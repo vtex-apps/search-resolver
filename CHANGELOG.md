@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.1.0] - 2020-05-20
+### Fixed
+- General adjustments
+- Reset repo based on `vtex.search-graphql`
+
+## [1.0.0] - 2020-05-09
+### Changed
+- Use Elastic instead of SOLR.
+
 ## [0.11.0] - 2020-07-31
 
 ### Changed

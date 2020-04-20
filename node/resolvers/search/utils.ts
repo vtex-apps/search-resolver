@@ -123,17 +123,17 @@ export const searchEncodeURI = (account: string) => (str: string) => {
     return str.replace(/[%"'.()]/g, (c: string) => {
       switch (c) {
         case '%':
-          return "@perc@"
+          return '@perc@'
         case '"':
-          return "@quo@"
-        case '\'':
-          return "@squo@"
+          return '@quo@'
+        case "'":
+          return '@squo@'
         case '.':
-          return "@dot@"
+          return '@dot@'
         case '(':
-          return "@lpar@"
+          return '@lpar@'
         case ')':
-          return "@rpar@"
+          return '@rpar@'
         default: {
           return c
         }
@@ -168,7 +168,7 @@ export const searchDecodeURI = (str: string) => {
 }
 
 export const getMapAndPriceRangeFromSelectedFacets = (
-  selectedFacets: SelectedFacets[]
+  selectedFacets: SelectedFacet[]
 ) => {
   const priceRangeIndex = selectedFacets.findIndex(
     facet => facet.key === 'priceRange'

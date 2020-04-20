@@ -1,17 +1,17 @@
 interface Range {
-  from: number;
-  to: number;
+  from: number
+  to: number
 }
 
-interface SelectedFacets {
-  key: string;
-  value: string;
+interface SelectedFacet {
+  key: string
+  value: string
 }
 
 interface QueryArgs {
   query: string
   map?: string
-  selectedFacets?: SelectedFacets[]
+  selectedFacets?: SelectedFacet[]
 }
 
 interface SearchArgs extends QueryArgs {
@@ -72,8 +72,8 @@ interface FacetsArgs extends QueryArgs {
 }
 
 enum FacetsBehavior {
-  STATIC = "Static",
-  DYNAMIC = "Dynamic"
+  STATIC = 'Static',
+  DYNAMIC = 'Dynamic',
 }
 
 interface SearchProduct {
