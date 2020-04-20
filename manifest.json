@@ -1,7 +1,7 @@
 {
   "vendor": "vtex",
   "name": "search-resolver",
-  "version": "0.6.2",
+  "version": "1.1.0",
   "title": "GraphQL resolver for the VTEX store APIs",
   "description": "GraphQL resolvers for the VTEX API for the catalog and orders.",
   "credentialType": "absolute",
@@ -15,6 +15,9 @@
     "vtex.search-graphql": "0.x"
   },
   "policies": [
+    {
+      "name": "vtex.messages:translate-messages"
+    },
     {
       "name": "vtex.catalog-api-proxy:catalog-proxy"
     },
@@ -33,6 +36,13 @@
         "path": "/api/segments/*"
       },
       "name": "outbound-access"
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "search.biggylabs.com.br",
+        "path": "/*"
+      }
     }
   ],
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"

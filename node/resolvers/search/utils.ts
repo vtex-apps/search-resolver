@@ -121,30 +121,30 @@ export function translatePageType(searchPageType: string): string {
 export const searchEncodeURI = (account: string) => (str: string) => {
   if (!Functions.isGoCommerceAcc(account)) {
     return str.replace(/[%"'.()]/g, (c: string) => {
-      switch(c) {
+      switch (c) {
         case '%':
-          return "@perc@"
+          return '@perc@'
         case '"':
-          return "@quo@"
-        case '\'':
-          return "@squo@"
+          return '@quo@'
+        case "'":
+          return '@squo@'
         case '.':
-          return "@dot@"
+          return '@dot@'
         case '(':
-          return "@lpar@"
+          return '@lpar@'
         case ')':
-          return "@rpar@"
+          return '@rpar@'
         default: {
-           return c
+          return c
         }
-     }
+      }
     })
   }
   return str
 }
 
 export const getMapAndPriceRangeFromSelectedFacets = (
-  selectedFacets: SelectedFacets[]
+  selectedFacets: SelectedFacet[]
 ) => {
   const priceRangeIndex = selectedFacets.findIndex(
     facet => facet.key === 'priceRange'
