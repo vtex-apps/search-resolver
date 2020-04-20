@@ -1,6 +1,7 @@
 import './globals'
 
 import { Cached, LRUCache, RecorderState, Service } from '@vtex/api'
+import schema from 'vtex.search-graphql/graphql'
 
 import { Clients } from './clients'
 import { schemaDirectives } from './directives'
@@ -54,6 +55,7 @@ export default new Service<Clients, RecorderState, CustomContext>({
   },
   graphql: {
     resolvers,
+    schema,
     schemaDirectives,
   },
 })

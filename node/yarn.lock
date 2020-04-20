@@ -5414,17 +5414,9 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-"vtex.catalog-api-proxy@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.7.2/public/_types/react":
+"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.25.0-beta.0/public":
   version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.7.2/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
-
-"vtex.messages@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.59.2/public/@types/vtex.messages":
-  version "1.59.2"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.59.2/public/@types/vtex.messages#63cf1bc42e926b8d0eccb8a24b1e10f35c17dabf"
-
-"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.23.1/public/@types/vtex.search-graphql":
-  version "0.23.1"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.23.1/public/@types/vtex.search-graphql#91612d8e631f9ed5508f7f5781627347f531a2a3"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.25.0-beta.0/public#9792d7bdb757d0589ca11444acf72079273425b2"
 
 w3c-hr-time@^1.0.1:
   version "1.0.1"
