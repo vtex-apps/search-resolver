@@ -167,10 +167,14 @@ export const resolvers = {
       context: productId,
     }),
 
-    titleTag: ({ productId, productTitle }: SearchProduct) => formatTranslatableStringV2({
-      content: productTitle,
-      context: productId,
-    }),
+    titleTag: (product: SearchProduct) => {
+      const { productId, productTitle, productName } = product
+
+      return formatTranslatableStringV2({
+        content: productTitle ?? productName ?? '',
+        context: productId,
+      })
+    },
 
     productName: ({ productId, productName }: SearchProduct) => formatTranslatableStringV2({
       content: productName,
