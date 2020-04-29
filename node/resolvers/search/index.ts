@@ -32,7 +32,7 @@ import {
   SearchCrossSellingTypes,
   getMapAndPriceRangeFromSelectedFacets,
 } from './utils'
-import * as searchStats from '../stats/searchStats'
+// import * as searchStats from '../stats/searchStats'
 import { toCompatibilityArgs, hasFacetsBadArgs } from './newURLs'
 import {
   PATH_SEPARATOR,
@@ -446,9 +446,9 @@ export const queries = {
 
     searchFirstElements(productsRaw.data, args.from, search)
 
-    if (productsRaw.status === 200) {
-      searchStats.count(ctx, args)
-    }
+    // if (productsRaw.status === 200) {
+    //   searchStats.count(ctx, args)
+    // }
     return {
       translatedArgs: compatibilityArgs,
       searchMetaData,
