@@ -18,11 +18,9 @@ export const convertBiggyProduct = (
       })
     : []
 
-  const skus: any[] = (product.skus || [])
-    .filter(
-      (sku: any) => ((!isNaN(sku.stock) && sku.stock) || product.stock) > 0
-    )
-    .map(convertSKU(product, indexingType, tradePolicy))
+  const skus: any[] = (product.skus || []).map(
+    convertSKU(product, indexingType, tradePolicy)
+  )
 
   return {
     categories,
