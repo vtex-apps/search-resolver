@@ -777,10 +777,10 @@
     lodash.unescape "4.0.1"
     semver "5.5.0"
 
-"@vtex/api@6.25.0":
-  version "6.25.0"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.25.0.tgz#5d64fa74d34ffec67b3e7859bab837104dd21047"
-  integrity sha512-uMIr5FXnw//wiQokIYftf8nB+2vDc1bWFl2XYcChJdTv6So932BK8jBv+wQuc/eN/8BP4M/m0zcghjiejhw4pw==
+"@vtex/api@6.27.0":
+  version "6.27.0"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.27.0.tgz#c19634181915363bc9fa9e1150c5c15aa4b3f25e"
+  integrity sha512-yNkEbjSvKnC2VSAypYK5WaGW/tKmDgvO4kNaI8ZKU5anG3U82QjWWYlqsFZXh0ycvlP9l4+Og2BMHat4YKy+uA==
   dependencies:
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"
@@ -4844,7 +4844,7 @@ static-extend@^0.1.1:
     define-property "^0.2.5"
     object-copy "^0.1.0"
 
-stats-lite@vtex/node-stats-lite#dist:
+"stats-lite@github:vtex/node-stats-lite#dist":
   version "2.2.0"
   resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/1b0d39cc41ef7aaecfd541191f877887a2044797"
   dependencies:
