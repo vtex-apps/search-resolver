@@ -23,7 +23,7 @@ export const addContextToTranslatableString = (message: Message, ctx: Context) =
   const { locale } = tenant!
 
   if (!message.content) {
-    return !message.content
+    return message.content
   }
 
   const {
