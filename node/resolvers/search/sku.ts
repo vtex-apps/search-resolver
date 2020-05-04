@@ -1,7 +1,18 @@
 import { find, head, map, replace, slice } from 'ramda'
+import { formatTranslatableProp } from '../../utils/i18n'
 
 export const resolvers = {
   SKU: {
+    name: formatTranslatableProp<SearchItem, 'name', 'itemId'>(
+      'name',
+      'itemId'
+    ),
+
+    nameComplete: formatTranslatableProp<SearchItem, 'nameComplete', 'itemId'>(
+      'nameComplete',
+      'itemId'
+    ),
+
     attachments: ({ attachments = [] }: SearchItem) =>
       map(
         (attachment: any) => ({
