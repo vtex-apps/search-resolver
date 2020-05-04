@@ -275,7 +275,7 @@ export const queries = {
     const { query: filteredQuery, map: filteredMap } = filteredArgs
 
     const segmentData = ctx.vtex.segment
-    const salesChannel = (segmentData && segmentData.channel.toString()) || ''
+    const salesChannel = segmentData?.channel?.toString() || ''
     const unavailableString = hideUnavailableItems
       ? `&fq=isAvailablePerSalesChannel_${salesChannel}:1`
       : ''
@@ -512,7 +512,7 @@ export const queries = {
     )
     return getSearchMetaData(_, compatibilityArgs, ctx)
   },
-  /* All search engines need to implement the topSearches, searchSuggestions, and productSuggestions queries. 
+  /* All search engines need to implement the topSearches, searchSuggestions, and productSuggestions queries.
   VTEX search doesn't support these queries, so it always returns empty results as a placeholder. */
   topSearches: () => {
     return {
