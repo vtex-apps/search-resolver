@@ -22,6 +22,10 @@ export const addContextToTranslatableString = (message: Message, ctx: Context) =
   const { vtex: { tenant } } = ctx
   const { locale } = tenant!
 
+  if (!message.content) {
+    return !message.content
+  }
+
   const {
     content,
     context: originalContext,
