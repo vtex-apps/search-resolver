@@ -1,6 +1,9 @@
-import { formatTranslatableStringV2 } from '@vtex/api'
 import { compose, last, map, omit, pathOr, propOr, split } from 'ramda'
 
+import {
+  addContextToTranslatableString,
+  formatTranslatableProp,
+} from '../../utils/i18n'
 import { getBenefits } from '../benefits'
 import { buildCategoryMap } from './utils'
 
@@ -117,6 +120,11 @@ const productCategoriesToCategoryTree = async (
 
 export const resolvers = {
   Product: {
+    brand: formatTranslatableProp<SearchProduct, 'brand', 'brandId'>(
+      'brand',
+      'brandId'
+    ),
+
     benefits: ({ productId }: SearchProduct, _: any, ctx: Context) =>
       getBenefits(productId, ctx),
 
@@ -157,29 +165,29 @@ export const resolvers = {
 
     recommendations: (product: SearchProduct) => product,
 
-    description: ({ productId, description }: SearchProduct) => formatTranslatableStringV2({
-      content: description,
-      context: productId,
-    }),
+    description: formatTranslatableProp<SearchProduct, 'description', 'productId'>(
+      'description',
+      'productId'
+    ),
 
-    metaTagDescription: ({ productId, metaTagDescription }: SearchProduct) => formatTranslatableStringV2({
-      content: metaTagDescription,
-      context: productId,
-    }),
+    metaTagDescription: formatTranslatableProp<SearchProduct, 'metaTagDescription', 'productId'>(
+      'metaTagDescription',
+      'productId'
+    ),
 
-    titleTag: (product: SearchProduct) => {
-      const { productId, productTitle, productName } = product
+    titleTag: ({ productId, productTitle, productName }: SearchProduct, _: unknown, ctx: Context) =>
+      addContextToTranslatableString(
+        {
+          content: productTitle ?? productName ?? '',
+          context: productId
+        },
+        ctx
+      ),
 
-      return formatTranslatableStringV2({
-        content: productTitle ?? productName ?? '',
-        context: productId,
-      })
-    },
-
-    productName: ({ productId, productName }: SearchProduct) => formatTranslatableStringV2({
-      content: productName,
-      context: productId,
-    }),
+    productName: formatTranslatableProp<SearchProduct, 'productName', 'productId'>(
+      'productName',
+      'productId'
+    ),
 
     linkText: async ({ productId, linkText }: SearchProduct, _: unknown, ctx: Context) => {
       const { clients: { messagesGraphQL }, vtex: { binding, tenant } } = ctx
