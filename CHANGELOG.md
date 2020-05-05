@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Remove filter by available SKU from `convertBiggyProduct`.
+
 ## [1.1.0] - 2020-05-20
 ### Fixed
 - General adjustments
