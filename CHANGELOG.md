@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Fixed
 - Adds context to brand translatable fields
+- Adds context translation to category translatable fields
 
 ## [0.3.6] - 2020-05-05
 ### Fixed

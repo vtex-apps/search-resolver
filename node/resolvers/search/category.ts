@@ -1,6 +1,7 @@
 import { compose, last, prop, split } from 'ramda'
 
 import { getCategoryInfo } from './utils'
+import { formatTranslatableProp } from '../../utils/i18n'
 
 const lastSegment = compose<string, string[], string>(
   last,
@@ -19,15 +20,26 @@ type SafeCategory = CategoryByIdResponse | CategoryTreeResponse
 
 export const resolvers = {
   Category: {
+    name: formatTranslatableProp<SafeCategory, 'name', 'id'>(
+      'name',
+      'id'
+    ),
+
     cacheId: prop('id'),
 
     href: async ({ url }: SafeCategory) => {
       return cleanUrl(url)
     },
 
-    metaTagDescription: prop('MetaTagDescription'),
+    metaTagDescription: formatTranslatableProp<SafeCategory, 'MetaTagDescription', 'id'>(
+      'MetaTagDescription',
+      'id'
+    ),
 
-    titleTag: prop('Title'),
+    titleTag: formatTranslatableProp<SafeCategory, 'Title', 'id'>(
+      'Title',
+      'id'
+    ),
 
     slug: async ({ url }: SafeCategory) => {
       return url ? lastSegment(url) : null
