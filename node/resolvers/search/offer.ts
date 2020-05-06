@@ -105,12 +105,6 @@ export const resolvers = {
     },
     taxPercentage: (offer: CommertialOffer) => {
       return offer.Tax / offer.Price
-    },
-    sellingPriceWithTax: (offer: CommertialOffer) => {
-      return offer.Price + offer.Tax
-    },
-    listPriceWithTax: (offer: CommertialOffer) => {
-      return offer.ListPrice + 10;
     }
   },
 }
