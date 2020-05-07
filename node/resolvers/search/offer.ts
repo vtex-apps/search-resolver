@@ -102,6 +102,9 @@ export const resolvers = {
         return (NumberOfInstallments === 1 && Value < sellingPrice)
       })?.Value;
       return spotPrice || sellingPrice
+    },
+    taxPercentage: (offer: CommertialOffer) => {
+      return offer.Tax / offer.Price
     }
   },
 }
