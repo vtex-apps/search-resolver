@@ -133,28 +133,44 @@ const convertSKU = (
 
 export const biggyAttributesToVtexFilters = (attributes: any) =>
   attributes.map((attribute: any) => {
+    const isNumber = attribute.type === 'number'
+
     return {
       name: attribute.label,
-      type:
-        attribute.type === 'number'
-          ? 'PRICERANGE'
-          : attribute.type.toUpperCase(),
-      values: attribute.values.map((value: any) => {
-        return {
-          quantity: value.count,
-          name: unescape(value.label),
-          key: attribute.key,
-          value: value.key,
-          selected: value.active,
-          range:
-            attribute.type === 'number'
-              ? {
-                  from: parseFloat(value.from),
-                  to: parseFloat(value.to),
-                }
-              : undefined,
-        }
-      }),
+      type: isNumber ? 'PRICERANGE' : attribute.type.toUpperCase(),
+      values: isNumber
+        ? [
+            {
+              quantity: attribute.values.reduce(
+                (acum: number, value: any) => acum + value.count,
+                0
+              ),
+              name: unescape(attribute.label),
+              key: attribute.key,
+              value: attribute.key,
+              selected: attribute.active,
+              range: {
+                from: attribute.minValue,
+                to: attribute.maxValue,
+              },
+            },
+          ]
+        : attribute.values.map((value: any) => {
+            return {
+              quantity: value.count,
+              name: unescape(value.label),
+              key: attribute.key,
+              value: value.key,
+              selected: value.active,
+              range:
+                attribute.type === 'number'
+                  ? {
+                      from: parseFloat(value.from),
+                      to: parseFloat(value.to),
+                    }
+                  : undefined,
+            }
+          }),
     }
   })
 
