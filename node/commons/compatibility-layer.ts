@@ -162,13 +162,6 @@ export const biggyAttributesToVtexFilters = (attributes: any) =>
               key: attribute.key,
               value: value.key,
               selected: value.active,
-              range:
-                attribute.type === 'number'
-                  ? {
-                      from: parseFloat(value.from),
-                      to: parseFloat(value.to),
-                    }
-                  : undefined,
             }
           }),
     }
