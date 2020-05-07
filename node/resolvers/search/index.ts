@@ -33,7 +33,10 @@ import {
   getMapAndPriceRangeFromSelectedFacets,
 } from './utils'
 // import * as searchStats from '../stats/searchStats'
+import { toCompatibilityArgs, hasFacetsBadArgs } from './newURLs'
 import {
+  PATH_SEPARATOR,
+  MAP_VALUES_SEP,
   FACETS_BUCKET,
 } from './constants'
 import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
@@ -75,8 +78,6 @@ const inputToSearchCrossSelling = {
   [CrossSellingInput.accessories]: SearchCrossSellingTypes.accessories,
   [CrossSellingInput.suggestions]: SearchCrossSellingTypes.suggestions,
 }
-
-const hasFacetsBadArgs = ({ query, map }: QueryArgs) => !query || !map
 
 const translateToStoreDefaultLanguage = async (
   ctx: Context,
@@ -139,6 +140,34 @@ export const fieldResolvers = {
   ...productSearchResolvers,
   ...assemblyOptionResolvers,
   ...productPriceRangeResolvers,
+}
+
+export const getCompatibilityArgs = async <T extends QueryArgs>(
+  ctx: Context,
+  args: T
+) => {
+  const {
+    clients: { vbase, search },
+  } = ctx
+  const compatArgs = isLegacySearchFormat(args)
+    ? args
+    : await toCompatibilityArgs(vbase, search, args)
+  return compatArgs ? { ...args, ...compatArgs } : args
+}
+
+// Legacy search format is our search with path?map=c,c,specificationFilter
+// Where it has specificationFilters and all segments in path are mapped in `map` querystring
+const isLegacySearchFormat = ({
+  query,
+  map,
+}: {
+  query: string
+  map?: string
+}) => {
+  if (!map) {
+    return false
+  }
+  return map.split(MAP_VALUES_SEP).length === query.split(PATH_SEPARATOR).length
 }
 
 const isValidProductIdentifier = (identifier: ProductIndentifier | undefined) =>
@@ -228,15 +257,16 @@ export const queries = {
     args.map = args.map && decodeURIComponent(args.map)
     const translatedQuery = await translateToStoreDefaultLanguage(ctx, query!)
     args.query = translatedQuery
+    const compatibilityArgs = await getCompatibilityArgs<FacetsArgs>(ctx, args)
 
     const filteredArgs =
       args.behavior === 'Static'
         ? filterSpecificationFilters({
             ...args,
-            query: args.query,
-            map: args.map,
+            query: compatibilityArgs.query,
+            map: compatibilityArgs.map,
           } as Required<FacetsArgs>)
-        : (args as Required<FacetsArgs>)
+        : (compatibilityArgs as Required<FacetsArgs>)
 
     if (hasFacetsBadArgs(filteredArgs)) {
       throw new UserInputError('No query or map provided')
@@ -262,8 +292,8 @@ export const queries = {
     const result = {
       ...facetsResult,
       queryArgs: {
-        query: args.query,
-        map: args.map,
+        query: compatibilityArgs.query,
+        map: compatibilityArgs.map,
       },
     }
     return result
@@ -402,10 +432,15 @@ export const queries = {
       query,
     }
 
+    const compatibilityArgs = await getCompatibilityArgs<SearchArgs>(
+      ctx,
+      translatedArgs
+    )
+
     const [productsRaw, searchMetaData] = await Promise.all([
-      search.productsRaw(translatedArgs),
+      search.productsRaw(compatibilityArgs),
       isQueryingMetadata(info)
-        ? getSearchMetaData(_, translatedArgs, ctx)
+        ? getSearchMetaData(_, compatibilityArgs, ctx)
         : emptyTitleTag,
     ])
 
@@ -415,7 +450,7 @@ export const queries = {
     //   searchStats.count(ctx, args)
     // }
     return {
-      translatedArgs,
+      translatedArgs: compatibilityArgs,
       searchMetaData,
       productsRaw,
     }
@@ -471,8 +506,11 @@ export const queries = {
       ...args,
       query,
     }
-    
-    return getSearchMetaData(_, translatedArgs, ctx)
+    const compatibilityArgs = await getCompatibilityArgs<SearchArgs>(
+      ctx,
+      translatedArgs as SearchArgs
+    )
+    return getSearchMetaData(_, compatibilityArgs, ctx)
   },
   /* All search engines need to implement the topSearches, searchSuggestions, and productSuggestions queries.
   VTEX search doesn't support these queries, so it always returns empty results as a placeholder. */
