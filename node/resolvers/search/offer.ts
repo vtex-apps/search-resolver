@@ -102,6 +102,7 @@ export const resolvers = {
         return (NumberOfInstallments === 1 && Value < sellingPrice)
       })?.Value;
       return spotPrice || sellingPrice
-    }
+    },
+    taxPercentage: () => 0 // NOTE: We do not have offer.Tax info
   },
 }
