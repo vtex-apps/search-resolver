@@ -6,11 +6,6 @@ export enum IndexingType {
   XML = 'XML',
 }
 
-interface BreadcrumbItem {
-  name: string
-  href: string
-}
-
 export const convertBiggyProduct = (
   product: any,
   tradePolicy?: string,
@@ -227,7 +222,7 @@ export const buildBreadcrumb = (
   const pivotValue: string[] = []
   const pivotMap: string[] = []
 
-  const breadcrumb: BreadcrumbItem[] = []
+  const breadcrumb: Breadcrumb[] = []
 
   if (fullText) {
     pivotValue.push(fullText)

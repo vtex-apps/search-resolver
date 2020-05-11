@@ -33,16 +33,17 @@ enum IndexingType {
 
 interface SearchResultArgs {
   attributePath: string
-  query: string
-  page: number
-  count: number
-  sort: string
-  operator: string
-  fuzzy: string
+  query?: string
+  page?: number
+  count?: number
+  sort?: string
+  operator?: string
+  fuzzy?: string
   leap?: boolean
   tradePolicy?: number
   segment?: SegmentData
   indexingType?: IndexingType
+  fullText: string
 }
 
 interface SuggestionProductsArgs {
