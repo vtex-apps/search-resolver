@@ -19,6 +19,9 @@
       "name": "vtex.catalog-api-proxy:catalog-proxy"
     },
     {
+      "name": "vtex.catalog-api-proxy:authenticated-catalog-proxy"
+    },
+    {
       "name": "vbase-read-write"
     },
     {
