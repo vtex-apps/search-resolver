@@ -430,11 +430,8 @@ export const queries = {
     return {
       products: convertedProducts,
       recordsFiltered: result.total,
-      suggestion: result.suggestion,
-      correction: result.correction,
       fuzzy: result.fuzzy,
       operator: result.operator,
-      banners: result.banners,
     }
   },
 
@@ -499,14 +496,14 @@ export const queries = {
 
     return await biggySearch.topSearches()
   },
-  searchSuggestions: () => async (
+  autocompleteSearchSuggestions: (
     _: any,
-    args: SuggestionSearchesArgs,
+    args: { fullText: string },
     ctx: Context
   ) => {
     const { biggySearch } = ctx.clients
 
-    return await biggySearch.suggestionSearches(args)
+    return biggySearch.autocompleteSearchSuggestions(args)
   },
   productSuggestions: async (
     _: any,
@@ -524,14 +521,38 @@ export const queries = {
 
     return result
   },
-  banners: () => {
-    return {
-      banners: []
-    }
+  banners: (
+    _: any,
+    args: { fullText: string; selectedFacets: SelectedFacet[] },
+    ctx: Context
+  ) => {
+    const { biggySearch } = ctx.clients
+
+    return biggySearch.banners({
+      attributePath: buildAttributePath(args.selectedFacets),
+      fullText: args.fullText,
+    })
   },
-  correction: () => {
-    return {
-      correction: null
-    }
+  correction: (_: any, args: { fullText: string }, ctx: Context) => {
+    const { biggySearch } = ctx.clients
+
+    return biggySearch.correction(args)
+  },
+  redirect: (
+    _: any,
+    args: { fullText: string; selectedFacets: SelectedFacet[] },
+    ctx: Context
+  ) => {
+    const { biggySearch } = ctx.clients
+
+    return biggySearch.redirect({
+      attributePath: buildAttributePath(args.selectedFacets),
+      fullText: args.fullText,
+    })
+  },
+  searchSuggestions: (_: any, args: { fullText: string }, ctx: Context) => {
+    const { biggySearch } = ctx.clients
+
+    return biggySearch.searchSuggestions(args)
   }
 }
