@@ -15,11 +15,13 @@ const SIX_SECONDS_MS = 6 * 1000
 const MAX_SEGMENT_CACHE = 10000
 const segmentCache = new LRUCache<string, Cached>({ max: MAX_SEGMENT_CACHE })
 const searchCache = new LRUCache<string, Cached>({ max: 3000 })
+const biggySearchCache = new LRUCache<string, Cached>({ max: 3000 })
 const messagesCache = new LRUCache<string, Cached>({ max: 3000 })
 const vbaseCache = new LRUCache<string, Cached>({ max: 3000 })
 
 metrics.trackCache('segment', segmentCache)
 metrics.trackCache('search', searchCache)
+metrics.trackCache('biggySearch', biggySearchCache)
 metrics.trackCache('messages', messagesCache)
 metrics.trackCache('vbase', vbaseCache)
 
@@ -46,11 +48,16 @@ export default new Service<Clients, RecorderState, CustomContext>({
         memoryCache: searchCache,
         timeout: SIX_SECONDS_MS,
       },
-      vbase:{
+      biggySearch: {
+        concurrency: 10,
+        memoryCache: biggySearchCache,
+        timeout: SIX_SECONDS_MS,
+      },
+      vbase: {
         concurrency: 2,
         memoryCache: vbaseCache,
-        timeout: TWO_SECONDS_MS
-      }
+        timeout: TWO_SECONDS_MS,
+      },
     },
   },
   graphql: {
