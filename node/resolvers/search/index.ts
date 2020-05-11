@@ -519,7 +519,7 @@ export const queries = {
       searches: [],
     }
   },
-  searchSuggestions: () => {
+  autocompleteSearchSuggestions: () => {
     return {
       searches: [],
     }
@@ -530,4 +530,19 @@ export const queries = {
       products: [],
     }
   },
+  banners: () => {
+    return {
+      banners: []
+    }
+  },
+  searchSuggestions: () => {
+    return {
+      searches: [],
+    }
+  },
+  correction: () => {
+    return {
+      correction: null
+    }
+  }
 }
