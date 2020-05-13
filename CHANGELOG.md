@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Fix pricerange selection by removing it from the `compatibilityArgs`.
+
 ## [1.1.3] - 2020-05-08
 ### Added
 - `taxPercentage` stub resolver on `Offer`.
