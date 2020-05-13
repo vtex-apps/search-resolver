@@ -148,7 +148,6 @@ export const biggyAttributesToVtexFilters = (attributes: any) =>
               name: unescape(attribute.label),
               key: attribute.key,
               value: attribute.key,
-              selected: attribute.active,
               range: {
                 from: attribute.minValue,
                 to: attribute.maxValue,
