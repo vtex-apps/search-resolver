@@ -93,7 +93,11 @@ const getCompatibilityArgsFromSelectedFacets = async (
     return args
   }
 
-  args.map = selectedFacets.map(facet => facet.key).join(MAP_VALUES_SEP)
+  const [map, priceRange] = getMapAndPriceRangeFromSelectedFacets([
+    ...selectedFacets,
+  ])
+
+  args.map = map
 
   if (isLegacySearchFormat({ query: args.query, map: args.map })) {
     return args
@@ -110,6 +114,13 @@ const getCompatibilityArgsFromSelectedFacets = async (
       value: querySegments[index],
     }
   })
+
+  if (priceRange) {
+    args.selectedFacets.push({
+      key: 'priceRange',
+      value: priceRange,
+    })
+  }
 
   return args
 }
@@ -267,13 +278,7 @@ export const queries = {
     const { segment } = ctx.vtex
 
     const biggyArgs = {
-      attributePath: args.selectedFacets.reduce(
-        (attributePath: any, facet: any) =>
-          facet.key !== 'ft'
-            ? `${attributePath}/${facet.key}/${facet.value}`
-            : attributePath,
-        ''
-      ),
+      attributePath: buildAttributePath(args.selectedFacets),
       query: args.fullText,
       tradePolicy: segment && segment.channel,
     }
@@ -430,7 +435,6 @@ export const queries = {
       fuzzy: result.fuzzy,
       operator: result.operator,
       banners: result.banners,
-      searchState: 'placeHolderState',
     }
   },
 
