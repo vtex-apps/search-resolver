@@ -23,7 +23,27 @@ export const resolvers = {
       const quantity = resources.split('/')[1]
       return parseInt(quantity, 10)
     },
-    products: path(['productsRaw', 'data']),
+    products: ({ productsRaw }: ProductSearchParent, _: any, ctx: Context) => {
+      let hasBroken = false
+      for (const product of productsRaw.data) {
+        for (const item of product.items) {
+          if (item.sellers == null) {
+            const config: any = (productsRaw as any).config
+            ctx.vtex.logger.error({
+              message: 'Item missing sellers!',
+              searchUrl: config.url.replace(/\/proxy\/authenticated\/catalog|\/proxy\/catalog/, ''),
+              params: JSON.stringify(config.params)
+            })
+            hasBroken = true
+            break
+          }
+        }
+        if (hasBroken) {
+          break
+        }
+      }
+      return productsRaw.data
+    },
     breadcrumb: async (
       { translatedArgs, productsRaw: { data: products } }: ProductSearchParent,
       _: any,
