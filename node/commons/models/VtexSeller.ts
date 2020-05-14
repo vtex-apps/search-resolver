@@ -34,20 +34,20 @@ class VtexSeller {
       AvailableQuantity: 10000,
       discountHighlights: [],
       teasers: [],
-      Installments: [],
+      Installments: installment
+        ? [
+            {
+              Value: installment.value,
+              InterestRate: 0,
+              TotalValuePlusInterestRate: price,
+              NumberOfInstallments: installment.count,
+              Name: '',
+            },
+          ]
+        : [],
       Price: price,
       ListPrice: oldPrice,
       PriceWithoutDiscount: price,
-    }
-
-    if (installment) {
-      this.commertialOffer.Installments.push({
-        Value: installment.value,
-        InterestRate: 0,
-        TotalValuePlusInterestRate: price,
-        NumberOfInstallments: installment.count,
-        Name: '',
-      })
     }
   }
 }
