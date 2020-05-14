@@ -10,7 +10,7 @@ interface CommertialOffer {
   AvailableQuantity: number
   discountHighlights: any[]
   teasers: any[]
-  Installments?: Installment[]
+  Installments: Installment[]
   Price: number
   ListPrice: number
   PriceWithoutDiscount: number
@@ -34,15 +34,17 @@ class VtexSeller {
       AvailableQuantity: 10000,
       discountHighlights: [],
       teasers: [],
-      Installments: installment && [
-        {
-          Value: installment.value,
-          InterestRate: 0,
-          TotalValuePlusInterestRate: price,
-          NumberOfInstallments: installment.count,
-          Name: '',
-        },
-      ],
+      Installments: installment
+        ? [
+            {
+              Value: installment.value,
+              InterestRate: 0,
+              TotalValuePlusInterestRate: price,
+              NumberOfInstallments: installment.count,
+              Name: '',
+            },
+          ]
+        : [],
       Price: price,
       ListPrice: oldPrice,
       PriceWithoutDiscount: price,
