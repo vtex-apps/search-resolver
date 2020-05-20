@@ -1,6 +1,7 @@
 import { Functions } from '@gocommerce/utils'
 import { equals, includes, toLower } from 'ramda'
 
+import { formatTranslatableProp } from '../../utils/i18n'
 import { getSpecificationFilterName } from './modules/metadata'
 import { findCategoryInTree, getBrandFromSlug } from './utils'
 
@@ -95,7 +96,7 @@ export const resolvers = {
       if (isCategoryMap(mapUnit)) {
         const categoryData = await getCategoryInfo(obj, isVtex, ctx)
         if (categoryData) {
-          return categoryData.name
+          return formatTranslatableProp<any, any, any>('name', 'id')(categoryData, _, ctx)
         }
       }
       if (isSellerMap(mapUnit)) {
@@ -106,7 +107,9 @@ export const resolvers = {
       }
       if (isBrandMap(mapUnit)) {
         const brandData = await getBrandInfo(obj, isVtex, ctx)
-        return brandData ? brandData.name : defaultName
+        return brandData
+          ? formatTranslatableProp<any, any, any>('name', 'id')(brandData, _, ctx)
+          : defaultName
       }
       if (isSpecificationFilter(mapUnit)) {
         return getSpecificationFilterName(queryUnit)
