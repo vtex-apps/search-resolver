@@ -777,13 +777,14 @@
     lodash.unescape "4.0.1"
     semver "5.5.0"
 
-"@vtex/api@6.28.1":
-  version "6.28.1"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.28.1.tgz#36ae0535bde187f0bf84c69d41bf30f3c38f5ea6"
-  integrity sha512-9lpRwHPPXsyrbwkgbFgMp5/ENvaqS5TVJ7VtOXtRo5HjjEKrRCRO2vhPnocCDYj0O1Msk41Awj30HMZ5MpblFw==
+"@vtex/api@6.30.0":
+  version "6.30.0"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.30.0.tgz#9287828804a9b00fa16ab025d530203c4a9464cc"
+  integrity sha512-1VkhwebJYCY7sBdUH3KD2+PTxpX+BiXgVrisXRC07kbaxghzRdJ8oJcjhiSjvEHovjHCBtIHQbTuaM48dRNg5g==
   dependencies:
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"
+    "@vtex/node-error-report" "^0.0.2"
     "@wry/equality" "^0.1.9"
     agentkeepalive "^4.0.2"
     apollo-server-errors "^2.2.1"
@@ -821,6 +822,13 @@
     tar-fs "^2.0.0"
     uuid "^3.3.3"
     xss "^1.0.6"
+
+"@vtex/node-error-report@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@vtex/node-error-report/-/node-error-report-0.0.2.tgz#edf15095d6bb543d28b46f86bc109e6214149dfe"
+  integrity sha512-Q6V8E1IR/U0H6uTB1G+gH4ugL4Kw1l/WsK7W46LQBsxv4ISlZcO7dXPlWrL4RzRcVam5yzGAwNkv2wJdW61tAA==
+  dependencies:
+    is-stream "^2.0.0"
 
 "@vtex/tsconfig@^0.2.0":
   version "0.2.0"

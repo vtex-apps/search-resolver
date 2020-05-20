@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed
+- `cacheId` from `compatibilityLayer`.
+
 ## [1.1.5] - 2020-05-14
 ### Changed
 - Update `biggySearch` client timeout.

@@ -24,7 +24,6 @@ export const convertBiggyProduct = (
 
   return {
     categories,
-    cacheId: product.link,
     productId: product.product || product.id,
     productName: product.name,
     productReference: product.reference || product.product || product.id,
