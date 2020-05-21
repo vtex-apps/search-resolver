@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Bump graphql version.
+
 ## [0.6.2] - 2020-05-13
 ### Changed
 - Add error log if search item has non iterable sellers.
