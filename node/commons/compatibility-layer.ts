@@ -142,6 +142,7 @@ export const biggyAttributesToVtexFilters = (attributes: any) =>
           ? 'PRICERANGE'
           : 'NUMBER'
         : attribute.type.toUpperCase(),
+      hidden: !attribute.visible,
       values:
         isNumber && attribute.key === 'price'
           ? [
@@ -220,6 +221,7 @@ export const buildBreadcrumb = (selectedFacets: SelectedFacet[]) => {
   const pivotMap: string[] = []
 
   return selectedFacets
+<<<<<<< HEAD
     ? selectedFacets
         .filter(selectedFacet => selectedFacet.key !== 'priceRange')
         .map(selectedFacet => {
@@ -232,6 +234,22 @@ export const buildBreadcrumb = (selectedFacets: SelectedFacet[]) => {
           }
         })
     : []
+=======
+    .filter(
+      selectedFacet =>
+        selectedFacet.key !== 'priceRange' &&
+        selectedFacet.key !== 'productClusterIds'
+    )
+    .map(selectedFacet => {
+      pivotValue.push(selectedFacet.value)
+      pivotMap.push(selectedFacet.key)
+
+      return {
+        name: decodeURIComponent(selectedFacet.value).replace(/-/g, ' '),
+        href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
+      }
+    })
+>>>>>>> add hidden field
 }
 
 export const buildAttributePath = (selectedFacets: SelectedFacet[]) => {
