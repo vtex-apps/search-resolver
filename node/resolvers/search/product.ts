@@ -189,28 +189,28 @@ export const resolvers = {
       'productId'
     ),
 
-    linkText: async ({ productId, linkText }: SearchProduct, _: unknown, ctx: Context) => {
-      const { clients: { messagesGraphQL }, vtex: { binding, tenant } } = ctx
+    // linkText: async ({ productId, linkText }: SearchProduct, _: unknown, ctx: Context) => {
+    //   const { clients: { messagesGraphQL }, vtex: { binding, tenant } } = ctx
 
-      if (!binding || !tenant || binding.locale === tenant.locale) {
-        return linkText
-      }
+    //   if (!binding || !tenant || binding.locale === tenant.locale) {
+    //     return linkText
+    //   }
 
-      const messages = [{
-        context: productId,
-        content: linkText
-      }]
+    //   const messages = [{
+    //     context: productId,
+    //     content: linkText
+    //   }]
 
-      const translations = await messagesGraphQL.translate({
-        to: binding.locale,
-        indexedByFrom: [{
-          from: tenant.locale,
-          messages
-        }]
-      })
+    //   const translations = await messagesGraphQL.translate({
+    //     to: binding.locale,
+    //     indexedByFrom: [{
+    //       from: tenant.locale,
+    //       messages
+    //     }]
+    //   })
 
-      return translations[0]
-    },
+    //   return translations[0]
+    // },
 
     specificationGroups: (product: SearchProduct) => {
       const allSpecificationsGroups = propOr<[], SearchProduct, string[]>(
