@@ -12,7 +12,8 @@
   "dependencies": {
     "vtex.messages": "1.x",
     "vtex.catalog-api-proxy": "0.x",
-    "vtex.search-graphql": "0.x"
+    "vtex.search-graphql": "0.x",
+    "vtex.rewriter": "1.x"
   },
   "policies": [
     {
@@ -20,6 +21,9 @@
     },
     {
       "name": "vtex.catalog-api-proxy:authenticated-catalog-proxy"
+    },
+    {
+      "name": "vtex.rewriter:resolve-graphql"
     },
     {
       "name": "vbase-read-write"

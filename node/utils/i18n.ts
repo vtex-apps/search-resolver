@@ -1,6 +1,7 @@
 import {
   formatTranslatableStringV2,
   parseTranslatableStringV2,
+  createMessagesLoader,
 } from '@vtex/api'
 
 export const formatTranslatableProp = <R, P extends keyof R, I extends keyof R>(prop: P, idProp: I) =>
@@ -35,5 +36,18 @@ export const addContextToTranslatableString = (message: Message, ctx: Context) =
   const context = originalContext || message.context
   const from = originalFrom || message.from || locale
 
-  return formatTranslatableStringV2({content, context, from})
+  return formatTranslatableStringV2({ content, context, from })
+}
+
+export const translateToBindingLanguage = (message: Message, ctx: Context) => {
+  const { state, clients, vtex: { binding, tenant } } = ctx
+  if (!state.messagesBindingLanguage) {
+    state.messagesBindingLanguage = createMessagesLoader(clients, binding!.locale)
+  }
+
+  return state.messagesBindingLanguage!.load({
+    content: message.content,
+    context: message.context,
+    from: message.from ?? tenant!.locale,
+  })
 }

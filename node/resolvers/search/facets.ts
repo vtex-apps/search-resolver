@@ -1,10 +1,13 @@
 import { prop, toPairs } from 'ramda'
 
 import { zipQueryAndMap } from './utils'
+import { formatTranslatableProp } from '../../utils/i18n'
 
 interface EitherFacet extends SearchFacet {
   Children?: EitherFacet[]
 }
+
+type SearchFacetCategoryTranslated = SearchFacetCategory & { nameWithTranslation: string }
 
 enum FilterType {
   TEXT = 'TEXT',
@@ -59,6 +62,13 @@ const addId = (
   })
 }
 
+const addTranslatedName = (facets: SearchFacetCategory[], ctx: Context): SearchFacetCategoryTranslated[] => {
+  return facets.map(facet => ({
+    ...facet,
+    nameWithTranslation: formatTranslatableProp<SearchFacetCategory, 'Name', 'Id'>('Name', 'Id')(facet, {}, ctx)
+  }))
+}
+
 const baseFacetResolvers = {
   quantity: prop('Quantity'),
   name: prop('Name'),
@@ -71,7 +81,7 @@ const baseFacetResolvers = {
 export const resolvers = {
   FacetValue: {
     quantity: prop('Quantity'),
-    name: prop('Name'),
+    name: ({ Name, nameWithTranslation }: any) => nameWithTranslation ?? Name,
     value: prop('Value'),
     id: prop('Id'),
     children: prop('Children'),
@@ -93,12 +103,20 @@ export const resolvers = {
 
     id: prop('Id'),
 
-    name: prop('Name'),
+    name: (facet: any, _: unknown, ctx: Context) => {
+      if (facet.Id) {
+        return formatTranslatableProp<any, any, any>('Name', 'Id')(facet, _, ctx)
+      }
+      return facet.Name
+    },
   },
   BrandFacet: {
     ...baseFacetResolvers,
 
     id: prop('Id'),
+    // name: (facet: any, _: unknown, ctx: Context) => {
+    //   return formatTranslatableProp<any, any, any>('Name', 'Id')(facet, _, ctx)
+    // },
   },
   PriceRangesFacet: {
     ...baseFacetResolvers,
@@ -117,7 +135,9 @@ export const resolvers = {
       return linkPath
     },
 
-    name: prop('Name'),
+    name: (facet: SearchFacetCategory, _: unknown, ctx: Context) => {
+      return formatTranslatableProp<SearchFacetCategory, 'Name', 'Id'>('Name', 'Id')(facet, _, ctx)
+    },
   },
   Facets: {
     facets: ({
@@ -126,14 +146,14 @@ export const resolvers = {
       SpecificationFilters = {},
       PriceRanges = [],
       queryArgs,
-    }: SearchFacets & { queryArgs: { query: string; map: string } }) => {
+    }: SearchFacets & { queryArgs: { query: string; map: string } }, _: unknown, ctx: Context) => {
       const brands = {
         values: addSelected(Brands, queryArgs),
         type: FilterType.BRAND,
       }
 
       const catregoriesTrees = {
-        values: addSelected(CategoriesTrees, queryArgs),
+        values: addTranslatedName(addSelected(CategoriesTrees, queryArgs) as SearchFacetCategory[], ctx),
         type: FilterType.CATEGORYTREE,
       }
 
@@ -172,13 +192,13 @@ export const resolvers = {
       const selectedFacets =
         queryValues.length === mapValues.length
           ? mapValues.map((map, i) => {
-              return {
-                key: map,
-                value: queryValues[i],
-              }
-            })
+            return {
+              key: map,
+              value: queryValues[i],
+            }
+          })
           : []
-      
+
       return {
         ...queryArgs,
         selectedFacets

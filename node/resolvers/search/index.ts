@@ -94,11 +94,11 @@ const translateToStoreDefaultLanguage = async (
     return term
   }
 
-  if (!state.messages) {
-    state.messages = createMessagesLoader(clients, to)
+  if (!state.messagesTenantLanguage) {
+    state.messagesTenantLanguage = createMessagesLoader(clients, to)
   }
 
-  return state.messages!.load({
+  return state.messagesTenantLanguage!.load({
     from,
     content: term,
   })
