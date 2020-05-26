@@ -80,3 +80,26 @@ interface ProductSearchInput {
   orderBy: string
   productOriginVtex: boolean
 }
+
+interface ElasticAttribute {
+  visible: boolean
+  active: boolean
+  key: string
+  label: string
+  type: string
+  values: ElasticAttributeValue[]
+  minValue?: number
+  maxValue?: number
+}
+
+interface ElasticAttributeValue {
+  count: number
+  active: boolean
+  key: string
+  label: string
+}
+
+interface Breadcrumb {
+  href: string
+  name: string
+}
