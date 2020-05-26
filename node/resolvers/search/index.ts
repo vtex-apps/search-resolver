@@ -265,6 +265,7 @@ export const queries = {
         query: args.query,
         selectedFacets: args.selectedFacets,
       },
+      breadcrumb: buildBreadcrumb(result.attributes || [], args.fullText),
     }
   },
 
@@ -401,7 +402,6 @@ export const queries = {
     return {
       products: convertedProducts,
       recordsFiltered: result.total,
-      breadcrumb: buildBreadcrumb(selectedFacets),
       suggestion: result.suggestion,
       correction: result.correction,
       fuzzy: result.fuzzy,
