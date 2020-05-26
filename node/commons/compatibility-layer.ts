@@ -11,6 +11,11 @@ interface ExtraData {
   value: string
 }
 
+interface BreadcrumbItem {
+  name: string
+  href: string
+}
+
 export const convertBiggyProduct = (
   product: any,
   tradePolicy?: string,
@@ -231,27 +236,44 @@ export const convertOrderBy = (orderBy?: string): string => {
   }
 }
 
-export const buildBreadcrumb = (selectedFacets: SelectedFacet[]) => {
+export const buildBreadcrumb = (
+  attributes: ElasticAttribute[],
+  fullText: string
+) => {
   const pivotValue: string[] = []
   const pivotMap: string[] = []
 
-  return selectedFacets
-    ? selectedFacets
-        .filter(
-          selectedFacet =>
-            selectedFacet.key !== 'priceRange' &&
-            selectedFacet.key !== 'productClusterIds'
-        )
-        .map(selectedFacet => {
-          pivotValue.push(selectedFacet.value)
-          pivotMap.push(selectedFacet.key)
+  const breadcrumb: BreadcrumbItem[] = []
 
-          return {
-            name: decodeURIComponent(selectedFacet.value.replace(/-+/g, ' ')),
-            href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
-          }
-        })
-    : []
+  if (fullText) {
+    pivotValue.push(fullText)
+    pivotMap.push('ft')
+
+    breadcrumb.push({
+      name: fullText,
+      href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
+    })
+  }
+
+  const activeAttributes = attributes.filter(attribute => attribute.active)
+
+  activeAttributes.map(attribute => {
+    attribute.values.forEach(value => {
+      if (!value.active) {
+        return
+      }
+
+      pivotValue.push(value.key)
+      pivotMap.push(attribute.key)
+
+      breadcrumb.push({
+        name: unescape(value.label),
+        href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
+      })
+    })
+  })
+
+  return breadcrumb
 }
 
 export const buildAttributePath = (selectedFacets: SelectedFacet[]) => {
