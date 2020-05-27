@@ -168,8 +168,8 @@ export const biggyAttributesToVtexFilters = (attributes: any) =>
                 value: `${value.from}:${value.to}`,
                 selected: value.active,
                 range: {
-                  from: value.from,
-                  to: value.to,
+                  from: value.from !== '*' ? value.from : attribute.minValue,
+                  to: value.to !== '*' ? value.to : attribute.maxValue,
                 },
               }
             })
