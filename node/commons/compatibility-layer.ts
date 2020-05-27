@@ -137,32 +137,51 @@ export const biggyAttributesToVtexFilters = (attributes: any) =>
 
     return {
       name: attribute.label,
-      type: isNumber ? 'PRICERANGE' : attribute.type.toUpperCase(),
-      values: isNumber
-        ? [
-            {
-              quantity: attribute.values.reduce(
-                (acum: number, value: any) => acum + value.count,
-                0
-              ),
-              name: unescape(attribute.label),
-              key: attribute.key,
-              value: attribute.key,
-              range: {
-                from: attribute.minValue,
-                to: attribute.maxValue,
+      type: isNumber
+        ? attribute.key === 'price'
+          ? 'PRICERANGE'
+          : 'NUMBER'
+        : attribute.type.toUpperCase(),
+      values:
+        isNumber && attribute.key === 'price'
+          ? [
+              {
+                quantity: attribute.values.reduce(
+                  (acum: number, value: any) => acum + value.count,
+                  0
+                ),
+                name: unescape(attribute.label),
+                key: attribute.key,
+                value: attribute.key,
+                range: {
+                  from: attribute.minValue,
+                  to: attribute.maxValue,
+                },
               },
-            },
-          ]
-        : attribute.values.map((value: any) => {
-            return {
-              quantity: value.count,
-              name: unescape(value.label),
-              key: attribute.key,
-              value: value.key,
-              selected: value.active,
-            }
-          }),
+            ]
+          : isNumber
+          ? attribute.values.map((value: any) => {
+              return {
+                quantity: value.count,
+                name: unescape(`${value.from} - ${value.to}`),
+                key: attribute.key,
+                value: `${value.from}:${value.to}`,
+                selected: value.active,
+                range: {
+                  from: value.from,
+                  to: value.to,
+                },
+              }
+            })
+          : attribute.values.map((value: any) => {
+              return {
+                quantity: value.count,
+                name: unescape(value.label),
+                key: attribute.key,
+                value: value.key,
+                selected: value.active,
+              }
+            }),
     }
   })
 
