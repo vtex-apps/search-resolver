@@ -188,7 +188,7 @@ export const convertOrderBy = (orderBy?: string): string => {
     case 'OrderByNameASC':
       return 'name:asc'
     case 'OrderByReleaseDateDESC':
-      return 'fields.release:desc'
+      return 'release:desc'
     case 'OrderByBestDiscountDESC':
       return 'discount:desc'
     default:
