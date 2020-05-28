@@ -3,7 +3,7 @@ import { equals, includes, toLower } from 'ramda'
 
 import { formatTranslatableProp } from '../../utils/i18n'
 import { getSpecificationFilterName } from './modules/metadata'
-import { findCategoryInTree, getBrandFromSlug } from './utils'
+import { findCategoryInTree, getBrandFromSlug, breadcrumbMapKey } from './utils'
 
 interface BreadcrumbParams {
   queryUnit: string
@@ -80,10 +80,6 @@ const getBrandInfo = async (
   return search.pageType(queryUnit).catch(() => null)
 }
 
-const metadataKey = (queryUnit: string, mapUnit: string) => {
-  return `${queryUnit}-${mapUnit}`
-}
-
 export const resolvers = {
   SearchBreadcrumb: {
     name: async (obj: BreadcrumbParams, _: any, ctx: Context) => {
@@ -100,7 +96,7 @@ export const resolvers = {
         }
       }
       if (isCategoryMap(mapUnit)) {
-        const categoryData = metadataMap[metadataKey(queryUnit, mapUnit)] ?? (await getCategoryInfo(obj, isVtex, ctx))
+        const categoryData = metadataMap[breadcrumbMapKey(queryUnit, mapUnit)] ?? (await getCategoryInfo(obj, isVtex, ctx))
         if (categoryData) {
           return formatTranslatableProp<any, any, any>('name', 'id')(categoryData, _, ctx)
         }
@@ -112,7 +108,7 @@ export const resolvers = {
         }
       }
       if (isBrandMap(mapUnit)) {
-        const brandData = metadataMap[metadataKey(queryUnit, mapUnit)] ?? (await getBrandInfo(obj, isVtex, ctx))
+        const brandData = metadataMap[breadcrumbMapKey(queryUnit, mapUnit)] ?? (await getBrandInfo(obj, isVtex, ctx))
         if (brandData) {
           return formatTranslatableProp<any, any, any>('name', 'id')(brandData, _, ctx)
         }

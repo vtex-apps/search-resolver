@@ -158,3 +158,7 @@ export const getMapAndPriceRangeFromSelectedFacets = (
 
   return [map, priceRange]
 }
+
+export const breadcrumbMapKey = (queryUnit: string, mapUnit: string) => {
+  return `${queryUnit}-${mapUnit}`
+}

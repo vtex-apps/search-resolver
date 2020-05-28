@@ -1,7 +1,7 @@
 import { path } from 'ramda'
 import { IOResponse } from '@vtex/api'
 import { Functions } from '@gocommerce/utils'
-import { zipQueryAndMap } from './utils'
+import { zipQueryAndMap, breadcrumbMapKey } from './utils'
 import { slugifyStoreIndexer } from '../../utils/slug'
 import { translateToCurrentLanguage, shouldTranslateForBinding } from '../../utils/i18n'
 
@@ -29,20 +29,23 @@ const getTypeForCategory = (index: number) => {
   return 'subcategory'
 }
 
-const getRouteForQueryUnit = async (queryUnit: string, mapUnit: string, categoriesSearched: string[], ctx: Context) => {
+const getRouteForQueryUnit = async (queryUnit: string, mapUnit: string, categoriesSearched: string[], index: number, ctx: Context) => {
   const bindingId = ctx.vtex.binding!.id!
   const key = `${queryUnit}-${mapUnit}`
   if (mapUnit === 'b') {
     const brandPageType = await ctx.clients.search.pageType(queryUnit, 'map=b')
 
-    const brandFromRewriter = await ctx.clients.rewriter.getRoute(brandPageType.id, 'brand', bindingId)
-    if (brandFromRewriter) {
-      // se tem rota no rewriter, retornar rota de lá
-      return { path: brandFromRewriter, key, name: brandPageType.name, id: brandPageType.id }
+    if (index === 0) {
+      // if it is a brand page, we should check if there is a route on rewriter for this brand
+      const brandFromRewriter = await ctx.clients.rewriter.getRoute(brandPageType.id, 'brand', bindingId)
+      if (brandFromRewriter) {
+        return { path: brandFromRewriter, key, name: brandPageType.name, id: brandPageType.id }
+      }
     }
-    //translate and slugify
+    
+    //translate name and slugify result
     const translated = await translateToCurrentLanguage({ content: brandPageType.name, context: brandPageType.id }, ctx)
-    return { path: `/${slugifyStoreIndexer(translated)}`, key }
+    return { path: `/${slugifyStoreIndexer(translated)}`, key, name: brandPageType.name, id: brandPageType.id }
   }
   if (mapUnit === 'c') {
     const categoryPosition = categoriesSearched.findIndex(cat => cat === queryUnit)
@@ -54,8 +57,8 @@ const getRouteForQueryUnit = async (queryUnit: string, mapUnit: string, categori
 }
 
 const breadcrumbDataWithBinding = async (queryAndMap: [string, string][], categoriesSearched: string[], mapArray: string[], ctx: Context) => {
-  const queryTranslationsAndKeys = await Promise.all(queryAndMap.map(([queryUnit, mapUnit]) => {
-    return getRouteForQueryUnit(queryUnit, mapUnit, categoriesSearched, ctx)
+  const queryTranslationsAndKeys = await Promise.all(queryAndMap.map(([queryUnit, mapUnit], index) => {
+    return getRouteForQueryUnit(queryUnit, mapUnit, categoriesSearched, index, ctx)
   }))
   const queryTranslations = queryTranslationsAndKeys.reduce((acc, curr) => {
     acc[curr.key] = curr.path
@@ -69,9 +72,10 @@ const breadcrumbDataWithBinding = async (queryAndMap: [string, string][], catego
 
   const indexFirstCategory = mapArray.findIndex(m => m === 'c')
   const hrefs = queryAndMap.reduce((acc, curr) => {
-    const slug = curr[1] === 'c' || curr[1] === 'b' ? queryTranslations[`${curr[0]}-${curr[1]}`] : curr[0]
+    const [queryUnit, mapUnit] = curr
+    const slug = mapUnit === 'c' || mapUnit === 'b' ? queryTranslations[breadcrumbMapKey(queryUnit, mapUnit)] : queryUnit
     let prefix = acc.length > 0 ? acc[acc.length - 1] : ''
-    if (curr[1] === 'c') {
+    if (mapUnit === 'c') {
       prefix = indexFirstCategory > 0 ? acc[indexFirstCategory - 1] : ''
     }
     const noSlashSlug = slug.startsWith('/') ? slug.slice(1) : slug
