@@ -158,6 +158,3 @@ export const getMapAndPriceRangeFromSelectedFacets = (
 
   return [map, priceRange]
 }
-
-export const shouldTranslateForBinding = ({ vtex: { binding, tenant } }: Context) =>
-  Boolean(tenant?.locale && binding?.locale && tenant.locale !== binding.locale)

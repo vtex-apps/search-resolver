@@ -81,16 +81,21 @@ const inputToSearchCrossSelling = {
 
 const translateToStoreDefaultLanguage = async (
   ctx: Context,
-  term: string
+  term: string,
+  termLocaleFrom: string | undefined
 ): Promise<string> => {
   const {
     clients,
     state,
-    vtex: { locale: from, tenant },
+    vtex: { tenant },
   } = ctx
   const { locale: to } = tenant!
 
-  if (!from || from === to) {
+  if (!termLocaleFrom || termLocaleFrom == to) {
+    /** Do not translate if already in the same locale as the tenant or
+     * if the binding locale is the same as the current, this means that rewriter already
+     * sent the correct args to the search.
+     */
     return term
   }
 
@@ -99,12 +104,12 @@ const translateToStoreDefaultLanguage = async (
   }
 
   return state.messagesTenantLanguage!.load({
-    from,
+    from: termLocaleFrom,
     content: term,
   })
 }
 
-const noop = () => {}
+const noop = () => { }
 
 // Does prefetching and warms up cache for up to the 10 first elements of a search, so if user clicks on product page
 const searchFirstElements = (
@@ -225,14 +230,17 @@ export const queries = {
   ) => {
     const {
       clients: { search },
+      vtex: { locale }
     } = ctx
 
     if (!args.searchTerm) {
       throw new UserInputError('No search term provided')
     }
+
     const translatedTerm = await translateToStoreDefaultLanguage(
       ctx,
-      args.searchTerm
+      args.searchTerm,
+      locale,
     )
     const { itemsReturned } = await search.autocomplete({
       maxRows: args.maxRows,
@@ -247,6 +255,7 @@ export const queries = {
     const { query, hideUnavailableItems } = args
     const {
       clients: { search, vbase },
+      vtex: { tenant }
     } = ctx
 
     if (args.selectedFacets) {
@@ -255,17 +264,18 @@ export const queries = {
     }
 
     args.map = args.map && decodeURIComponent(args.map)
-    const translatedQuery = await translateToStoreDefaultLanguage(ctx, query!)
+    //The query has been translated by rewriter or is sent from the frontend in the tenant locale
+    const translatedQuery = await translateToStoreDefaultLanguage(ctx, query!, tenant?.locale)
     args.query = translatedQuery
     const compatibilityArgs = await getCompatibilityArgs<FacetsArgs>(ctx, args)
 
     const filteredArgs =
       args.behavior === 'Static'
         ? filterSpecificationFilters({
-            ...args,
-            query: compatibilityArgs.query,
-            map: compatibilityArgs.map,
-          } as Required<FacetsArgs>)
+          ...args,
+          query: compatibilityArgs.query,
+          map: compatibilityArgs.map,
+        } as Required<FacetsArgs>)
         : (compatibilityArgs as Required<FacetsArgs>)
 
     if (hasFacetsBadArgs(filteredArgs)) {
@@ -401,7 +411,9 @@ export const queries = {
   productSearch: async (_: any, args: SearchArgs, ctx: Context, info: any) => {
     const {
       clients: { search },
+      vtex: { tenant }
     } = ctx
+    console.log('teste ARGS: ', args)
     const queryTerm = args.query
 
     if (args.selectedFacets) {
@@ -426,11 +438,19 @@ export const queries = {
       )
     }
 
-    const query = await translateToStoreDefaultLanguage(ctx, args.query || '')
+    //The query has been translated by rewriter or is sent from the frontend in the tenant locale
+    const query = await translateToStoreDefaultLanguage(ctx, args.query || '', tenant?.locale)
     const translatedArgs = {
       ...args,
       query,
     }
+
+    console.log("teste vamola: ", {
+      query,
+      argsquery: args.query,
+      to: ctx.vtex.locale,
+      fromTerm: tenant?.locale,
+    })
 
     const compatibilityArgs = await getCompatibilityArgs<SearchArgs>(
       ctx,
@@ -449,6 +469,7 @@ export const queries = {
     // if (productsRaw.status === 200) {
     //   searchStats.count(ctx, args)
     // }
+    console.log('teste compatibilityArgs: ', compatibilityArgs)
     return {
       translatedArgs: compatibilityArgs,
       searchMetaData,
@@ -501,7 +522,8 @@ export const queries = {
       args.map = map
     }
 
-    const query = await translateToStoreDefaultLanguage(ctx, args.query || '')
+    //The query has been translated by rewriter or is sent from the frontend in the tenant locale
+    const query = await translateToStoreDefaultLanguage(ctx, args.query || '', ctx.vtex.tenant?.locale)
     const translatedArgs = {
       ...args,
       query,

@@ -1,9 +1,9 @@
 import { path } from 'ramda'
 import { IOResponse } from '@vtex/api'
 import { Functions } from '@gocommerce/utils'
-import { zipQueryAndMap, shouldTranslateForBinding } from './utils'
+import { zipQueryAndMap } from './utils'
 import { slugifyStoreIndexer } from '../../utils/slug'
-import { translateToBindingLanguage } from '../../utils/i18n'
+import { translateToCurrentLanguage, shouldTranslateForBinding } from '../../utils/i18n'
 
 interface ProductSearchParent {
   productsRaw: IOResponse<SearchProduct[]>
@@ -31,25 +31,26 @@ const getTypeForCategory = (index: number) => {
 
 const getRouteForQueryUnit = async (queryUnit: string, mapUnit: string, categoriesSearched: string[], ctx: Context) => {
   const bindingId = ctx.vtex.binding!.id!
+  const key = `${queryUnit}-${mapUnit}`
   if (mapUnit === 'b') {
     const brandPageType = await ctx.clients.search.pageType(queryUnit, 'map=b')
 
     const brandFromRewriter = await ctx.clients.rewriter.getRoute(brandPageType.id, 'brand', bindingId)
     if (brandFromRewriter) {
       // se tem rota no rewriter, retornar rota de lá
-      return { path: brandFromRewriter, key: `${queryUnit}-${mapUnit}`, name: brandPageType.name, id: brandPageType.id }
+      return { path: brandFromRewriter, key, name: brandPageType.name, id: brandPageType.id }
     }
     //translate and slugify
-    const translated = await translateToBindingLanguage({ content: brandPageType.name, context: brandPageType.id }, ctx)
-    return { path: `/${slugifyStoreIndexer(translated)}`, key: `${queryUnit}-${mapUnit}` }
+    const translated = await translateToCurrentLanguage({ content: brandPageType.name, context: brandPageType.id }, ctx)
+    return { path: `/${slugifyStoreIndexer(translated)}`, key }
   }
   if (mapUnit === 'c') {
     const categoryPosition = categoriesSearched.findIndex(cat => cat === queryUnit)
     const category = await ctx.clients.search.pageType(categoriesSearched.slice(0, categoryPosition + 1).join('/'))
     const route = await ctx.clients.rewriter.getRoute(category.id, getTypeForCategory(categoryPosition), bindingId)
-    return { path: route ?? queryUnit, key: `${queryUnit}-${mapUnit}`, name: category.name, id: category.id }
+    return { path: route ?? queryUnit, key, name: category.name, id: category.id }
   }
-  return { path: queryUnit, key: `${queryUnit}-${mapUnit}`, name: null, id: null }
+  return { path: queryUnit, key, name: null, id: null }
 }
 
 const breadcrumbDataWithBinding = async (queryAndMap: [string, string][], categoriesSearched: string[], mapArray: string[], ctx: Context) => {
