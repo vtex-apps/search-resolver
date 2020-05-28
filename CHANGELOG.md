@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Rpelace spaces by hyphens in the `buildAttributePath` function.
+
 ## [1.1.6] - 2020-05-28
 
 ### Fixed

@@ -214,18 +214,14 @@ export const buildBreadcrumb = (selectedFacets: SelectedFacet[]) => {
 }
 
 export const buildAttributePath = (selectedFacets: SelectedFacet[]) => {
-  return selectedFacets.reduce(
-    (attributePath, facet) => {
-      if (facet.key === 'priceRange') {
-        facet.key = 'price'
-        facet.value = facet.value.replace(` TO `, ':')
-      }
+  return selectedFacets.reduce((attributePath, facet) => {
+    if (facet.key === 'priceRange') {
+      facet.key = 'price'
+      facet.value = facet.value.replace(` TO `, ':')
+    }
 
-      return facet.key !== 'ft'
-        ? `${attributePath}${facet.key}/${facet.value}/`
-        : attributePath
-    },
-
-    ''
-  )
+    return facet.key !== 'ft'
+      ? `${attributePath}${facet.key}/${facet.value.replace(/ |%20/, '-')}/`
+      : attributePath
+  }, '')
 }
