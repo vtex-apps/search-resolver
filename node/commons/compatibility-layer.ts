@@ -220,27 +220,31 @@ export const buildBreadcrumb = (selectedFacets: SelectedFacet[]) => {
   const pivotMap: string[] = []
 
   return selectedFacets
-    .filter(selectedFacet => selectedFacet.key !== 'priceRange')
-    .map(selectedFacet => {
-      pivotValue.push(selectedFacet.value)
-      pivotMap.push(selectedFacet.key)
+    ? selectedFacets
+        .filter(selectedFacet => selectedFacet.key !== 'priceRange')
+        .map(selectedFacet => {
+          pivotValue.push(selectedFacet.value)
+          pivotMap.push(selectedFacet.key)
 
-      return {
-        name: decodeURIComponent(selectedFacet.value),
-        href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
-      }
-    })
+          return {
+            name: decodeURIComponent(selectedFacet.value),
+            href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
+          }
+        })
+    : []
 }
 
 export const buildAttributePath = (selectedFacets: SelectedFacet[]) => {
-  return selectedFacets.reduce((attributePath, facet) => {
-    if (facet.key === 'priceRange') {
-      facet.key = 'price'
-      facet.value = facet.value.replace(` TO `, ':')
-    }
+  return selectedFacets
+    ? selectedFacets.reduce((attributePath, facet) => {
+        if (facet.key === 'priceRange') {
+          facet.key = 'price'
+          facet.value = facet.value.replace(` TO `, ':')
+        }
 
-    return facet.key !== 'ft'
-      ? `${attributePath}${facet.key}/${facet.value.replace(/ |%20/, '-')}/`
-      : attributePath
-  }, '')
+        return facet.key !== 'ft'
+          ? `${attributePath}${facet.key}/${facet.value.replace(/ |%20/, '-')}/`
+          : attributePath
+      }, '')
+    : ''
 }

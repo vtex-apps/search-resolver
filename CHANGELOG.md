@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Allows specification filters with type `number` to be used as buckets.
 
+### Fixed
+
+- Error when receiving selected facets with `undefined` value.
+
 ## [1.1.7] - 2020-05-28
 
 ### Changed
