@@ -92,10 +92,7 @@ const translateToStoreDefaultLanguage = async (
   const { locale: to } = tenant!
 
   if (!termLocaleFrom || termLocaleFrom == to) {
-    /** Do not translate if already in the same locale as the tenant or
-     * if the binding locale is the same as the current, this means that rewriter already
-     * sent the correct args to the search.
-     */
+    // Do not translate if string already in correct language
     return term
   }
 
@@ -413,7 +410,6 @@ export const queries = {
       clients: { search },
       vtex: { tenant }
     } = ctx
-    console.log('teste ARGS: ', args)
     const queryTerm = args.query
 
     if (args.selectedFacets) {
@@ -445,13 +441,6 @@ export const queries = {
       query,
     }
 
-    console.log("teste vamola: ", {
-      query,
-      argsquery: args.query,
-      to: ctx.vtex.locale,
-      fromTerm: tenant?.locale,
-    })
-
     const compatibilityArgs = await getCompatibilityArgs<SearchArgs>(
       ctx,
       translatedArgs
@@ -469,7 +458,6 @@ export const queries = {
     // if (productsRaw.status === 200) {
     //   searchStats.count(ctx, args)
     // }
-    console.log('teste compatibilityArgs: ', compatibilityArgs)
     return {
       translatedArgs: compatibilityArgs,
       searchMetaData,
