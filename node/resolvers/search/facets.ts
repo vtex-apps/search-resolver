@@ -1,7 +1,7 @@
-import { prop, toPairs, last } from 'ramda'
+import { prop, toPairs } from 'ramda'
 
 import { zipQueryAndMap } from './utils'
-import { formatTranslatableProp, shouldTranslateForBinding } from '../../utils/i18n'
+import { formatTranslatableProp } from '../../utils/i18n'
 
 interface EitherFacet extends SearchFacet {
   Children?: EitherFacet[]
@@ -61,9 +61,14 @@ const addId = (
 }
 
 const translateValues = (facets: SearchFacetCategory[], ctx: Context) => {
+  return facets.map(facet => ({
+    ...facet,
+    Name: formatTranslatableProp<SearchFacetCategory, 'Name', 'Id'>('Name', 'Id')(facet, {}, ctx),
+  }))
+  /*
+  I will keep this code because when we implement the full search solution, we might need it.
   const { clients: { rewriter }, vtex: { binding } } = ctx
   return Promise.all(facets.map(async facet => {
-    // return facet
     let link = facet.Link
     let value = facet.Value
     if (shouldTranslateForBinding(ctx)) {
@@ -80,6 +85,7 @@ const translateValues = (facets: SearchFacetCategory[], ctx: Context) => {
       LinkEncoded: encodeURI(link),
     }
   }))
+  */
 }
 
 const baseFacetResolvers = {
@@ -164,7 +170,6 @@ export const resolvers = {
 
       const catregoriesTrees = {
         values: translateValues(addSelected(CategoriesTrees, queryArgs) as SearchFacetCategory[], ctx),
-        // values: addSelected(CategoriesTrees, queryArgs),
         type: FilterType.CATEGORYTREE,
       }
 
