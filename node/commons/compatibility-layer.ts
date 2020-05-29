@@ -137,32 +137,51 @@ export const biggyAttributesToVtexFilters = (attributes: any) =>
 
     return {
       name: attribute.label,
-      type: isNumber ? 'PRICERANGE' : attribute.type.toUpperCase(),
-      values: isNumber
-        ? [
-            {
-              quantity: attribute.values.reduce(
-                (acum: number, value: any) => acum + value.count,
-                0
-              ),
-              name: unescape(attribute.label),
-              key: attribute.key,
-              value: attribute.key,
-              range: {
-                from: attribute.minValue,
-                to: attribute.maxValue,
+      type: isNumber
+        ? attribute.key === 'price'
+          ? 'PRICERANGE'
+          : 'NUMBER'
+        : attribute.type.toUpperCase(),
+      values:
+        isNumber && attribute.key === 'price'
+          ? [
+              {
+                quantity: attribute.values.reduce(
+                  (acum: number, value: any) => acum + value.count,
+                  0
+                ),
+                name: unescape(attribute.label),
+                key: attribute.key,
+                value: attribute.key,
+                range: {
+                  from: attribute.minValue,
+                  to: attribute.maxValue,
+                },
               },
-            },
-          ]
-        : attribute.values.map((value: any) => {
-            return {
-              quantity: value.count,
-              name: unescape(value.label),
-              key: attribute.key,
-              value: value.key,
-              selected: value.active,
-            }
-          }),
+            ]
+          : isNumber
+          ? attribute.values.map((value: any) => {
+              return {
+                quantity: value.count,
+                name: unescape(`${value.from} - ${value.to}`),
+                key: attribute.key,
+                value: `${value.from}:${value.to}`,
+                selected: value.active,
+                range: {
+                  from: value.from !== '*' ? value.from : attribute.minValue,
+                  to: value.to !== '*' ? value.to : attribute.maxValue,
+                },
+              }
+            })
+          : attribute.values.map((value: any) => {
+              return {
+                quantity: value.count,
+                name: unescape(value.label),
+                key: attribute.key,
+                value: value.key,
+                selected: value.active,
+              }
+            }),
     }
   })
 
@@ -201,27 +220,31 @@ export const buildBreadcrumb = (selectedFacets: SelectedFacet[]) => {
   const pivotMap: string[] = []
 
   return selectedFacets
-    .filter(selectedFacet => selectedFacet.key !== 'priceRange')
-    .map(selectedFacet => {
-      pivotValue.push(selectedFacet.value)
-      pivotMap.push(selectedFacet.key)
+    ? selectedFacets
+        .filter(selectedFacet => selectedFacet.key !== 'priceRange')
+        .map(selectedFacet => {
+          pivotValue.push(selectedFacet.value)
+          pivotMap.push(selectedFacet.key)
 
-      return {
-        name: decodeURIComponent(selectedFacet.value),
-        href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
-      }
-    })
+          return {
+            name: decodeURIComponent(selectedFacet.value),
+            href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
+          }
+        })
+    : []
 }
 
 export const buildAttributePath = (selectedFacets: SelectedFacet[]) => {
-  return selectedFacets.reduce((attributePath, facet) => {
-    if (facet.key === 'priceRange') {
-      facet.key = 'price'
-      facet.value = facet.value.replace(` TO `, ':')
-    }
+  return selectedFacets
+    ? selectedFacets.reduce((attributePath, facet) => {
+        if (facet.key === 'priceRange') {
+          facet.key = 'price'
+          facet.value = facet.value.replace(` TO `, ':')
+        }
 
-    return facet.key !== 'ft'
-      ? `${attributePath}${facet.key}/${facet.value.replace(/ |%20/, '-')}/`
-      : attributePath
-  }, '')
+        return facet.key !== 'ft'
+          ? `${attributePath}${facet.key}/${facet.value.replace(/ |%20/, '-')}/`
+          : attributePath
+      }, '')
+    : ''
 }
