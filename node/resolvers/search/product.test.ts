@@ -1,11 +1,11 @@
 import { resolvers } from './product'
-import { mockContext } from '../../__mocks__/helpers'
+import { mockContext, getBindingLocale, resetContext } from '../../__mocks__/helpers'
 import { getProduct } from '../../__mocks__/product'
 
 describe('tests related to product resolver', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockContext.vtex.platform = 'vtex'
+    resetContext()
   })
   describe('categoryTree resolver', () => {
     test('ensure that VTEX account never calls the category tree search API', async () => {
@@ -182,5 +182,37 @@ describe('tests related to product resolver', () => {
     product.clusterHighlights = null as any
     const result = resolvers.Product.clusterHighlights(product as any)
     expect(result).toMatchObject([])
+  })
+
+  describe('linkText resolver', () => {
+    test('linkText with binding with different locales', async () => {
+      const product = getProduct()
+      mockContext.vtex.binding.locale = 'fr-FR'
+      mockContext.clients.rewriter.getRoute.mockImplementationOnce(
+        (id: string, type: string, bindingId: string) => Promise.resolve(`/${id}-${type}-${bindingId}-${getBindingLocale()}/p`)
+      )
+      const result = await resolvers.Product.linkText(product as any, {}, mockContext as any)
+      expect(result).toBe('16-product-abc-fr-FR')
+    })
+    test('linkText for same binding language', async () => {
+      const product = getProduct()
+      const result = await resolvers.Product.linkText(product as any, {}, mockContext as any)
+      expect(result).toBe(product.linkText)
+    })
+  })
+
+  describe('specificationGroups resolver', () => {
+    test('specifications groups should have expected format and translated values', () => {
+      const product = getProduct()
+      const result = resolvers.Product.specificationGroups(product as any, {}, mockContext as any)
+      expect(result[0]).toMatchObject({
+        name: 'Tamanho (((16))) <<<pt-BR>>>',
+        specifications: [{ name: 'Numero do calçado (((16))) <<<pt-BR>>>', values: ["35 (((16))) <<<pt-BR>>>"] }]
+      })
+      expect(result[1]).toMatchObject({
+        name: 'allSpecifications (((16))) <<<pt-BR>>>',
+        specifications: [{ name: 'Numero do calçado (((16))) <<<pt-BR>>>', values: ["35 (((16))) <<<pt-BR>>>"] }]
+      })
+    })
   })
 })

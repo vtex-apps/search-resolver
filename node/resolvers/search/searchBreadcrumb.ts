@@ -118,7 +118,7 @@ export const resolvers = {
       }
       return defaultName && decodeURI(defaultName)
     },
-    href: async (params: BreadcrumbParams) => {
+    href: (params: BreadcrumbParams) => {
       const {
         index,
         queryArray,

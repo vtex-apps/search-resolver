@@ -8,6 +8,8 @@ import {
 import { getBenefits } from '../benefits'
 import { buildCategoryMap } from './utils'
 
+type DynamicKey<T> = Record<string, T>
+
 const objToNameValue = (
   keyName: string,
   valueName: string,
@@ -214,11 +216,15 @@ export const resolvers = {
       const specificationGroups = allSpecificationsGroups.map(
         (groupName: string) => ({
           name: addContextToTranslatableString({ content: groupName, context: product.productId }, ctx),
-          specifications: ((product as any)[groupName] || []).map(
-            (name: string) => ({
-              name: addContextToTranslatableString({ content: name, context: product.productId }, ctx),
-              values: (product as any)[addContextToTranslatableString({ content: name, context: product.productId }, ctx)] || [],
-            })
+          specifications: ((product as unknown as DynamicKey<string[]>)?.[groupName] ?? []).map(
+            (name: string) => {
+              const values = (product as unknown as DynamicKey<string[]>)[name] || []
+              const translatedValues = values.map((value: string) => addContextToTranslatableString({ content: value, context: product.productId }, ctx))
+              return {
+                name: addContextToTranslatableString({ content: name, context: product.productId }, ctx),
+                values: translatedValues,
+              }
+            }
           ),
         })
       )
