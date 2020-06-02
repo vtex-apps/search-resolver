@@ -2,8 +2,7 @@ import { path } from 'ramda'
 import { IOResponse } from '@vtex/api'
 import { Functions } from '@gocommerce/utils'
 import { zipQueryAndMap, breadcrumbMapKey } from './utils'
-import { slugifyStoreIndexer } from '../../utils/slug'
-import { translateToCurrentLanguage, shouldTranslateForBinding } from '../../utils/i18n'
+import { shouldTranslateForBinding } from '../../utils/i18n'
 
 interface ProductSearchParent {
   productsRaw: IOResponse<SearchProduct[]>
@@ -42,10 +41,7 @@ const getRouteForQueryUnit = async (queryUnit: string, mapUnit: string, categori
         return { path: brandFromRewriter, key, name: brandPageType.name, id: brandPageType.id }
       }
     }
-    
-    //translate name and slugify result
-    const translated = await translateToCurrentLanguage({ content: brandPageType.name, context: brandPageType.id }, ctx)
-    return { path: `/${slugifyStoreIndexer(translated)}`, key, name: brandPageType.name, id: brandPageType.id }
+    return { path: queryUnit, key, name: brandPageType.name, id: brandPageType.id }
   }
   if (mapUnit === 'c') {
     const categoryPosition = categoriesSearched.findIndex(cat => cat === queryUnit)

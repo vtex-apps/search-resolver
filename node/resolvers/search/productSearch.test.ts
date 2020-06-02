@@ -257,3 +257,41 @@ describe('tests for breadcrumb resolver', () => {
     expect(mockContext.clients.rewriter.getRoute).toBeCalledTimes(2)
   })
 })
+
+describe.only('tests related to the productSearch query', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    resetContext()
+  })
+
+  test('should not translate args that are not ft', async () => {
+    const args = {
+      query: 'shoes/sneakers',
+      map: 'c,c'
+    }
+  
+    const result = await queries.productSearch({}, args as any, mockContext as any, {})
+    expect(result.translatedArgs).toMatchObject({ query: 'shoes/sneakers', map: 'c,c' })
+  })
+
+  test('should not translate ft args if user locale matches tenant locale', async () => {
+    const args = {
+      query: 'tenis/shoes/sneakers',
+      map: 'ft,c,c'
+    }
+  
+    const result = await queries.productSearch({}, args as any, mockContext as any, {})
+    expect(result.translatedArgs).toMatchObject({ query: 'tenis/shoes/sneakers', map: 'ft,c,c' })
+  })
+
+  test('should translate ft args if user locale differs tenant locale', async () => {
+    mockContext.vtex.locale = 'es-ES'
+    const args = {
+      query: 'tenis/shoes/sneakers',
+      map: 'ft,c,c'
+    }
+  
+    const result = await queries.productSearch({}, args as any, mockContext as any, {})
+    expect(result.translatedArgs).toMatchObject({ query: 'tenis-pt-BR/shoes/sneakers', map: 'ft,c,c' })
+  })
+})

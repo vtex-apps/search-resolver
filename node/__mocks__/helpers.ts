@@ -16,7 +16,8 @@ const searchClientMock = {
   categories: jest.fn(),
   crossSelling: jest.fn(),
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  productById: jest.fn((_id: string, _cacheable: boolean = true) => promisify(null))
+  productById: jest.fn((_id: string, _cacheable: boolean = true) => promisify(null)),
+  productsRaw: jest.fn(() => ({ data: [] })),
 }
 
 const messagesGraphQLClientMock = {
@@ -41,6 +42,7 @@ const rewriterClientMock: any = {
 }
 
 const getLocale = () => mockContext.vtex.locale
+const getTenantLocale = () => mockContext.vtex.tenant.locale
 
 const initialCtxState = {
   account: 'storecomponents',
@@ -52,7 +54,7 @@ const initialCtxState = {
 
 const generateDeepCopy = (obj: any) => JSON.parse(JSON.stringify(obj))
 
-export const mockContext = {
+export const mockContext: any = {
   vtex: {
     ...generateDeepCopy(initialCtxState),
   },
@@ -65,6 +67,9 @@ export const mockContext = {
   state: {
     messagesBindingLanguage: {
       loadMany: jest.fn((messages: any) => messages.map((message: any) => `${message.content}-${getLocale()}`))
+    },
+    messagesTenantLanguage: {
+      load: jest.fn((message: any) => `${message.content}-${getTenantLocale()}`)
     }
   },
 }

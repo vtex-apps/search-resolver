@@ -1,6 +1,6 @@
 import { compose, last, prop, split } from 'ramda'
 
-import { getCategoryInfo,  } from './utils'
+import { getCategoryInfo } from './utils'
 import { formatTranslatableProp, shouldTranslateForBinding } from '../../utils/i18n'
 
 const lastSegment = compose<string, string[], string>(

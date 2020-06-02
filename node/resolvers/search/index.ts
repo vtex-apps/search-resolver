@@ -40,6 +40,7 @@ import {
   FACETS_BUCKET,
 } from './constants'
 import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
+import { shouldTranslateForTenantLocale } from '../../utils/i18n'
 
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -82,16 +83,15 @@ const inputToSearchCrossSelling = {
 const translateToStoreDefaultLanguage = async (
   ctx: Context,
   term: string,
-  termLocaleFrom: string | undefined
 ): Promise<string> => {
   const {
     clients,
     state,
-    vtex: { tenant },
+    vtex: { locale: from, tenant },
   } = ctx
   const { locale: to } = tenant!
 
-  if (!termLocaleFrom || termLocaleFrom == to) {
+  if (!shouldTranslateForTenantLocale(ctx)) {
     // Do not translate if string already in correct language
     return term
   }
@@ -101,7 +101,7 @@ const translateToStoreDefaultLanguage = async (
   }
 
   return state.messagesTenantLanguage!.load({
-    from: termLocaleFrom,
+    from: from!,
     content: term,
   })
 }
@@ -219,6 +219,21 @@ const filterSpecificationFilters = ({
   }
 }
 
+const getTranslatedSearchTerm = async (query: SearchArgs['query'], map: SearchArgs['map'], ctx: Context) => {
+  if (!query || !map || !shouldTranslateForTenantLocale(ctx)) {
+    return query
+  }
+  const ftSearchIndex = map.split(',').findIndex(m => m === 'ft')
+  if (ftSearchIndex === -1) {
+    return query
+  }
+  const queryArray = query.split('/')
+  const queryUnit = queryArray[ftSearchIndex]
+  const translated = await translateToStoreDefaultLanguage(ctx, queryUnit)
+  const queryTranslated = [...queryArray.slice(0, ftSearchIndex), translated, ...queryArray.slice(ftSearchIndex + 1)]
+  return queryTranslated.join('/')
+}
+
 export const queries = {
   autocomplete: async (
     _: any,
@@ -227,7 +242,6 @@ export const queries = {
   ) => {
     const {
       clients: { search },
-      vtex: { locale }
     } = ctx
 
     if (!args.searchTerm) {
@@ -236,8 +250,7 @@ export const queries = {
 
     const translatedTerm = await translateToStoreDefaultLanguage(
       ctx,
-      args.searchTerm,
-      locale,
+      args.searchTerm
     )
     const { itemsReturned } = await search.autocomplete({
       maxRows: args.maxRows,
@@ -249,10 +262,9 @@ export const queries = {
     }
   },
   facets: async (_: any, args: FacetsArgs, ctx: Context) => {
-    const { query, hideUnavailableItems } = args
+    const { hideUnavailableItems } = args
     const {
       clients: { search, vbase },
-      vtex: { tenant }
     } = ctx
 
     if (args.selectedFacets) {
@@ -261,9 +273,9 @@ export const queries = {
     }
 
     args.map = args.map && decodeURIComponent(args.map)
-    //The query has been translated by rewriter or is sent from the frontend in the tenant locale
-    const translatedQuery = await translateToStoreDefaultLanguage(ctx, query!, tenant?.locale)
-    args.query = translatedQuery
+
+    args.query = await getTranslatedSearchTerm(args.query, args.map, ctx)
+
     const compatibilityArgs = await getCompatibilityArgs<FacetsArgs>(ctx, args)
 
     const filteredArgs =
@@ -406,10 +418,7 @@ export const queries = {
   },
 
   productSearch: async (_: any, args: SearchArgs, ctx: Context, info: any) => {
-    const {
-      clients: { search },
-      vtex: { tenant }
-    } = ctx
+    const { clients: { search } } = ctx
     const queryTerm = args.query
 
     if (args.selectedFacets) {
@@ -434,8 +443,7 @@ export const queries = {
       )
     }
 
-    //The query has been translated by rewriter or is sent from the frontend in the tenant locale
-    const query = await translateToStoreDefaultLanguage(ctx, args.query || '', tenant?.locale)
+    const query = await getTranslatedSearchTerm(args.query, args.map, ctx)
     const translatedArgs = {
       ...args,
       query,
@@ -510,8 +518,7 @@ export const queries = {
       args.map = map
     }
 
-    //The query has been translated by rewriter or is sent from the frontend in the tenant locale
-    const query = await translateToStoreDefaultLanguage(ctx, args.query || '', ctx.vtex.tenant?.locale)
+    const query = await getTranslatedSearchTerm(args.query || '', args.map || '', ctx)
     const translatedArgs = {
       ...args,
       query,

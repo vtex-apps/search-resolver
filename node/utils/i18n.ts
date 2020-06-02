@@ -76,3 +76,6 @@ export const shouldTranslate = ({ vtex: { tenant, locale } }: Context) => tenant
 
 export const shouldTranslateForBinding = ({ vtex: { binding, tenant } }: Context) =>
   Boolean(tenant?.locale && binding?.locale && tenant.locale !== binding.locale)
+
+  export const shouldTranslateForTenantLocale = ({ vtex: { locale, tenant } }: Context) =>
+  Boolean(tenant?.locale && locale && tenant.locale !== locale)
