@@ -777,13 +777,14 @@
     lodash.unescape "4.0.1"
     semver "5.5.0"
 
-"@vtex/api@6.28.1":
-  version "6.28.1"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.28.1.tgz#36ae0535bde187f0bf84c69d41bf30f3c38f5ea6"
-  integrity sha512-9lpRwHPPXsyrbwkgbFgMp5/ENvaqS5TVJ7VtOXtRo5HjjEKrRCRO2vhPnocCDYj0O1Msk41Awj30HMZ5MpblFw==
+"@vtex/api@6.30.1":
+  version "6.30.1"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.30.1.tgz#e71ebed6cff6bfdec928535133ffe6d0522797ae"
+  integrity sha512-HfE5Jxii3daU8s3B0FS/5fKeoObkqZkdGBSz8iwWvhYN+nCrvJWm7J0KT5MyGNphp0E3ShxoHQhF46RUG8yXVA==
   dependencies:
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"
+    "@vtex/node-error-report" "^0.0.2"
     "@wry/equality" "^0.1.9"
     agentkeepalive "^4.0.2"
     apollo-server-errors "^2.2.1"
@@ -821,6 +822,13 @@
     tar-fs "^2.0.0"
     uuid "^3.3.3"
     xss "^1.0.6"
+
+"@vtex/node-error-report@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@vtex/node-error-report/-/node-error-report-0.0.2.tgz#edf15095d6bb543d28b46f86bc109e6214149dfe"
+  integrity sha512-Q6V8E1IR/U0H6uTB1G+gH4ugL4Kw1l/WsK7W46LQBsxv4ISlZcO7dXPlWrL4RzRcVam5yzGAwNkv2wJdW61tAA==
+  dependencies:
+    is-stream "^2.0.0"
 
 "@vtex/tsconfig@^0.2.0":
   version "0.2.0"
@@ -5409,9 +5417,9 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.25.2-beta.0/public":
+"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.27.1/public":
   version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.25.2-beta.0/public#5426ea5d6dedc54d790646c92696a944d454a603"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.27.1/public#8a5768cf10c831d22fa3e7b9445a0e843f064887"
 
 w3c-hr-time@^1.0.1:
   version "1.0.1"
