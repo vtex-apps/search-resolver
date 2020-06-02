@@ -129,7 +129,7 @@ export const resolvers = {
 
       const noMapQueryString = mapArray.slice(0, index + 1).every(isCategoryMap) || (isBrandMap(mapUnit) && index === 0)
       if (hrefs) {
-        // Will fall here only if store if translated data for different binding on upper resolver
+        // Will fall here only if store translated data for different binding on upper resolver
         const href = hrefs[index]
         if (noMapQueryString) {
           return href
