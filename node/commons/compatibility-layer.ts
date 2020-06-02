@@ -142,6 +142,7 @@ export const biggyAttributesToVtexFilters = (attributes: any) =>
           ? 'PRICERANGE'
           : 'NUMBER'
         : attribute.type.toUpperCase(),
+      hidden: !attribute.visible,
       values:
         isNumber && attribute.key === 'price'
           ? [
@@ -221,7 +222,11 @@ export const buildBreadcrumb = (selectedFacets: SelectedFacet[]) => {
 
   return selectedFacets
     ? selectedFacets
-        .filter(selectedFacet => selectedFacet.key !== 'priceRange')
+        .filter(
+          selectedFacet =>
+            selectedFacet.key !== 'priceRange' &&
+            selectedFacet.key !== 'productClusterIds'
+        )
         .map(selectedFacet => {
           pivotValue.push(selectedFacet.value)
           pivotMap.push(selectedFacet.key)
