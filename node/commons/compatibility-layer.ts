@@ -11,8 +11,6 @@ export const convertBiggyProduct = (
   tradePolicy?: string,
   indexingType?: IndexingType
 ) => {
-  const isProductSplit = product.id !== product.product
-
   const categories: string[] = product.categories
     ? product.categories.map((_: any, index: number) => {
         const subArray = product.categories.slice(0, index)
@@ -26,7 +24,6 @@ export const convertBiggyProduct = (
 
   return {
     categories,
-    cacheId: isProductSplit ? `${product.link}-${product.id}` : product.link,
     productId: product.id,
     productName: product.name,
     productReference: product.reference || product.product || product.id,
