@@ -26,7 +26,7 @@ export interface Message extends BaseMessage {
   context?: string
 }
 
-export const addContextToTranslatableString = (message: MessageWithContext, ctx: Context) => {
+export const addContextToTranslatableString = (message: Message, ctx: Context) => {
   const { vtex: { tenant } } = ctx
   const { locale } = tenant!
 
@@ -40,7 +40,7 @@ export const addContextToTranslatableString = (message: MessageWithContext, ctx:
     from: originalFrom
   } = parseTranslatableStringV2(message.content)
 
-  const context = (originalContext || message.context).toString()
+  const context = (originalContext || message.context)?.toString()
   const from = originalFrom || message.from || locale
 
   return formatTranslatableStringV2({ content, context, from })
@@ -54,7 +54,7 @@ export const translateToCurrentLanguage = (message: MessageWithContext, ctx: Con
 
   return state.messagesBindingLanguage!.load({
     content: message.content,
-    context: message.context.toString(),
+    context: message.context?.toString(),
     from: message.from ?? tenant!.locale,
   })
 }
