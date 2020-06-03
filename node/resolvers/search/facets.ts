@@ -1,6 +1,7 @@
 import { prop, toPairs } from 'ramda'
 
 import { zipQueryAndMap } from './utils'
+import { formatTranslatableProp } from '../../utils/i18n'
 
 interface EitherFacet extends SearchFacet {
   Children?: EitherFacet[]
@@ -59,6 +60,34 @@ const addId = (
   })
 }
 
+const translateValues = (facets: SearchFacetCategory[], ctx: Context) => {
+  return facets.map(facet => ({
+    ...facet,
+    Name: formatTranslatableProp<SearchFacetCategory, 'Name', 'Id'>('Name', 'Id')(facet, {}, ctx),
+  }))
+  /*
+  I will keep this code because when we implement the full search solution, we might need it.
+  const { clients: { rewriter }, vtex: { binding } } = ctx
+  return Promise.all(facets.map(async facet => {
+    let link = facet.Link
+    let value = facet.Value
+    if (shouldTranslateForBinding(ctx)) {
+      const newRoute = await rewriter.getRoute(facet.Id.toString(), 'anyCategoryEntity', binding!.id!)
+      link = newRoute ?? link
+      value = newRoute ? last(newRoute.split('/')) : facet.Value
+    }
+    
+    return {
+      ...facet,
+      Name: formatTranslatableProp<SearchFacetCategory, 'Name', 'Id'>('Name', 'Id')(facet, {}, ctx),
+      Link: link,
+      Value: value,
+      LinkEncoded: encodeURI(link),
+    }
+  }))
+  */
+}
+
 const baseFacetResolvers = {
   quantity: prop('Quantity'),
   name: prop('Name'),
@@ -93,12 +122,18 @@ export const resolvers = {
 
     id: prop('Id'),
 
-    name: prop('Name'),
+    name: (facet: any, _: unknown, ctx: Context) => {
+      if (facet.Id) {
+        return formatTranslatableProp<any, any, any>('Name', 'Id')(facet, _, ctx)
+      }
+      return facet.Name
+    },
   },
   BrandFacet: {
     ...baseFacetResolvers,
 
     id: prop('Id'),
+    //TODO: add translation to name here when brand has ID
   },
   PriceRangesFacet: {
     ...baseFacetResolvers,
@@ -117,23 +152,24 @@ export const resolvers = {
       return linkPath
     },
 
-    name: prop('Name'),
+    name: formatTranslatableProp<SearchFacetCategory, 'Name', 'Id'>('Name', 'Id')
   },
   Facets: {
-    facets: ({
+    facets: async ({
       CategoriesTrees = [],
       Brands = [],
       SpecificationFilters = {},
       PriceRanges = [],
       queryArgs,
-    }: SearchFacets & { queryArgs: { query: string; map: string } }) => {
+    }: SearchFacets & { queryArgs: { query: string; map: string } }, _: unknown, ctx: Context) => {
+      // TODO: add translation to name 
       const brands = {
         values: addSelected(Brands, queryArgs),
         type: FilterType.BRAND,
       }
 
       const catregoriesTrees = {
-        values: addSelected(CategoriesTrees, queryArgs),
+        values: translateValues(addSelected(CategoriesTrees, queryArgs) as SearchFacetCategory[], ctx),
         type: FilterType.CATEGORYTREE,
       }
 
@@ -172,13 +208,13 @@ export const resolvers = {
       const selectedFacets =
         queryValues.length === mapValues.length
           ? mapValues.map((map, i) => {
-              return {
-                key: map,
-                value: queryValues[i],
-              }
-            })
+            return {
+              key: map,
+              value: queryValues[i],
+            }
+          })
           : []
-      
+
       return {
         ...queryArgs,
         selectedFacets

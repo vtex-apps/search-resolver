@@ -1,11 +1,14 @@
-import { compose, last, map, omit, pathOr, propOr, split } from 'ramda'
+import { compose, last, map, omit, pathOr, split } from 'ramda'
 
 import {
   addContextToTranslatableString,
   formatTranslatableProp,
+  shouldTranslateForBinding,
 } from '../../utils/i18n'
 import { getBenefits } from '../benefits'
 import { buildCategoryMap } from './utils'
+
+type DynamicKey<T> = Record<string, T>
 
 const objToNameValue = (
   keyName: string,
@@ -118,6 +121,15 @@ const productCategoriesToCategoryTree = async (
   return mappedCategories.length ? mappedCategories : null
 }
 
+const urlToSlug = (slug: string | undefined) => {
+  if (!slug) {
+    return slug
+  }
+  const erasedSlash = slug.replace(/^\//g, '') //removing starting / char
+  const finalSlug = erasedSlash.replace(/(\/p)$/g, '') //remove ending /p chars
+  return finalSlug
+}
+
 export const resolvers = {
   Product: {
     brand: formatTranslatableProp<SearchProduct, 'brand', 'brandId'>(
@@ -190,42 +202,29 @@ export const resolvers = {
     ),
 
     linkText: async ({ productId, linkText }: SearchProduct, _: unknown, ctx: Context) => {
-      const { clients: { messagesGraphQL }, vtex: { binding, tenant } } = ctx
+      const { clients: { rewriter }, vtex: { binding } } = ctx
 
-      if (!binding || !tenant || binding.locale === tenant.locale) {
+      if (!shouldTranslateForBinding(ctx)) {
         return linkText
       }
-
-      const messages = [{
-        context: productId,
-        content: linkText
-      }]
-
-      const translations = await messagesGraphQL.translate({
-        to: binding.locale,
-        indexedByFrom: [{
-          from: tenant.locale,
-          messages
-        }]
-      })
-
-      return translations[0]
+      const route = await rewriter.getRoute(productId, 'product', binding!.id!)
+      return urlToSlug(route) ?? linkText
     },
 
-    specificationGroups: (product: SearchProduct) => {
-      const allSpecificationsGroups = propOr<[], SearchProduct, string[]>(
-        [],
-        'allSpecificationsGroups',
-        product
-      ).concat(['allSpecifications'])
+    specificationGroups: (product: SearchProduct, _: unknown, ctx: Context) => {
+      const allSpecificationsGroups = (product.allSpecificationsGroups ?? []).concat(['allSpecifications'])
       const specificationGroups = allSpecificationsGroups.map(
         (groupName: string) => ({
-          name: groupName,
-          specifications: ((product as any)[groupName] || []).map(
-            (name: string) => ({
-              name,
-              values: (product as any)[name] || [],
-            })
+          name: addContextToTranslatableString({ content: groupName, context: product.productId }, ctx),
+          specifications: ((product as unknown as DynamicKey<string[]>)?.[groupName] ?? []).map(
+            (name: string) => {
+              const values = (product as unknown as DynamicKey<string[]>)[name] || []
+              const translatedValues = values.map((value: string) => addContextToTranslatableString({ content: value, context: product.productId }, ctx))
+              return {
+                name: addContextToTranslatableString({ content: name, context: product.productId }, ctx),
+                values: translatedValues,
+              }
+            }
           ),
         })
       )
