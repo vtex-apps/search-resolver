@@ -80,6 +80,11 @@ const getBrandInfo = async (
   return search.pageType(queryUnit).catch(() => null)
 }
 
+interface TranslatableData {
+  id?: string
+  name: string
+}
+
 export const resolvers = {
   SearchBreadcrumb: {
     name: async (obj: BreadcrumbParams, _: any, ctx: Context) => {
@@ -96,9 +101,9 @@ export const resolvers = {
         }
       }
       if (isCategoryMap(mapUnit)) {
-        const categoryData = metadataMap[breadcrumbMapKey(queryUnit, mapUnit)] ?? (await getCategoryInfo(obj, isVtex, ctx))
+        const categoryData = (metadataMap[breadcrumbMapKey(queryUnit, mapUnit)] ?? (await getCategoryInfo(obj, isVtex, ctx))) as TranslatableData
         if (categoryData) {
-          return formatTranslatableProp<any, any, any>('name', 'id')(categoryData, _, ctx)
+          return formatTranslatableProp<TranslatableData, 'name', 'id'>('name', 'id')(categoryData, _, ctx)
         }
       }
       if (isSellerMap(mapUnit)) {
@@ -108,9 +113,9 @@ export const resolvers = {
         }
       }
       if (isBrandMap(mapUnit)) {
-        const brandData = metadataMap[breadcrumbMapKey(queryUnit, mapUnit)] ?? (await getBrandInfo(obj, isVtex, ctx))
+        const brandData = (metadataMap[breadcrumbMapKey(queryUnit, mapUnit)] ?? (await getBrandInfo(obj, isVtex, ctx))) as TranslatableData
         if (brandData) {
-          return formatTranslatableProp<any, any, any>('name', 'id')(brandData, _, ctx)
+          return formatTranslatableProp<TranslatableData, 'name', 'id'>('name', 'id')(brandData, _, ctx)
         }
       }
       if (isSpecificationFilter(mapUnit)) {
