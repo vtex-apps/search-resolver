@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Redirect query.
+- Breadcrumb to `facets`.
+
+### Changed
+- Remove `suggestions`, `correction` and `banners` from `productSearchV3` and create a query for each one.
+
 ## [1.4.1] - 2020-06-17
 
 ### Fixed
