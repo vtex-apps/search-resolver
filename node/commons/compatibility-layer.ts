@@ -231,7 +231,7 @@ export const buildBreadcrumb = (selectedFacets: SelectedFacet[]) => {
           pivotMap.push(selectedFacet.key)
 
           return {
-            name: decodeURIComponent(selectedFacet.value),
+            name: decodeURIComponent(selectedFacet.value.replace(/-+/g, ' ')),
             href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
           }
         })
