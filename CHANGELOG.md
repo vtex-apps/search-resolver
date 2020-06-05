@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Redirect query.
+
+### Changed
+- Remove `suggestions`, `correction` and `banners` from `productSearchV3` and create a query for each one.
+
 ## [0.7.3] - 2020-06-10
 ### Added
 - Translation of specifications in product.
