@@ -60,34 +60,6 @@ const addId = (
   })
 }
 
-const translateValues = (facets: SearchFacetCategory[], ctx: Context) => {
-  return facets.map(facet => ({
-    ...facet,
-    Name: formatTranslatableProp<SearchFacetCategory, 'Name', 'Id'>('Name', 'Id')(facet, {}, ctx),
-  }))
-  /*
-  I will keep this code because when we implement the full search solution, we might need it.
-  const { clients: { rewriter }, vtex: { binding } } = ctx
-  return Promise.all(facets.map(async facet => {
-    let link = facet.Link
-    let value = facet.Value
-    if (shouldTranslateForBinding(ctx)) {
-      const newRoute = await rewriter.getRoute(facet.Id.toString(), 'anyCategoryEntity', binding!.id!)
-      link = newRoute ?? link
-      value = newRoute ? last(newRoute.split('/')) : facet.Value
-    }
-    
-    return {
-      ...facet,
-      Name: formatTranslatableProp<SearchFacetCategory, 'Name', 'Id'>('Name', 'Id')(facet, {}, ctx),
-      Link: link,
-      Value: value,
-      LinkEncoded: encodeURI(link),
-    }
-  }))
-  */
-}
-
 const baseFacetResolvers = {
   quantity: prop('Quantity'),
   name: prop('Name'),
@@ -100,7 +72,12 @@ const baseFacetResolvers = {
 export const resolvers = {
   FacetValue: {
     quantity: prop('Quantity'),
-    name: prop('Name'),
+    name: (facet: any, _: unknown, ctx: Context) => {
+      if (facet.Id) {
+        return formatTranslatableProp<any, any, any>('Name', 'Id')(facet, _, ctx)
+      }
+      return facet.Name
+    },
     value: prop('Value'),
     id: prop('Id'),
     children: prop('Children'),
@@ -161,15 +138,14 @@ export const resolvers = {
       SpecificationFilters = {},
       PriceRanges = [],
       queryArgs,
-    }: SearchFacets & { queryArgs: { query: string; map: string } }, _: unknown, ctx: Context) => {
-      // TODO: add translation to name 
+    }: SearchFacets & { queryArgs: { query: string; map: string } }) => {
       const brands = {
         values: addSelected(Brands, queryArgs),
         type: FilterType.BRAND,
       }
 
       const catregoriesTrees = {
-        values: translateValues(addSelected(CategoriesTrees, queryArgs) as SearchFacetCategory[], ctx),
+        values: addSelected(CategoriesTrees, queryArgs),
         type: FilterType.CATEGORYTREE,
       }
 
