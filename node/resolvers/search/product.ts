@@ -1,9 +1,12 @@
-import { compose, last, map, omit, pathOr, split } from 'ramda'
+import { compose, last, map, omit, pathOr, split, values } from 'ramda'
 
 import {
   addContextToTranslatableString,
   formatTranslatableProp,
   shouldTranslateForBinding,
+  shouldTranslate,
+  translateManyToCurrentLanguage,
+  Message,
 } from '../../utils/i18n'
 import { getBenefits } from '../benefits'
 import { buildCategoryMap } from './utils'
@@ -163,11 +166,49 @@ export const resolvers = {
     productClusters: ({ productClusters = {} }: SearchProduct) =>
       objToNameValue('id', 'name', productClusters),
 
-    properties: (product: SearchProduct) =>
-      map(
-        (name: string) => ({ name, values: (product as any)[name] }),
-        product.allSpecifications || []
-      ),
+    properties: async (product: SearchProduct, _: unknown, ctx: Context) => {
+      const valuesUntranslated = (product.allSpecifications ?? []).map((name: string) => {
+        const value = ((product as any)[name] as string[])
+        return { name, values: value }
+      })
+      if (!shouldTranslate(ctx)) {
+        return valuesUntranslated
+      }
+
+      const filters = await ctx.clients.search.filtersInCategoryFromId(product.categoryId)
+      const filterMapFromName = filters.reduce(
+        (acc, curr) => {
+          acc[curr.Name] = curr
+          return acc
+        },
+        {} as Record<string, FilterListTreeCategoryById>
+      )
+      const valuesWithTranslations = valuesUntranslated.map(property => {
+        const filterId = filterMapFromName[property.name]?.FieldId
+        return {
+          name: addContextToTranslatableString({ content: property.name, context: filterId?.toString() }, ctx),
+          values: property.values.map(value => addContextToTranslatableString({ content: value, context: filterId?.toString() }, ctx))
+        }
+      })
+      return valuesWithTranslations
+
+      // const messages = valuesUntranslated.reduce((acc, curr) => {
+      //   const filterId = filters.find(({ Name }) => Name === curr.name)?.FieldId
+      //   acc.push({ content: curr.name, context: filterId?.toString() })
+      //   acc.push({ content: curr.values[0], context: filterId?.toString() })
+      //   return acc
+      // }, [] as Message[])
+
+      // const trans = await translateManyToCurrentLanguage(messages, ctx)
+      // const valuesTranslated = []
+      // for (let index = 0; index < messages.length; index += 2) {
+      //   const name = trans[index]
+      //   const value = trans[index + 1]
+      //   valuesTranslated.push({ name, values: [value] })
+      // }
+
+      // return valuesTranslated
+    },
 
     propertyGroups: (product: SearchProduct) => {
       const { allSpecifications = [] } = product

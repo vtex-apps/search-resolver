@@ -157,9 +157,9 @@ export class Search extends AppClient {
     })
 
   public getCategoryChildren = (id: number) =>
-  this.get<Record<string, string>>(`/pub/category/categories/children?id=${id}`, {
-    metric: 'search-category-children'
-  })
+    this.get<Record<string, string>>(`/pub/category/categories/children?id=${id}`, {
+      metric: 'search-category-children'
+    })
 
   public facets = (facets: string = '') => {
     const [path, options] = decodeURI(facets).split('?')
@@ -181,10 +181,15 @@ export class Search extends AppClient {
       metric: 'search-crossSelling',
     })
 
+  public filtersInCategoryFromId = (id: string | number) =>
+    this.get<FilterListTreeCategoryById[]>(`/pub/specification/field/listTreeByCategoryId/${id}`, {
+      metric: 'search-listTreeByCategoryId'
+    })
+
   public autocomplete = ({ maxRows, searchTerm }: AutocompleteArgs) =>
     this.get<{ itemsReturned: SearchAutocompleteUnit[] }>(
       `/buscaautocomplete?maxRows=${maxRows}&productNameContains=${
-        encodeURIComponent(this.searchEncodeURI(searchTerm))
+      encodeURIComponent(this.searchEncodeURI(searchTerm))
       }`,
       { metric: 'search-autocomplete' }
     )

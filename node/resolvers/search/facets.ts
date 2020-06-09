@@ -1,10 +1,17 @@
 import { prop, toPairs } from 'ramda'
 
 import { zipQueryAndMap } from './utils'
-import { formatTranslatableProp } from '../../utils/i18n'
+import { formatTranslatableProp, addContextToTranslatableString } from '../../utils/i18n'
 
 interface EitherFacet extends SearchFacet {
   Children?: EitherFacet[]
+}
+
+//This Type represents all kind of facets, from department, to categories, to brand and specifications
+interface GenericFacet extends SearchFacet {
+  NameWithTranslation?: string
+  Id?: string
+  Children?: GenericFacet
 }
 
 enum FilterType {
@@ -69,12 +76,27 @@ const baseFacetResolvers = {
   value: prop('Value'),
 }
 
+const addNameWithTranslation = (specificationFacets: SearchFacet[], filterId: string | undefined, ctx: Context) => {
+  if (!filterId) {
+    return specificationFacets
+  }
+
+  return specificationFacets.map(facet => ({
+    ...facet,
+    NameWithTranslation: addContextToTranslatableString({ content: facet.Name, context: filterId }, ctx)
+  }))
+}
+
 export const resolvers = {
   FacetValue: {
     quantity: prop('Quantity'),
-    name: (facet: any, _: unknown, ctx: Context) => {
+    name: (facet: GenericFacet, _: unknown, ctx: Context) => {
+      if (facet.NameWithTranslation) {
+        console.log('teste NameWithTranslation: ', facet.NameWithTranslation)
+        return facet.NameWithTranslation
+      }
       if (facet.Id) {
-        return formatTranslatableProp<any, any, any>('Name', 'Id')(facet, _, ctx)
+        return formatTranslatableProp<GenericFacet, 'Name', 'Id'>('Name', 'Id')(facet, _, ctx)
       }
       return facet.Name
     },
@@ -99,9 +121,9 @@ export const resolvers = {
 
     id: prop('Id'),
 
-    name: (facet: any, _: unknown, ctx: Context) => {
+    name: (facet: GenericFacet, _: unknown, ctx: Context) => {
       if (facet.Id) {
-        return formatTranslatableProp<any, any, any>('Name', 'Id')(facet, _, ctx)
+        return formatTranslatableProp<GenericFacet, 'Name', 'Id'>('Name', 'Id')(facet, _, ctx)
       }
       return facet.Name
     },
@@ -138,7 +160,7 @@ export const resolvers = {
       SpecificationFilters = {},
       PriceRanges = [],
       queryArgs,
-    }: SearchFacets & { queryArgs: { query: string; map: string } }) => {
+    }: SearchFacets & { queryArgs: { query: string; map: string } }, _: unknown, ctx: Context) => {
       const brands = {
         values: addSelected(Brands, queryArgs),
         type: FilterType.BRAND,
@@ -151,9 +173,11 @@ export const resolvers = {
 
       const specificationFilters = toPairs(SpecificationFilters).map(
         ([filterName, filterFacets]) => {
+          const filterId = filterFacets?.[0].Map.split('_')?.[1]
+          const name = filterId ? addContextToTranslatableString({ content: filterName, context: filterId }, ctx) : filterName
           return {
-            name: filterName,
-            values: addSelected(filterFacets, queryArgs),
+            name,
+            values: addNameWithTranslation(addSelected(filterFacets, queryArgs), filterId, ctx),
             type: FilterType.TEXT,
           }
         }
