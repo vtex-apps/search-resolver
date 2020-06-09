@@ -2,7 +2,7 @@ import { path } from 'ramda'
 import { IOResponse } from '@vtex/api'
 import { Functions } from '@gocommerce/utils'
 import { zipQueryAndMap, breadcrumbMapKey } from './utils'
-import { shouldTranslateForBinding } from '../../utils/i18n'
+import { shouldTranslateToBinding } from '../../utils/i18n'
 
 interface ProductSearchParent {
   productsRaw: IOResponse<SearchProduct[]>
@@ -141,7 +141,7 @@ export const resolvers = {
       const mapArray = map.split(',')
 
       const { metadataMap, hrefs } =
-        shouldTranslateForBinding(ctx) ?
+        shouldTranslateToBinding(ctx) ?
           await breadcrumbDataWithBinding(queryAndMap, categoriesSearched, mapArray, ctx)
           : { metadataMap: {}, hrefs: null }
 
