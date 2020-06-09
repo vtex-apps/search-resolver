@@ -191,23 +191,6 @@ export const resolvers = {
         }
       })
       return valuesWithTranslations
-
-      // const messages = valuesUntranslated.reduce((acc, curr) => {
-      //   const filterId = filters.find(({ Name }) => Name === curr.name)?.FieldId
-      //   acc.push({ content: curr.name, context: filterId?.toString() })
-      //   acc.push({ content: curr.values[0], context: filterId?.toString() })
-      //   return acc
-      // }, [] as Message[])
-
-      // const trans = await translateManyToCurrentLanguage(messages, ctx)
-      // const valuesTranslated = []
-      // for (let index = 0; index < messages.length; index += 2) {
-      //   const name = trans[index]
-      //   const value = trans[index + 1]
-      //   valuesTranslated.push({ name, values: [value] })
-      // }
-
-      // return valuesTranslated
     },
 
     propertyGroups: (product: SearchProduct) => {
