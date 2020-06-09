@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.3.4] - 2020-06-09
+
 ### Added
 - `vtex.sae-analytics@2.x` as dependency.
 
