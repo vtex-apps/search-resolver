@@ -92,7 +92,6 @@ export const resolvers = {
     quantity: prop('Quantity'),
     name: (facet: GenericFacet, _: unknown, ctx: Context) => {
       if (facet.NameWithTranslation) {
-        console.log('teste NameWithTranslation: ', facet.NameWithTranslation)
         return facet.NameWithTranslation
       }
       if (facet.Id) {
