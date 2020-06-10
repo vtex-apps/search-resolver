@@ -18,7 +18,7 @@ import { Functions } from '@gocommerce/utils'
 
 import { zipQueryAndMap, findCategoryInTree, getBrandFromSlug } from '../utils'
 import { toTitleCase } from '../../../utils/string'
-import { formatTranslatableProp, translateManyToCurrentLanguage, Message, shouldTranslate } from '../../../utils/i18n'
+import { formatTranslatableProp, translateManyToCurrentLanguage, Message, shouldTranslateToUserLocale } from '../../../utils/i18n'
 
 type TupleString = [string, string]
 
@@ -227,7 +227,7 @@ export const getSearchMetaData = async (
   ])
 
   const titleTagNames =
-    shouldTranslate(ctx) ?
+    shouldTranslateToUserLocale(ctx) ?
       (await translateTitles(metadata, otherNames, ctx))
       : [metadata.titleTag, ...otherNames]
   return {

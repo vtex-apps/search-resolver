@@ -202,17 +202,66 @@ describe('tests related to product resolver', () => {
   })
 
   describe('specificationGroups resolver', () => {
-    test('specifications groups should have expected format and translated values', () => {
+    test('specifications groups should have expected format but not translated if same locale as tenant', async () => {
       const product = getProduct()
-      const result = resolvers.Product.specificationGroups(product as any, {}, mockContext as any)
+      const result = await resolvers.Product.specificationGroups(product as any, {}, mockContext as any)
+      expect(result[0]).toMatchObject({
+        name: 'Tamanho',
+        specifications: [{ name: 'Numero do calçado', values: ["35"] }]
+      })
+      expect(result[1]).toMatchObject({
+        name: 'allSpecifications',
+        specifications: [{ name: 'Numero do calçado', values: ["35"] }]
+      })
+    })
+    test('specifications groups should have expected format and translated values', async () => {
+      mockContext.vtex.locale = 'fr-FR'
+      const product = getProduct()
+      mockContext.clients.search.filtersInCategoryFromId.mockImplementationOnce(() => ([{
+        Name: 'Numero do calçado',
+        FieldId: 'specification-Id',
+      }]))
+      const result = await resolvers.Product.specificationGroups(product as any, {}, mockContext as any)
+
       expect(result[0]).toMatchObject({
         name: 'Tamanho (((16))) <<<pt-BR>>>',
-        specifications: [{ name: 'Numero do calçado (((16))) <<<pt-BR>>>', values: ["35 (((16))) <<<pt-BR>>>"] }]
+        specifications: [{ name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>', values: ["35 (((specification-Id))) <<<pt-BR>>>"] }]
       })
       expect(result[1]).toMatchObject({
         name: 'allSpecifications (((16))) <<<pt-BR>>>',
-        specifications: [{ name: 'Numero do calçado (((16))) <<<pt-BR>>>', values: ["35 (((16))) <<<pt-BR>>>"] }]
+        specifications: [{ name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>', values: ["35 (((specification-Id))) <<<pt-BR>>>"] }]
       })
+    })
+  })
+
+  describe('properties resolver', () => {
+    test('properties should have expected format but not translated if same locale as tenant', async () => {
+      const product = getProduct()
+      const result = await resolvers.Product.properties(product as any, {}, mockContext as any)
+      expect(result).toMatchObject([{ name: 'Numero do calçado', values: ['35'] }])
+    })
+    test('specifications groups should have expected format and translated values', async () => {
+      mockContext.vtex.locale = 'fr-FR'
+      const product = getProduct({
+        allSpecifications: ['Numero do calçado', 'testeName'],
+        'testeName': ['teste value']
+      })
+
+      mockContext.clients.search.filtersInCategoryFromId.mockImplementationOnce(() => ([
+        {
+          Name: 'Numero do calçado',
+          FieldId: 'specification-Id',
+        },
+        {
+          Name: 'testeName',
+          FieldId: 'teste-id'
+        }
+      ]))
+      const result = await resolvers.Product.properties(product as any, {}, mockContext as any)
+      expect(result).toMatchObject([
+        { name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>', values: ['35 (((specification-Id))) <<<pt-BR>>>'] },
+        { name: 'testeName (((teste-id))) <<<pt-BR>>>', values: ['teste value (((teste-id))) <<<pt-BR>>>'] }
+      ])
     })
   })
 })

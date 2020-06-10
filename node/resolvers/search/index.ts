@@ -40,7 +40,7 @@ import {
   FACETS_BUCKET,
 } from './constants'
 import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
-import { shouldTranslateForTenantLocale } from '../../utils/i18n'
+import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -91,7 +91,7 @@ const translateToStoreDefaultLanguage = async (
   } = ctx
   const { locale: to } = tenant!
 
-  if (!shouldTranslateForTenantLocale(ctx)) {
+  if (!shouldTranslateToTenantLocale(ctx)) {
     // Do not translate if string already in correct language
     return term
   }
@@ -220,7 +220,7 @@ const filterSpecificationFilters = ({
 }
 
 const getTranslatedSearchTerm = async (query: SearchArgs['query'], map: SearchArgs['map'], ctx: Context) => {
-  if (!query || !map || !shouldTranslateForTenantLocale(ctx)) {
+  if (!query || !map || !shouldTranslateToTenantLocale(ctx)) {
     return query
   }
   const ftSearchIndex = map.split(',').findIndex(m => m === 'ft')

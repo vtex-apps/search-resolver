@@ -1,7 +1,7 @@
 import { compose, last, prop, split } from 'ramda'
 
 import { getCategoryInfo } from './utils'
-import { formatTranslatableProp, shouldTranslateForBinding } from '../../utils/i18n'
+import { formatTranslatableProp, shouldTranslateToBinding } from '../../utils/i18n'
 
 const lastSegment = compose<string, string[], string>(
   last,
@@ -28,7 +28,7 @@ export const resolvers = {
     cacheId: prop('id'),
 
     href: async ({ url, id }: SafeCategory, _: unknown, ctx: Context) => {
-      if (shouldTranslateForBinding(ctx)) {
+      if (shouldTranslateToBinding(ctx)) {
         const rewriterUrl = await ctx.clients.rewriter.getRoute(id.toString(), 'anyCategoryEntity', ctx.vtex.binding!.id!)
         if (rewriterUrl) {
           url = rewriterUrl
@@ -48,7 +48,7 @@ export const resolvers = {
     ),
 
     slug: async ({ url, id }: SafeCategory, _: unknown, ctx: Context) => {
-      if (shouldTranslateForBinding(ctx)) {
+      if (shouldTranslateToBinding(ctx)) {
         const rewriterUrl = await ctx.clients.rewriter.getRoute(id.toString(), 'anyCategoryEntity', ctx.vtex.binding!.id!)
         if (rewriterUrl) {
           url = rewriterUrl

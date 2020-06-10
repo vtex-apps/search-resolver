@@ -72,10 +72,10 @@ export const translateManyToCurrentLanguage = (messages: Message[], ctx: Context
   })))
 }
 
-export const shouldTranslate = ({ vtex: { tenant, locale } }: Context) => tenant?.locale !== locale
+export const shouldTranslateToUserLocale = ({ vtex: { tenant, locale } }: Context) => tenant?.locale !== locale
 
-export const shouldTranslateForBinding = ({ vtex: { binding, tenant } }: Context) =>
+export const shouldTranslateToBinding = ({ vtex: { binding, tenant } }: Context) =>
   Boolean(tenant?.locale && binding?.locale && tenant.locale !== binding.locale)
 
-  export const shouldTranslateForTenantLocale = ({ vtex: { locale, tenant } }: Context) =>
+  export const shouldTranslateToTenantLocale = ({ vtex: { locale, tenant } }: Context) =>
   Boolean(tenant?.locale && locale && tenant.locale !== locale)
