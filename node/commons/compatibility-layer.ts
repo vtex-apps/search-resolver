@@ -1,5 +1,4 @@
 import VtexSeller from './models/VtexSeller'
-import unescape from 'unescape'
 
 export enum IndexingType {
   API = 'API',
@@ -145,61 +144,6 @@ const convertSKU = (
     ],
   }
 }
-
-export const biggyAttributesToVtexFilters = (attributes: any) =>
-  attributes.map((attribute: any) => {
-    const isNumber = attribute.type === 'number'
-
-    return {
-      name: attribute.label,
-      type: isNumber
-        ? attribute.key === 'price'
-          ? 'PRICERANGE'
-          : 'NUMBER'
-        : attribute.type.toUpperCase(),
-      hidden: !attribute.visible,
-      values:
-        isNumber && attribute.key === 'price'
-          ? [
-              {
-                quantity: attribute.values.reduce(
-                  (acum: number, value: any) => acum + value.count,
-                  0
-                ),
-                name: unescape(attribute.label),
-                key: attribute.key,
-                value: attribute.key,
-                range: {
-                  from: attribute.minValue,
-                  to: attribute.maxValue,
-                },
-              },
-            ]
-          : isNumber
-          ? attribute.values.map((value: any) => {
-              return {
-                quantity: value.count,
-                name: unescape(`${value.from} - ${value.to}`),
-                key: attribute.key,
-                value: `${value.from}:${value.to}`,
-                selected: value.active,
-                range: {
-                  from: value.from !== '*' ? value.from : attribute.minValue,
-                  to: value.to !== '*' ? value.to : attribute.maxValue,
-                },
-              }
-            })
-          : attribute.values.map((value: any) => {
-              return {
-                quantity: value.count,
-                name: unescape(value.label),
-                key: attribute.key,
-                value: value.key,
-                selected: value.active,
-              }
-            }),
-    }
-  })
 
 /**
  * Convert from VTEX OrderBy into Biggy's sort.

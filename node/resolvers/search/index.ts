@@ -22,12 +22,12 @@ import {
 import { toCompatibilityArgs } from './newURLs'
 import { PATH_SEPARATOR, MAP_VALUES_SEP } from './constants'
 import {
-  biggyAttributesToVtexFilters,
   buildAttributePath,
   convertOrderBy,
   buildBreadcrumb,
 } from '../../commons/compatibility-layer'
 import { productsCatalog, productsBiggy } from '../../commons/products'
+import { attributesToFilters } from '../../utils/attributes'
 
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -240,7 +240,7 @@ export const queries = {
       args
     )) as FacetsInput
 
-    let { fullText } = args
+    let { fullText, searchState } = args
 
     if (fullText) {
       fullText = await translateToStoreDefaultLanguage(ctx, args.fullText!)
@@ -250,17 +250,16 @@ export const queries = {
     const { segment } = ctx.vtex
 
     const biggyArgs = {
+      searchState,
+      query: fullText,
       attributePath: buildAttributePath(args.selectedFacets),
-      query: args.fullText,
       tradePolicy: segment && segment.channel,
     }
 
     const result = await biggySearch.facets(biggyArgs)
 
     return {
-      facets: result.attributes
-        ? biggyAttributesToVtexFilters(result.attributes)
-        : [],
+      facets: attributesToFilters(result),
       queryArgs: {
         query: args.query,
         selectedFacets: args.selectedFacets,
@@ -376,7 +375,15 @@ export const queries = {
 
     const { biggySearch } = ctx.clients
     const { segment } = ctx.vtex
-    const { from, to, selectedFacets, fullText, fuzzy, operator } = args
+    const {
+      from,
+      to,
+      selectedFacets,
+      fullText,
+      fuzzy,
+      operator,
+      searchState,
+    } = args
 
     const count = to - from + 1
     const page = Math.round((to + 1) / count)
@@ -386,6 +393,7 @@ export const queries = {
       count,
       fuzzy,
       operator,
+      searchState,
       attributePath: buildAttributePath(selectedFacets),
       query: fullText,
       tradePolicy: segment && segment.channel,
@@ -400,6 +408,7 @@ export const queries = {
     const convertedProducts = productResolver(result, ctx)
 
     return {
+      searchState,
       products: convertedProducts,
       recordsFiltered: result.total,
       correction: result.correction,
