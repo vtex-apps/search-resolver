@@ -193,8 +193,8 @@ export const resolvers = {
       if (!shouldTranslateToUserLocale(ctx)) {
         return valuesUntranslated
       }
-      const filterIdFromNameMap = await getProductFilterIdMap(product, ctx)
 
+      const filterIdFromNameMap = await getProductFilterIdMap(product, ctx)
       const valuesWithTranslations = valuesUntranslated.map(addTranslationParamsToSpecification(filterIdFromNameMap, ctx))
       return valuesWithTranslations
     },
@@ -261,6 +261,7 @@ export const resolvers = {
       if (!shouldTranslateToUserLocale(ctx)) {
         return noTranslationSpecificationGroups
       }
+
       const filterIdFromNameMap = await getProductFilterIdMap(product, ctx)
       const translatedGroups = noTranslationSpecificationGroups.map(group => {
         return {
