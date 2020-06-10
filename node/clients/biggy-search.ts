@@ -1,5 +1,6 @@
 import { ExternalClient, InstanceOptions, IOContext } from '@vtex/api'
 import { IndexingType } from '../commons/compatibility-layer'
+import { parseState } from '../utils/searchState'
 import path from 'path'
 
 const buildPathFromArgs = (args: SearchResultArgs) => {
@@ -86,7 +87,16 @@ export class BiggySearchClient extends ExternalClient {
   }
 
   public async searchMetadata(args: SearchResultArgs): Promise<any> {
-    const { query, page, count, sort, operator, fuzzy, leap } = args
+    const {
+      query,
+      page,
+      count,
+      sort,
+      operator,
+      fuzzy,
+      leap,
+      searchState,
+    } = args
 
     const url = `${this.store}/api/split/metadata_search/${buildPathFromArgs(
       args
@@ -101,6 +111,7 @@ export class BiggySearchClient extends ExternalClient {
         operator,
         fuzzy,
         bgy_leap: leap ? true : undefined,
+        ...parseState(searchState),
       },
       metric: 'search-result',
     })
@@ -114,7 +125,16 @@ export class BiggySearchClient extends ExternalClient {
   }
 
   public async facets(args: SearchResultArgs): Promise<any> {
-    const { query, page, count, sort, operator, fuzzy, leap } = args
+    const {
+      query,
+      page,
+      count,
+      sort,
+      operator,
+      fuzzy,
+      leap,
+      searchState,
+    } = args
 
     const url = `${this.store}/api/split/attribute_search/${buildPathFromArgs(
       args
@@ -129,6 +149,7 @@ export class BiggySearchClient extends ExternalClient {
         operator,
         fuzzy,
         bgy_leap: leap ? true : undefined,
+        ...parseState(searchState),
       },
       metric: 'search-result',
     })
@@ -137,7 +158,16 @@ export class BiggySearchClient extends ExternalClient {
   }
 
   public async productSearch(args: SearchResultArgs): Promise<any> {
-    const { query, page, count, sort, operator, fuzzy, leap } = args
+    const {
+      query,
+      page,
+      count,
+      sort,
+      operator,
+      fuzzy,
+      leap,
+      searchState,
+    } = args
 
     const url = `${this.store}/api/split/product_search/${buildPathFromArgs(
       args
@@ -152,6 +182,7 @@ export class BiggySearchClient extends ExternalClient {
         operator,
         fuzzy,
         bgy_leap: leap ? true : undefined,
+        ...parseState(searchState),
       },
       metric: 'search-result',
     })
