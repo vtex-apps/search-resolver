@@ -6,6 +6,11 @@ export enum IndexingType {
   XML = 'XML',
 }
 
+interface ExtraData {
+  key: string
+  value: string
+}
+
 export const convertBiggyProduct = (
   product: any,
   tradePolicy?: string,
@@ -22,7 +27,7 @@ export const convertBiggyProduct = (
     convertSKU(product, indexingType, tradePolicy)
   )
 
-  return {
+  const convertedProduct: any = {
     categories,
     productId: product.id,
     cacheId: `sp-${product.id}`,
@@ -39,7 +44,17 @@ export const convertBiggyProduct = (
     description: product.description,
     items: skus,
     sku: skus.find(sku => sku.sellers && sku.sellers.length > 0),
+    allSpecifications: [],
   }
+
+  if (product.extraData) {
+    product.extraData.forEach(({ key, value }: ExtraData) => {
+      convertedProduct.allSpecifications.push(key)
+      convertedProduct[key] = [value]
+    })
+  }
+
+  return convertedProduct
 }
 
 const getSellersIndexedByApi = (
