@@ -213,25 +213,6 @@ export class BiggySearchClient extends ExternalClient {
     }
   }
 
-  public async redirect(args: SearchResultArgs): Promise<any> {
-    const { fullText } = args
-
-    const url = `${this.store}/api/split/redirect_search/${buildPathFromArgs(
-      args
-    )}`
-
-    const result = await this.http.getRaw(url, {
-      params: {
-        query: fullText,
-      },
-      metric: 'search-redirect',
-    })
-
-    return {
-      url: result.data.redirect,
-    }
-  }
-
   public async searchSuggestions(args: { fullText: string }): Promise<any> {
     const { fullText } = args
 
