@@ -404,6 +404,7 @@ export const queries = {
       recordsFiltered: result.total,
       fuzzy: result.fuzzy,
       operator: result.operator,
+      redirect: result.redirect,
     }
   },
 
@@ -510,21 +511,9 @@ export const queries = {
 
     return biggySearch.correction(args)
   },
-  redirect: (
-    _: any,
-    args: { fullText: string; selectedFacets: SelectedFacet[] },
-    ctx: Context
-  ) => {
-    const { biggySearch } = ctx.clients
-
-    return biggySearch.redirect({
-      attributePath: buildAttributePath(args.selectedFacets),
-      fullText: args.fullText,
-    })
-  },
   searchSuggestions: (_: any, args: { fullText: string }, ctx: Context) => {
     const { biggySearch } = ctx.clients
 
     return biggySearch.searchSuggestions(args)
-  }
+  },
 }
