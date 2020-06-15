@@ -402,6 +402,7 @@ export const queries = {
     return {
       products: convertedProducts,
       recordsFiltered: result.total,
+      correction: result.correction,
       fuzzy: result.fuzzy,
       operator: result.operator,
       redirect: result.redirect,
