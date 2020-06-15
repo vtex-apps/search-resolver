@@ -561,10 +561,5 @@ export const queries = {
     return {
       correction: null
     }
-  },
-  redirect: () => {
-    return {
-      url: null
-    }
   }
 }
