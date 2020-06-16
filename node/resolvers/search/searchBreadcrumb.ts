@@ -121,7 +121,7 @@ export const resolvers = {
       if (isSpecificationFilter(mapUnit)) {
         return getSpecificationFilterName(queryUnit)
       }
-      return defaultName && decodeURI(defaultName)
+      return defaultName && decodeURIComponent(defaultName)
     },
     href: (params: BreadcrumbParams) => {
       const {

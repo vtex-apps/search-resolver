@@ -129,7 +129,7 @@ const getPrimaryMetadata = (
     const cleanQuery = args.query || ''
     const term = head(cleanQuery.split('/')) || ''
     return {
-      titleTag: decodeURI(term),
+      titleTag: decodeURIComponent(term),
       metaTagDescription: null,
     }
   }
