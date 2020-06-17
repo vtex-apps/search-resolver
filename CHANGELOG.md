@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Add `suggestions`, `correction`, `banners`, and `redirect`.
+
 ## [0.7.3] - 2020-06-10
 ### Added
 - Translation of specifications in product.
