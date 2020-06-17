@@ -14,6 +14,7 @@ interface CommertialOffer {
   Price: number
   ListPrice: number
   PriceWithoutDiscount: number
+  Tax: number
 }
 
 class VtexSeller {
@@ -48,6 +49,7 @@ class VtexSeller {
       Price: price,
       ListPrice: oldPrice,
       PriceWithoutDiscount: price,
+      Tax: 0,
     }
   }
 }
