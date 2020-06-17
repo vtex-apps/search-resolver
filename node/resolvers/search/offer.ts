@@ -103,6 +103,8 @@ export const resolvers = {
       })?.Value;
       return spotPrice || sellingPrice
     },
-    taxPercentage: () => 0 // NOTE: We do not have offer.Tax info
+    taxPercentage: (offer: CommertialOffer) => {
+      return offer.Tax / offer.Price
+    }
   },
 }
