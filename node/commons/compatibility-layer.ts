@@ -271,6 +271,29 @@ export const buildBreadcrumb = (
   return breadcrumb
 }
 
+export const deprecatedBuildBreadcrumb = (selectedFacets: SelectedFacet[]) => {
+  const pivotValue: string[] = []
+  const pivotMap: string[] = []
+
+  return selectedFacets
+    ? selectedFacets
+        .filter(
+          selectedFacet =>
+            selectedFacet.key !== 'priceRange' &&
+            selectedFacet.key !== 'productClusterIds'
+        )
+        .map(selectedFacet => {
+          pivotValue.push(selectedFacet.value)
+          pivotMap.push(selectedFacet.key)
+
+          return {
+            name: decodeURIComponent(selectedFacet.value.replace(/-+/g, ' ')),
+            href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
+          }
+        })
+    : []
+}
+
 export const buildAttributePath = (selectedFacets: SelectedFacet[]) => {
   return selectedFacets
     ? selectedFacets.reduce((attributePath, facet) => {
