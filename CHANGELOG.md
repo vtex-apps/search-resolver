@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed
+- Deprecated breadcrumb.
+
 ## [1.5.0] - 2020-06-17
 
 ### Added

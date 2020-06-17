@@ -26,7 +26,6 @@ import {
   buildAttributePath,
   convertOrderBy,
   buildBreadcrumb,
-  deprecatedBuildBreadcrumb,
 } from '../../commons/compatibility-layer'
 import { productsCatalog, productsBiggy } from '../../commons/products'
 
@@ -403,7 +402,6 @@ export const queries = {
     return {
       products: convertedProducts,
       recordsFiltered: result.total,
-      breadcrumb: deprecatedBuildBreadcrumb(selectedFacets),
       correction: result.correction,
       fuzzy: result.fuzzy,
       operator: result.operator,
