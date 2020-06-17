@@ -231,7 +231,47 @@ export const convertOrderBy = (orderBy?: string): string => {
   }
 }
 
-export const buildBreadcrumb = (selectedFacets: SelectedFacet[]) => {
+export const buildBreadcrumb = (
+  attributes: ElasticAttribute[],
+  fullText: string
+) => {
+  const pivotValue: string[] = []
+  const pivotMap: string[] = []
+
+  const breadcrumb: Breadcrumb[] = []
+
+  if (fullText) {
+    pivotValue.push(fullText)
+    pivotMap.push('ft')
+
+    breadcrumb.push({
+      name: fullText,
+      href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
+    })
+  }
+
+  const activeAttributes = attributes.filter(attribute => attribute.active)
+
+  activeAttributes.map(attribute => {
+    attribute.values.forEach(value => {
+      if (!value.active) {
+        return
+      }
+
+      pivotValue.push(value.key)
+      pivotMap.push(attribute.key)
+
+      breadcrumb.push({
+        name: unescape(value.label),
+        href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
+      })
+    })
+  })
+
+  return breadcrumb
+}
+
+export const deprecatedBuildBreadcrumb = (selectedFacets: SelectedFacet[]) => {
   const pivotValue: string[] = []
   const pivotMap: string[] = []
 

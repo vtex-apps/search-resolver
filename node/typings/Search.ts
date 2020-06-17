@@ -33,16 +33,17 @@ enum IndexingType {
 
 interface SearchResultArgs {
   attributePath: string
-  query: string
-  page: number
-  count: number
-  sort: string
-  operator: string
-  fuzzy: string
+  query?: string
+  page?: number
+  count?: number
+  sort?: string
+  operator?: string
+  fuzzy?: string
   leap?: boolean
   tradePolicy?: number
   segment?: SegmentData
   indexingType?: IndexingType
+  fullText: string
 }
 
 interface SuggestionProductsArgs {
@@ -79,4 +80,27 @@ interface ProductSearchInput {
   operator: string
   orderBy: string
   productOriginVtex: boolean
+}
+
+interface ElasticAttribute {
+  visible: boolean
+  active: boolean
+  key: string
+  label: string
+  type: string
+  values: ElasticAttributeValue[]
+  minValue?: number
+  maxValue?: number
+}
+
+interface ElasticAttributeValue {
+  count: number
+  active: boolean
+  key: string
+  label: string
+}
+
+interface Breadcrumb {
+  href: string
+  name: string
 }

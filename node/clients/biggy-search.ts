@@ -158,4 +158,73 @@ export class BiggySearchClient extends ExternalClient {
 
     return result.data
   }
+
+  public async banners(args: SearchResultArgs): Promise<any> {
+    const { fullText } = args
+
+    const url = `${this.store}/api/split/banner_search/${buildPathFromArgs(
+      args
+    )}`
+
+    const result = await this.http.getRaw(url, {
+      params: {
+        query: fullText,
+      },
+      metric: 'search-result',
+    })
+
+    return {
+      banners: result.data.banners,
+    }
+  }
+
+  public async autocompleteSearchSuggestions(args: {
+    fullText: string
+  }): Promise<any> {
+    const { fullText } = args
+
+    const result = await this.http.get<any>(
+      `${this.store}/api/suggestion_searches`,
+      {
+        params: {
+          term: fullText,
+        },
+        metric: 'search-autcomplete-suggestions',
+      }
+    )
+
+    return result
+  }
+
+  public async correction(args: { fullText: string }): Promise<any> {
+    const { fullText } = args
+
+    const url = `${this.store}/api/split/correction_search/`
+
+    const result = await this.http.getRaw(url, {
+      params: {
+        query: fullText,
+      },
+      metric: 'search-correction',
+    })
+
+    return {
+      correction: result.data.correction,
+    }
+  }
+
+  public async searchSuggestions(args: { fullText: string }): Promise<any> {
+    const { fullText } = args
+
+    const url = `${this.store}/api/split/suggestion_search/`
+
+    const result = await this.http.getRaw(url, {
+      params: {
+        query: fullText,
+      },
+      metric: 'search-suggestions',
+    })
+
+    return result.data.suggestion
+  }
 }

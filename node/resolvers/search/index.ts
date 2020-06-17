@@ -26,6 +26,7 @@ import {
   buildAttributePath,
   convertOrderBy,
   buildBreadcrumb,
+  deprecatedBuildBreadcrumb,
 } from '../../commons/compatibility-layer'
 import { productsCatalog, productsBiggy } from '../../commons/products'
 
@@ -265,6 +266,7 @@ export const queries = {
         query: args.query,
         selectedFacets: args.selectedFacets,
       },
+      breadcrumb: buildBreadcrumb(result.attributes || [], args.fullText),
     }
   },
 
@@ -401,12 +403,11 @@ export const queries = {
     return {
       products: convertedProducts,
       recordsFiltered: result.total,
-      breadcrumb: buildBreadcrumb(selectedFacets),
-      suggestion: result.suggestion,
+      breadcrumb: deprecatedBuildBreadcrumb(selectedFacets),
       correction: result.correction,
       fuzzy: result.fuzzy,
       operator: result.operator,
-      banners: result.banners,
+      redirect: result.redirect,
     }
   },
 
@@ -471,14 +472,14 @@ export const queries = {
 
     return await biggySearch.topSearches()
   },
-  searchSuggestions: () => async (
+  autocompleteSearchSuggestions: (
     _: any,
-    args: SuggestionSearchesArgs,
+    args: { fullText: string },
     ctx: Context
   ) => {
     const { biggySearch } = ctx.clients
 
-    return await biggySearch.suggestionSearches(args)
+    return biggySearch.autocompleteSearchSuggestions(args)
   },
   productSuggestions: async (
     _: any,
@@ -495,5 +496,27 @@ export const queries = {
     })
 
     return result
+  },
+  banners: (
+    _: any,
+    args: { fullText: string; selectedFacets: SelectedFacet[] },
+    ctx: Context
+  ) => {
+    const { biggySearch } = ctx.clients
+
+    return biggySearch.banners({
+      attributePath: buildAttributePath(args.selectedFacets),
+      fullText: args.fullText,
+    })
+  },
+  correction: (_: any, args: { fullText: string }, ctx: Context) => {
+    const { biggySearch } = ctx.clients
+
+    return biggySearch.correction(args)
+  },
+  searchSuggestions: (_: any, args: { fullText: string }, ctx: Context) => {
+    const { biggySearch } = ctx.clients
+
+    return biggySearch.searchSuggestions(args)
   },
 }
