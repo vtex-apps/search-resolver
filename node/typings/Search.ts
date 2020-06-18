@@ -44,6 +44,7 @@ interface SearchResultArgs {
   segment?: SegmentData
   indexingType?: IndexingType
   fullText: string
+  searchState?: string
 }
 
 interface SuggestionProductsArgs {
@@ -68,6 +69,7 @@ interface FacetsInput {
   selectedFacets: SelectedFacet[]
   fullText: string
   query: string
+  searchState?: string
 }
 
 interface ProductSearchInput {
@@ -80,6 +82,7 @@ interface ProductSearchInput {
   operator: string
   orderBy: string
   productOriginVtex: boolean
+  searchState?: string
 }
 
 interface ElasticAttribute {
