@@ -44,13 +44,6 @@ export const productsCatalog = async (searchResult: any, ctx: any) => {
       // This will help to sort the products
       product.biggyIndex = idx
 
-      biggyProduct.extraData = [
-        {
-          key: 'specificationTest',
-          value: 'specification do hiago',
-        },
-      ]
-
       if (biggyProduct.extraData) {
         biggyProduct.extraData.forEach(({ key, value }: ExtraData) => {
           if (indexOf(key, product.allSpecifications) < 0) {
