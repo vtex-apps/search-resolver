@@ -5,6 +5,11 @@ export enum IndexingType {
   XML = 'XML',
 }
 
+export interface ExtraData {
+  key: string
+  value: string
+}
+
 export const convertBiggyProduct = (
   product: BiggySearchProduct,
   tradePolicy?: string,
