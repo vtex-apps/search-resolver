@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Multiple values to `PRICERANGE`.
+
 ## [1.6.1] - 2020-06-25
 
 ### Added
