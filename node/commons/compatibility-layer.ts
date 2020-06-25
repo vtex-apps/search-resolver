@@ -5,7 +5,7 @@ export enum IndexingType {
   XML = 'XML',
 }
 
-interface ExtraData {
+export interface ExtraData {
   key: string
   value: string
 }
