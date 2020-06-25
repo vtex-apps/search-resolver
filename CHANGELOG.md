@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Error when `allSpecifications` is undefined.
+
 ## [1.6.2] - 2020-06-25
 
 ### Added
