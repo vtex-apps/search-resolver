@@ -108,21 +108,21 @@ const convertValues = (
   if (attribute.type === 'number' && attribute.key === 'price') {
     return {
       type: 'PRICERANGE',
-      values: [
-        {
-          quantity: attribute.values.reduce(
-            (acum: number, value: any) => acum + value.count,
-            0
-          ),
-          name: unescape(attribute.label),
+      values: attribute.values.map((value: any) => {
+        return {
+          quantity: value.count,
+          name: unescape(value.label),
           key: attribute.key,
-          value: attribute.key,
+          value: value.key,
+          selected: value.active,
           range: {
-            from: attribute.minValue,
-            to: attribute.maxValue,
+            from: parseFloat(
+              isNaN(value.from) ? attribute.minValue : value.from
+            ),
+            to: parseFloat(isNaN(value.to) ? attribute.maxValue : value.to),
           },
-        },
-      ],
+        }
+      }),
     }
   }
 
