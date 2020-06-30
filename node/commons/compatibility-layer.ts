@@ -1,4 +1,5 @@
 import { distinct } from '../utils/object'
+import unescape from 'unescape'
 
 export enum IndexingType {
   API = 'API',
