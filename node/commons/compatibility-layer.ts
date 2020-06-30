@@ -1,3 +1,5 @@
+import unescape from 'unescape'
+
 import VtexSeller from './models/VtexSeller'
 
 export enum IndexingType {
