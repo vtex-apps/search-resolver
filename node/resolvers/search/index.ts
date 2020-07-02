@@ -27,7 +27,10 @@ import {
   buildBreadcrumb,
 } from '../../commons/compatibility-layer'
 import { productsCatalog, productsBiggy } from '../../commons/products'
-import { attributesToFilters } from '../../utils/attributes'
+import {
+  attributesToFilters,
+  sortAttributeValuesByCatalog,
+} from '../../utils/attributes'
 
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -246,7 +249,7 @@ export const queries = {
       fullText = await translateToStoreDefaultLanguage(ctx, args.fullText!)
     }
 
-    const { biggySearch } = ctx.clients
+    const { biggySearch, search } = ctx.clients
     const { segment } = ctx.vtex
 
     const biggyArgs = {
@@ -257,6 +260,21 @@ export const queries = {
     }
 
     const result = await biggySearch.facets(biggyArgs)
+
+    // FIXME: This is used to sort values based on catalog API.
+    // Remove it when it is not necessary anymore
+    if (result && result.attributes) {
+      result.attributes.forEach(async (attribute: any) => {
+        if (
+          attribute.type === 'text' &&
+          attribute.ids &&
+          attribute.ids.length
+        ) {
+          const catalogValues = await search.getFieldValues(attribute.ids[0])
+          sortAttributeValuesByCatalog(attribute, catalogValues)
+        }
+      })
+    }
 
     return {
       facets: attributesToFilters(result),

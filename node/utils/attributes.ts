@@ -53,6 +53,12 @@ interface FilterValue {
   }
 }
 
+interface CatalogAttributeValues {
+  FieldValueId: number
+  Value: string
+  Position: number
+}
+
 /**
  * Convert from Biggy's attributes into Specification Filters.
  *
@@ -178,4 +184,24 @@ const convertValues = (
   }
 
   throw new Error(`Not recognized attribute type: ${attribute.type}`)
+}
+
+export const sortAttributeValuesByCatalog = (
+  attribute: TextAttribute,
+  values: CatalogAttributeValues[]
+) => {
+  const findPositionByLabel = (label: string) => {
+    const catalogValue = values.find(
+      value => value.Value === label
+    )
+    return catalogValue ? catalogValue.Position : -1
+  }
+
+  attribute.values.sort((a, b) => {
+    const aPosition = findPositionByLabel(a.label)
+    const bPosition = findPositionByLabel(b.label)
+
+
+    return aPosition < bPosition ? -1 : 1
+  })
 }
