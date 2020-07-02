@@ -177,7 +177,8 @@ export const convertOrderBy = (orderBy?: string): string => {
 
 export const buildBreadcrumb = (
   attributes: ElasticAttribute[],
-  fullText: string
+  fullText: string,
+  selectedFacets: SelectedFacet[]
 ) => {
   const pivotValue: string[] = []
   const pivotMap: string[] = []
@@ -206,11 +207,20 @@ export const buildBreadcrumb = (
       pivotMap.push(attribute.key)
 
       breadcrumb.push({
+        key: value.key,
         name: unescape(value.label),
         href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
       })
     })
   })
+
+  const selectedFacetsValues = selectedFacets.map(facet => facet.value)
+
+  breadcrumb.sort((a, b) =>
+    selectedFacetsValues.indexOf(a.key!) < selectedFacetsValues.indexOf(b.key!)
+      ? -1
+      : 1
+  )
 
   return breadcrumb
 }

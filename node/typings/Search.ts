@@ -104,6 +104,7 @@ interface ElasticAttributeValue {
 }
 
 interface Breadcrumb {
+  key?: string
   href: string
   name: string
 }

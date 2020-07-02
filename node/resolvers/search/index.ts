@@ -264,7 +264,11 @@ export const queries = {
         query: args.query,
         selectedFacets: args.selectedFacets,
       },
-      breadcrumb: buildBreadcrumb(result.attributes || [], args.fullText),
+      breadcrumb: buildBreadcrumb(
+        result.attributes || [],
+        args.fullText,
+        args.selectedFacets || []
+      ),
     }
   },
 
