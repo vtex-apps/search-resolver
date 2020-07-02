@@ -297,3 +297,10 @@ interface FieldResponseAPI {
   FieldGroupId: number
   FieldGroupName: string
 }
+
+interface FieldValuesResponseAPI {
+  FieldValueId: number
+  Value: string
+  Position: number
+  IsActive: boolean
+}

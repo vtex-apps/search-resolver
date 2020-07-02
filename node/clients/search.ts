@@ -214,6 +214,11 @@ export class Search extends AppClient {
       { metric: 'catalog-get-field-by-id' }
     )
 
+  public getFieldValues = (id: number) =>
+    this.get<FieldValuesResponseAPI>(`/pub/specification/fieldvalue/${id}`, {
+      metric: 'catalog-get-field-value-by-id',
+    })
+
   private getRaw = <T = any>(url: string, config: RequestConfig = {}) => {
     const segmentData: SegmentData | undefined = (this
       .context! as CustomIOContext).segment

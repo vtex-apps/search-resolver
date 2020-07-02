@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Use catalog API to sort facet values.
+
 ## [1.6.5] - 2020-07-09
 
 ### Fixed
