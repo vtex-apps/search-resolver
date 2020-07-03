@@ -1,17 +1,12 @@
-import VtexSeller from './models/VtexSeller'
+import { distinct } from '../utils/object'
 
 export enum IndexingType {
   API = 'API',
   XML = 'XML',
 }
 
-interface ExtraData {
-  key: string
-  value: string
-}
-
 export const convertBiggyProduct = (
-  product: any,
+  product: BiggySearchProduct,
   tradePolicy?: string,
   indexingType?: IndexingType
 ) => {
@@ -22,33 +17,47 @@ export const convertBiggyProduct = (
       })
     : []
 
-  const skus: any[] = (product.skus || []).map(
+  const skus: SearchItem[] = (product.skus || []).map(
     convertSKU(product, indexingType, tradePolicy)
   )
 
-  const convertedProduct: any = {
+  const allSpecifications = product.productSpecifications.concat(getSKUSpecifications(product))
+
+  const convertedProduct: SearchProduct & { cacheId?: string, [key: string]: any } = {
     categories,
+    categoriesIds: product.categoryIds,
     productId: product.id,
     cacheId: `sp-${product.id}`,
     productName: product.name,
     productReference: product.reference || product.product || product.id,
     linkText: product.link,
-    brand:
-      product.brand ||
-      product.extraInfo['marca'] ||
-      product.extraInfo['brand'] ||
-      '',
-    brandId: -1,
+    brand: product.brand || '',
+    brandId: Number(product.brandId),
     link: product.url,
     description: product.description,
     items: skus,
-    sku: skus.find(sku => sku.sellers && sku.sellers.length > 0),
-    allSpecifications: [],
+    // sku: skus.find(sku => sku.sellers && sku.sellers.length > 0),
+    allSpecifications,
+
+    categoryId: "",
+    productTitle: "",
+    metaTagDescription: "",
+    clusterHighlights: {},
+    productClusters: {},
+    searchableClusters: {},
+    titleTag: "",
+    Specifications: [],
+    allSpecificationsGroups: [],
+    itemMetadata: {
+      items: []
+    },
   }
 
+  //convertedProduct["Tamanho"] = [].push
+
   if (product.extraData) {
-    product.extraData.forEach(({ key, value }: ExtraData) => {
-      convertedProduct.allSpecifications.push(key)
+    product.extraData.forEach(({ key, value }: BiggyProductExtraData) => {
+      convertedProduct.allSpecifications?.push(key)
       convertedProduct[key] = [value]
     })
   }
@@ -56,29 +65,96 @@ export const convertBiggyProduct = (
   return convertedProduct
 }
 
+
+const getVariations = (sku: BiggySearchSKU): string[] => {
+  return sku.attributes.map((attribute) => attribute.key)
+}
+
+const getSKUSpecifications = (product: BiggySearchProduct): string[] => {
+  return product.skus.map((sku) => sku.attributes.map((attribute) => attribute.key)).reduce((acc, val) => acc.concat(val), []).filter(distinct)
+}
+
+const buildCommertialOffer = (
+  price: number,
+  oldPrice: number,
+  installment: { value: number; count: number },
+  tax?: number,
+): CommertialOffer => {
+
+  const installments: SearchInstallment[] = [{
+    Value: installment.value,
+    InterestRate: 0,
+    TotalValuePlusInterestRate: price,
+    NumberOfInstallments: installment.count,
+    Name: '',
+    PaymentSystemName: '',
+    PaymentSystemGroupName: '',
+  }]
+
+  return {
+    DeliverySlaSamplesPerRegion: {},
+    DeliverySlaSamples: [],
+    AvailableQuantity: 10000,
+    DiscountHighLight: [],
+    Teasers: [],
+    Installments: installment
+      ? installments
+      : [],
+    Price: price,
+    ListPrice: oldPrice,
+    PriceWithoutDiscount: price,
+    Tax: tax || 0,
+    GiftSkuIds: [],
+    BuyTogether: [],
+    ItemMetadataAttachment: [],
+    RewardValue: 0,
+    PriceValidUntil: '',
+    GetInfoErrorMessage: null,
+    CacheVersionUsedToCallCheckout: '',
+  }
+}
+
 const getSellersIndexedByApi = (
-  product: any,
-  sku: any,
+  product: BiggySearchProduct,
+  sku: BiggySearchSKU,
   tradePolicy?: string
-) => {
+): Seller[] => {
   const selectedPolicy = tradePolicy
-    ? sku.policies.find((policy: any) => policy.id === tradePolicy)
+    ? sku.policies.find((policy: BiggyPolicy) => policy.id === tradePolicy)
     : sku.policies[0]
 
   const biggySellers = (selectedPolicy && selectedPolicy.sellers) || []
 
-  return biggySellers.map((seller: any) => {
+  return biggySellers.map((seller: BiggySeller): Seller => {
     const price = seller.price || sku.price || product.price
     const oldPrice = seller.oldPrice || sku.oldPrice || product.oldPrice
     const installment = seller.installment || product.installment
+    const commertialOffer = buildCommertialOffer(price, oldPrice, installment, seller.tax)
 
-    return new VtexSeller(seller.id, price, oldPrice, installment)
+    return {
+      sellerId: seller.id,
+      sellerName: seller.name,
+      addToCartLink: "",
+      sellerDefault: false,
+      commertialOffer,
+    }
   })
 }
 
-const getSellersIndexedByXML = (product: any) => {
-  const { installment, price, oldPrice } = product
-  return [new VtexSeller('1', price, oldPrice, installment)]
+const getSellersIndexedByXML = (product: BiggySearchProduct): Seller[] => {
+  const price = product.price
+  const oldPrice = product.oldPrice
+  const installment = product.installment
+  const commertialOffer = buildCommertialOffer(price, oldPrice, installment, product.tax)
+  //return new VtexSeller(seller.id, price, oldPrice, installment, seller.tax)
+
+  return [{
+    sellerId: '1',
+    sellerName: '',
+    addToCartLink: "",
+    sellerDefault: false,
+    commertialOffer,
+  }]
 }
 
 const getImageId = (imageUrl: string) => {
@@ -88,10 +164,10 @@ const getImageId = (imageUrl: string) => {
     : undefined
 }
 
-const elasticImageToVtexImage = (image: ElasticImage, imageId: string) => {
+const elasticImageToSearchImage = (image: ElasticImage, imageId: string): SearchImage => {
   return {
     imageId,
-    cacheId: imageId,
+    imageTag: "",
     imageLabel: image.name,
     imageText: image.name,
     imageUrl: image.value,
@@ -99,28 +175,28 @@ const elasticImageToVtexImage = (image: ElasticImage, imageId: string) => {
 }
 
 const convertImages = (images: ElasticImage[], indexingType?: IndexingType) => {
-  const vtexImages: VtexImage[] = []
+  const vtexImages: SearchImage[] = []
 
   if (indexingType && indexingType === IndexingType.XML) {
     const selectedImage: ElasticImage = images[0]
     const imageId = getImageId(selectedImage.value)
 
-    return imageId ? [elasticImageToVtexImage(selectedImage, imageId)] : []
+    return imageId ? [elasticImageToSearchImage(selectedImage, imageId)] : []
   }
 
   images.forEach(image => {
     const imageId = getImageId(image.value)
-    imageId ? vtexImages.push(elasticImageToVtexImage(image, imageId)) : []
+    imageId ? vtexImages.push(elasticImageToSearchImage(image, imageId)) : []
   })
 
   return vtexImages
 }
 
 const convertSKU = (
-  product: any,
+  product: BiggySearchProduct,
   indexingType?: IndexingType,
   tradePolicy?: string
-) => (sku: any) => {
+) => (sku: BiggySearchSKU): SearchItem => {
   const images = convertImages(product.images, indexingType)
 
   const sellers =
@@ -128,10 +204,11 @@ const convertSKU = (
       ? getSellersIndexedByXML(product)
       : getSellersIndexedByApi(product, sku, tradePolicy)
 
+  const variations = getVariations(sku)
+
   return {
     sellers,
     images,
-    seller: sellers[0],
     itemId: sku.id,
     name: product.name,
     nameComplete: product.name,
@@ -142,6 +219,14 @@ const convertSKU = (
         Value: sku.reference,
       },
     ],
+    measurementUnit: sku.measurementUnit || product.measurementUnit,
+    unitMultiplier: sku.unitMultiplier || product.unitMultiplier,
+    variations,
+    ean: '',
+    modalType: '',
+    Videos: [],
+    attachments: [],
+    isKit: false,
   }
 }
 

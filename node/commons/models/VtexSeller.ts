@@ -26,7 +26,8 @@ class VtexSeller {
     sellerId: string,
     price: number,
     oldPrice: number,
-    installment: { value: number; count: number }
+    installment: { value: number; count: number },
+    tax?: number,
   ) {
     this.sellerId = sellerId
     this.sellerName = ''
@@ -49,7 +50,7 @@ class VtexSeller {
       Price: price,
       ListPrice: oldPrice,
       PriceWithoutDiscount: price,
-      Tax: 0,
+      Tax: tax || 0
     }
   }
 }
