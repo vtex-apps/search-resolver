@@ -16,7 +16,7 @@ import {
 } from 'ramda'
 import { Functions } from '@gocommerce/utils'
 
-import { zipQueryAndMap, findCategoryInTree, getBrandFromSlug } from '../utils'
+import { zipQueryAndMap, findCategoryInTree, getBrandFromSlug, searchDecodeURI } from '../utils'
 import { toTitleCase } from '../../../utils/string'
 import { formatTranslatableProp, translateManyToCurrentLanguage, Message, shouldTranslateToUserLocale } from '../../../utils/i18n'
 
@@ -102,7 +102,7 @@ const getBrandMetadata = async (
 }
 
 export const getSpecificationFilterName = (name: string) => {
-  return toTitleCase(decodeURI(name))
+  return toTitleCase(searchDecodeURI(decodeURI(name)))
 }
 
 const getPrimaryMetadata = (
