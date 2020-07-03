@@ -71,16 +71,18 @@ export const attributesToFilters = ({
     return []
   }
 
-  return attributes!.map(attribute => {
-    const { type, values } = convertValues(attribute, total)
+  return attributes!
+    .filter(attribute => attribute.visible)
+    .map(attribute => {
+      const { type, values } = convertValues(attribute, total)
 
-    return {
-      values,
-      type,
-      name: attribute.label,
-      hidden: !attribute.visible,
-    }
-  })
+      return {
+        values,
+        type,
+        name: attribute.label,
+        hidden: !attribute.visible,
+      }
+    })
 }
 
 /**
