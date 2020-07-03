@@ -258,7 +258,7 @@ describe('tests for breadcrumb resolver', () => {
   })
 })
 
-describe.only('tests related to the productSearch query', () => {
+describe('tests related to the productSearch query', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     resetContext()
