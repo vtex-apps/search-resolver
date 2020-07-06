@@ -27,6 +27,8 @@ import { resolvers as productSearchResolvers } from './productSearch'
 import { resolvers as recommendationResolvers } from './recommendation'
 import { resolvers as breadcrumbResolvers } from './searchBreadcrumb'
 import { resolvers as skuResolvers } from './sku'
+import { resolvers as skuSpecificationFieldResolver } from './skuSpecificationField'
+import { resolvers as skuSpecificationValueResolver } from './skuSpecificationValue'
 import { resolvers as productPriceRangeResolvers } from './productPriceRange'
 import {
   SearchCrossSellingTypes,
@@ -138,6 +140,8 @@ export const fieldResolvers = {
   ...productResolvers,
   ...recommendationResolvers,
   ...skuResolvers,
+  ...skuSpecificationFieldResolver,
+  ...skuSpecificationValueResolver,
   ...breadcrumbResolvers,
   ...productSearchResolvers,
   ...assemblyOptionResolvers,

@@ -130,6 +130,16 @@ interface SearchItem {
   }[]
 }
 
+interface SKUSpecificationField {
+  name: string,
+  id: string
+}
+
+interface SKUSpecificationValue {
+  name: string,
+  id: string
+}
+
 interface SearchImage {
   imageId: string
   imageLabel: string | null
