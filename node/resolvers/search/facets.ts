@@ -2,6 +2,7 @@ import { prop, toPairs } from 'ramda'
 
 import { zipQueryAndMap } from './utils'
 import { formatTranslatableProp, addContextToTranslatableString } from '../../utils/i18n'
+import { searchSlugify } from '../../utils/slug'
 
 interface EitherFacet extends SearchFacet {
   Children?: EitherFacet[]
@@ -37,7 +38,7 @@ const addSelected = (
     const currentFacetSlug = decodeURIComponent(facet.Value).toLowerCase()
     const isSelected =
       joinedQueryAndMap.find(
-        ([slug, slugMap]) => slug === currentFacetSlug && facet.Map === slugMap
+        ([slug, slugMap]) => searchSlugify(slug) === searchSlugify(currentFacetSlug) && facet.Map === slugMap
       ) !== undefined
 
     return {
