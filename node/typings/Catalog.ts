@@ -130,6 +130,11 @@ interface SearchItem {
   }[]
 }
 
+interface SkuSpecification {
+  field: SKUSpecificationField,
+  values: SKUSpecificationValue[]
+}
+
 interface SKUSpecificationField {
   name: string,
   id: string
@@ -137,7 +142,8 @@ interface SKUSpecificationField {
 
 interface SKUSpecificationValue {
   name: string,
-  id: string
+  id: string,
+  fieldId: string
 }
 
 interface SearchImage {

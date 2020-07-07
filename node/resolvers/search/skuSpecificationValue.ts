@@ -6,7 +6,7 @@ export const resolvers = {
       return addContextToTranslatableString(
         {
           content: value.name,
-          context: value.id
+          context: value.fieldId
         },
         ctx
       )
