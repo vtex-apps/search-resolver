@@ -28,8 +28,16 @@ export const convertBiggyProduct = (
     convertSKU(product, indexingType, tradePolicy)
   )
 
+  const selectedProperties = [
+    {
+      key: product.split.labelKey,
+      value: product.split.labelValue,
+    },
+  ]
+
   const convertedProduct: any = {
     categories,
+    selectedProperties,
     productId: product.id,
     cacheId: `sp-${product.id}`,
     productName: product.name,
