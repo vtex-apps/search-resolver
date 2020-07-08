@@ -41,9 +41,17 @@ export const convertBiggyProduct = (
 
   const brandId = product.brandId ? Number(product.brandId) : -1
 
+  const selectedProperties = [
+    {
+      key: product.split.labelKey,
+      value: product.split.labelValue,
+    },
+  ]
+
   const convertedProduct: SearchProduct & { cacheId?: string, [key: string]: any } = {
     categories,
     categoriesIds,
+    selectedProperties,
     productId: product.id,
     cacheId: `sp-${product.id}`,
     productName: product.name,
