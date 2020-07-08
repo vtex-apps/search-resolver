@@ -143,6 +143,30 @@ export const searchEncodeURI = (account: string) => (str: string) => {
   return str
 }
 
+export const searchDecodeURI = (str: string) => {
+  return str.replace(/(\@perc\@|\@slash\@|\@quo\@|\@squo\@|\@dot\@|\@lpar\@|\@rpar\@)/g, (c: string) => {
+    switch (c) {
+      case '@perc@':
+        return '%'
+      case '@quo@':
+        return "\""
+      case '@squo@':
+        return "\'"
+      case '@dot@':
+        return "."
+      case '@lpar@':
+        return "("
+      case '@rpar@':
+        return ")"
+      case '@slash@':
+        return "/"
+      default: {
+        return c
+      }
+    }
+  })
+}
+
 export const getMapAndPriceRangeFromSelectedFacets = (
   selectedFacets: SelectedFacets[]
 ) => {
