@@ -124,6 +124,8 @@ interface BiggySearchProduct {
   categoryIds: string[]
   extraData: BiggyProductExtraData[]
   productSpecifications: string[]
+  specificationGroups: Map<string, string[]>
+  textAttributes: BiggyTextAttribute[]
 }
 
 interface BiggyProductImages {
@@ -179,4 +181,11 @@ interface BiggyInstallment {
 interface BiggyPolicy {
   id: string
   sellers: BiggySeller[]
+}
+
+interface BiggyTextAttribute {
+  labelKey: string
+  labelValue: string
+  key: string
+  value: string
 }

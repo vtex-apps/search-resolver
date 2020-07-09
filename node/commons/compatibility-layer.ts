@@ -17,15 +17,25 @@ export const convertBiggyProduct = (
       })
     : []
 
+
+  const categoriesIds: string[] = product.categoryIds
+  ? product.categoryIds.map((_: any, index: number) => {
+      const subArray = product.categoryIds.slice(0, index + 1)
+      return `/${subArray.join('/')}/`
+    }).reverse()
+  : []
+
   const skus: SearchItem[] = (product.skus || []).map(
     convertSKU(product, indexingType, tradePolicy)
   )
 
   const allSpecifications = product.productSpecifications.concat(getSKUSpecifications(product))
 
+  const allSpecificationsGroups = [ ...product.specificationGroups.keys() ]
+
   const convertedProduct: SearchProduct & { cacheId?: string, [key: string]: any } = {
     categories,
-    categoriesIds: product.categoryIds,
+    categoriesIds,
     productId: product.id,
     cacheId: `sp-${product.id}`,
     productName: product.name,
@@ -36,7 +46,6 @@ export const convertBiggyProduct = (
     link: product.url,
     description: product.description,
     items: skus,
-    // sku: skus.find(sku => sku.sellers && sku.sellers.length > 0),
     allSpecifications,
 
     categoryId: "",
@@ -47,13 +56,11 @@ export const convertBiggyProduct = (
     searchableClusters: {},
     titleTag: "",
     Specifications: [],
-    allSpecificationsGroups: [],
+    allSpecificationsGroups,
     itemMetadata: {
       items: []
     },
   }
-
-  //convertedProduct["Tamanho"] = [].push
 
   if (product.extraData) {
     product.extraData.forEach(({ key, value }: BiggyProductExtraData) => {
@@ -61,6 +68,21 @@ export const convertBiggyProduct = (
       convertedProduct[key] = [value]
     })
   }
+
+  product.productSpecifications.forEach((specification) => {
+    const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == specification)
+    if (attributes != null && attributes.length > 0) {
+      convertedProduct[specification] = []
+
+      attributes.forEach((attribute) => {
+        convertedProduct[specification].push(attribute.labelValue)
+      })
+    }
+  })
+
+  allSpecificationsGroups.forEach((specificationGroup) => {
+    convertedProduct[specificationGroup] = product.specificationGroups.get(specificationGroup)
+  })
 
   return convertedProduct
 }
@@ -196,7 +218,7 @@ const convertSKU = (
   product: BiggySearchProduct,
   indexingType?: IndexingType,
   tradePolicy?: string
-) => (sku: BiggySearchSKU): SearchItem => {
+) => (sku: BiggySearchSKU): SearchItem & { [key: string]: any } => {
   const images = convertImages(product.images, indexingType)
 
   const sellers =
@@ -206,7 +228,7 @@ const convertSKU = (
 
   const variations = getVariations(sku)
 
-  return {
+  const item: SearchItem & { [key: string]: any } = {
     sellers,
     images,
     itemId: sku.id,
@@ -228,6 +250,19 @@ const convertSKU = (
     attachments: [],
     isKit: false,
   }
+
+  variations.forEach((variation) => {
+    const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == variation)
+    if (attributes != null && attributes.length > 0) {
+      item[variation] = []
+
+      attributes.forEach((attribute) => {
+        item[variation].push(attribute.labelValue)
+      })
+    }
+  })
+
+  return item
 }
 
 /**
