@@ -271,19 +271,20 @@ export const resolvers = {
       })
       return translatedGroups
     },
-    items: ({ items: searchItems }: SearchProduct, { filter }: ItemArg) => {
+    items: ({ items: searchItems, skuSpecifications = [] }: SearchProduct, { filter }: ItemArg) => {
+      const searchItemsWithVariations = searchItems.map(item => ({ ...item, skuSpecifications }))
       if (filter === ItemsFilterEnum.ALL) {
-        return searchItems
+        return searchItemsWithVariations
       }
       if (filter === ItemsFilterEnum.FIRST_AVAILABLE) {
-        const firstAvailable = searchItems.find(isAvailable)
-        return firstAvailable ? [firstAvailable] : [searchItems[0]]
+        const firstAvailable = searchItemsWithVariations.find(isAvailable)
+        return firstAvailable ? [firstAvailable] : [searchItemsWithVariations[0]]
       }
       if (filter === ItemsFilterEnum.ALL_AVAILABLE) {
-        const onlyAvailable = searchItems.filter(isAvailable)
-        return onlyAvailable.length > 0 ? onlyAvailable : [searchItems[0]]
+        const onlyAvailable = searchItemsWithVariations.filter(isAvailable)
+        return onlyAvailable.length > 0 ? onlyAvailable : [searchItemsWithVariations[0]]
       }
-      return searchItems
+      return searchItemsWithVariations
     },
     priceRange: ({ items: searchItems }: SearchProduct) => {
       const offers = searchItems.reduce<CommertialOffer[]>(

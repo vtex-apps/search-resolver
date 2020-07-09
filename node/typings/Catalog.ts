@@ -101,6 +101,7 @@ interface SearchProduct {
   Specifications?: string[]
   allSpecifications?: string[]
   allSpecificationsGroups?: string[]
+  skuSpecifications?: SkuSpecification[]
 }
 
 interface SearchItem {
@@ -128,6 +129,10 @@ interface SearchItem {
     itemId: string
     amount: number
   }[]
+}
+
+interface SearchItemExtended extends SearchItem {
+  skuSpecifications?: SkuSpecification[]
 }
 
 interface SkuSpecification {
@@ -263,11 +268,11 @@ interface SearchAutocompleteUnit {
   criteria: string
 }
 
-interface FieldTreeResponseAPI{
-  Name:	string
+interface FieldTreeResponseAPI {
+  Name: string
   CategoryId: number
   FieldId: number
-  IsActive:	boolean
+  IsActive: boolean
   IsStockKeepingUnit: boolean
 }
 
