@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Sort breadcrumb values based on `selectedFacets`.
+
 ## [1.6.4] - 2020-07-08
 
 ### Fixed

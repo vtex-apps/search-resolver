@@ -179,7 +179,8 @@ export const convertOrderBy = (orderBy?: string): string => {
 
 export const buildBreadcrumb = (
   attributes: ElasticAttribute[],
-  fullText: string
+  fullText: string,
+  selectedFacets: SelectedFacet[]
 ) => {
   const pivotValue: string[] = []
   const pivotMap: string[] = []
@@ -197,20 +198,43 @@ export const buildBreadcrumb = (
   }
 
   const activeAttributes = attributes.filter(attribute => attribute.active)
+  const activeValues: (ElasticAttributeValue & {
+    visible: boolean
+    attributeKey: string
+  })[] = []
 
-  activeAttributes.map(attribute => {
+  activeAttributes.forEach(attribute => {
     attribute.values.forEach(value => {
-      if (!value.active) {
-        return
+      if (value.active) {
+        activeValues.push({
+          ...value,
+          visible: attribute.visible,
+          attributeKey: attribute.key,
+        })
       }
+    })
+  })
 
-      pivotValue.push(value.key)
-      pivotMap.push(attribute.key)
+  const selectedFacetsValues = selectedFacets.map(
+    selectedFacet => selectedFacet.value
+  )
+  activeValues.sort((a, b) =>
+    selectedFacetsValues.indexOf(a.key) < selectedFacetsValues.indexOf(b.key)
+      ? -1
+      : 1
+  )
 
-      breadcrumb.push({
-        name: unescape(value.label),
-        href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
-      })
+  activeValues.forEach(value => {
+    pivotValue.push(value.key)
+    pivotMap.push(value.attributeKey)
+
+    if (!value.visible) {
+      return
+    }
+
+    breadcrumb.push({
+      name: unescape(value.label),
+      href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
     })
   })
 
