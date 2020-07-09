@@ -22,6 +22,25 @@ export const getProduct = (customFields = {}) => {
     allSpecifications: ['Numero do calçado'],
     allSpecificationsGroups: ['Tamanho'],
     description: "If you go classic, you can't go wrong.",
+    skuSpecifications: [
+      {
+        field: {
+          id: 10,
+          name: "Numero do calçado",
+          isActive: true,
+          position: 1,
+          type: "Combo",
+        },
+        values: [{
+          id: "190",
+          name: "35",
+        },
+        {
+          id: "191",
+          name: "37",
+        }]
+      }
+    ],
     items: [
       {
         itemId: '35',
