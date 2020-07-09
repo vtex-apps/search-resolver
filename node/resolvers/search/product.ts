@@ -68,18 +68,6 @@ const removeTrailingSlashes = (str: string) =>
 const removeStartingSlashes = (str: string) =>
   str.startsWith('/') ? str.slice(1) : str
 
-const getProductFilterIdMap = async (product: SearchProduct, ctx: Context) => {
-  const filters = await ctx.clients.search.filtersInCategoryFromId(product.categoryId)
-  const filterMapFromName = filters.reduce(
-    (acc, curr) => {
-      acc[curr.Name] = curr.FieldId.toString()
-      return acc
-    },
-    {} as Record<string, string>
-  )
-  return filterMapFromName
-}
-
 const getLastCategory = compose<string, string, string[], string>(
   last,
   split('/'),
@@ -143,12 +131,12 @@ const urlToSlug = (slug: string | undefined) => {
   return finalSlug
 }
 
-const addTranslationParamsToSpecification = (filterIdFromNameMap: Record<string, string>, ctx: Context) => (specification: { name: string, values: string[] }) => {
+const addTranslationParamsToSpecification = (skuSpecifications: SearchProduct['skuSpecifications'], ctx: Context) => (specification: { name: string, values: string[] }) => {
   const { name, values } = specification
-  const filterId = filterIdFromNameMap[name]
+  const fieldId = (skuSpecifications || []).find(specification => specification.field.name === name)?.field?.id
   return {
-    name: addContextToTranslatableString({ content: name, context: filterId }, ctx),
-    values: values.map(value => addContextToTranslatableString({ content: value, context: filterId }, ctx))
+    name: addContextToTranslatableString({ content: name, context: fieldId }, ctx),
+    values: values.map(value => addContextToTranslatableString({ content: value, context: fieldId }, ctx))
   }
 }
 
@@ -194,8 +182,7 @@ export const resolvers = {
         return valuesUntranslated
       }
 
-      const filterIdFromNameMap = await getProductFilterIdMap(product, ctx)
-      const valuesWithTranslations = valuesUntranslated.map(addTranslationParamsToSpecification(filterIdFromNameMap, ctx))
+      const valuesWithTranslations = valuesUntranslated.map(addTranslationParamsToSpecification(product.skuSpecifications, ctx))
       return valuesWithTranslations
     },
 
@@ -262,11 +249,10 @@ export const resolvers = {
         return noTranslationSpecificationGroups
       }
 
-      const filterIdFromNameMap = await getProductFilterIdMap(product, ctx)
       const translatedGroups = noTranslationSpecificationGroups.map(group => {
         return {
           name: addContextToTranslatableString({ content: group.name, context: product.productId }, ctx),
-          specifications: group.specifications.map(addTranslationParamsToSpecification(filterIdFromNameMap, ctx))
+          specifications: group.specifications.map(addTranslationParamsToSpecification(product.skuSpecifications, ctx))
         }
       })
       return translatedGroups
