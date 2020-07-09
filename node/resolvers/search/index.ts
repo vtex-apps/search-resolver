@@ -264,16 +264,20 @@ export const queries = {
     // FIXME: This is used to sort values based on catalog API.
     // Remove it when it is not necessary anymore
     if (result && result.attributes) {
-      result.attributes.forEach(async (attribute: any) => {
-        if (
-          attribute.type === 'text' &&
-          attribute.ids &&
-          attribute.ids.length
-        ) {
-          const catalogValues = await search.getFieldValues(attribute.ids[0])
-          sortAttributeValuesByCatalog(attribute, catalogValues)
-        }
-      })
+      result.attributes = await Promise.all(
+        result.attributes.map(async (attribute: any) => {
+          if (
+            attribute.type === 'text' &&
+            attribute.ids &&
+            attribute.ids.length
+          ) {
+            const catalogValues = await search.getFieldValues(attribute.ids[0])
+            sortAttributeValuesByCatalog(attribute, catalogValues)
+          }
+
+          return attribute
+        })
+      )
     }
 
     return {
@@ -282,7 +286,11 @@ export const queries = {
         query: args.query,
         selectedFacets: args.selectedFacets,
       },
-      breadcrumb: buildBreadcrumb(result.attributes || [], args.fullText, args.selectedFacets),
+      breadcrumb: buildBreadcrumb(
+        result.attributes || [],
+        args.fullText,
+        args.selectedFacets
+      ),
     }
   },
 
