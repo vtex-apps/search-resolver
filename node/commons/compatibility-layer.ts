@@ -41,7 +41,7 @@ export const convertBiggyProduct = (
 
   const brandId = product.brandId ? Number(product.brandId) : -1
 
-  const selectedProperties = [
+  const selectedProperties = product.split && [
     {
       key: product.split.labelKey,
       value: product.split.labelValue,
