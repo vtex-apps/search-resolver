@@ -33,6 +33,8 @@ export const convertBiggyProduct = (
 
   const allSpecificationsGroups = [ ...product.specificationGroups.keys() ]
 
+  const brandId = product.brandId ? Number(product.brandId) : -1
+
   const convertedProduct: SearchProduct & { cacheId?: string, [key: string]: any } = {
     categories,
     categoriesIds,
@@ -42,7 +44,7 @@ export const convertBiggyProduct = (
     productReference: product.reference || product.product || product.id,
     linkText: product.link,
     brand: product.brand || '',
-    brandId: Number(product.brandId),
+    brandId,
     link: product.url,
     description: product.description,
     items: skus,
