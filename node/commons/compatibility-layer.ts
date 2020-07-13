@@ -170,7 +170,6 @@ const getSellersIndexedByXML = (product: BiggySearchProduct): Seller[] => {
   const oldPrice = product.oldPrice
   const installment = product.installment
   const commertialOffer = buildCommertialOffer(price, oldPrice, installment, product.tax)
-  //return new VtexSeller(seller.id, price, oldPrice, installment, seller.tax)
 
   return [{
     sellerId: '1',

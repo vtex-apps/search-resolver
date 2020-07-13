@@ -117,8 +117,7 @@ interface BiggySearchProduct {
   measurementUnit: string
   unitMultiplier: number
   tax: number
-
-  images: BiggyProductImages[]
+  images: BiggyProductImage[]
   skus: BiggySearchSKU[]
   categories: string[]
   categoryIds: string[]
@@ -128,7 +127,7 @@ interface BiggySearchProduct {
   textAttributes: BiggyTextAttribute[]
 }
 
-interface BiggyProductImages {
+interface BiggyProductImage {
   name: string
   value: string
 }
@@ -149,9 +148,7 @@ interface BiggySearchSKU {
   measurementUnit: string
   unitMultiplier: number
   link: string
-
   attributes: BiggySKUAttribute[]
-
   sellers: BiggySeller[]
   policies: BiggyPolicy[]
 }
@@ -168,7 +165,6 @@ interface BiggySeller {
   price: number
   stock: number
   tax: number
-
   installment: BiggyInstallment
 }
 
