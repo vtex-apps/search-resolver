@@ -10,6 +10,45 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - `variations`, `unitMultiplier` and `measurementUnit` (SKU), `allSpecifications`, `brandId` (product) and `tax` (seller) fields to output product in compatibility layer.
 
+## [1.8.1] - 2020-07-10
+
+### Fixed
+- Deal with `null` exception in `product.split`.
+
+## [1.8.0] - 2020-07-09
+### Added
+- `selectedProperties` to the product object.
+
+## [1.7.0] - 2020-07-09
+
+### Added
+- Use catalog API to sort facet values.
+
+## [1.6.5] - 2020-07-09
+
+### Fixed
+- Sort breadcrumb values based on `selectedFacets`.
+
+## [1.6.4] - 2020-07-08
+
+### Fixed
+- Add missing `unescape` import in `compatibility-layer`.
+
+## [1.6.3] - 2020-06-25
+
+### Fixed
+- Error when `allSpecifications` is undefined.
+
+## [1.6.2] - 2020-06-25
+
+### Added
+- Multiple values to `PRICERANGE`.
+
+## [1.6.1] - 2020-06-25
+
+### Added
+- `extraData` when `productOriginVtex` is `true`.
+
 ## [1.6.0] - 2020-06-18
 
 ### Added

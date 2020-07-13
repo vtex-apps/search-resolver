@@ -18,10 +18,11 @@ export const productsBiggy = async (searchResult: any, ctx: any) => {
 }
 
 export const productsCatalog = async (searchResult: any, ctx: any) => {
-  let products: any[] = searchResult.products
+  let biggyProducts: any[] = searchResult.products
+  let products: any[] = []
   const productIds = map<any, string>((product: any) => {
     return prop('product', product) || prop('id', product) || ''
-  }, products)
+  }, biggyProducts)
 
   if (!isEmpty(productIds)) {
     // Get products' model from VTEX search API
@@ -34,12 +35,28 @@ export const productsCatalog = async (searchResult: any, ctx: any) => {
       ctx
     )
 
+    // Add extra data and correct index
+    products.forEach((product: any) => {
+      const idx = indexOf(product.productId, productIds)
+      const biggyProduct = biggyProducts[idx]
+
+      // This will help to sort the products
+      product.biggyIndex = idx
+
+      if (biggyProduct.extraData && biggyProduct.extraData.length) {
+        product.allSpecifications = product.allSpecifications || []
+
+        biggyProduct.extraData.forEach(({ key, value }: BiggyProductExtraData) => {
+          if (indexOf(key, product.allSpecifications) < 0) {
+            product.allSpecifications.push(key)
+            product[key] = [value]
+          }
+        })
+      }
+    })
+
     // Maintain biggySearch's order.
-    products = sort(
-      (a, b) =>
-        indexOf(a.productId, productIds) - indexOf(b.productId, productIds),
-      products
-    )
+    products = sort((a, b) => a.biggyIndex - b.biggyIndex, products)
   }
 
   return products
