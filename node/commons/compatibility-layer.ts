@@ -37,7 +37,9 @@ export const convertBiggyProduct = (
 
   const allSpecifications = product.productSpecifications.concat(getSKUSpecifications(product))
 
-  const allSpecificationsGroups = [ ...product.specificationGroups.keys() ]
+  const specificationGroups = JSON.parse(product.specificationGroups)
+
+  const allSpecificationsGroups = [ ...Object.keys(specificationGroups) ]
 
   const brandId = product.brandId ? Number(product.brandId) : -1
 
@@ -98,7 +100,7 @@ export const convertBiggyProduct = (
   })
 
   allSpecificationsGroups.forEach((specificationGroup) => {
-    convertedProduct[specificationGroup] = product.specificationGroups.get(specificationGroup)
+    convertedProduct[specificationGroup] = specificationGroups[specificationGroup]
   })
 
   return convertedProduct
