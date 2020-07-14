@@ -202,6 +202,15 @@ describe('tests related to product resolver', () => {
   })
 
   describe('specificationGroups resolver', () => {
+    test('specification groups should not crash if object has no skuSpecifications or property', async () => {
+      const product = getProduct({
+        skuSpecifications: undefined,
+        allSpecifications: undefined,
+        allSpecificationsGroups: undefined
+      })
+      const result = await resolvers.Product.properties(product as any, {}, mockContext as any)
+      expect(result).toMatchObject([])
+    })
     test('specifications groups should have expected format but not translated if same locale as tenant', async () => {
       const product = getProduct()
       const result = await resolvers.Product.specificationGroups(product as any, {}, mockContext as any)
@@ -217,50 +226,80 @@ describe('tests related to product resolver', () => {
     test('specifications groups should have expected format and translated values', async () => {
       mockContext.vtex.locale = 'fr-FR'
       const product = getProduct()
-      mockContext.clients.search.filtersInCategoryFromId.mockImplementationOnce(() => ([{
-        Name: 'Numero do calçado',
-        FieldId: 'specification-Id',
-      }]))
       const result = await resolvers.Product.specificationGroups(product as any, {}, mockContext as any)
 
       expect(result[0]).toMatchObject({
         name: 'Tamanho (((16))) <<<pt-BR>>>',
-        specifications: [{ name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>', values: ["35 (((specification-Id))) <<<pt-BR>>>"] }]
+        specifications: [{ name: 'Numero do calçado (((10))) <<<pt-BR>>>', values: ["35 (((10))) <<<pt-BR>>>"] }]
       })
       expect(result[1]).toMatchObject({
         name: 'allSpecifications (((16))) <<<pt-BR>>>',
-        specifications: [{ name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>', values: ["35 (((specification-Id))) <<<pt-BR>>>"] }]
+        specifications: [{ name: 'Numero do calçado (((10))) <<<pt-BR>>>', values: ["35 (((10))) <<<pt-BR>>>"] }]
       })
     })
   })
 
   describe('properties resolver', () => {
+    test('propertiies resolver should not crash if object has no skuSpecifications or property', async () => {
+      const product = getProduct({
+        skuSpecifications: undefined,
+        allSpecifications: undefined
+      })
+      const result = await resolvers.Product.properties(product as any, {}, mockContext as any)
+      expect(result).toMatchObject([])
+    })
     test('properties should have expected format but not translated if same locale as tenant', async () => {
       const product = getProduct()
       const result = await resolvers.Product.properties(product as any, {}, mockContext as any)
       expect(result).toMatchObject([{ name: 'Numero do calçado', values: ['35'] }])
     })
-    test('specifications groups should have expected format and translated values', async () => {
+    test('properties should have expected format and translated values', async () => {
       mockContext.vtex.locale = 'fr-FR'
       const product = getProduct({
         allSpecifications: ['Numero do calçado', 'testeName'],
-        'testeName': ['teste value']
+        'testeName': ['teste value'],
+        skuSpecifications: [
+          {
+            field: {
+              id: 10,
+              name: "Numero do calçado",
+              isActive: true,
+              position: 1,
+              type: "Combo",
+            },
+            values: [{
+              id: "190",
+              name: "35",
+            },
+            {
+              id: "191",
+              name: "37",
+            }]
+          },
+          {
+            field: {
+              id: 11,
+              name: "testeName",
+              isActive: true,
+              position: 2,
+              type: "Combo",
+            },
+            values: [{
+              id: "200",
+              name: "teste value",
+            },
+            {
+              id: "201",
+              name: "teste value 2",
+            }]
+          }
+        ],
       })
 
-      mockContext.clients.search.filtersInCategoryFromId.mockImplementationOnce(() => ([
-        {
-          Name: 'Numero do calçado',
-          FieldId: 'specification-Id',
-        },
-        {
-          Name: 'testeName',
-          FieldId: 'teste-id'
-        }
-      ]))
       const result = await resolvers.Product.properties(product as any, {}, mockContext as any)
       expect(result).toMatchObject([
-        { name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>', values: ['35 (((specification-Id))) <<<pt-BR>>>'] },
-        { name: 'testeName (((teste-id))) <<<pt-BR>>>', values: ['teste value (((teste-id))) <<<pt-BR>>>'] }
+        { name: 'Numero do calçado (((10))) <<<pt-BR>>>', values: ['35 (((10))) <<<pt-BR>>>'] },
+        { name: 'testeName (((11))) <<<pt-BR>>>', values: ['teste value (((11))) <<<pt-BR>>>'] }
       ])
     })
   })
