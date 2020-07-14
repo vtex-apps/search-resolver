@@ -57,7 +57,6 @@ export const convertBiggyProduct = (
     description: product.description,
     items: skus,
     allSpecifications,
-
     categoryId: "",
     productTitle: "",
     metaTagDescription: "",
@@ -71,6 +70,8 @@ export const convertBiggyProduct = (
       items: []
     },
     selectedProperties,
+    // This field is only maintaned for backwards compatibility reasons, it shouldnt exist.
+    skus: skus.find(sku => sku.sellers && sku.sellers.length > 0),
   }
 
   if (product.extraData) {
