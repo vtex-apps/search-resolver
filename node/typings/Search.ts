@@ -123,7 +123,7 @@ interface BiggySearchProduct {
   categoryIds: string[]
   extraData: BiggyProductExtraData[]
   productSpecifications: string[]
-  specificationGroups: Map<string, string[]>
+  specificationGroups: string
   textAttributes: BiggyTextAttribute[]
   split: BiggySplit
 }

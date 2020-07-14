@@ -43,12 +43,12 @@ const parseFieldsToJson = (fields: any) =>
   mergeAll(fields.map((field: any) => zipObj([field.key], [field.value])))
 
 /**
- * Pass this to a filter to get values from an array.
+ * Pass this to a filter to get distinct values from an array.
  * .filter(dinstinct)
  */
-const distinct = (value: any, self: any, index: any) => {
+function distinct<T>(value: T, index: number, self: T[]) {
   return self.indexOf(value) === index
 }
 
 
-export { renameKeysWith, parseFieldsToJson, distinct}
+export { renameKeysWith, parseFieldsToJson, distinct }
