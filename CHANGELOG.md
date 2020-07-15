@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.9.0] - 2020-07-15
+
+### Added
+- `variations`, `unitMultiplier` and `measurementUnit` (SKU), `allSpecifications`, `brandId` (product) and `tax` (seller) fields to output product in compatibility layer.
+
 ## [1.8.1] - 2020-07-10
 
 ### Fixed
