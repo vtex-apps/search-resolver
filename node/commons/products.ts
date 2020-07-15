@@ -1,7 +1,6 @@
 import { convertBiggyProduct } from './compatibility-layer'
 import { map, prop, isEmpty, sort, indexOf } from 'ramda'
 import { queries } from '../resolvers/search'
-import { ExtraData } from './compatibility-layer'
 
 export const productsBiggy = async (searchResult: any, ctx: any) => {
   const { segment } = ctx.vtex
@@ -47,7 +46,7 @@ export const productsCatalog = async (searchResult: any, ctx: any) => {
       if (biggyProduct.extraData && biggyProduct.extraData.length) {
         product.allSpecifications = product.allSpecifications || []
 
-        biggyProduct.extraData.forEach(({ key, value }: ExtraData) => {
+        biggyProduct.extraData.forEach(({ key, value }: BiggyProductExtraData) => {
           if (indexOf(key, product.allSpecifications) < 0) {
             product.allSpecifications.push(key)
             product[key] = [value]

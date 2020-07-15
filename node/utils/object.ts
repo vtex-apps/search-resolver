@@ -42,4 +42,13 @@ const renameKeysWith = curry((func: any, object: any) =>
 const parseFieldsToJson = (fields: any) =>
   mergeAll(fields.map((field: any) => zipObj([field.key], [field.value])))
 
-export { renameKeysWith, parseFieldsToJson }
+/**
+ * Pass this to a filter to get distinct values from an array.
+ * .filter(dinstinct)
+ */
+function distinct<T>(value: T, index: number, self: T[]) {
+  return self.indexOf(value) === index
+}
+
+
+export { renameKeysWith, parseFieldsToJson, distinct }
