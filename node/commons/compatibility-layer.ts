@@ -37,7 +37,7 @@ export const convertBiggyProduct = (
 
   const allSpecifications = product.productSpecifications.concat(getSKUSpecifications(product))
 
-  const specificationGroups = JSON.parse(product.specificationGroups)
+  const specificationGroups = product.specificationGroups ? JSON.parse(product.specificationGroups) : {}
 
   const allSpecificationsGroups = [ ...Object.keys(specificationGroups) ]
 
