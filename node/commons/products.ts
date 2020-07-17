@@ -2,13 +2,14 @@ import { convertBiggyProduct } from './compatibility-layer'
 import { map, prop, isEmpty, sort, indexOf } from 'ramda'
 import { queries } from '../resolvers/search'
 
-export const productsBiggy = async (searchResult: any, ctx: any) => {
+export const productsBiggy = async (searchResult: any, ctx: any, simulationBehavior: 'skip' | 'default' | null) => {
   const { segment } = ctx.vtex
+  const { checkout } = ctx.clients.checkout
   const products: any[] = []
 
   searchResult.products.forEach((product: any) => {
     try {
-      products.push(convertBiggyProduct(product, segment && segment.channel))
+      products.push(convertBiggyProduct(product, checkout, simulationBehavior, segment && segment.channel))
     } catch (e) {
       // TODO: add logging
     }

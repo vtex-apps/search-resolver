@@ -75,6 +75,7 @@ interface ProductSearchInput {
   orderBy: string
   productOriginVtex: boolean
   searchState?: string
+  simulationBehavior: 'skip' | 'default' | null
 }
 
 interface ElasticAttribute {
