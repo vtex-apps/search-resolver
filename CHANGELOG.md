@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Category `id` and facet values `href` to `facets` query response.
+
+### Fixed
+- `PRICERANGE` being shown as numerical bucket facets in some languages.
+
+### Changed
+- Update dependencies, fixing linting.
+
 ## [1.9.1] - 2020-07-16
 
 ### Fixed

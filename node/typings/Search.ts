@@ -18,10 +18,7 @@ interface ElasticImage {
   value: string
 }
 
-enum IndexingType {
-  API = 'API',
-  XML = 'XML',
-}
+type IndexingType = 'API' | 'XML'
 
 interface SearchResultArgs {
   attributePath: string
@@ -77,22 +74,43 @@ interface ProductSearchInput {
   searchState?: string
 }
 
-interface ElasticAttribute {
-  visible: boolean
-  active: boolean
+type ElasticAttribute = (ElasticNumericalAttribute | ElasticTextAttribute) & {
   key: string
   label: string
-  type: string
-  values: ElasticAttributeValue[]
-  minValue?: number
-  maxValue?: number
+  type: 'text' | 'number' | 'location'
+  visible: boolean
+  active: boolean
 }
 
 interface ElasticAttributeValue {
   count: number
   active: boolean
+}
+
+interface ElasticNumericalAttributeValue extends ElasticAttributeValue {
+  from: string
+  to: string
+}
+
+interface ElasticTextAttributeValue extends ElasticAttributeValue {
   key: string
   label: string
+  id?: string
+}
+
+interface ElasticNumericalAttribute {
+  type: 'number' | 'location'
+  maxValue: number
+  minValue: number
+  active: boolean
+  activeFrom?: string
+  activeTo?: string
+  values: ElasticNumericalAttributeValue[]
+}
+
+interface ElasticTextAttribute {
+  type: 'text'
+  values: ElasticTextAttributeValue[]
 }
 
 interface Breadcrumb {

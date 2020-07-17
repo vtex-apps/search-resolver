@@ -1,28 +1,32 @@
-import { attributesToFilters } from './attributes'
+import { attributesToFilters, buildHref } from './attributes'
 
 describe('attributesToFilters', () => {
   it('should convert a text attribute correctly', () => {
     expect(
-      attributesToFilters({
-        total: 108,
-        attributes: [
-          {
-            visible: true,
-            values: [
-              {
-                count: 108,
-                active: false,
-                key: 'lions-pride',
-                label: 'Lions Pride',
-              },
-            ],
-            key: 'brand',
-            label: 'Brand',
-            type: 'text' as 'text',
-          },
-        ],
-      })
-    ).toEqual([
+      attributesToFilters(
+        {
+          total: 108,
+          attributes: [
+            {
+              visible: true,
+              active: false,
+              values: [
+                {
+                  count: 108,
+                  active: false,
+                  key: 'lions-pride',
+                  label: 'Lions Pride',
+                },
+              ],
+              key: 'brand',
+              label: 'Brand',
+              type: 'text' as 'text',
+            },
+          ],
+        },
+        []
+      )
+    ).toMatchObject([
       {
         hidden: false,
         name: 'Brand',
@@ -42,41 +46,44 @@ describe('attributesToFilters', () => {
 
   it('should convert price attribute correctly', () => {
     expect(
-      attributesToFilters({
-        total: 367,
-        attributes: [
-          {
-            visible: true,
-            values: [
-              {
-                count: 180,
-                active: false,
-                from: '*',
-                to: '30',
-              },
-              {
-                count: 90,
-                active: false,
-                from: '30',
-                to: '50',
-              },
-              {
-                count: 97,
-                active: false,
-                from: '50',
-                to: '*',
-              },
-            ],
-            active: false,
-            key: 'price',
-            label: 'Price',
-            type: 'number' as 'number',
-            minValue: 10,
-            maxValue: 100,
-          },
-        ],
-      })
-    ).toEqual([
+      attributesToFilters(
+        {
+          total: 367,
+          attributes: [
+            {
+              visible: true,
+              values: [
+                {
+                  count: 180,
+                  active: false,
+                  from: '*',
+                  to: '30',
+                },
+                {
+                  count: 90,
+                  active: false,
+                  from: '30',
+                  to: '50',
+                },
+                {
+                  count: 97,
+                  active: false,
+                  from: '50',
+                  to: '*',
+                },
+              ],
+              active: false,
+              key: 'price',
+              label: 'Price',
+              type: 'number' as 'number',
+              minValue: 10,
+              maxValue: 100,
+            },
+          ],
+        },
+        []
+      )
+    ).toMatchObject([
       {
         hidden: false,
         name: 'Price',
@@ -85,10 +92,30 @@ describe('attributesToFilters', () => {
           {
             key: 'price',
             name: 'Price',
-            quantity: 367,
+            quantity: 180,
             value: 'price',
             range: {
               from: 10,
+              to: 30,
+            },
+          },
+          {
+            key: 'price',
+            name: 'Price',
+            quantity: 90,
+            value: 'price',
+            range: {
+              from: 30,
+              to: 50,
+            },
+          },
+          {
+            key: 'price',
+            name: 'Price',
+            quantity: 97,
+            value: 'price',
+            range: {
+              from: 50,
               to: 100,
             },
           },
@@ -99,29 +126,32 @@ describe('attributesToFilters', () => {
 
   it('should convert number attributes correctly', () => {
     expect(
-      attributesToFilters({
-        total: 13,
-        attributes: [
-          {
-            visible: true,
-            values: [
-              {
-                count: 13,
-                active: false,
-                from: '0',
-                to: '*',
-              },
-            ],
-            active: false,
-            key: 'polegadas',
-            label: 'Polegadas',
-            type: 'number' as 'number',
-            minValue: 0,
-            maxValue: 0,
-          },
-        ],
-      })
-    ).toEqual([
+      attributesToFilters(
+        {
+          total: 13,
+          attributes: [
+            {
+              visible: true,
+              values: [
+                {
+                  count: 13,
+                  active: false,
+                  from: '0',
+                  to: '*',
+                },
+              ],
+              active: false,
+              key: 'polegadas',
+              label: 'Polegadas',
+              type: 'number' as 'number',
+              minValue: 0,
+              maxValue: 0,
+            },
+          ],
+        },
+        []
+      )
+    ).toMatchObject([
       {
         hidden: false,
         name: 'Polegadas',
@@ -141,35 +171,38 @@ describe('attributesToFilters', () => {
 
   it('should convert not selected location attributes correctly', () => {
     expect(
-      attributesToFilters({
-        total: 124,
-        attributes: [
-          {
-            visible: true,
-            values: [
-              {
-                count: 71,
-                active: false,
-                from: '0',
-                to: '5505580',
-              },
-              {
-                count: 53,
-                active: false,
-                from: '0',
-                to: '4477620',
-              },
-            ],
-            active: false,
-            key: 'location',
-            label: 'Location',
-            type: 'location' as 'location',
-            minValue: 2421698.143072009,
-            maxValue: 6533501.777013255,
-          },
-        ],
-      })
-    ).toEqual([
+      attributesToFilters(
+        {
+          total: 124,
+          attributes: [
+            {
+              visible: true,
+              values: [
+                {
+                  count: 71,
+                  active: false,
+                  from: '0',
+                  to: '5505580',
+                },
+                {
+                  count: 53,
+                  active: false,
+                  from: '0',
+                  to: '4477620',
+                },
+              ],
+              active: false,
+              key: 'location',
+              label: 'Location',
+              type: 'location' as 'location',
+              minValue: 2421698.143072009,
+              maxValue: 6533501.777013255,
+            },
+          ],
+        },
+        []
+      )
+    ).toMatchObject([
       {
         hidden: false,
         name: 'Location',
@@ -196,37 +229,40 @@ describe('attributesToFilters', () => {
 
   it('should convert selected location attributes correctly', () => {
     expect(
-      attributesToFilters({
-        total: 124,
-        attributes: [
-          {
-            visible: true,
-            values: [
-              {
-                count: 71,
-                active: false,
-                from: '0',
-                to: '5505580',
-              },
-              {
-                count: 53,
-                active: false,
-                from: '0',
-                to: '4477620',
-              },
-            ],
-            active: true,
-            activeFrom: '0',
-            activeTo: '3605120',
-            key: 'location',
-            label: 'Location',
-            type: 'location' as 'location',
-            minValue: 2421698.143072009,
-            maxValue: 6533501.777013255,
-          },
-        ],
-      })
-    ).toEqual([
+      attributesToFilters(
+        {
+          total: 124,
+          attributes: [
+            {
+              visible: true,
+              values: [
+                {
+                  count: 71,
+                  active: false,
+                  from: '0',
+                  to: '5505580',
+                },
+                {
+                  count: 53,
+                  active: false,
+                  from: '0',
+                  to: '4477620',
+                },
+              ],
+              active: true,
+              activeFrom: '0',
+              activeTo: '3605120',
+              key: 'location',
+              label: 'Location',
+              type: 'location' as 'location',
+              minValue: 2421698.143072009,
+              maxValue: 6533501.777013255,
+            },
+          ],
+        },
+        []
+      )
+    ).toMatchObject([
       {
         hidden: false,
         name: 'Location',
@@ -242,5 +278,18 @@ describe('attributesToFilters', () => {
         ],
       },
     ])
+  })
+})
+
+describe('buildHref', () => {
+  it('should create an href from nothing', () => {
+    expect(buildHref('', '', '')).toEqual('')
+    expect(buildHref('', 'hello', 'world')).toEqual('world?map=hello')
+  })
+
+  it('should create an href from existing base', () => {
+    expect(buildHref('hello?map=world', 'ola', 'mundo')).toEqual(
+      'hello/mundo?map=world,ola'
+    )
   })
 })

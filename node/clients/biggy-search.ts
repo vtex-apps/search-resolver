@@ -1,15 +1,14 @@
-import { ExternalClient, InstanceOptions, IOContext } from '@vtex/api'
-import { IndexingType } from '../commons/compatibility-layer'
-import { parseState } from '../utils/searchState'
 import path from 'path'
+
+import { ExternalClient, InstanceOptions, IOContext } from '@vtex/api'
+
+import { parseState } from '../utils/searchState'
 
 const buildPathFromArgs = (args: SearchResultArgs) => {
   const { attributePath, tradePolicy, indexingType } = args
 
   const policyAttr =
-    tradePolicy && indexingType !== IndexingType.XML
-      ? `trade-policy/${tradePolicy}`
-      : ''
+    tradePolicy && indexingType !== 'XML' ? `trade-policy/${tradePolicy}` : ''
 
   return path.join(attributePath, policyAttr)
 }
@@ -17,15 +16,16 @@ const buildPathFromArgs = (args: SearchResultArgs) => {
 export class BiggySearchClient extends ExternalClient {
   private store: string
 
-  public constructor(context: IOContext, options?: InstanceOptions) {
+  constructor(context: IOContext, options?: InstanceOptions) {
     super('http://search.biggylabs.com.br/search-api/v1/', context, options)
 
     const { account } = context
+
     this.store = account
   }
 
   public async topSearches(): Promise<any> {
-    const result = await this.http.get<any>(`${this.store}/api/top_searches`, {
+    const result = await this.http.get(`${this.store}/api/top_searches`, {
       metric: 'top-searches',
     })
 
@@ -35,7 +35,7 @@ export class BiggySearchClient extends ExternalClient {
   public async suggestionSearches(args: SuggestionSearchesArgs): Promise<any> {
     const { term } = args
 
-    const result = await this.http.get<any>(
+    const result = await this.http.get(
       `${this.store}/api/suggestion_searches`,
       {
         params: {
@@ -56,7 +56,8 @@ export class BiggySearchClient extends ExternalClient {
       tradePolicy,
       indexingType,
     } = args
-    const attributes: { key: string; value: string }[] = []
+
+    const attributes: Array<{ key: string; value: string }> = []
 
     if (attributeKey && attributeValue) {
       attributes.push({
@@ -65,7 +66,7 @@ export class BiggySearchClient extends ExternalClient {
       })
     }
 
-    if (indexingType !== IndexingType.XML && tradePolicy) {
+    if (indexingType !== 'XML' && tradePolicy) {
       attributes.push({
         key: 'trade-policy',
         value: tradePolicy,
@@ -214,7 +215,7 @@ export class BiggySearchClient extends ExternalClient {
   }): Promise<any> {
     const { fullText } = args
 
-    const result = await this.http.get<any>(
+    const result = await this.http.get(
       `${this.store}/api/suggestion_searches`,
       {
         params: {
