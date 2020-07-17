@@ -1,10 +1,6 @@
-import { distinct } from '../utils/object'
 import unescape from 'unescape'
 
-export enum IndexingType {
-  API = 'API',
-  XML = 'XML',
-}
+import { distinct } from '../utils/object'
 
 export const convertBiggyProduct = (
   product: BiggySearchProduct,
@@ -14,27 +10,34 @@ export const convertBiggyProduct = (
   const categories: string[] = product.categories
     ? product.categories.map((_: any, index: number) => {
         const subArray = product.categories.slice(0, index)
+
         return `/${subArray.join('/')}/`
       })
     : []
 
-
   const categoriesIds: string[] = product.categoryIds
-  ? product.categoryIds.map((_: any, index: number) => {
-      const subArray = product.categoryIds.slice(0, index + 1)
-      return `/${subArray.join('/')}/`
-    }).reverse()
-  : []
+    ? product.categoryIds
+        .map((_: any, index: number) => {
+          const subArray = product.categoryIds.slice(0, index + 1)
+
+          return `/${subArray.join('/')}/`
+        })
+        .reverse()
+    : []
 
   const skus: SearchItem[] = (product.skus || []).map(
     convertSKU(product, indexingType, tradePolicy)
   )
 
-  const allSpecifications = product.productSpecifications.concat(getSKUSpecifications(product))
+  const allSpecifications = product.productSpecifications.concat(
+    getSKUSpecifications(product)
+  )
 
-  const specificationGroups = product.specificationGroups ? JSON.parse(product.specificationGroups) : {}
+  const specificationGroups = product.specificationGroups
+    ? JSON.parse(product.specificationGroups)
+    : {}
 
-  const allSpecificationsGroups = [ ...Object.keys(specificationGroups) ]
+  const allSpecificationsGroups = [...Object.keys(specificationGroups)]
 
   const brandId = product.brandId ? Number(product.brandId) : -1
 
@@ -45,7 +48,10 @@ export const convertBiggyProduct = (
     },
   ]
 
-  const convertedProduct: SearchProduct & { cacheId?: string, [key: string]: any } = {
+  const convertedProduct: SearchProduct & {
+    cacheId?: string
+    [key: string]: any
+  } = {
     categories,
     categoriesIds,
     productId: product.id,
@@ -59,21 +65,21 @@ export const convertBiggyProduct = (
     description: product.description,
     items: skus,
     allSpecifications,
-    categoryId: "",
-    productTitle: "",
-    metaTagDescription: "",
+    categoryId: '',
+    productTitle: '',
+    metaTagDescription: '',
     clusterHighlights: {},
     productClusters: {},
     searchableClusters: {},
-    titleTag: "",
+    titleTag: '',
     Specifications: [],
     allSpecificationsGroups,
     itemMetadata: {
-      items: []
+      items: [],
     },
     selectedProperties,
     // This field is only maintaned for backwards compatibility reasons, it shouldnt exist.
-    skus: skus.find(sku => sku.sellers && sku.sellers.length > 0),
+    skus: skus.find((sku) => sku.sellers && sku.sellers.length > 0),
   }
 
   if (product.extraData) {
@@ -84,7 +90,10 @@ export const convertBiggyProduct = (
   }
 
   product.productSpecifications.forEach((specification) => {
-    const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == specification)
+    const attributes = product.textAttributes.filter(
+      (attribute) => attribute.labelKey === specification
+    )
+
     if (attributes != null && attributes.length > 0) {
       convertedProduct[specification] = []
 
@@ -95,37 +104,41 @@ export const convertBiggyProduct = (
   })
 
   allSpecificationsGroups.forEach((specificationGroup) => {
-    convertedProduct[specificationGroup] = specificationGroups[specificationGroup]
+    convertedProduct[specificationGroup] =
+      specificationGroups[specificationGroup]
   })
 
   return convertedProduct
 }
-
 
 const getVariations = (sku: BiggySearchSKU): string[] => {
   return sku.attributes.map((attribute) => attribute.key)
 }
 
 const getSKUSpecifications = (product: BiggySearchProduct): string[] => {
-  return product.skus.map((sku) => sku.attributes.map((attribute) => attribute.key)).reduce((acc, val) => acc.concat(val), []).filter(distinct)
+  return product.skus
+    .map((sku) => sku.attributes.map((attribute) => attribute.key))
+    .reduce((acc, val) => acc.concat(val), [])
+    .filter(distinct)
 }
 
 const buildCommertialOffer = (
   price: number,
   oldPrice: number,
   installment: { value: number; count: number },
-  tax?: number,
+  tax?: number
 ): CommertialOffer => {
-
-  const installments: SearchInstallment[] = [{
-    Value: installment.value,
-    InterestRate: 0,
-    TotalValuePlusInterestRate: price,
-    NumberOfInstallments: installment.count,
-    Name: '',
-    PaymentSystemName: '',
-    PaymentSystemGroupName: '',
-  }]
+  const installments: SearchInstallment[] = [
+    {
+      Value: installment.value,
+      InterestRate: 0,
+      TotalValuePlusInterestRate: price,
+      NumberOfInstallments: installment.count,
+      Name: '',
+      PaymentSystemName: '',
+      PaymentSystemGroupName: '',
+    },
+  ]
 
   return {
     DeliverySlaSamplesPerRegion: {},
@@ -133,13 +146,11 @@ const buildCommertialOffer = (
     AvailableQuantity: 10000,
     DiscountHighLight: [],
     Teasers: [],
-    Installments: installment
-      ? installments
-      : [],
+    Installments: installment ? installments : [],
     Price: price,
     ListPrice: oldPrice,
     PriceWithoutDiscount: price,
-    Tax: tax || 0,
+    Tax: tax ?? 0,
     GiftSkuIds: [],
     BuyTogether: [],
     ItemMetadataAttachment: [],
@@ -159,50 +170,67 @@ const getSellersIndexedByApi = (
     ? sku.policies.find((policy: BiggyPolicy) => policy.id === tradePolicy)
     : sku.policies[0]
 
-  const biggySellers = (selectedPolicy && selectedPolicy.sellers) || []
+  const biggySellers = selectedPolicy?.sellers ?? []
 
-  return biggySellers.map((seller: BiggySeller): Seller => {
-    const price = seller.price || sku.price || product.price
-    const oldPrice = seller.oldPrice || sku.oldPrice || product.oldPrice
-    const installment = seller.installment || product.installment
-    const commertialOffer = buildCommertialOffer(price, oldPrice, installment, seller.tax)
+  return biggySellers.map(
+    (seller: BiggySeller): Seller => {
+      const price = seller.price || sku.price || product.price
+      const oldPrice = seller.oldPrice || sku.oldPrice || product.oldPrice
+      const installment = seller.installment || product.installment
+      const commertialOffer = buildCommertialOffer(
+        price,
+        oldPrice,
+        installment,
+        seller.tax
+      )
 
-    return {
-      sellerId: seller.id,
-      sellerName: seller.name,
-      addToCartLink: "",
-      sellerDefault: false,
-      commertialOffer,
+      return {
+        sellerId: seller.id,
+        sellerName: seller.name,
+        addToCartLink: '',
+        sellerDefault: false,
+        commertialOffer,
+      }
     }
-  })
+  )
 }
 
 const getSellersIndexedByXML = (product: BiggySearchProduct): Seller[] => {
-  const price = product.price
-  const oldPrice = product.oldPrice
-  const installment = product.installment
-  const commertialOffer = buildCommertialOffer(price, oldPrice, installment, product.tax)
+  const { price, oldPrice, installment } = product
 
-  return [{
-    sellerId: '1',
-    sellerName: '',
-    addToCartLink: "",
-    sellerDefault: false,
-    commertialOffer,
-  }]
+  const commertialOffer = buildCommertialOffer(
+    price,
+    oldPrice,
+    installment,
+    product.tax
+  )
+
+  return [
+    {
+      sellerId: '1',
+      sellerName: '',
+      addToCartLink: '',
+      sellerDefault: false,
+      commertialOffer,
+    },
+  ]
 }
 
 const getImageId = (imageUrl: string) => {
   const baseUrlRegex = new RegExp(/.+ids\/(\d+)/)
+
   return baseUrlRegex.test(imageUrl)
     ? baseUrlRegex.exec(imageUrl)![1]
     : undefined
 }
 
-const elasticImageToSearchImage = (image: ElasticImage, imageId: string): SearchImage => {
+const elasticImageToSearchImage = (
+  image: ElasticImage,
+  imageId: string
+): SearchImage => {
   return {
     imageId,
-    imageTag: "",
+    imageTag: '',
     imageLabel: image.name,
     imageText: image.name,
     imageUrl: image.value,
@@ -212,15 +240,16 @@ const elasticImageToSearchImage = (image: ElasticImage, imageId: string): Search
 const convertImages = (images: ElasticImage[], indexingType?: IndexingType) => {
   const vtexImages: SearchImage[] = []
 
-  if (indexingType && indexingType === IndexingType.XML) {
-    const selectedImage: ElasticImage = images[0]
+  if (indexingType && indexingType === 'XML') {
+    const [selectedImage] = images
     const imageId = getImageId(selectedImage.value)
 
     return imageId ? [elasticImageToSearchImage(selectedImage, imageId)] : []
   }
 
-  images.forEach(image => {
+  images.forEach((image) => {
     const imageId = getImageId(image.value)
+
     imageId ? vtexImages.push(elasticImageToSearchImage(image, imageId)) : []
   })
 
@@ -235,7 +264,7 @@ const convertSKU = (
   const images = convertImages(product.images, indexingType)
 
   const sellers =
-    indexingType === IndexingType.XML
+    indexingType === 'XML'
       ? getSellersIndexedByXML(product)
       : getSellersIndexedByApi(product, sku, tradePolicy)
 
@@ -265,7 +294,10 @@ const convertSKU = (
   }
 
   variations.forEach((variation) => {
-    const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == variation)
+    const attributes = product.textAttributes.filter(
+      (attribute) => attribute.labelKey === variation
+    )
+
     if (attributes != null && attributes.length > 0) {
       item[variation] = []
 
@@ -289,22 +321,30 @@ export const convertOrderBy = (orderBy?: string): string => {
   switch (orderBy) {
     case 'OrderByPriceDESC':
       return 'price:desc'
+
     case 'OrderByPriceASC':
       return 'price:asc'
+
     case 'OrderByTopSaleDESC':
       return 'orders:desc'
-    case 'OrderByReviewRateDESC':
-      return '' // TODO: Not Supported
+
     case 'OrderByNameDESC':
       return 'name:desc'
+
     case 'OrderByNameASC':
       return 'name:asc'
+
     case 'OrderByReleaseDateDESC':
       return 'release:desc'
+
     case 'OrderByBestDiscountDESC':
       return 'discount:desc'
+
+    case 'OrderByReviewRateDESC':
+      return '' // NOTE: Not Supported
+
     default:
-      return ''
+      return orderBy ?? ''
   }
 }
 
@@ -328,34 +368,38 @@ export const buildBreadcrumb = (
     })
   }
 
-  const activeAttributes = attributes.filter(attribute => attribute.active)
-  const activeValues: (ElasticAttributeValue & {
-    visible: boolean
-    attributeKey: string
-  })[] = []
+  const activeValues: Array<
+    ElasticTextAttributeValue & {
+      visible: boolean
+      attributeKey: string
+    }
+  > = []
 
-  activeAttributes.forEach(attribute => {
-    attribute.values.forEach(value => {
-      if (value.active) {
-        activeValues.push({
-          ...value,
-          visible: attribute.visible,
-          attributeKey: attribute.key,
-        })
-      }
-    })
-  })
+  for (const attribute of attributes) {
+    if (attribute.type === 'text' && attribute.active) {
+      attribute.values.forEach((value) => {
+        if (value.active) {
+          activeValues.push({
+            ...value,
+            visible: attribute.visible,
+            attributeKey: attribute.key,
+          })
+        }
+      })
+    }
+  }
 
   const selectedFacetsValues = selectedFacets.map(
-    selectedFacet => selectedFacet.value
+    (selectedFacet) => selectedFacet.value
   )
+
   activeValues.sort((a, b) =>
     selectedFacetsValues.indexOf(a.key) < selectedFacetsValues.indexOf(b.key)
       ? -1
       : 1
   )
 
-  activeValues.forEach(value => {
+  activeValues.forEach((value) => {
     pivotValue.push(value.key)
     pivotMap.push(value.attributeKey)
 

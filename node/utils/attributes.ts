@@ -1,39 +1,8 @@
-import { either, isEmpty, isNil } from 'ramda'
+import { either, isEmpty, isNil, last } from 'ramda'
 import unescape from 'unescape'
 
-type Attribute = (NumericalAttribute | TextAttribute) & {
-  key: string
-  label: string
-  type: 'text' | 'number' | 'location'
-  visible: boolean
-}
-
-interface NumericalAttribute {
-  type: 'number' | 'location'
-  maxValue: number
-  minValue: number
-  active: boolean
-  activeFrom?: string
-  activeTo?: string
-  values: {
-    count: number
-    from: string
-    to: string
-    active: boolean
-  }[]
-}
-
-interface TextAttribute {
-  type: 'text'
-  values: {
-    key: string
-    count: number
-    active: boolean
-    label: string
-  }[]
-}
-
 type FilterType = 'PRICERANGE' | 'TEXT'
+
 interface Filter {
   type: FilterType
   name: string
@@ -43,9 +12,11 @@ interface Filter {
 
 interface FilterValue {
   quantity: number
-  name: string
   key: string
-  value: string
+  id?: string
+  href?: string
+  name?: string
+  value?: string
   selected?: boolean
   range?: {
     from: number
@@ -66,19 +37,24 @@ interface CatalogAttributeValues {
  * @param {Attribute[]} [attributes] Attributes from Biggy's API.
  * @returns {Filter[]}
  */
-export const attributesToFilters = ({
-  total,
-  attributes,
-}: {
-  total: number
-  attributes?: Attribute[]
-}): Filter[] => {
+export const attributesToFilters = (
+  {
+    total,
+    attributes,
+  }: {
+    total: number
+    attributes?: ElasticAttribute[]
+  },
+  breadcrumb: Breadcrumb[]
+): Filter[] => {
   if (either(isNil, isEmpty)(attributes)) {
     return []
   }
 
-  return attributes!.map(attribute => {
-    const { type, values } = convertValues(attribute, total)
+  const baseHref = (last(breadcrumb) ?? { href: '', name: '' }).href
+
+  return attributes!.map((attribute) => {
+    const { type, values } = convertValues(attribute, total, baseHref)
 
     return {
       values,
@@ -88,6 +64,9 @@ export const attributesToFilters = ({
     }
   })
 }
+
+// NOTE: This should be removed when facet rework is done.
+const knownPriceKeys = ['price', 'precio', 'preco', 'pret']
 
 /**
  * Convert values, and create FilterType, that can be either `PRICERANGE` or
@@ -106,26 +85,29 @@ export const attributesToFilters = ({
  * @returns {{ type: FilterType; values: FilterValue[] }}
  */
 const convertValues = (
-  attribute: Attribute,
-  total: number
+  attribute: ElasticAttribute,
+  total: number,
+  baseHref: string
 ): { type: FilterType; values: FilterValue[] } => {
   // When creating a filter for price attribute, it should be the only one to use
   // the type `'PRICERANGE'`.
-  if (attribute.type === 'number' && attribute.key === 'price') {
+  if (attribute.type === 'number' && knownPriceKeys.includes(attribute.key)) {
     return {
       type: 'PRICERANGE',
-      values: attribute.values.map((value: any) => {
+      values: attribute.values.map((value) => {
         return {
           quantity: value.count,
-          name: unescape(value.label),
           key: attribute.key,
-          value: value.key,
+          name: attribute.label,
+          value: attribute.key,
           selected: value.active,
           range: {
-            from: parseFloat(
-              isNaN(value.from) ? attribute.minValue : value.from
-            ),
-            to: parseFloat(isNaN(value.to) ? attribute.maxValue : value.to),
+            from: Number.isNaN(parseFloat(value.from))
+              ? attribute.minValue
+              : parseFloat(value.from),
+            to: Number.isNaN(parseFloat(value.to))
+              ? attribute.maxValue
+              : parseFloat(value.to),
           },
         }
       }),
@@ -155,7 +137,7 @@ const convertValues = (
 
     return {
       type: 'TEXT',
-      values: attribute.values.map(value => {
+      values: attribute.values.map((value) => {
         return {
           quantity: value.count,
           name: unescape(`${value.from} - ${value.to}`),
@@ -171,8 +153,10 @@ const convertValues = (
   if (attribute.type === 'text') {
     return {
       type: 'TEXT',
-      values: attribute.values.map(value => {
+      values: attribute.values.map((value) => {
         return {
+          id: value.id,
+          href: buildHref(baseHref, attribute.key, value.key),
           quantity: value.count,
           name: unescape(value.label),
           key: attribute.key,
@@ -186,21 +170,35 @@ const convertValues = (
   throw new Error(`Not recognized attribute type: ${attribute.type}`)
 }
 
+export const buildHref = (
+  baseHref: string,
+  key: string,
+  value: string
+): string => {
+  if (isEmpty(key) || isEmpty(value)) {
+    return baseHref
+  }
+
+  const [path = '', map = ''] = baseHref.split('?map=')
+  const pathValues = [...path.split('/'), value].filter((x) => !isEmpty(x))
+  const mapValues = [...map.split(','), key].filter((x) => !isEmpty(x))
+
+  return `${pathValues.join('/')}?map=${mapValues.join(',')}`
+}
+
 export const sortAttributeValuesByCatalog = (
-  attribute: TextAttribute,
+  attribute: ElasticTextAttribute,
   values: CatalogAttributeValues[]
 ) => {
   const findPositionByLabel = (label: string) => {
-    const catalogValue = values.find(
-      value => value.Value === label
-    )
+    const catalogValue = values.find((value) => value.Value === label)
+
     return catalogValue ? catalogValue.Position : -1
   }
 
   attribute.values.sort((a, b) => {
     const aPosition = findPositionByLabel(a.label)
     const bPosition = findPositionByLabel(b.label)
-
 
     return aPosition < bPosition ? -1 : 1
   })

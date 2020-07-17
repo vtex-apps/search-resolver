@@ -162,7 +162,7 @@ const searchFirstElements = (
   }
   products
     .slice(0, Math.min(10, products.length))
-    .forEach(product =>
+    .forEach((product) =>
       search.productById(product.productId, false).catch(noop)
     )
 }
@@ -286,17 +286,19 @@ export const queries = {
       )
     }
 
+    const breadcrumb = buildBreadcrumb(
+      result.attributes || [],
+      args.fullText,
+      args.selectedFacets
+    )
+
     return {
-      facets: attributesToFilters(result),
+      breadcrumb,
+      facets: attributesToFilters(result, breadcrumb),
       queryArgs: {
         query: args.query,
         selectedFacets: args.selectedFacets,
       },
-      breadcrumb: buildBreadcrumb(
-        result.attributes || [],
-        args.fullText,
-        args.selectedFacets
-      ),
     }
   },
 
@@ -473,7 +475,7 @@ export const queries = {
     searchFirstElements(products, 0, ctx.clients.search)
     // We add a custom cacheId because these products are not exactly like the other products from search apis.
     // Each product is basically a SKU and you may have two products in response with same ID but each one representing a SKU.
-    return products.map(product => {
+    return products.map((product) => {
       const skuId = pathOr('', ['items', '0', 'itemId'], product)
       return {
         ...product,
