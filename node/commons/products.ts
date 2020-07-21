@@ -1,25 +1,33 @@
-import { convertBiggyProduct } from './compatibility-layer'
 import { map, prop, isEmpty, sort, indexOf } from 'ramda'
+
+import { convertBiggyProduct } from './compatibility-layer'
 import { queries } from '../resolvers/search'
 
-export const productsBiggy = async (searchResult: any, ctx: any) => {
-  const { segment } = ctx.vtex
+export const productsBiggy = async (
+  searchResult: any,
+  ctx: Context & { vtex: { segment: { channel: string } } }
+) => {
+  const { segment, logger } = ctx.vtex
   const products: any[] = []
 
   searchResult.products.forEach((product: any) => {
     try {
-      products.push(convertBiggyProduct(product, segment && segment.channel))
-    } catch (e) {
-      // TODO: add logging
+      products.push(convertBiggyProduct(product, segment?.channel))
+    } catch (err) {
+      console.log(err) // eslint-disable-line no-console
+      logger.error(err)
     }
   })
 
   return products
 }
 
-export const productsCatalog = async (searchResult: any, ctx: any) => {
-  let biggyProducts: any[] = searchResult.products
+export const productsCatalog = async (
+  searchResult: any,
+  ctx: Context & { vtex: { segment: { channel: string } } }
+) => {
   let products: any[] = []
+  const biggyProducts: any[] = searchResult.products
   const productIds = map<any, string>((product: any) => {
     return prop('product', product) || prop('id', product) || ''
   }, biggyProducts)
@@ -46,12 +54,14 @@ export const productsCatalog = async (searchResult: any, ctx: any) => {
       if (biggyProduct.extraData && biggyProduct.extraData.length) {
         product.allSpecifications = product.allSpecifications || []
 
-        biggyProduct.extraData.forEach(({ key, value }: BiggyProductExtraData) => {
-          if (indexOf(key, product.allSpecifications) < 0) {
-            product.allSpecifications.push(key)
-            product[key] = [value]
+        biggyProduct.extraData.forEach(
+          ({ key, value }: BiggyProductExtraData) => {
+            if (indexOf(key, product.allSpecifications) < 0) {
+              product.allSpecifications.push(key)
+              product[key] = [value]
+            }
           }
-        })
+        )
       }
     })
 

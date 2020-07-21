@@ -29,7 +29,8 @@ export const convertBiggyProduct = (
     convertSKU(product, indexingType, tradePolicy)
   )
 
-  const allSpecifications = product.productSpecifications.concat(
+  const productSpecifications = product.productSpecifications ?? []
+  const allSpecifications = productSpecifications.concat(
     getSKUSpecifications(product)
   )
 
@@ -89,7 +90,7 @@ export const convertBiggyProduct = (
     })
   }
 
-  product.productSpecifications.forEach((specification) => {
+  productSpecifications.forEach((specification) => {
     const attributes = product.textAttributes.filter(
       (attribute) => attribute.labelKey === specification
     )
@@ -319,6 +320,9 @@ const convertSKU = (
  */
 export const convertOrderBy = (orderBy?: string): string => {
   switch (orderBy) {
+    case 'OrderByScoreDESC':
+      return 'relevance:desc'
+
     case 'OrderByPriceDESC':
       return 'price:desc'
 

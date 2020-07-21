@@ -140,7 +140,7 @@ interface BiggySearchProduct {
   categories: string[]
   categoryIds: string[]
   extraData: BiggyProductExtraData[]
-  productSpecifications: string[]
+  productSpecifications?: string[]
   specificationGroups: string
   textAttributes: BiggyTextAttribute[]
   split: BiggySplit
