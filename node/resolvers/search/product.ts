@@ -208,9 +208,11 @@ export const resolvers = {
       ).concat(['allSpecifications'])
       const specificationGroups = allSpecificationsGroups.map(
         (groupName: string) => ({
+          originalName: groupName,
           name: groupName,
           specifications: ((product as any)[groupName] || []).map(
             (name: string) => ({
+              originalName: name,
               name,
               values: (product as any)[name] || [],
             })
