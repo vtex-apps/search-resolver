@@ -147,6 +147,7 @@ const addTranslationParamsToSpecification = (filterIdFromNameMap: Record<string,
   const { name, values } = specification
   const filterId = filterIdFromNameMap[name]
   return {
+    originalName: name,
     name: addContextToTranslatableString({ content: name, context: filterId }, ctx),
     values: values.map(value => addContextToTranslatableString({ content: value, context: filterId }, ctx))
   }
@@ -245,11 +246,13 @@ export const resolvers = {
       const allSpecificationsGroups = (product.allSpecificationsGroups ?? []).concat(['allSpecifications'])
       const noTranslationSpecificationGroups = allSpecificationsGroups.map(
         (groupName: string) => ({
+          originalName: groupName,
           name: groupName,
           specifications: ((product as unknown as DynamicKey<string[]>)?.[groupName] ?? []).map(
             (name: string) => {
               const values = (product as unknown as DynamicKey<string[]>)[name] || []
               return {
+                originalName: name,
                 name,
                 values,
               }
@@ -265,10 +268,12 @@ export const resolvers = {
       const filterIdFromNameMap = await getProductFilterIdMap(product, ctx)
       const translatedGroups = noTranslationSpecificationGroups.map(group => {
         return {
+          originalName: group.name,
           name: addContextToTranslatableString({ content: group.name, context: product.productId }, ctx),
           specifications: group.specifications.map(addTranslationParamsToSpecification(filterIdFromNameMap, ctx))
         }
       })
+
       return translatedGroups
     },
     items: ({ items: searchItems, skuSpecifications = [] }: SearchProduct, { filter }: ItemArg) => {
