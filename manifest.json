@@ -12,7 +12,7 @@
   "dependencies": {
     "vtex.messages": "1.x",
     "vtex.catalog-api-proxy": "0.x",
-    "vtex.search-graphql": "0.30.0-beta.0",
+    "vtex.search-graphql": "0.x",
     "vtex.rewriter": "1.x"
   },
   "policies": [
