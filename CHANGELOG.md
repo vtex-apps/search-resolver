@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.10.0] - 2020-07-21
+### Added
+- `originalName` to `SpecificationGroup`.
+- `originalName` to `SpecificationGroupProperty`.
+- `originalName` to `SKUSpecificationField`.
+- `originalName` to `SKUSpecificationValue`.
+
+## [1.9.1] - 2020-07-16
+
+### Fixed
+- Not treating a possible undefined object coming from product.specificationGroups
+
 ## [1.9.0] - 2020-07-15
 
 ### Added

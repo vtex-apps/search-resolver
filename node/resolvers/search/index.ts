@@ -13,6 +13,9 @@ import { resolvers as offerResolvers } from './offer'
 import { resolvers as productResolvers } from './product'
 import { resolvers as recommendationResolvers } from './recommendation'
 import { resolvers as skuResolvers } from './sku'
+import { resolvers as skuSpecificationResolver } from './skuSpecification'
+import { resolvers as skuSpecificationFieldResolver } from './skuSpecificationField'
+import { resolvers as skuSpecificationValueResolver } from './skuSpecificationValue'
 import { resolvers as productPriceRangeResolvers } from './productPriceRange'
 import { getSearchMetaData } from './modules/metadata'
 import {
@@ -176,6 +179,9 @@ export const fieldResolvers = {
   ...productResolvers,
   ...recommendationResolvers,
   ...skuResolvers,
+  ...skuSpecificationResolver,
+  ...skuSpecificationFieldResolver,
+  ...skuSpecificationValueResolver,
   ...assemblyOptionResolvers,
   ...productPriceRangeResolvers,
 }
