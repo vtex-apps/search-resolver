@@ -97,8 +97,6 @@ export const convertBiggyProduct = async (
 
     const groupedBySkuId = R.groupBy(R.prop("id"), simulation.items)
 
-    // const x = R.indexBy((x) => `${x.id}-${x.seller}`, simulation.items)
-
     const orderItemsBySellerById: OrderFormItemBySellerById = R.mergeAll(Object.entries(groupedBySkuId).map(([id, items]) => {
       const groupedBySeller = R.indexBy((R.prop("seller")), items)
 
@@ -140,9 +138,9 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
     searchItem.sellers.forEach((seller) => {
       const orderFormItem = orderFormItems[seller.sellerId]
 
-      seller.commertialOffer.Price = orderFormItem.price
+      seller.commertialOffer.Price = orderFormItem.price / 100
       seller.commertialOffer.PriceValidUntil = orderFormItem.priceValidUntil
-      seller.commertialOffer.ListPrice = orderFormItem.listPrice
+      seller.commertialOffer.ListPrice = orderFormItem.listPrice / 100
     })
   }
 

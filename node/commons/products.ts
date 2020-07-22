@@ -4,7 +4,7 @@ import { queries } from '../resolvers/search'
 
 export const productsBiggy = async (searchResult: any, ctx: any, simulationBehavior: 'skip' | 'default' | null) => {
   const { segment } = ctx.vtex
-  const { checkout } = ctx.clients.checkout
+  const checkout = ctx.clients.checkout
   const products: any[] = []
 
   searchResult.products.forEach((product: any) => {
