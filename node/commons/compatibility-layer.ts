@@ -1,7 +1,7 @@
 import { distinct } from '../utils/object'
 import unescape from 'unescape'
 import { Checkout } from '../clients/checkout'
-import R from 'ramda'
+import { groupBy, prop, indexBy, mergeAll } from 'ramda'
 
 export enum IndexingType {
   API = 'API',
@@ -89,16 +89,18 @@ export const convertBiggyProduct = async (
   }
 
   if (simulationBehavior === 'default') {
+    // eslint-disable-next-line no-console
+    console.log("Usando simulation")
     const simulationPayload: SimulationPayload = {
       items: getSimulationPayloads(convertedProduct)
     }
 
     const simulation = await checkout.simulation(simulationPayload)
 
-    const groupedBySkuId = R.groupBy(R.prop("id"), simulation.items)
+    const groupedBySkuId = groupBy(prop("id"), simulation.items)
 
-    const orderItemsBySellerById: OrderFormItemBySellerById = R.mergeAll(Object.entries(groupedBySkuId).map(([id, items]) => {
-      const groupedBySeller = R.indexBy((R.prop("seller")), items)
+    const orderItemsBySellerById: OrderFormItemBySellerById = mergeAll(Object.entries(groupedBySkuId).map(([id, items]) => {
+      const groupedBySeller = indexBy((prop("seller")), items)
 
       return {[id]: groupedBySeller}
     }))
