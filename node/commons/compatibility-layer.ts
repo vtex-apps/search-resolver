@@ -89,8 +89,6 @@ export const convertBiggyProduct = async (
   }
 
   if (simulationBehavior === 'default') {
-    // eslint-disable-next-line no-console
-    console.log("Usando simulation")
     const simulationPayload: SimulationPayload = {
       items: getSimulationPayloads(convertedProduct)
     }
