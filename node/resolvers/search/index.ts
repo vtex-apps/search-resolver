@@ -255,8 +255,10 @@ export const queries = {
       fullText = await translateToStoreDefaultLanguage(ctx, args.fullText!)
     }
 
-    const { biggySearch, search } = ctx.clients
-    const { segment } = ctx.vtex
+    const {
+      clients: { biggySearch, search },
+      vtex: { segment, account },
+    } = ctx
 
     const biggyArgs = {
       searchState,
@@ -287,7 +289,7 @@ export const queries = {
     }
 
     return {
-      facets: attributesToFilters(result),
+      facets: attributesToFilters({ ...result, account }),
       queryArgs: {
         query: args.query,
         selectedFacets: args.selectedFacets,
