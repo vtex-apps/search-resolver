@@ -50,9 +50,9 @@ export class BiggySearchClient extends ExternalClient {
 
   public async suggestionProducts(args: SuggestionProductsArgs): Promise<any> {
     const {
-      term,
-      attributeKey,
-      attributeValue,
+      fullText: term,
+      facetKey: attributeKey,
+      facetValue: attributeValue,
       tradePolicy,
       indexingType,
     } = args

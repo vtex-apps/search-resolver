@@ -40,9 +40,9 @@ interface SearchResultArgs {
 }
 
 interface SuggestionProductsArgs {
-  term: string
-  attributeKey?: string
-  attributeValue?: string
+  fullText: string
+  facetKey?: string
+  facetValue?: string
   tradePolicy?: string
   segment?: SegmentData
   indexingType?: IndexingType
