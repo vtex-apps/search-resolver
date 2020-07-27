@@ -11,7 +11,7 @@ const buildPathFromArgs = (args: SearchResultArgs) => {
       ? `trade-policy/${tradePolicy}`
       : ''
 
-  return path.join(attributePath, policyAttr)
+  return path.join(attributePath.split('%20').join('-'), policyAttr)
 }
 
 export class BiggySearchClient extends ExternalClient {
