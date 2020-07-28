@@ -21,7 +21,8 @@ export const convertBiggyProduct = async (
   checkout: Checkout,
   simulationBehavior: 'skip' | 'default' | null,
   tradePolicy?: string,
-  indexingType?: IndexingType
+  priceTable?: string,
+  indexingType?: IndexingType,
 ) => {
   const categories: string[] = product.categories
     ? product.categories.map((_: any, index: number) => {
@@ -90,6 +91,7 @@ export const convertBiggyProduct = async (
 
   if (simulationBehavior === 'default') {
     const simulationPayload: SimulationPayload = {
+      priceTables: priceTable ? [priceTable] : undefined,
       items: getSimulationPayloads(convertedProduct)
     }
 
