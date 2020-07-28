@@ -46,6 +46,7 @@ interface SuggestionProductsArgs {
   tradePolicy?: string
   segment?: SegmentData
   indexingType?: IndexingType
+  productOriginVtex: boolean
 }
 
 interface SuggestionSearchesArgs {

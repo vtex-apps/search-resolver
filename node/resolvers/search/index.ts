@@ -558,7 +558,13 @@ export const queries = {
       tradePolicy,
     })
 
-    return result
+    const productResolver = args.productOriginVtex
+      ? productsCatalog
+      : productsBiggy
+
+    const convertedProducts = productResolver(result, ctx)
+
+    return { ...result, products: convertedProducts }
   },
   banners: (
     _: any,
