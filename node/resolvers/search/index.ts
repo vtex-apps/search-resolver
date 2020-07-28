@@ -562,7 +562,11 @@ export const queries = {
       ? productsCatalog
       : productsBiggy
 
-    const convertedProducts = productResolver(result, ctx)
+    const convertedProducts = productResolver(
+      result,
+      ctx,
+      args.simulationBehavior
+    )
 
     return { ...result, products: convertedProducts }
   },

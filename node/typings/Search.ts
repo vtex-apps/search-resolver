@@ -47,6 +47,7 @@ interface SuggestionProductsArgs {
   segment?: SegmentData
   indexingType?: IndexingType
   productOriginVtex: boolean
+  simulationBehavior: 'skip' | 'default' | null
 }
 
 interface SuggestionSearchesArgs {
