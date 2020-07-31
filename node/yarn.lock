@@ -777,10 +777,10 @@
     lodash.unescape "4.0.1"
     semver "5.5.0"
 
-"@vtex/api@6.35.0":
-  version "6.35.0"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.35.0.tgz#1970a8974f8bf9fbc70fb4e6758b78d46c8b1f87"
-  integrity sha512-RWH9wqpHHV0FtGlK4AxrsFcjVxhl3ZVTQRKboEgOI+7Ts9scLkBoEyYnwtQzvjfAkJgxUNCmvqsKPN2HxAnWlQ==
+"@vtex/api@6.36.0":
+  version "6.36.0"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.36.0.tgz#debc0462cae4196a6580ded8ed88359dcb6ce31d"
+  integrity sha512-kEIHIOA6oXCGq65TpQG6ZBA2r3qQ9SAgoMpjo87dZvbybvxTPI7mz8URKy4jKuArf1mkhzLu9EqsJ+xwljFySg==
   dependencies:
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"
@@ -4615,7 +4615,7 @@ static-extend@^0.1.1:
     define-property "^0.2.5"
     object-copy "^0.1.0"
 
-stats-lite@vtex/node-stats-lite#dist:
+"stats-lite@github:vtex/node-stats-lite#dist":
   version "2.2.0"
   resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/1b0d39cc41ef7aaecfd541191f877887a2044797"
   dependencies:
@@ -5148,9 +5148,9 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.30.0/public":
+"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.31.0/public":
   version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.30.0/public#4d74220342aeb71ad5132892a33fbe86dafefbad"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.31.0/public#af2733e2895e3df1e7a8685aaeb0c0609475f216"
 
 w3c-hr-time@^1.0.1:
   version "1.0.1"
