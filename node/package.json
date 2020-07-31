@@ -32,7 +32,7 @@
     "slugify": "^1.2.6",
     "typescript": "3.8.3",
     "unescape": "^1.0.1",
-    "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.30.0/public"
+    "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.31.0/public"
   },
   "devDependencies": {
     "@types/atob": "^2.1.2",
@@ -45,7 +45,7 @@
     "@types/node": "^12.0.0",
     "@types/qs": "^6.5.1",
     "@types/ramda": "^0.26.21",
-    "@vtex/api": "6.35.2",
+    "@vtex/api": "6.36.0",
     "@vtex/tsconfig": "^0.2.0",
     "eslint": "^5.15.3",
     "eslint-config-vtex": "^10.1.0",
