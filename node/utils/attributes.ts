@@ -33,7 +33,7 @@ interface TextAttribute {
   }[]
 }
 
-type FilterType = 'PRICERANGE' | 'TEXT'
+type FilterType = 'PRICERANGE' | 'TEXT' | 'NUMBER'
 interface Filter {
   type: FilterType
   name: string
@@ -69,16 +69,18 @@ interface CatalogAttributeValues {
 export const attributesToFilters = ({
   total,
   attributes,
+  account,
 }: {
   total: number
   attributes?: Attribute[]
+  account: string
 }): Filter[] => {
   if (either(isNil, isEmpty)(attributes)) {
     return []
   }
 
   return attributes!.map(attribute => {
-    const { type, values } = convertValues(attribute, total)
+    const { type, values } = convertValues(attribute, total, account)
 
     return {
       values,
@@ -107,13 +109,36 @@ export const attributesToFilters = ({
  */
 const convertValues = (
   attribute: Attribute,
-  total: number
+  total: number,
+  account: string
 ): { type: FilterType; values: FilterValue[] } => {
   // When creating a filter for price attribute, it should be the only one to use
   // the type `'PRICERANGE'`.
   if (attribute.type === 'number' && attribute.key === 'price') {
     return {
       type: 'PRICERANGE',
+      values: attribute.values.map((value: any) => {
+        return {
+          quantity: value.count,
+          name: unescape(value.label),
+          key: attribute.key,
+          value: value.key,
+          selected: value.active,
+          range: {
+            from: parseFloat(
+              isNaN(value.from) ? attribute.minValue : value.from
+            ),
+            to: parseFloat(isNaN(value.to) ? attribute.maxValue : value.to),
+          },
+        }
+      }),
+    }
+  }
+
+  // FIXME: Remove this when creating the specificationType for filters
+  if (attribute.type === 'number' && attribute.key === 'quilometragem' && account === 'localizaseminovos') {
+    return {
+      type: 'NUMBER',
       values: attribute.values.map((value: any) => {
         return {
           quantity: value.count,
@@ -191,16 +216,13 @@ export const sortAttributeValuesByCatalog = (
   values: CatalogAttributeValues[]
 ) => {
   const findPositionByLabel = (label: string) => {
-    const catalogValue = values.find(
-      value => value.Value === label
-    )
+    const catalogValue = values.find(value => value.Value === label)
     return catalogValue ? catalogValue.Position : -1
   }
 
   attribute.values.sort((a, b) => {
     const aPosition = findPositionByLabel(a.label)
     const bPosition = findPositionByLabel(b.label)
-
 
     return aPosition < bPosition ? -1 : 1
   })
