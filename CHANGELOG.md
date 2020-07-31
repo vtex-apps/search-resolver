@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Bump `search-graphql` version to `v0.31.0`.
+
 ## [0.10.0] - 2020-07-21
 
 ### Added
