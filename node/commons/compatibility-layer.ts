@@ -118,11 +118,10 @@ const getSKUSpecifications = (product: BiggySearchProduct): string[] => {
 const buildCommertialOffer = (
   price: number,
   oldPrice: number,
-  installment: { value: number; count: number },
+  installment?: BiggyInstallment,
   tax?: number,
 ): CommertialOffer => {
-
-  const installments: SearchInstallment[] = [{
+  const installments: SearchInstallment[] = installment ? [{
     Value: installment.value,
     InterestRate: 0,
     TotalValuePlusInterestRate: price,
@@ -130,7 +129,7 @@ const buildCommertialOffer = (
     Name: '',
     PaymentSystemName: '',
     PaymentSystemGroupName: '',
-  }]
+  }] : [];
 
   return {
     DeliverySlaSamplesPerRegion: {},
@@ -138,9 +137,7 @@ const buildCommertialOffer = (
     AvailableQuantity: 10000,
     DiscountHighLight: [],
     Teasers: [],
-    Installments: installment
-      ? installments
-      : [],
+    Installments: installments,
     Price: price,
     ListPrice: oldPrice,
     PriceWithoutDiscount: price,
