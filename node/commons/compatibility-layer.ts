@@ -303,8 +303,10 @@ export const convertOrderBy = (orderBy?: string): string => {
       return 'release:desc'
     case 'OrderByBestDiscountDESC':
       return 'discount:desc'
-    default:
+    case 'OrderByScoreDESC':
       return ''
+    default:
+      return orderBy || ''
   }
 }
 
