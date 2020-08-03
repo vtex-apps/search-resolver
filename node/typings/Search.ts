@@ -125,6 +125,12 @@ interface BiggySearchProduct {
   productSpecifications: string[]
   specificationGroups: string
   textAttributes: BiggyTextAttribute[]
+  split: BiggySplit
+}
+
+interface BiggySplit {
+  labelKey: string
+  labelValue: string
 }
 
 interface BiggyProductImage {
