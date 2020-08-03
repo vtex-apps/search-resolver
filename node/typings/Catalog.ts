@@ -101,6 +101,7 @@ interface SearchProduct {
   Specifications?: string[]
   allSpecifications?: string[]
   allSpecificationsGroups?: string[]
+  skuSpecifications?: SkuSpecification[]
 }
 
 interface SearchItem {
@@ -128,6 +129,10 @@ interface SearchItem {
     itemId: string
     amount: number
   }[]
+}
+
+interface SearchItemExtended extends SearchItem {
+  skuSpecifications?: SkuSpecification[]
 }
 
 interface SkuSpecification {

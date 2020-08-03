@@ -26,3 +26,10 @@ export function searchSlugify(str: string) {
   const replaced = noCommas.replace(/[*+~.()'"!:@&\[\]`/ %$#?{}|><=_^]/g, '-')
   return toLower(removeAccents(replaced))
 }
+
+export const slugifyStoreIndexer = (str: string) =>
+  str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[*+~.()'"!:@&\[\]`,/ %$#?{}|><=_^]/g, '-')
