@@ -44,10 +44,12 @@ interface SearchPageTypeResponse {
  */
 export class Search extends AppClient {
   private searchEncodeURI: (x: string) => string
+  private basePath: string
 
   public constructor(ctx: IOContext, opts?: InstanceOptions) {
     super('vtex.catalog-api-proxy@0.x', ctx, opts)
 
+    this.basePath = ctx.sessionToken ? '/proxy/authenticated/catalog' : '/proxy/catalog'
     this.searchEncodeURI = searchEncodeURI(ctx.account)
   }
 
@@ -155,9 +157,9 @@ export class Search extends AppClient {
     })
 
   public getCategoryChildren = (id: number) =>
-  this.get<Record<string, string>>(`/pub/category/categories/children?id=${id}`, {
-    metric: 'search-category-children'
-  })
+    this.get<Record<string, string>>(`/pub/category/categories/children?id=${id}`, {
+      metric: 'search-category-children'
+    })
 
   public facets = (facets: string = '') => {
     const [path, options] = decodeURI(facets).split('?')
@@ -179,10 +181,15 @@ export class Search extends AppClient {
       metric: 'search-crossSelling',
     })
 
+  public filtersInCategoryFromId = (id: string | number) =>
+    this.get<FilterListTreeCategoryById[]>(`/pub/specification/field/listTreeByCategoryId/${id}`, {
+      metric: 'search-listTreeByCategoryId'
+    })
+
   public autocomplete = ({ maxRows, searchTerm }: AutocompleteArgs) =>
     this.get<{ itemsReturned: SearchAutocompleteUnit[] }>(
       `/buscaautocomplete?maxRows=${maxRows}&productNameContains=${
-        encodeURIComponent(this.searchEncodeURI(searchTerm))
+      encodeURIComponent(this.searchEncodeURI(searchTerm))
       }`,
       { metric: 'search-autocomplete' }
     )
@@ -198,7 +205,7 @@ export class Search extends AppClient {
     }
     config.inflightKey = inflightKey
 
-    return this.http.get<T>(`/proxy/catalog${url}`, config)
+    return this.http.get<T>(`${this.basePath}${url}`, config)
   }
 
   public getField = (id: number) =>
@@ -229,7 +236,7 @@ export class Search extends AppClient {
     }
     config.inflightKey = inflightKey
 
-    return this.http.getRaw<T>(`/proxy/catalog${url}`, config)
+    return this.http.getRaw<T>(`${this.basePath}${url}`, config)
   }
 
   private productSearchUrl = ({
