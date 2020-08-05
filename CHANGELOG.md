@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- Relevant commits from the `0.x` branch.
+
+### Fixed
+
+- SKU variations being `undefined`.
+
 ## [1.13.1] - 2020-08-05
 
 ### Fixed
