@@ -9,8 +9,8 @@ export const productsBiggy = async (searchResult: any, ctx: any) => {
   searchResult.products.forEach((product: any) => {
     try {
       products.push(convertBiggyProduct(product, segment && segment.channel))
-    } catch (err) {
-      console.error(err)
+    } catch (e) {
+      // TODO: add logging
     }
   })
 

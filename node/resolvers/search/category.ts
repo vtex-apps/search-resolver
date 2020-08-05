@@ -1,7 +1,6 @@
 import { compose, last, prop, split } from 'ramda'
 
 import { getCategoryInfo } from './utils'
-import { formatTranslatableProp, shouldTranslateToBinding } from '../../utils/i18n'
 
 const lastSegment = compose<string, string[], string>(
   last,
@@ -20,40 +19,17 @@ type SafeCategory = CategoryByIdResponse | CategoryTreeResponse
 
 export const resolvers = {
   Category: {
-    name: formatTranslatableProp<SafeCategory, 'name', 'id'>(
-      'name',
-      'id'
-    ),
-
     cacheId: prop('id'),
 
-    href: async ({ url, id }: SafeCategory, _: unknown, ctx: Context) => {
-      if (shouldTranslateToBinding(ctx)) {
-        const rewriterUrl = await ctx.clients.rewriter.getRoute(id.toString(), 'anyCategoryEntity', ctx.vtex.binding!.id!)
-        if (rewriterUrl) {
-          url = rewriterUrl
-        }
-      }
+    href: async ({ url }: SafeCategory) => {
       return cleanUrl(url)
     },
 
-    metaTagDescription: formatTranslatableProp<SafeCategory, 'MetaTagDescription', 'id'>(
-      'MetaTagDescription',
-      'id'
-    ),
+    metaTagDescription: prop('MetaTagDescription'),
 
-    titleTag: formatTranslatableProp<SafeCategory, 'Title', 'id'>(
-      'Title',
-      'id'
-    ),
+    titleTag: prop('Title'),
 
-    slug: async ({ url, id }: SafeCategory, _: unknown, ctx: Context) => {
-      if (shouldTranslateToBinding(ctx)) {
-        const rewriterUrl = await ctx.clients.rewriter.getRoute(id.toString(), 'anyCategoryEntity', ctx.vtex.binding!.id!)
-        if (rewriterUrl) {
-          url = rewriterUrl
-        }
-      }
+    slug: async ({ url }: SafeCategory) => {
       return url ? lastSegment(url) : null
     },
 

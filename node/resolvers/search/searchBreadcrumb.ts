@@ -1,9 +1,8 @@
 import { Functions } from '@gocommerce/utils'
 import { equals, includes, toLower } from 'ramda'
 
-import { formatTranslatableProp } from '../../utils/i18n'
 import { getSpecificationFilterName } from './modules/metadata'
-import { findCategoryInTree, getBrandFromSlug, breadcrumbMapKey } from './utils'
+import { findCategoryInTree, getBrandFromSlug } from './utils'
 
 interface BreadcrumbParams {
   queryUnit: string
@@ -14,8 +13,6 @@ interface BreadcrumbParams {
   categories: CategoryTreeResponse[]
   categoriesSearched: string[]
   products: SearchProduct[]
-  hrefs: string[] | null
-  metadataMap: Record<string, { id: string, name: string }>
 }
 
 const findClusterNameFromId = (
@@ -80,18 +77,13 @@ const getBrandInfo = async (
   return search.pageType(queryUnit).catch(() => null)
 }
 
-interface TranslatableData {
-  id?: string
-  name: string
-}
-
 export const resolvers = {
   SearchBreadcrumb: {
     name: async (obj: BreadcrumbParams, _: any, ctx: Context) => {
       const {
         vtex: { account },
       } = ctx
-      const { queryUnit, mapUnit, index, queryArray, products, metadataMap } = obj
+      const { queryUnit, mapUnit, index, queryArray, products } = obj
       const defaultName = queryArray[index]
       const isVtex = !Functions.isGoCommerceAcc(account)
       if (isProductClusterMap(mapUnit)) {
@@ -101,9 +93,9 @@ export const resolvers = {
         }
       }
       if (isCategoryMap(mapUnit)) {
-        const categoryData = (metadataMap[breadcrumbMapKey(queryUnit, mapUnit)] ?? (await getCategoryInfo(obj, isVtex, ctx))) as TranslatableData
+        const categoryData = await getCategoryInfo(obj, isVtex, ctx)
         if (categoryData) {
-          return formatTranslatableProp<TranslatableData, 'name', 'id'>('name', 'id')(categoryData, _, ctx)
+          return categoryData.name
         }
       }
       if (isSellerMap(mapUnit)) {
@@ -113,46 +105,32 @@ export const resolvers = {
         }
       }
       if (isBrandMap(mapUnit)) {
-        const brandData = (metadataMap[breadcrumbMapKey(queryUnit, mapUnit)] ?? (await getBrandInfo(obj, isVtex, ctx))) as TranslatableData
-        if (brandData) {
-          return formatTranslatableProp<TranslatableData, 'name', 'id'>('name', 'id')(brandData, _, ctx)
-        }
+        const brandData = await getBrandInfo(obj, isVtex, ctx)
+        return brandData ? brandData.name : defaultName
       }
       if (isSpecificationFilter(mapUnit)) {
         return getSpecificationFilterName(queryUnit)
       }
       return defaultName && decodeURI(defaultName)
     },
-    href: (params: BreadcrumbParams) => {
-      const {
-        index,
-        queryArray,
-        mapArray,
-        mapUnit,
-        hrefs,
-      } = params
-
-      const noMapQueryString = mapArray.slice(0, index + 1).every(isCategoryMap) || (isBrandMap(mapUnit) && index === 0)
-      if (hrefs) {
-        // Will fall here only if store translated data for different binding on upper resolver
-        const href = hrefs[index]
-        if (noMapQueryString) {
-          return href
-        }
-        return `${href}?map=${sliceAndJoin(
-          mapArray,
-          index + 1,
-          ','
-        )}`
+    href: ({
+      index,
+      queryArray,
+      mapArray,
+      mapUnit,
+      queryUnit,
+    }: BreadcrumbParams) => {
+      if (index === 0 && (isCategoryMap(mapUnit) || isBrandMap(mapUnit))) {
+        return `/${queryUnit}`
       }
-
-      const queryString = noMapQueryString ? '' : `?map=${sliceAndJoin(
+      if (mapArray.every(isCategoryMap)) {
+        return `/${sliceAndJoin(queryArray, index + 1, '/')}`
+      }
+      return `/${sliceAndJoin(queryArray, index + 1, '/')}?map=${sliceAndJoin(
         mapArray,
         index + 1,
         ','
       )}`
-
-      return `/${sliceAndJoin(queryArray, index + 1, '/')}${queryString}`
     },
   },
 }

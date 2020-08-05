@@ -8,6 +8,7 @@ import {
   map,
   filter,
   findLastIndex,
+  path,
   split,
   toLower,
   reverse,
@@ -16,9 +17,8 @@ import {
 } from 'ramda'
 import { Functions } from '@gocommerce/utils'
 
-import { zipQueryAndMap, findCategoryInTree, getBrandFromSlug, searchDecodeURI } from '../utils'
+import { zipQueryAndMap, findCategoryInTree, getBrandFromSlug } from '../utils'
 import { toTitleCase } from '../../../utils/string'
-import { formatTranslatableProp, translateManyToCurrentLanguage, Message, shouldTranslateToUserLocale } from '../../../utils/i18n'
 
 type TupleString = [string, string]
 
@@ -48,7 +48,6 @@ const getAndParsePagetype = async (path: string, ctx: Context) => {
   return {
     titleTag: pagetype.title || pagetype.name,
     metaTagDescription: pagetype.metaTagDescription,
-    id: pagetype.id,
   }
 }
 
@@ -69,11 +68,10 @@ const getCategoryMetadata = async (
       findCategoryInTree(
         await search.categories(cleanQuery.split('/').length),
         cleanQuery.split('/')
-      )
+      ) || {}
     return {
-      id: null,
-      metaTagDescription: category?.MetaTagDescription,
-      titleTag: category?.Title ?? category?.name,
+      metaTagDescription: path(['MetaTagDescription'], category),
+      titleTag: path(['Title'], category) || path(['Name'], category),
     }
   }
 
@@ -91,18 +89,17 @@ const getBrandMetadata = async (
   const cleanQuery = head(split('/', query || '')) || ''
 
   if (Functions.isGoCommerceAcc(account)) {
-    const brand = await getBrandFromSlug(toLower(cleanQuery), search)
+    const brand = (await getBrandFromSlug(toLower(cleanQuery), search)) || {}
     return {
-      id: null,
-      metaTagDescription: brand?.metaTagDescription,
-      titleTag: brand?.title ?? brand?.name,
+      metaTagDescription: path(['metaTagDescription'], brand),
+      titleTag: path(['title'], brand) || path(['name'], brand),
     }
   }
   return getAndParsePagetype(cleanQuery, ctx)
 }
 
 export const getSpecificationFilterName = (name: string) => {
-  return toTitleCase(searchDecodeURI(decodeURI(name)))
+  return toTitleCase(decodeURI(name))
 }
 
 const getPrimaryMetadata = (
@@ -156,7 +153,7 @@ const getNameForRemainingMaps = async (
         }
       }
       if (map === 'b' && !isGC) {
-        const brand = await search.pageType(decodeURI(query), 'map=b').catch(() => null)
+        const brand = await search.pageType(decodeURI(query)).catch(() => null)
         if (brand) {
           return brand.name
         }
@@ -177,23 +174,12 @@ export const emptyTitleTag = {
 
 type StringNull = string | null | undefined
 
-const removeNulls = <T>(array: (T | null | undefined)[]): T[] => array.filter(Boolean) as T[]
-
 const isNotNil = complement(isNil)
 const joinNames = compose<StringNull[], string[], string[], string>(
   join(' - '),
   reverse,
   filter(isNotNil) as any
 )
-
-const translateTitles = (metadata: SearchMetadata, otherNames: (string | null)[], ctx: Context) => {
-  const messages: Message[] = []
-  if (metadata.titleTag) {
-    messages.push({ content: metadata.titleTag, context: metadata.id ?? undefined })
-  }
-  messages.push(...removeNulls(otherNames).map(name => ({ content: name })))
-  return translateManyToCurrentLanguage(messages, ctx)
-}
 
 /**
  * Get metadata of category/brand APIs
@@ -226,12 +212,8 @@ export const getSearchMetaData = async (
     getNameForRemainingMaps(validTuples, ctx),
   ])
 
-  const titleTagNames =
-    shouldTranslateToUserLocale(ctx) ?
-      (await translateTitles(metadata, otherNames, ctx))
-      : [metadata.titleTag, ...otherNames]
   return {
-    titleTag: joinNames(titleTagNames),
-    metaTagDescription: formatTranslatableProp<SearchMetadata, 'metaTagDescription', 'id'>('metaTagDescription', 'id')(metadata, {}, ctx),
+    titleTag: joinNames([metadata.titleTag, ...otherNames]),
+    metaTagDescription: metadata.metaTagDescription,
   }
 }

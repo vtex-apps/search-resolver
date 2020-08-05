@@ -7,5 +7,4 @@ interface SearchMetadataArgs {
 interface SearchMetadata {
   titleTag?: string | null
   metaTagDescription?: string | null
-  id?: string | null
 }
