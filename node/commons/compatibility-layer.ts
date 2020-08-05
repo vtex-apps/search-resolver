@@ -59,7 +59,7 @@ export const convertBiggyProduct = (
     description: product.description,
     items: skus,
     allSpecifications,
-    categoryId: product.categoryIds?.[0],
+    categoryId: "",
     productTitle: "",
     metaTagDescription: "",
     clusterHighlights: {},

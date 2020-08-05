@@ -23,11 +23,7 @@ import {
   getMapAndPriceRangeFromSelectedFacets,
 } from './utils'
 import { toCompatibilityArgs } from './newURLs'
-import {
-  PATH_SEPARATOR,
-  MAP_VALUES_SEP,
-} from './constants'
-import { shouldTranslateToTenantLocale } from '../../utils/i18n'
+import { PATH_SEPARATOR, MAP_VALUES_SEP } from './constants'
 import {
   buildAttributePath,
   convertOrderBy,
@@ -129,7 +125,7 @@ const getCompatibilityArgsFromSelectedFacets = async (
 
 const translateToStoreDefaultLanguage = async (
   ctx: Context,
-  term: string,
+  term: string
 ): Promise<string> => {
   const {
     clients,
@@ -138,22 +134,21 @@ const translateToStoreDefaultLanguage = async (
   } = ctx
   const { locale: to } = tenant!
 
-  if (!shouldTranslateToTenantLocale(ctx)) {
-    // Do not translate if string already in correct language
+  if (!from || from === to) {
     return term
   }
 
-  if (!state.messagesTenantLanguage) {
-    state.messagesTenantLanguage = createMessagesLoader(clients, to)
+  if (!state.messages) {
+    state.messages = createMessagesLoader(clients, to)
   }
 
-  return state.messagesTenantLanguage!.load({
-    from: from!,
+  return state.messages!.load({
+    from,
     content: term,
   })
 }
 
-const noop = () => { }
+const noop = () => {}
 
 // Does prefetching and warms up cache for up to the 10 first elements of a search, so if user clicks on product page
 const searchFirstElements = (
@@ -222,21 +217,6 @@ const isLegacySearchFormat = ({
 const isValidProductIdentifier = (identifier: ProductIndentifier | undefined) =>
   !!identifier && !isNil(identifier.value) && !isEmpty(identifier.value)
 
-const getTranslatedSearchTerm = async (query: SearchArgs['query'], map: SearchArgs['map'], ctx: Context) => {
-  if (!query || !map || !shouldTranslateToTenantLocale(ctx)) {
-    return query
-  }
-  const ftSearchIndex = map.split(',').findIndex(m => m === 'ft')
-  if (ftSearchIndex === -1) {
-    return query
-  }
-  const queryArray = query.split('/')
-  const queryUnit = queryArray[ftSearchIndex]
-  const translated = await translateToStoreDefaultLanguage(ctx, queryUnit)
-  const queryTranslated = [...queryArray.slice(0, ftSearchIndex), translated, ...queryArray.slice(ftSearchIndex + 1)]
-  return queryTranslated.join('/')
-}
-
 export const queries = {
   autocomplete: async (
     _: any,
@@ -250,7 +230,6 @@ export const queries = {
     if (!args.searchTerm) {
       throw new UserInputError('No search term provided')
     }
-
     const translatedTerm = await translateToStoreDefaultLanguage(
       ctx,
       args.searchTerm
@@ -518,7 +497,7 @@ export const queries = {
       args.map = map
     }
 
-    const query = await getTranslatedSearchTerm(args.query || '', args.map || '', ctx)
+    const query = await translateToStoreDefaultLanguage(ctx, args.query || '')
     const translatedArgs = {
       ...args,
       query,

@@ -19,8 +19,7 @@ declare global {
   type Context = ServiceContext<Clients, State, CustomContext>
 
   interface State extends RecorderState {
-    messagesTenantLanguage?: MessagesLoaderV2
-    messagesBindingLanguage?: MessagesLoaderV2
+    messages?: MessagesLoaderV2
   }
 
   interface StaleRevalidateData<T>{
