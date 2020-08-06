@@ -2,6 +2,7 @@ import { distinct } from '../utils/object'
 import unescape from 'unescape'
 import { Checkout } from '../clients/checkout'
 import { groupBy, prop, indexBy, mergeAll } from 'ramda'
+import { removeDiacriticsFromURL } from '../utils/string'
 
 export enum IndexingType {
   API = 'API',
@@ -429,7 +430,7 @@ export const buildAttributePath = (selectedFacets: SelectedFacet[]) => {
         }
 
         return facet.key !== 'ft'
-          ? `${attributePath}${facet.key}/${facet.value.replace(/ |%20/, '-')}/`
+          ? `${attributePath}${facet.key}/${removeDiacriticsFromURL(facet.value).replace(/ |%20/, '-')}/`
           : attributePath
       }, '')
     : ''

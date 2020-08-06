@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Remove diacritics from API call.
+
 ## [1.14.0] - 2020-08-06
 
 ### Added

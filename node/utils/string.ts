@@ -5,3 +5,10 @@ export const toTitleCase = (str: string) => {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
 }
+
+export const removeDiacriticsFromURL = (url: string) =>
+  encodeURIComponent(
+    decodeURIComponent(url)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+  )
