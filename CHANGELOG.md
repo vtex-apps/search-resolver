@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.14.0] - 2020-08-06
+
 ### Added
 - Passing simulationBehavior to compatibilityLayer so it calls simulation for the default behavior.
 
