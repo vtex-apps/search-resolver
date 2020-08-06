@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Passing simulationBehavior to compatibilityLayer so it calls simulation for the default behavior.
 
+## [1.13.3] - 2020-08-06
+
+### Fixed
+
+- Compatibility `variations` and `speficiations` not being set in some situations.
+
 ## [1.13.2] - 2020-08-06
 
 ### Added
