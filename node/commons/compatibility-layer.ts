@@ -1,15 +1,28 @@
 import { distinct } from '../utils/object'
 import unescape from 'unescape'
+import { Checkout } from '../clients/checkout'
+import { groupBy, prop, indexBy, mergeAll } from 'ramda'
 
 export enum IndexingType {
   API = 'API',
   XML = 'XML',
 }
 
-export const convertBiggyProduct = (
+interface OrderFormItemBySellerById {
+  [skuId: string]: OrderFormItemBySeller
+}
+
+interface OrderFormItemBySeller {
+  [sellerId: string]: OrderFormItem
+}
+
+export const convertBiggyProduct = async (
   product: BiggySearchProduct,
+  checkout: Checkout,
+  simulationBehavior: 'skip' | 'default' | null,
   tradePolicy?: string,
-  indexingType?: IndexingType
+  priceTable?: string,
+  indexingType?: IndexingType,
 ) => {
   const categories: string[] = product.categories
     ? product.categories.map((_: any, index: number) => {
@@ -76,6 +89,27 @@ export const convertBiggyProduct = (
     skus: skus.find(sku => sku.sellers && sku.sellers.length > 0),
   }
 
+  if (simulationBehavior === 'default') {
+    const simulationPayload: SimulationPayload = {
+      priceTables: priceTable ? [priceTable] : undefined,
+      items: getSimulationPayloads(convertedProduct)
+    }
+
+    const simulation = await checkout.simulation(simulationPayload)
+
+    const groupedBySkuId = groupBy(prop("id"), simulation.items)
+
+    const orderItemsBySellerById: OrderFormItemBySellerById = mergeAll(Object.entries(groupedBySkuId).map(([id, items]) => {
+      const groupedBySeller = indexBy((prop("seller")), items)
+
+      return {[id]: groupedBySeller}
+    }))
+
+    convertedProduct.items.map((item) => {
+      fillSearchItemWithSimulation(item, orderItemsBySellerById[item.itemId])
+    })
+  }
+
   if (product.extraData) {
     product.extraData.forEach(({ key, value }: BiggyProductExtraData) => {
       convertedProduct.allSpecifications?.push(key)
@@ -95,6 +129,32 @@ export const convertBiggyProduct = (
   })
 
   return convertedProduct
+}
+
+const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: OrderFormItemBySeller) => {
+  if (orderFormItems) {
+    searchItem.sellers.forEach((seller) => {
+      const orderFormItem = orderFormItems[seller.sellerId]
+
+      seller.commertialOffer.Price = orderFormItem.price / 100
+      seller.commertialOffer.PriceValidUntil = orderFormItem.priceValidUntil
+      seller.commertialOffer.ListPrice = orderFormItem.listPrice / 100
+    })
+  }
+
+  return searchItem
+}
+
+const getSimulationPayloads = (product: SearchProduct) => {
+  return product.items.map((item) => {
+    return item.sellers.map((seller) => {
+      return {
+        id: item.itemId,
+        quantity: 1,
+        seller: seller.sellerId
+      } as PayloadItem
+    })
+  }).reduce((acc, val) => acc.concat(val), []).filter(distinct)
 }
 
 const getVariations = (sku: BiggySearchSKU): string[] => {

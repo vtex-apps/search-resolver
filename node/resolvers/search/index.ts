@@ -438,6 +438,7 @@ export const queries = {
       fuzzy,
       operator,
       searchState,
+      simulationBehavior,
     } = args
 
     const count = to - from + 1
@@ -460,7 +461,7 @@ export const queries = {
     const productResolver = args.productOriginVtex
       ? productsCatalog
       : productsBiggy
-    const convertedProducts = productResolver(result, ctx)
+    const convertedProducts = productResolver(result, ctx, simulationBehavior)
 
     return {
       searchState,
