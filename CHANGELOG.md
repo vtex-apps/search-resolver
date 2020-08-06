@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Compatibility `variations` and `speficiations` not being set in some situations.
+
 ## [1.13.2] - 2020-08-06
 
 ### Added

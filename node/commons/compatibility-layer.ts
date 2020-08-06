@@ -83,15 +83,11 @@ export const convertBiggyProduct = (
     })
   }
 
-  product.productSpecifications.forEach((specification) => {
+  allSpecifications.forEach((specification) => {
     const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == specification)
-    if (attributes != null && attributes.length > 0) {
-      convertedProduct[specification] = []
-
-      attributes.forEach((attribute) => {
-        convertedProduct[specification].push(attribute.labelValue)
-      })
-    }
+    convertedProduct[specification] = attributes.map((attribute) => {
+      attribute.labelValue
+    })
   })
 
   allSpecificationsGroups.forEach((specificationGroup) => {
@@ -262,9 +258,7 @@ const convertSKU = (
 
   variations.forEach((variation) => {
     const attribute = sku.attributes.find((attribute) => attribute.key == variation)
-    if (attribute != null) {
-      item[variation] = [attribute.value]
-    }
+    item[variation] = attribute != null ? [attribute.value] : []
   })
 
   return item
