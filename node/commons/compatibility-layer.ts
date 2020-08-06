@@ -71,7 +71,7 @@ export const convertBiggyProduct = async (
     description: product.description,
     items: skus,
     allSpecifications,
-    categoryId: "",
+    categoryId: product.categoryIds?.[0],
     productTitle: "",
     metaTagDescription: "",
     clusterHighlights: {},
@@ -133,6 +133,7 @@ export const convertBiggyProduct = async (
   return convertedProduct
 }
 
+<<<<<<< HEAD
 const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: OrderFormItemBySeller) => {
   if (orderFormItems) {
     searchItem.sellers.forEach((seller) => {
@@ -159,6 +160,8 @@ const getSimulationPayloads = (product: SearchProduct) => {
   }).reduce((acc, val) => acc.concat(val), []).filter(distinct)
 }
 
+=======
+>>>>>>> bf5b82e723fa95283064c198164cbea0233a4814
 const getVariations = (sku: BiggySearchSKU): string[] => {
   return sku.attributes.map((attribute) => attribute.key)
 }
@@ -170,11 +173,10 @@ const getSKUSpecifications = (product: BiggySearchProduct): string[] => {
 const buildCommertialOffer = (
   price: number,
   oldPrice: number,
-  installment: { value: number; count: number },
+  installment?: BiggyInstallment,
   tax?: number,
 ): CommertialOffer => {
-
-  const installments: SearchInstallment[] = [{
+  const installments: SearchInstallment[] = installment ? [{
     Value: installment.value,
     InterestRate: 0,
     TotalValuePlusInterestRate: price,
@@ -182,7 +184,7 @@ const buildCommertialOffer = (
     Name: '',
     PaymentSystemName: '',
     PaymentSystemGroupName: '',
-  }]
+  }] : [];
 
   return {
     DeliverySlaSamplesPerRegion: {},
@@ -190,9 +192,7 @@ const buildCommertialOffer = (
     AvailableQuantity: 10000,
     DiscountHighLight: [],
     Teasers: [],
-    Installments: installment
-      ? installments
-      : [],
+    Installments: installments,
     Price: price,
     ListPrice: oldPrice,
     PriceWithoutDiscount: price,
@@ -322,13 +322,9 @@ const convertSKU = (
   }
 
   variations.forEach((variation) => {
-    const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == variation)
-    if (attributes != null && attributes.length > 0) {
-      item[variation] = []
-
-      attributes.forEach((attribute) => {
-        item[variation].push(attribute.labelValue)
-      })
+    const attribute = sku.attributes.find((attribute) => attribute.key == variation)
+    if (attribute != null) {
+      item[variation] = [attribute.value]
     }
   })
 
@@ -360,8 +356,10 @@ export const convertOrderBy = (orderBy?: string): string => {
       return 'release:desc'
     case 'OrderByBestDiscountDESC':
       return 'discount:desc'
-    default:
+    case 'OrderByScoreDESC':
       return ''
+    default:
+      return orderBy || ''
   }
 }
 

@@ -1,11 +1,11 @@
 import { resolvers } from './product'
-import { mockContext } from '../../__mocks__/helpers'
+import { mockContext, getBindingLocale, resetContext } from '../../__mocks__/helpers'
 import { getProduct } from '../../__mocks__/product'
 
 describe('tests related to product resolver', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockContext.vtex.platform = 'vtex'
+    resetContext()
   })
   describe('categoryTree resolver', () => {
     test('ensure that VTEX account never calls the category tree search API', async () => {
@@ -182,5 +182,86 @@ describe('tests related to product resolver', () => {
     product.clusterHighlights = null as any
     const result = resolvers.Product.clusterHighlights(product as any)
     expect(result).toMatchObject([])
+  })
+
+  describe('linkText resolver', () => {
+    test('linkText with binding with different locales', async () => {
+      const product = getProduct()
+      mockContext.vtex.binding.locale = 'fr-FR'
+      mockContext.clients.rewriter.getRoute.mockImplementationOnce(
+        (id: string, type: string, bindingId: string) => Promise.resolve(`/${id}-${type}-${bindingId}-${getBindingLocale()}/p`)
+      )
+      const result = await resolvers.Product.linkText(product as any, {}, mockContext as any)
+      expect(result).toBe('16-product-abc-fr-FR')
+    })
+    test('linkText for same binding language', async () => {
+      const product = getProduct()
+      const result = await resolvers.Product.linkText(product as any, {}, mockContext as any)
+      expect(result).toBe(product.linkText)
+    })
+  })
+
+  describe('specificationGroups resolver', () => {
+    test('specifications groups should have expected format but not translated if same locale as tenant', async () => {
+      const product = getProduct()
+      const result = await resolvers.Product.specificationGroups(product as any, {}, mockContext as any)
+      expect(result[0]).toMatchObject({
+        name: 'Tamanho',
+        specifications: [{ name: 'Numero do calçado', values: ["35"] }]
+      })
+      expect(result[1]).toMatchObject({
+        name: 'allSpecifications',
+        specifications: [{ name: 'Numero do calçado', values: ["35"] }]
+      })
+    })
+    test('specifications groups should have expected format and translated values', async () => {
+      mockContext.vtex.locale = 'fr-FR'
+      const product = getProduct()
+      mockContext.clients.search.filtersInCategoryFromId.mockImplementationOnce(() => ([{
+        Name: 'Numero do calçado',
+        FieldId: 'specification-Id',
+      }]))
+      const result = await resolvers.Product.specificationGroups(product as any, {}, mockContext as any)
+
+      expect(result[0]).toMatchObject({
+        name: 'Tamanho (((16))) <<<pt-BR>>>',
+        specifications: [{ name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>', values: ["35 (((specification-Id))) <<<pt-BR>>>"] }]
+      })
+      expect(result[1]).toMatchObject({
+        name: 'allSpecifications (((16))) <<<pt-BR>>>',
+        specifications: [{ name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>', values: ["35 (((specification-Id))) <<<pt-BR>>>"] }]
+      })
+    })
+  })
+
+  describe('properties resolver', () => {
+    test('properties should have expected format but not translated if same locale as tenant', async () => {
+      const product = getProduct()
+      const result = await resolvers.Product.properties(product as any, {}, mockContext as any)
+      expect(result).toMatchObject([{ name: 'Numero do calçado', values: ['35'] }])
+    })
+    test('specifications groups should have expected format and translated values', async () => {
+      mockContext.vtex.locale = 'fr-FR'
+      const product = getProduct({
+        allSpecifications: ['Numero do calçado', 'testeName'],
+        'testeName': ['teste value']
+      })
+
+      mockContext.clients.search.filtersInCategoryFromId.mockImplementationOnce(() => ([
+        {
+          Name: 'Numero do calçado',
+          FieldId: 'specification-Id',
+        },
+        {
+          Name: 'testeName',
+          FieldId: 'teste-id'
+        }
+      ]))
+      const result = await resolvers.Product.properties(product as any, {}, mockContext as any)
+      expect(result).toMatchObject([
+        { name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>', values: ['35 (((specification-Id))) <<<pt-BR>>>'] },
+        { name: 'testeName (((teste-id))) <<<pt-BR>>>', values: ['teste value (((teste-id))) <<<pt-BR>>>'] }
+      ])
+    })
   })
 })

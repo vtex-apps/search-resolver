@@ -1,7 +1,7 @@
 {
   "vendor": "vtex",
   "name": "search-resolver",
-  "version": "1.10.0",
+  "version": "1.13.2",
   "title": "GraphQL resolver for the VTEX store APIs",
   "description": "GraphQL resolvers for the VTEX API for the catalog and orders.",
   "credentialType": "absolute",
@@ -13,6 +13,7 @@
     "vtex.messages": "1.x",
     "vtex.catalog-api-proxy": "0.x",
     "vtex.search-graphql": "0.x",
+    "vtex.rewriter": "1.x",
     "vtex.sae-analytics": "2.x"
   },
   "policies": [
@@ -21,6 +22,12 @@
     },
     {
       "name": "vtex.catalog-api-proxy:catalog-proxy"
+    },
+    {
+      "name": "vtex.catalog-api-proxy:authenticated-catalog-proxy"
+    },
+    {
+      "name": "vtex.rewriter:resolve-graphql"
     },
     {
       "name": "vbase-read-write"

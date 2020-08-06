@@ -114,7 +114,7 @@ interface BiggySearchProduct {
   price: number
   brand: string
   brandId: string
-  installment: BiggyInstallment
+  installment?: BiggyInstallment
   measurementUnit: string
   unitMultiplier: number
   tax: number
@@ -172,7 +172,7 @@ interface BiggySeller {
   price: number
   stock: number
   tax: number
-  installment: BiggyInstallment
+  installment?: BiggyInstallment
 }
 
 interface BiggyInstallment {

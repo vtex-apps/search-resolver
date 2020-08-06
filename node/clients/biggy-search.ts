@@ -11,7 +11,7 @@ const buildPathFromArgs = (args: SearchResultArgs) => {
       ? `trade-policy/${tradePolicy}`
       : ''
 
-  return path.join(attributePath, policyAttr)
+  return path.join(attributePath.split('%20').join('-'), policyAttr)
 }
 
 export class BiggySearchClient extends ExternalClient {
@@ -25,7 +25,7 @@ export class BiggySearchClient extends ExternalClient {
   }
 
   public async topSearches(): Promise<any> {
-    const result = await this.http.get<any>(`${this.store}/api/top_searches`, {
+    const result = await this.http.get(`${this.store}/api/top_searches`, {
       metric: 'top-searches',
     })
 
@@ -35,7 +35,7 @@ export class BiggySearchClient extends ExternalClient {
   public async suggestionSearches(args: SuggestionSearchesArgs): Promise<any> {
     const { term } = args
 
-    const result = await this.http.get<any>(
+    const result = await this.http.get(
       `${this.store}/api/suggestion_searches`,
       {
         params: {
@@ -72,7 +72,7 @@ export class BiggySearchClient extends ExternalClient {
       })
     }
 
-    const result = await this.http.post<any>(
+    const result = await this.http.post(
       `${this.store}/api/suggestion_products`,
       {
         term,
@@ -214,7 +214,7 @@ export class BiggySearchClient extends ExternalClient {
   }): Promise<any> {
     const { fullText } = args
 
-    const result = await this.http.get<any>(
+    const result = await this.http.get(
       `${this.store}/api/suggestion_searches`,
       {
         params: {
