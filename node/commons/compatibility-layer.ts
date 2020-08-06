@@ -21,7 +21,8 @@ export const convertBiggyProduct = async (
   checkout: Checkout,
   simulationBehavior: 'skip' | 'default' | null,
   tradePolicy?: string,
-  indexingType?: IndexingType
+  priceTable?: string,
+  indexingType?: IndexingType,
 ) => {
   const categories: string[] = product.categories
     ? product.categories.map((_: any, index: number) => {
@@ -90,6 +91,7 @@ export const convertBiggyProduct = async (
 
   if (simulationBehavior === 'default') {
     const simulationPayload: SimulationPayload = {
+      priceTables: priceTable ? [priceTable] : undefined,
       items: getSimulationPayloads(convertedProduct)
     }
 
@@ -133,7 +135,6 @@ export const convertBiggyProduct = async (
   return convertedProduct
 }
 
-<<<<<<< HEAD
 const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: OrderFormItemBySeller) => {
   if (orderFormItems) {
     searchItem.sellers.forEach((seller) => {
@@ -160,8 +161,6 @@ const getSimulationPayloads = (product: SearchProduct) => {
   }).reduce((acc, val) => acc.concat(val), []).filter(distinct)
 }
 
-=======
->>>>>>> bf5b82e723fa95283064c198164cbea0233a4814
 const getVariations = (sku: BiggySearchSKU): string[] => {
   return sku.attributes.map((attribute) => attribute.key)
 }

@@ -777,17 +777,10 @@
     lodash.unescape "4.0.1"
     semver "5.5.0"
 
-<<<<<<< HEAD
-"@vtex/api@6.35.1":
-  version "6.35.1"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.35.1.tgz#d18b861667b8d038fe8fd31c61e926f569305069"
-  integrity sha512-mRLTP9YT6aw3SNOnFRuUauWwxgiy5jh2BTzUFhiwMe2FjrqrS17f1y2mpxzZrafRs9e/W1jrqh2cpJPa8iIimQ==
-=======
 "@vtex/api@6.36.0":
   version "6.36.0"
   resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.36.0.tgz#debc0462cae4196a6580ded8ed88359dcb6ce31d"
   integrity sha512-kEIHIOA6oXCGq65TpQG6ZBA2r3qQ9SAgoMpjo87dZvbybvxTPI7mz8URKy4jKuArf1mkhzLu9EqsJ+xwljFySg==
->>>>>>> bf5b82e723fa95283064c198164cbea0233a4814
   dependencies:
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"
