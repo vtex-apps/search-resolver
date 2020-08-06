@@ -59,7 +59,7 @@ export const convertBiggyProduct = (
     description: product.description,
     items: skus,
     allSpecifications,
-    categoryId: "",
+    categoryId: product.categoryIds?.[0],
     productTitle: "",
     metaTagDescription: "",
     clusterHighlights: {},
@@ -100,7 +100,6 @@ export const convertBiggyProduct = (
 
   return convertedProduct
 }
-
 
 const getVariations = (sku: BiggySearchSKU): string[] => {
   return sku.attributes.map((attribute) => attribute.key)
@@ -262,13 +261,9 @@ const convertSKU = (
   }
 
   variations.forEach((variation) => {
-    const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == variation)
-    if (attributes != null && attributes.length > 0) {
-      item[variation] = []
-
-      attributes.forEach((attribute) => {
-        item[variation].push(attribute.labelValue)
-      })
+    const attribute = sku.attributes.find((attribute) => attribute.key == variation)
+    if (attribute != null) {
+      item[variation] = [attribute.value]
     }
   })
 
