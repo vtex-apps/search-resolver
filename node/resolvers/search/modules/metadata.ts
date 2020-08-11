@@ -10,9 +10,6 @@ import {
   findLastIndex,
   split,
   toLower,
-  reverse,
-  complement,
-  isNil,
 } from 'ramda'
 import { Functions } from '@gocommerce/utils'
 
@@ -26,6 +23,11 @@ const isTupleMap = compose<TupleString, string, boolean>(
   equals('c'),
   prop('1')
 )
+
+interface UnitData {
+  name: string
+  id: string
+}
 
 const getLastCategoryIndex = findLastIndex(isTupleMap)
 
@@ -120,9 +122,11 @@ const getPrimaryMetadata = (
   if (firstMap && firstMap.includes('specificationFilter')) {
     const cleanQuery = args.query || ''
     const name = head(cleanQuery.split('/')) || ''
+    const filterId = firstMap.split('_')[1]
     return {
       titleTag: getSpecificationFilterName(name),
       metaTagDescription: null,
+      id: filterId,
     }
   }
   if (firstMap === 'ft') {
@@ -139,30 +143,31 @@ const getPrimaryMetadata = (
 const getNameForRemainingMaps = async (
   remainingTuples: [string, string][],
   ctx: Context
-) => {
+): Promise<(UnitData | null)[]> => {
   const {
     vtex: { account },
     clients: { search },
   } = ctx
   const lastCategoryIndex = getLastCategoryIndex(remainingTuples)
   const isGC = Functions.isGoCommerceAcc(account)
-  const names = await Promise.all(
+  const names: (UnitData | null)[] = await Promise.all(
     remainingTuples.map(async ([query, map], index) => {
       if (map === 'c' && index === lastCategoryIndex && !isGC) {
         const cleanQuery = categoriesOnlyQuery(remainingTuples)
         const pagetype = await search.pageType(cleanQuery).catch(() => null)
         if (pagetype) {
-          return pagetype.name
+          return { name: pagetype.name, id: pagetype.id }
         }
       }
       if (map === 'b' && !isGC) {
         const brand = await search.pageType(decodeURI(query), 'map=b').catch(() => null)
         if (brand) {
-          return brand.name
+          return { name: brand.name, id: brand.id }
         }
       }
       if (map.includes('specificationFilter')) {
-        return getSpecificationFilterName(query)
+        const filterId = map.split('_')[1]
+        return { name: getSpecificationFilterName(query), id: filterId }
       }
       return null
     })
@@ -175,23 +180,20 @@ export const emptyTitleTag = {
   metaTagDescription: null,
 }
 
-type StringNull = string | null | undefined
-
 const removeNulls = <T>(array: (T | null | undefined)[]): T[] => array.filter(Boolean) as T[]
 
-const isNotNil = complement(isNil)
-const joinNames = compose<StringNull[], string[], string[], string>(
-  join(' - '),
-  reverse,
-  filter(isNotNil) as any
-)
+const joinNames = (unitDatas: (string | null | undefined)[]) => {
+  return (unitDatas.filter(Boolean) as string[])
+    .reverse()
+    .join(' - ')
+}
 
-const translateTitles = (metadata: SearchMetadata, otherNames: (string | null)[], ctx: Context) => {
+const translateTitles = (metadata: SearchMetadata, otherNames: (UnitData | null)[], ctx: Context) => {
   const messages: Message[] = []
   if (metadata.titleTag) {
     messages.push({ content: metadata.titleTag, context: metadata.id ?? undefined })
   }
-  messages.push(...removeNulls(otherNames).map(name => ({ content: name })))
+  messages.push(...removeNulls(otherNames).map(unitData => ({ content: unitData.name, context: unitData.id })))
   return translateManyToCurrentLanguage(messages, ctx)
 }
 
@@ -229,7 +231,7 @@ export const getSearchMetaData = async (
   const titleTagNames =
     shouldTranslateToUserLocale(ctx) ?
       (await translateTitles(metadata, otherNames, ctx))
-      : [metadata.titleTag, ...otherNames]
+      : [metadata.titleTag, ...otherNames.map(unit => unit?.name)]
   return {
     titleTag: joinNames(titleTagNames),
     metaTagDescription: formatTranslatableProp<SearchMetadata, 'metaTagDescription', 'id'>('metaTagDescription', 'id')(metadata, {}, ctx),
