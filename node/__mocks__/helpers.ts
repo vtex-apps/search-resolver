@@ -67,7 +67,7 @@ export const mockContext: any = {
   },
   state: {
     messagesBindingLanguage: {
-      loadMany: jest.fn((messages: any) => messages.map((message: any) => `${message.content}-${getLocale()}`))
+      loadMany: jest.fn((messages: any) => messages.map((message: any) => `${message.content}-${getLocale()}${message.context ? `-${message.context}` : ''}`))
     },
     messagesTenantLanguage: {
       load: jest.fn((message: any) => `${message.content}-${getTenantLocale()}`)

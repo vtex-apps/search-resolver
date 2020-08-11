@@ -138,7 +138,7 @@ describe('tests related to the searchMetadata query', () => {
     mockContext.vtex.tenant.locale = 'fr-FR'
 
     const result = await queries.searchMetadata({}, args, mockContext as any)
-    expect(result.titleTag).toBe('department/category-title-es-ES')
+    expect(result.titleTag).toBe('department/category-title-es-ES-1')
     expect(result.metaTagDescription).toBe(
       'department/category-metaTagDescription (((1))) <<<fr-FR>>>'
     )
@@ -156,7 +156,7 @@ describe('tests related to the searchMetadata query', () => {
     mockContext.vtex.tenant.locale = 'fr-FR'
 
     const result = await queries.searchMetadata({}, args, mockContext as any)
-    expect(result.titleTag).toBe('Large-es-ES - brand-es-ES - department/category-title-es-ES')
+    expect(result.titleTag).toBe('Large-es-ES-15 - brand-es-ES-1 - department/category-title-es-ES-1')
     expect(result.metaTagDescription).toBe(
       'department/category-metaTagDescription (((1))) <<<fr-FR>>>'
     )
