@@ -138,12 +138,29 @@ describe('tests related to the searchMetadata query', () => {
     mockContext.vtex.tenant.locale = 'fr-FR'
 
     const result = await queries.searchMetadata({}, args, mockContext as any)
-    expect(result.titleTag).toBe('department/category-title-es-ES')
+    expect(result.titleTag).toBe('department/category-title-es-ES-1')
     expect(result.metaTagDescription).toBe(
       'department/category-metaTagDescription (((1))) <<<fr-FR>>>'
     )
     expect(mockContext.clients.search.pageType).toBeCalledTimes(1)
     expect(mockContext.state.messagesBindingLanguage.loadMany).toBeCalledTimes(1)
+  })
+
+  test('get search metadata from pageType for category with brand & specification filter with locale difference', async () => {
+    const args = {
+      query: 'Department/Category/Brand/Large',
+      map: 'c,c,b,specificationFilter_15',
+    }
+
+    mockContext.vtex.locale = 'es-ES'
+    mockContext.vtex.tenant.locale = 'fr-FR'
+
+    const result = await queries.searchMetadata({}, args, mockContext as any)
+    expect(result.titleTag).toBe('Large-es-ES-15 - brand-es-ES-1 - department/category-title-es-ES-1')
+    expect(result.metaTagDescription).toBe(
+      'department/category-metaTagDescription (((1))) <<<fr-FR>>>'
+    )
+    expect(mockContext.clients.search.pageType).toBeCalledTimes(2)
   })
 })
 
