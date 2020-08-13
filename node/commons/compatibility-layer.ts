@@ -25,20 +25,13 @@ export const convertBiggyProduct = async (
   priceTable?: string,
   indexingType?: IndexingType,
 ) => {
-  const categories: string[] = product.categories
-    ? product.categories.map((_: any, index: number) => {
-        const subArray = product.categories.slice(0, index)
-        return `/${subArray.join('/')}/`
-      })
-    : []
+  const categories: string[] = []
+  const categoriesIds: string[] = []
 
-
-  const categoriesIds: string[] = product.categoryIds
-  ? product.categoryIds.map((_: any, index: number) => {
-      const subArray = product.categoryIds.slice(0, index + 1)
-      return `/${subArray.join('/')}/`
-    }).reverse()
-  : []
+  product.categoryTrees.forEach((categoryTree) => {
+    categories.push(`/${categoryTree.categoryNames.join('/')}/`)
+    categoriesIds.push(`/${categoryTree.categoryIds.join('/')}/`)
+  })
 
   const skus: SearchItem[] = (product.skus || []).map(
     convertSKU(product, indexingType, tradePolicy)

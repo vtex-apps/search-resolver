@@ -127,6 +127,7 @@ interface BiggySearchProduct {
   specificationGroups: string
   textAttributes: BiggyTextAttribute[]
   split: BiggySplit
+  categoryTrees: BiggyCategoryTree[]
 }
 
 interface BiggySplit {
@@ -191,4 +192,9 @@ interface BiggyTextAttribute {
   labelValue: string
   key: string
   value: string
+}
+
+interface BiggyCategoryTree {
+  categoryNames: string[]
+  categoryIds: string[]
 }
