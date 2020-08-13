@@ -125,12 +125,14 @@ export const convertBiggyProduct = async (
     })
   }
 
-  allSpecifications.forEach((specification) => {
-    const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == specification)
-    convertedProduct[specification] = attributes.map((attribute) => {
-      attribute.labelValue
+  if (product.textAttributes) {
+    allSpecifications.forEach((specification) => {
+      const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == specification)
+      convertedProduct[specification] = attributes.map((attribute) => {
+        attribute.labelValue
+      })
     })
-  })
+  }
 
   allSpecificationsGroups.forEach((specificationGroup) => {
     convertedProduct[specificationGroup] = specificationGroups[specificationGroup]
