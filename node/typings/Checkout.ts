@@ -243,4 +243,9 @@ interface SimulationPayload {
   isCheckedIn?: boolean
   priceTables?: string[]
   marketingData?: Record<string, string>
+  shippingData?: ShippingData
+}
+
+interface ShippingData {
+  logisticsInfo?: { regionId?: string }[]
 }
