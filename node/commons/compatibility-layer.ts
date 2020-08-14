@@ -23,6 +23,7 @@ export const convertBiggyProduct = async (
   simulationBehavior: 'skip' | 'default' | null,
   tradePolicy?: string,
   priceTable?: string,
+  regionId?: string,
   indexingType?: IndexingType,
 ) => {
   const categories: string[] = []
@@ -86,7 +87,8 @@ export const convertBiggyProduct = async (
   if (simulationBehavior === 'default') {
     const simulationPayload: SimulationPayload = {
       priceTables: priceTable ? [priceTable] : undefined,
-      items: getSimulationPayloads(convertedProduct)
+      items: getSimulationPayloads(convertedProduct),
+      shippingData: { logisticsInfo: [{ regionId }] }
     }
 
     const simulation = await checkout.simulation(simulationPayload)
