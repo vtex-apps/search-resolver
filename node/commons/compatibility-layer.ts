@@ -29,7 +29,7 @@ export const convertBiggyProduct = async (
   const categories: string[] = []
   const categoriesIds: string[] = []
 
-  product.categoryTrees.forEach((categoryTree) => {
+  product.categoryTrees?.forEach((categoryTree) => {
     categories.push(`/${categoryTree.categoryNames.join('/')}/`)
     categoriesIds.push(`/${categoryTree.categoryIds.join('/')}/`)
   })
@@ -38,9 +38,7 @@ export const convertBiggyProduct = async (
     convertSKU(product, indexingType, tradePolicy)
   )
 
-  product.productSpecifications = product.productSpecifications ?? []
-
-  const allSpecifications = product.productSpecifications.concat(getSKUSpecifications(product))
+  const allSpecifications = (product.productSpecifications ?? []).concat(getSKUSpecifications(product))
 
   const specificationGroups = product.specificationGroups ? JSON.parse(product.specificationGroups) : {}
 
