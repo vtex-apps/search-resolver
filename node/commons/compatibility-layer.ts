@@ -85,15 +85,25 @@ export const convertBiggyProduct = async (
   }
 
   if (simulationBehavior === 'default') {
-    const simulationPayload: SimulationPayload = {
-      priceTables: priceTable ? [priceTable] : undefined,
-      items: getSimulationPayloads(convertedProduct),
-      shippingData: { logisticsInfo: [{ regionId }] }
-    }
+    const payloadItems = getSimulationPayloads(convertedProduct)
 
-    const simulation = await checkout.simulation(simulationPayload)
+    const simulationPayloads: SimulationPayload[] = payloadItems.map((item) => {
+       return {
+        priceTables: priceTable ? [priceTable] : undefined,
+        items: [item],
+        shippingData: { logisticsInfo: [{ regionId }] }
+      }
+    })
 
-    const groupedBySkuId = groupBy(prop("id"), simulation.items)
+    const simulationPromises = simulationPayloads.map((payload) => {
+      return checkout.simulation(payload)
+    })
+
+    const simulations = await Promise.all(simulationPromises)
+
+    const simulationItems = simulations.map((simulation) => simulation.items).reduce((acc, val) => acc.concat(val), []).filter(distinct)
+
+    const groupedBySkuId = groupBy(prop("id"), simulationItems)
 
     const orderItemsBySellerById: OrderFormItemBySellerById = mergeAll(Object.entries(groupedBySkuId).map(([id, items]) => {
       const groupedBySeller = indexBy((prop("seller")), items)
@@ -131,6 +141,11 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
   if (orderFormItems) {
     searchItem.sellers.forEach((seller) => {
       const orderFormItem = orderFormItems[seller.sellerId]
+
+      if (orderFormItem == null) {
+        console.warn(`Product ${searchItem.itemId} is unavailable for seller ${seller.sellerId}`)
+        return
+      }
 
       seller.commertialOffer.Price = orderFormItem.price / 100
       seller.commertialOffer.PriceValidUntil = orderFormItem.priceValidUntil

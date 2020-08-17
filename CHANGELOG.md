@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Add calls to simulation for product sellers on compatibility layer.
+
 ## [1.15.1] - 2020-08-14
 
 ### Fixed
