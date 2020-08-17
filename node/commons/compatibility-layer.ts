@@ -149,7 +149,7 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
 
       seller.commertialOffer.Price = orderFormItem.price / 100
       seller.commertialOffer.PriceValidUntil = orderFormItem.priceValidUntil
-      seller.commertialOffer.ListPrice = orderFormItem.listPrice / 10
+      seller.commertialOffer.ListPrice = orderFormItem.listPrice / 100
     })
   }
 
