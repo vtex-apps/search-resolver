@@ -29,7 +29,7 @@ export const convertBiggyProduct = async (
   const categories: string[] = []
   const categoriesIds: string[] = []
 
-  product.categoryTrees.forEach((categoryTree) => {
+  product.categoryTrees?.forEach((categoryTree) => {
     categories.push(`/${categoryTree.categoryNames.join('/')}/`)
     categoriesIds.push(`/${categoryTree.categoryIds.join('/')}/`)
   })
@@ -38,11 +38,11 @@ export const convertBiggyProduct = async (
     convertSKU(product, indexingType, tradePolicy)
   )
 
-  const allSpecifications = product.productSpecifications.concat(getSKUSpecifications(product))
+  const allSpecifications = (product.productSpecifications ?? []).concat(getSKUSpecifications(product))
 
   const specificationGroups = product.specificationGroups ? JSON.parse(product.specificationGroups) : {}
 
-  const allSpecificationsGroups = [ ...Object.keys(specificationGroups) ]
+  const allSpecificationsGroups = [...Object.keys(specificationGroups)]
 
   const brandId = product.brandId ? Number(product.brandId) : -1
 
@@ -88,7 +88,7 @@ export const convertBiggyProduct = async (
     const payloadItems = getSimulationPayloads(convertedProduct)
 
     const simulationPayloads: SimulationPayload[] = payloadItems.map((item) => {
-       return {
+      return {
         priceTables: priceTable ? [priceTable] : undefined,
         items: [item],
         shippingData: { logisticsInfo: [{ regionId }] }
@@ -108,7 +108,7 @@ export const convertBiggyProduct = async (
     const orderItemsBySellerById: OrderFormItemBySellerById = mergeAll(Object.entries(groupedBySkuId).map(([id, items]) => {
       const groupedBySeller = indexBy((prop("seller")), items)
 
-      return {[id]: groupedBySeller}
+      return { [id]: groupedBySeller }
     }))
 
     convertedProduct.items.map((item) => {
@@ -123,12 +123,14 @@ export const convertBiggyProduct = async (
     })
   }
 
-  allSpecifications.forEach((specification) => {
-    const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == specification)
-    convertedProduct[specification] = attributes.map((attribute) => {
-      attribute.labelValue
+  if (product.textAttributes) {
+    allSpecifications.forEach((specification) => {
+      const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == specification)
+      convertedProduct[specification] = attributes.map((attribute) => {
+        attribute.labelValue
+      })
     })
-  })
+  }
 
   allSpecificationsGroups.forEach((specificationGroup) => {
     convertedProduct[specificationGroup] = specificationGroups[specificationGroup]
@@ -434,14 +436,14 @@ export const buildBreadcrumb = (
 export const buildAttributePath = (selectedFacets: SelectedFacet[]) => {
   return selectedFacets
     ? selectedFacets.reduce((attributePath, facet) => {
-        if (facet.key === 'priceRange') {
-          facet.key = 'price'
-          facet.value = facet.value.replace(` TO `, ':')
-        }
+      if (facet.key === 'priceRange') {
+        facet.key = 'price'
+        facet.value = facet.value.replace(` TO `, ':')
+      }
 
-        return facet.key !== 'ft'
-          ? `${attributePath}${facet.key}/${removeDiacriticsFromURL(facet.value).replace(/ |%20/, '-')}/`
-          : attributePath
-      }, '')
+      return facet.key !== 'ft'
+        ? `${attributePath}${facet.key}/${removeDiacriticsFromURL(facet.value).replace(/ |%20/, '-')}/`
+        : attributePath
+    }, '')
     : ''
 }
