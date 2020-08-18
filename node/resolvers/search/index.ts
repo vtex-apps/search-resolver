@@ -461,7 +461,7 @@ export const queries = {
     const productResolver = args.productOriginVtex
       ? productsCatalog
       : productsBiggy
-    const convertedProducts = productResolver(result, ctx, simulationBehavior)
+    const convertedProducts = productResolver({ ctx, simulationBehavior, searchResult: result })
 
     return {
       searchState,
@@ -563,9 +563,11 @@ export const queries = {
       : productsBiggy
 
     const convertedProducts = productResolver(
-      result,
-      ctx,
-      args.simulationBehavior
+      {
+        ctx,
+        searchResult: result,
+        simulationBehavior: args.simulationBehavior
+      }
     )
 
     return { ...result, products: convertedProducts }
