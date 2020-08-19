@@ -54,6 +54,7 @@ interface SuggestionProductsArgs {
   indexingType?: IndexingType
   productOriginVtex: boolean
   simulationBehavior: 'skip' | 'default' | null
+  sellers?: RegionSeller[]
 }
 
 interface SuggestionSearchesArgs {

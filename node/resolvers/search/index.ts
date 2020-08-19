@@ -251,15 +251,18 @@ const getTranslatedSearchTerm = async (
 }
 
 const getSellers = async (
-  account: string,
-  regionId: string,
   vbase: VBase,
-  checkout: Checkout
+  checkout: Checkout,
+  regionId?: string,
 ) => {
+  if (!regionId) {
+    return []
+  }
+
   const result = await staleFromVBaseWhileRevalidate(
     vbase,
-    `${SELLERS_BUCKET}-${(Math.random() * 10000).toFixed(0)}`,
-    `${account}-${regionId}`,
+    `${SELLERS_BUCKET}`,
+    regionId,
     async (params: { regionId: string; checkout: Checkout }) => params.checkout.regions(params.regionId),
     { regionId, checkout },
     {
@@ -267,7 +270,7 @@ const getSellers = async (
     }
   )
 
-  return result?.find((seller: any) => seller.id === regionId)?.sellers
+  return result?.find((region: any) => region.id === regionId)?.sellers
 }
 
 export const queries = {
@@ -314,9 +317,7 @@ export const queries = {
       vtex: { segment, account },
     } = ctx
 
-    const sellers = await getSellers(account, segment.regionId, vbase, checkout)
-
-    console.log(sellers)
+    const sellers = await getSellers(vbase, checkout, segment?.regionId,)
 
     const biggyArgs = {
       searchState,
@@ -467,7 +468,7 @@ export const queries = {
     )) as ProductSearchInput
 
     const { biggySearch, vbase, checkout } = ctx.clients
-    const { segment, account } = ctx.vtex
+    const { segment } = ctx.vtex
     const {
       from,
       to,
@@ -479,7 +480,7 @@ export const queries = {
       simulationBehavior,
     } = args
 
-    const sellers = await getSellers(account, segment.regionId, vbase, checkout)
+    const sellers = await getSellers(vbase, checkout, segment?.regionId)
 
     const count = to - from + 1
     const page = Math.round((to + 1) / count)
@@ -597,13 +598,19 @@ export const queries = {
     args: SuggestionProductsArgs,
     ctx: Context
   ) => {
-    const { biggySearch } = ctx.clients
+    const {
+      clients: { biggySearch, checkout, vbase },
+      vtex: { segment },
+    } = ctx
+
+    const sellers = await getSellers(vbase, checkout, segment?.regionId)
 
     const tradePolicy = path<string | undefined>(['segment', 'channel'], args)
 
     const result = await biggySearch.suggestionProducts({
       ...args,
       tradePolicy,
+      sellers
     })
 
     const productResolver = args.productOriginVtex
