@@ -37,6 +37,12 @@ interface SearchResultArgs {
   indexingType?: IndexingType
   fullText: string
   searchState?: string
+  sellers?: RegionSeller[]
+}
+
+interface RegionSeller {
+  id: string;
+  name: string;
 }
 
 interface SuggestionProductsArgs {

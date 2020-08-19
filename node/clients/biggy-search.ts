@@ -14,6 +14,13 @@ const buildPathFromArgs = (args: SearchResultArgs) => {
   return path.join(attributePath.split('%20').join('-'), policyAttr)
 }
 
+const buildBSearchFilterCookie = (sellers?: RegionSeller[]) =>
+  !sellers || sellers.length === 0
+    ? ''
+    : sellers.reduce((cookie: string, seller: RegionSeller, idx: number) => {
+      return `${cookie}${idx > 0 ? '/' : ''}${seller.id}`
+    }, 'bsearch-filter=skuSeller#')
+
 export class BiggySearchClient extends ExternalClient {
   private store: string
 
@@ -134,6 +141,7 @@ export class BiggySearchClient extends ExternalClient {
       fuzzy,
       leap,
       searchState,
+      sellers,
     } = args
 
     const url = `${this.store}/api/split/attribute_search/${buildPathFromArgs(
@@ -152,6 +160,9 @@ export class BiggySearchClient extends ExternalClient {
         ...parseState(searchState),
       },
       metric: 'search-result',
+      headers: {
+        Cookie: buildBSearchFilterCookie(sellers),
+      },
     })
 
     return result.data
@@ -167,6 +178,7 @@ export class BiggySearchClient extends ExternalClient {
       fuzzy,
       leap,
       searchState,
+      sellers,
     } = args
 
     const url = `${this.store}/api/split/product_search/${buildPathFromArgs(
@@ -185,6 +197,9 @@ export class BiggySearchClient extends ExternalClient {
         ...parseState(searchState),
       },
       metric: 'search-result',
+      headers: {
+        Cookie: buildBSearchFilterCookie(sellers),
+      },
     })
 
     return result.data
@@ -220,7 +235,7 @@ export class BiggySearchClient extends ExternalClient {
         params: {
           term: decodeURIComponent(fullText),
         },
-        metric: 'search-autcomplete-suggestions',
+        metric: 'search-autocomplete-suggestions',
       }
     )
 
