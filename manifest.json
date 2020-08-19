@@ -51,7 +51,7 @@
     },
     {
       "attrs": {
-        "host": "exitocol.vtexcommercebeta.com.br",
+        "host": "{{account}}.vtexcommercebeta.com.br",
         "path": "/*"
       },
       "name": "outbound-access"

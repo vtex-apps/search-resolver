@@ -316,6 +316,8 @@ export const queries = {
 
     const sellers = await getSellers(account, segment.regionId, vbase, checkout)
 
+    console.log(sellers)
+
     const biggyArgs = {
       searchState,
       query: fullText,
