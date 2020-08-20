@@ -14,7 +14,7 @@ interface OrderFormItemBySellerById {
 }
 
 interface OrderFormItemBySeller {
-  [sellerId: string]: OrderFormItem
+  [sellerId: string]: OrderFormItem & { paymentData: PaymentData }
 }
 
 export const convertBiggyProduct = async (
@@ -80,7 +80,7 @@ export const convertBiggyProduct = async (
       items: []
     },
     selectedProperties,
-    // This field is only maintaned for backwards compatibility reasons, it shouldnt exist.
+    // This field is only maintained for backwards compatibility reasons, it shouldn't exist.
     skus: skus.find(sku => sku.sellers && sku.sellers.length > 0),
   }
 
@@ -101,7 +101,7 @@ export const convertBiggyProduct = async (
 
     const simulations = await Promise.all(simulationPromises)
 
-    const simulationItems = simulations.map((simulation) => simulation.items).reduce((acc, val) => acc.concat(val), []).filter(distinct)
+    const simulationItems = simulations.map((simulation) => simulation.items.map(item => ({ ...item, paymentData: simulation.paymentData }))).reduce((acc, val) => acc.concat(val), [])
 
     const groupedBySkuId = groupBy(prop("id"), simulationItems)
 
@@ -152,6 +152,30 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
       seller.commertialOffer.Price = orderFormItem.price / 100
       seller.commertialOffer.PriceValidUntil = orderFormItem.priceValidUntil
       seller.commertialOffer.ListPrice = orderFormItem.listPrice / 100
+
+      const [installmentOption] = orderFormItem.paymentData.installmentOptions
+      const { installments } = installmentOption
+      const correctInstallment = installments.reduce((previous, current) => {
+        if (previous.hasInterestRate && !current.hasInterestRate) {
+          return current
+        }
+
+        if ((previous.hasInterestRate === current.hasInterestRate) && current.count > previous.count) {
+          return current
+        }
+
+        return previous
+      })
+
+      seller.commertialOffer.Installments = [{
+        Value: correctInstallment.value / 100,
+        InterestRate: 0,
+        TotalValuePlusInterestRate: correctInstallment.total / 100,
+        NumberOfInstallments: correctInstallment.count,
+        Name: '',
+        PaymentSystemName: '',
+        PaymentSystemGroupName: '',
+      }]
     })
   }
 
