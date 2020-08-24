@@ -169,7 +169,7 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
 
       seller.commertialOffer.Installments = [{
         Value: correctInstallment.value / 100,
-        InterestRate: 0,
+        InterestRate: correctInstallment.interestRate,
         TotalValuePlusInterestRate: correctInstallment.total / 100,
         NumberOfInstallments: correctInstallment.count,
         Name: '',
