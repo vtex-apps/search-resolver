@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Simulation fills the installment field.
+
 ## [1.15.3] - 2020-08-18
 
 ### Fixed
