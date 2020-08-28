@@ -153,7 +153,14 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
       seller.commertialOffer.PriceValidUntil = orderFormItem.priceValidUntil
       seller.commertialOffer.ListPrice = orderFormItem.listPrice / 100
 
-      const [installmentOption] = orderFormItem.paymentData.installmentOptions
+      const installmentOptions = orderFormItem?.paymentData?.installmentOptions || []
+
+      const [installmentOption] = installmentOptions
+
+      if (!installmentOption) {
+        return
+      }
+
       const { installments } = installmentOption
       const correctInstallment = installments.reduce((previous, current) => {
         if (previous.hasInterestRate && !current.hasInterestRate) {
