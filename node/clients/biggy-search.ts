@@ -39,7 +39,7 @@ export class BiggySearchClient extends ExternalClient {
       `${this.store}/api/suggestion_searches`,
       {
         params: {
-          term,
+          term: decodeURIComponent(term),
         },
         metric: 'suggestion-searches',
       }
@@ -75,7 +75,7 @@ export class BiggySearchClient extends ExternalClient {
     const result = await this.http.post(
       `${this.store}/api/suggestion_products`,
       {
-        term,
+        term: decodeURIComponent(term),
         attributes,
       },
       {
@@ -104,7 +104,7 @@ export class BiggySearchClient extends ExternalClient {
 
     const result = await this.http.getRaw(url, {
       params: {
-        query,
+        query: decodeURIComponent(query || ''),
         page,
         count,
         sort,
@@ -142,7 +142,7 @@ export class BiggySearchClient extends ExternalClient {
 
     const result = await this.http.getRaw(url, {
       params: {
-        query,
+        query: decodeURIComponent(query || ''),
         page,
         count,
         sort,
@@ -175,7 +175,7 @@ export class BiggySearchClient extends ExternalClient {
 
     const result = await this.http.getRaw(url, {
       params: {
-        query,
+        query: decodeURIComponent(query || ''),
         page,
         count,
         sort,
@@ -199,7 +199,7 @@ export class BiggySearchClient extends ExternalClient {
 
     const result = await this.http.getRaw(url, {
       params: {
-        query: fullText,
+        query: decodeURIComponent(fullText),
       },
       metric: 'search-result',
     })
@@ -218,7 +218,7 @@ export class BiggySearchClient extends ExternalClient {
       `${this.store}/api/suggestion_searches`,
       {
         params: {
-          term: fullText,
+          term: decodeURIComponent(fullText),
         },
         metric: 'search-autcomplete-suggestions',
       }
@@ -234,7 +234,7 @@ export class BiggySearchClient extends ExternalClient {
 
     const result = await this.http.getRaw(url, {
       params: {
-        query: fullText,
+        query: decodeURIComponent(fullText),
       },
       metric: 'search-correction',
     })
@@ -251,7 +251,7 @@ export class BiggySearchClient extends ExternalClient {
 
     const result = await this.http.getRaw(url, {
       params: {
-        query: fullText,
+        query: decodeURIComponent(fullText),
       },
       metric: 'search-suggestions',
     })
