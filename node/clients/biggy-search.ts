@@ -175,7 +175,7 @@ export class BiggySearchClient extends ExternalClient {
 
     const result = await this.http.getRaw(url, {
       params: {
-        query: decodeURIComponent(query || ''),
+        query: decodeURIComponent(query ?? ''),
         page,
         count,
         sort,
