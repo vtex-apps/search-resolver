@@ -317,7 +317,7 @@ export const queries = {
       },
       breadcrumb: buildBreadcrumb(
         result.attributes || [],
-        args.fullText,
+        decodeURIComponent(args.fullText),
         args.selectedFacets
       ),
     }
