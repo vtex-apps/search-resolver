@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.15.6] - 2020-09-03
+
 ### Fixed
 - Double encoded `fulltext`.
 
