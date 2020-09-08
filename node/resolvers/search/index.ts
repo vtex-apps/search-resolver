@@ -461,7 +461,10 @@ export const queries = {
     const productResolver = args.productOriginVtex
       ? productsCatalog
       : productsBiggy
-    const convertedProducts = productResolver({ ctx, simulationBehavior, searchResult: result })
+    const convertedProducts = await productResolver({ ctx, simulationBehavior, searchResult: result })
+
+    // Add prefix to the cacheId to avoid conflicts. Repeated cacheIds in the same page are causing strange behavior.
+    convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
 
     return {
       searchState,
