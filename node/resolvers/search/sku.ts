@@ -1,4 +1,4 @@
-import { find, head, map, replace, slice } from 'ramda'
+import { find, head, map } from 'ramda'
 import { formatTranslatableProp, addContextToTranslatableString } from '../../utils/i18n'
 
 export const resolvers = {
@@ -25,15 +25,17 @@ export const resolvers = {
     images: (
       { images = [] }: SearchItem,
       { quantity }: { quantity: number }
-    ) =>
-      map(
-        image => ({
+    ) => {
+      const someImages = quantity > 0 ? images.slice(0, quantity) : images
+
+      return someImages.map((image) => {
+        return {
           cacheId: image.imageId,
           ...image,
-          imageUrl: replace('http://', 'https://', image.imageUrl),
-        }),
-        quantity > 0 ? slice(0, quantity, images) : images
-      ),
+          imageUrl: image.imageUrl ? image.imageUrl.replace('http://', 'https://') : '',
+        }
+      })
+    },
 
     kitItems: (
       { kitItems }: SearchItem,
