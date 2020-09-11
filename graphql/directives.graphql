@@ -1,0 +1,3 @@
+directive @withSegment on FIELD_DEFINITION
+
+directive @toVtexAssets on FIELD_DEFINITION

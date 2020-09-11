@@ -1,13 +1,14 @@
 {
   "vendor": "vtex",
-  "name": "search-resolver",
-  "version": "1.15.7",
+  "name": "carrefour-resolver",
+  "version": "0.0.3",
   "title": "GraphQL resolver for the VTEX store APIs",
   "description": "GraphQL resolvers for the VTEX API for the catalog and orders.",
   "credentialType": "absolute",
   "builders": {
     "node": "6.x",
-    "docs": "0.x"
+    "docs": "0.x",
+    "graphql": "1.x"
   },
   "dependencies": {
     "vtex.messages": "1.x",

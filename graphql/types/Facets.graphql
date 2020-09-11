@@ -1,0 +1,115 @@
+type QueryArgs {
+  map: String
+  query: String
+  selectedFacets: [SelectedFacet]
+}
+
+type Range {
+  from: Float
+  to: Float
+}
+
+type FacetValue {
+  id: ID
+  quantity: Int!
+  name: String @translatableV2
+  key: String
+  value: String
+  selected: Boolean
+  children: [FacetValue]
+  range: Range
+  link: String
+  linkEncoded: String
+  href: String
+}
+
+enum FilterType {
+  TEXT
+  NUMBER
+  CATEGORYTREE
+  BRAND
+  PRICERANGE
+}
+
+type Facet {
+  name: String @translatableV2
+  values: [FacetValue]
+  type: FilterType
+  hidden: Boolean
+}
+
+type Facets {
+  departments: [DepartmentFacet]
+  brands: [BrandFacet]
+  specificationFilters: [FilterFacets]
+  categoriesTrees: [CategoriesTreeFacet]
+  priceRanges: [PriceRangesFacet]
+  recordsFiltered: Int
+  queryArgs: QueryArgs
+  facets: [Facet]
+  breadcrumb: [SearchBreadcrumb]
+}
+
+type DepartmentFacet {
+  id: ID!
+  quantity: Int!
+  name: String @translatableV2
+  link: String!
+  linkEncoded: String!
+  map: String
+  value: String!
+  selected: Boolean!
+}
+
+type BrandFacet {
+  id: ID!
+  quantity: Int!
+  name: String!
+  link: String!
+  linkEncoded: String!
+  map: String
+  value: String!
+  selected: Boolean!
+}
+
+type PriceRangesFacet {
+  quantity: Int!
+  name: String @translatableV2
+  link: String!
+  linkEncoded: String!
+  map: String
+  value: String!
+  selected: Boolean!
+  slug: String
+}
+
+type CategoriesTreeFacet {
+  id: ID!
+  quantity: Int!
+  name: String @translatableV2
+  link: String!
+  linkEncoded: String!
+  """
+  Contains slugified links according to the store structure. /:department/d, /:category/:subcategory, etc
+  """
+  href: String!
+  map: String
+  value: String!
+  children: [CategoriesTreeFacet]
+  selected: Boolean!
+}
+
+type FilterFacet {
+  quantity: Int!
+  name: String @translatableV2
+  link: String!
+  linkEncoded: String!
+  map: String
+  value: String!
+  selected: Boolean!
+}
+
+type FilterFacets {
+  name: String
+  facets: [FilterFacet]
+}

@@ -1,0 +1,40 @@
+type ProductSearch {
+  products: [Product]
+  recordsFiltered: Int
+  titleTag: String
+  metaTagDescription: String
+  breadcrumb: [SearchBreadcrumb]
+  canonical: String
+  suggestion: SearchSuggestions
+  correction: SearchCorrection
+  operator: Operator
+  fuzzy: String
+  searchState: String
+  banners: [SearchBanner]
+  redirect: String
+}
+
+enum Operator {
+  and
+  or
+}
+
+type SearchBreadcrumb {
+  name: String @translatableV2
+  href: String
+}
+
+type SearchMetadata {
+  titleTag: String
+  metaTagDescription: String @translatableV2
+}
+
+input SelectedFacetInput {
+  key: String
+  value: String
+}
+
+type SelectedFacet {
+  key: String
+  value: String
+}

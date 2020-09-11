@@ -1,0 +1,418 @@
+type Product {
+  """
+  Brand of the product
+  """
+  brand: String @translatableV2
+  """
+  Id of the brand of the product
+  """
+  brandId: Int
+  """
+  linkText is used as cacheId
+  """
+  cacheId: ID
+  categoryId: ID
+  """
+  Categories of the product
+  """
+  categories: [String]
+    @deprecated(
+      reason: "Use 'categoryTree' field for internationalization support"
+    )
+  """
+  Product's categories
+  """
+  categoryTree: [Category]
+  """
+  List of related products
+  """
+  clusterHighlights: [ClusterHighlight]
+  productClusters: [ProductClusters]
+  """
+  Product description
+  """
+  description: String @translatableV2
+  """
+  SKU objects of the product
+  """
+  items(filter: ItemsFilter): [SKU]
+  """
+  List of SKU Specifications
+  """
+  skuSpecifications: [SkuSpecification]
+  """
+  Product URL
+  """
+  link: String
+  """
+  Product slug
+  """
+  linkText: String
+  """
+  Product ID
+  """
+  productId: ID
+  """
+  Product name
+  """
+  productName: String @translatableV2
+  """
+  Array of product properties
+  """
+  properties: [Property]
+  """
+  Array of product properties
+  """
+  propertyGroups: [PropertyGroup]
+  """
+  Product reference
+  """
+  productReference: String
+  """
+  Title used by html tag
+  """
+  titleTag: String @translatableV2
+  """
+  Description used by html tag
+  """
+  metaTagDescription: String @translatableV2
+  """
+  Related Products
+  """
+  recommendations: Recommendation
+  """
+  JSON specification of the product
+  """
+  jsonSpecifications: String
+  """
+  List of benefits associated with this product
+  """
+  benefits: [Benefit]
+  itemMetadata: ItemMetadata
+  """
+  Array of product SpecificationGroup
+  """
+  specificationGroups: [SpecificationGroup]
+
+  """
+  Returns highest and lowest prices for available SKUs in product.
+  """
+  priceRange: ProductPriceRange
+
+  """
+  Product Release Date, for list ordering and product cluster highlight
+  """
+  releaseDate: String
+
+  """
+  Product properties that will be selected by default. e.g: {key: "Color", value: "Blue"}
+  """
+  selectedProperties: [SelectedProperty]
+}
+
+type SelectedProperty {
+  key: String
+  value: String
+}
+
+enum ItemsFilter {
+  """
+  Returns all items, same as no filter.
+  """
+  ALL
+  """
+  Returns only the first available item. Returns first if no item is available.
+  """
+  FIRST_AVAILABLE
+  """
+  Returns all available items. Returns first if no item is available.
+  """
+  ALL_AVAILABLE
+}
+
+type ProductPriceRange {
+  sellingPrice: PriceRange
+  listPrice: PriceRange
+}
+
+type PriceRange {
+  highPrice: Float
+  lowPrice: Float
+}
+
+type OnlyProduct {
+  brand: String
+  categoryId: ID
+  categoryTree: [Category]
+  clusterHighlights: [ClusterHighlight]
+  productClusters: [ProductClusters]
+  description: String
+  link: String
+  linkText: String
+  productId: ID
+  productName: String
+  properties: [Property]
+  propertyGroups: [PropertyGroup]
+  productReference: String
+  recommendations: Recommendation
+  jsonSpecifications: String
+}
+
+type ProductClusters {
+  id: ID
+  name: String
+}
+
+type ClusterHighlight {
+  id: ID
+  name: String
+}
+
+type Seller {
+  sellerId: ID
+  sellerName: String
+  addToCartLink: String
+  sellerDefault: Boolean
+  commertialOffer: Offer
+}
+
+type Recommendation {
+  buy: [Product]
+  view: [Product]
+  similars: [Product]
+}
+
+type SKU {
+  itemId: ID
+  name: String @translatableV2
+  nameComplete: String @translatableV2
+  complementName: String
+  ean: String
+  referenceId: [Reference]
+  measurementUnit: String
+  unitMultiplier: Float
+  kitItems: [KitItem]
+  images(quantity: Int): [Image]
+  videos: [Video]
+  sellers: [Seller]
+  variations: [Property]
+  attachments: [Attachment] @deprecated(reason: "Use itemMetaData instead")
+  estimatedDateArrival: String
+}
+
+type SkuSpecification {
+  field: SKUSpecificationField
+  values: [SKUSpecificationValue]
+}
+
+type SKUSpecificationField {
+  originalName: String
+  name: String @translatableV2
+}
+
+type SKUSpecificationValue {
+  originalName: String
+  name: String @translatableV2
+}
+
+type productSpecification {
+  fieldName: String @translatableV2
+  fieldValues: [String] @translatableV2
+}
+
+input ProductUniqueIdentifier {
+  field: ProductUniqueIdentifierField!
+  value: ID!
+}
+
+enum ProductUniqueIdentifierField {
+  id
+  slug
+  ean
+  reference
+  sku
+}
+
+type KitItem {
+  itemId: ID
+  amount: Int
+  product: OnlyProduct
+  sku: SKU
+}
+
+type Attachment {
+  id: ID
+  name: String
+  required: Boolean
+  domainValues: [DomainValues]
+}
+
+type DomainValues {
+  FieldName: String
+  MaxCaracters: String
+  DomainValues: String
+}
+
+enum InstallmentsCriteria {
+  MAX_WITHOUT_INTEREST
+  MAX_WITH_INTEREST
+  MAX # Equivalent to MAX_WITHOUT_INTEREST. Kept for backwards-compatibility
+  MIN
+  ALL
+}
+
+type Offer {
+  Installments(
+    criteria: InstallmentsCriteria = ALL
+    rates: Boolean = true
+  ): [Installment]
+  Price: Float
+  ListPrice: Float
+  spotPrice: Float
+  PriceWithoutDiscount: Float
+  RewardValue: Float
+  PriceValidUntil: String
+  AvailableQuantity: Float
+  Tax: Float
+  taxPercentage: Float
+  CacheVersionUsedToCallCheckout: String
+  DeliverySlaSamples: [DeliverySlaSamples]
+  """
+  List of discount highlights
+  """
+  discountHighlights: [Discount!]
+  teasers: [Teaser!]
+  """
+  List of SKUs for gifts associated with the product
+  """
+  giftSkuIds: [String]
+  """
+  List of gifts associated with the product
+  """
+  gifts: [Gift]
+}
+
+type Gift {
+  productName: String
+  skuName: String
+  brand: String
+  linkText: String
+  description: String
+  images: [GiftImage]
+}
+
+type GiftImage {
+  imageUrl: String
+  imageLabel: String
+  imageText: String
+}
+
+type Teaser {
+  name: String
+  conditions: TeaserCondition
+  effects: TeaserEffects
+}
+
+type TeaserCondition {
+  minimumQuantity: Int
+  parameters: [TeaserValue]
+}
+
+type TeaserEffects {
+  parameters: [TeaserValue]
+}
+
+type TeaserValue {
+  name: String
+  value: String
+}
+
+"""
+Discount object
+"""
+type Discount {
+  """
+  Discount name
+  """
+  name: String
+}
+
+type DeliverySlaSamples {
+  DeliverySlaPerTypes: [DeliverySlaPerTypes]
+  Region: Region
+}
+
+type DeliverySlaPerTypes {
+  TypeName: String
+  Price: Float
+  EstimatedTimeSpanToDelivery: String
+}
+
+type Region {
+  IsPersisted: Boolean
+  IsRemoved: Boolean
+  Id: ID
+  Name: String
+  CountryCode: String
+  ZipCode: String
+  CultureInfoName: String
+}
+
+type Image {
+  cacheId: ID
+  imageId: ID
+  imageLabel: String
+  imageTag: String
+  imageUrl: String @toVtexAssets
+  imageText: String
+}
+
+type Video {
+  videoUrl: String
+}
+
+type SpecificationGroup {
+  originalName: String
+  name: String @translatableV2
+  specifications: [SpecificationGroupProperty]
+}
+
+type SpecificationGroupProperty {
+  originalName: String
+  name: String @translatableV2
+  values: [String] @translatableV2
+}
+
+type Property {
+  name: String @translatableV2
+  values: [String] @translatableV2
+}
+
+type PropertyGroup {
+  name: String
+  properties: [String]
+}
+
+type Installment {
+  Value: Float
+  InterestRate: Float
+  TotalValuePlusInterestRate: Float
+  NumberOfInstallments: Int
+  PaymentSystemName: String
+  PaymentSystemGroupName: String
+  Name: String
+}
+
+type Reference {
+  Key: String
+  Value: String
+}
+
+enum CrossSelingInputEnum {
+  buy
+  similars
+  view
+  viewAndBought
+  accessories
+  suggestions
+}

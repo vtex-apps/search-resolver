@@ -1,0 +1,10 @@
+type Banners {
+  banners: [SearchBanner]
+}
+
+type SearchBanner {
+  id: String
+  name: String
+  area: String
+  html: String
+}

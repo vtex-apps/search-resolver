@@ -1,0 +1,75 @@
+type ItemMetadata {
+  items: [ItemMetadataUnit]
+  priceTable: [ItemPriceTable]
+}
+
+type ItemPriceTable {
+  type: String
+  values: [PriceTableItem]
+}
+
+type PriceTableItem {
+  id: String
+  assemblyId: String
+  price: Int
+}
+
+type ItemMetadataUnit {
+  id: ID
+  name: String
+  skuName: String
+  productId: String
+  refId: String
+  ean: String
+  imageUrl: String @toVtexAssets
+  detailUrl: String
+  seller: String
+  assemblyOptions: [AssemblyOption]
+}
+
+type AssemblyOption {
+  id: ID
+  name: String
+  required: Boolean
+  composition: CompositionType
+  inputValues: [InputValue]
+}
+
+scalar StringOrBoolean
+
+type InputValue {
+  label: String
+  maxLength: Int
+  type: InputValueType
+  defaultValue: StringOrBoolean
+  domain: [String]
+}
+
+enum InputValueType {
+  TEXT
+  BOOLEAN
+  OPTIONS
+}
+
+type CompositionType {
+  minQuantity: Int
+  maxQuantity: Int
+  items: [CompositionItem]
+}
+
+type CompositionItem {
+  id: ID
+  minQuantity: Int
+  maxQuantity: Int
+  initialQuantity: Int
+  priceTable: String
+  seller: String
+}
+
+input AssemblyOptionInput {
+  id: ID!
+  quantity: Int!
+  assemblyId: String!
+  seller: String!
+  options: [AssemblyOptionInput!]
+}

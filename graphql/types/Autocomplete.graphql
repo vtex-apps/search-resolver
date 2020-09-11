@@ -1,0 +1,6 @@
+type ProductSuggestions {
+    """Number of suggested products"""
+    count: Int!
+    """Suggested products"""
+    products: [Product]!
+}

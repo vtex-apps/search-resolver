@@ -7,7 +7,7 @@
         "actions": ["post", "get"],
         "effect": "allow",
         "resources": [
-          "vrn:vtex.search-resolver:{{region}}:{{account}}:{{workspace}}:/_v/graphql"
+          "vrn:vtex.carrefour-resolver:{{region}}:{{account}}:{{workspace}}:/_v/graphql"
         ]
       }
     ]

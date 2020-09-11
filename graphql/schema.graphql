@@ -1,0 +1,357 @@
+enum SORT {
+  ASC
+  DESC
+}
+
+type Query {
+  """
+  Returns a specified product
+  """
+  product(
+    """
+    Product slug
+    """
+    slug: String
+    """
+    Product identifier
+    """
+    identifier: ProductUniqueIdentifier
+  ): Product @cacheControl(scope: SEGMENT, maxAge: SHORT) @withSegment
+
+  """
+  Return the banners for a given query
+  """
+  banners(
+    """
+    Text inputted by the user as the search term
+    """
+    fullText: String = ""
+    """
+    Selected facets
+    """
+    selectedFacets: [SelectedFacetInput]
+  ): Banners @cacheControl(scope: SEGMENT, maxAge: SHORT) @withSegment
+
+  """
+  Correct a misspeled term
+  """
+  correction(
+    """
+    Text inputted by the user as the search term
+    """
+    fullText: String = ""
+  ): Correction @cacheControl(scope: SEGMENT, maxAge: SHORT) @withSegment
+
+  """
+  Get search suggestions
+  """
+  searchSuggestions(
+    """
+    Text inputted by the user as the search term
+    """
+    fullText: String!
+  ): SearchSuggestions
+    @cacheControl(scope: SEGMENT, maxAge: MEDIUM)
+    @withSegment
+
+  """
+  Returns products list filtered and ordered
+  """
+  productSearch(
+    """
+    Terms that is used in search e.g.: eletronics/samsung
+    """
+    query: String = ""
+    """
+    Text inputted by the user as the search term
+    """
+    fullText: String = ""
+    """
+    Defines terms types: Brand, Category, Department e.g.: c,b
+    """
+    map: String = ""
+    """
+    Selected facets
+    """
+    selectedFacets: [SelectedFacetInput]
+    """
+    Filter by category. {a}/{b} - {a} and {b} are categoryIds
+    """
+    category: String = ""
+    """
+    Array of product specification. specificationFilter_{a}:{b} - {a} is the specificationId, {b} = specification value
+    """
+    specificationFilters: [String]
+    """
+    Filter by price range. e.g.: {a} TO {b} - {a} is the minimum price "from" and {b} is the highest price "to"
+    """
+    priceRange: String = ""
+    """
+    Filter by collection. where collection also know as productClusterId
+    """
+    collection: String = ""
+    """
+    Filter by availability at a specific sales channel. e.g.: salesChannel:4 if want filter by available products for the sales channel 4
+    """
+    salesChannel: String = ""
+    """
+    Order by a criteria. OrderByPriceDESC/OrderByPriceASC, OrderByTopSaleDESC, OrderByReviewRateDESC, OrderByNameASC/OrderByNameDESC, OrderByReleaseDateDESC, OrderByBestDiscountDESC
+    """
+    orderBy: String = "OrderByPriceDESC"
+    """
+    Pagination item start
+    """
+    from: Int = 0
+    """
+    Pagination item end
+    """
+    to: Int = 9
+    """
+    If true, uses isAvailablePerSalesChannel_ parameter on query with segment's sales channel. Will override any given salesChannel arg
+    """
+    hideUnavailableItems: Boolean = false
+    """
+    If you want faster searches and do not care about most up to date prices and promotions, use skip value.
+    """
+    simulationBehavior: SimulationBehavior = default
+    """
+    Each search engine has its own database, but this database might not have all the product information like `clusterHighlights` or `productClusters`.
+    As an alternative, the search engine may use the VTEX API to complete this information by setting this field to true.
+    """
+    productOriginVtex: Boolean = false
+    """
+    Indicates how the search-engine will deal with the fullText if there is more than one word. Set `and` if the returned products must have all the words in its metadata or `or` otherwise.
+    """
+    operator: Operator
+    """
+    Indicates how the search engine will correct misspelled words by using fuzzy logic.
+    It can be a number representing the max number of misspelled letters, or the string `auto` suggesting that the search-engine should set this value by itself.
+    """
+    fuzzy: String
+    """
+    As fuzzy and operator, it controls the search state, but it is for general purposes. This field allows the search engines to apply features that are not handled by the other fields.
+    The possible values in this field are defined by each search engine.
+    """
+    searchState: String
+  ): ProductSearch @cacheControl(scope: SEGMENT, maxAge: SHORT) @withSegment
+
+  searchMetadata(
+    """
+    Terms that is used in search e.g.: eletronics/samsung
+    """
+    query: String = ""
+    """
+    Text inputted by the user as the search term
+    """
+    fullText: String = ""
+    """
+    Defines terms types: Brand, Category, Department e.g.: c,b
+    """
+    map: String = ""
+    """
+    Selected facets
+    """
+    selectedFacets: [SelectedFacetInput]
+  ): SearchMetadata @cacheControl(scope: PUBLIC, maxAge: MEDIUM) @withSegment
+
+  """
+  Returns products list filtered and ordered
+  """
+  products(
+    """
+    Terms that is used in search e.g.: eletronics/samsung
+    """
+    query: String = ""
+    """
+    Defines terms types: Brand, Category, Department e.g.: c,b
+    """
+    map: String = ""
+    """
+    Filter by category. {a}/{b} - {a} and {b} are categoryIds
+    """
+    category: String = ""
+    """
+    Array of product specification. specificationFilter_{a}:{b} - {a} is the specificationId, {b} = specification value
+    """
+    specificationFilters: [String]
+    """
+    Filter by price range. e.g.: {a} TO {b} - {a} is the minimum price "from" and {b} is the highest price "to"
+    """
+    priceRange: String = ""
+    """
+    Filter by collection. where collection also know as productClusterId
+    """
+    collection: String = ""
+    """
+    Filter by availability at a specific sales channel. e.g.: salesChannel:4 if want filter by available products for the sales channel 4
+    """
+    salesChannel: String = ""
+    """
+    Order by a criteria. OrderByPriceDESC/OrderByPriceASC, OrderByTopSaleDESC, OrderByReviewRateDESC, OrderByNameASC/OrderByNameDESC, OrderByReleaseDateDESC, OrderByBestDiscountDESC
+    """
+    orderBy: String = "OrderByPriceDESC"
+    """
+    Pagination item start
+    """
+    from: Int = 0
+    """
+    Pagination item end
+    """
+    to: Int = 9
+    """
+    If true, uses isAvailablePerSalesChannel_ parameter on query with segment's sales channel. Will override any given salesChannel arg
+    """
+    hideUnavailableItems: Boolean = false
+    """
+    If you want faster searches and do not care about most up to date prices and promotions, use skip value.
+    """
+    simulationBehavior: SimulationBehavior = default
+  ): [Product] @cacheControl(scope: SEGMENT, maxAge: SHORT) @withSegment
+
+  productRecommendations(
+    identifier: ProductUniqueIdentifier
+    type: CrossSelingInputEnum
+  ): [Product] @cacheControl(scope: SEGMENT, maxAge: SHORT) @withSegment
+
+  productsByIdentifier(
+    field: ProductUniqueIdentifierField!
+    values: [ID!]
+    """
+    Filter by availability at a specific sales channel.
+    """
+    salesChannel: String
+  ): [Product] @cacheControl(scope: SEGMENT, maxAge: SHORT) @withSegment
+
+  """
+  Returns facets category
+  """
+  facets(
+    """
+    Terms that is used in search e.g.: eletronics/samsung
+    """
+    query: String = ""
+    """
+    Text inputted by the user as the search term
+    """
+    fullText: String = ""
+    """
+    Defines terms types: Brand, Category, Department e.g.: c,b
+    """
+    map: String = ""
+    """
+    Selected facets
+    """
+    selectedFacets: [SelectedFacetInput]
+    """
+    If true, uses isAvailablePerSalesChannel_ parameter on query with segment's sales channel.
+    """
+    hideUnavailableItems: Boolean = false
+    """
+    If Static, ignores SpecificationFilters received on the map and query when returning
+    the facets available, which makes the facets never change.
+    """
+    behavior: String = "Static"
+    """
+    Indicates how the search-engine will deal with the fullText if there is more than one word. Set `and` if the returned products must have all the words in its metadata or `or` otherwise.
+    """
+    operator: Operator
+    """
+    Indicates how the search engine will correct misspelled words by using fuzzy logic.
+    It can be a number representing the max number of misspelled letters, or the string `auto` suggesting that the search-engine should set this value by itself.
+    """
+    fuzzy: String
+    """
+    As fuzzy and operator, it controls the search state, but it is for general purposes. This field allows the search engines to apply features that are not handled by the other fields.
+    The possible values in this field are defined by each search engine.
+    """
+    searchState: String
+  ): Facets @cacheControl(scope: SEGMENT, maxAge: MEDIUM) @withSegment
+
+  """
+  Get auto complete suggestions in search
+  """
+  autocomplete(
+    """
+    Number of items that is returned
+    """
+    maxRows: Int = 12
+    """
+    Terms that is used in search e.g.: iphone
+    """
+    searchTerm: String
+  ): Suggestions @cacheControl(scope: SEGMENT, maxAge: MEDIUM) @withSegment
+
+  """
+  Get top searches from store
+  """
+  topSearches: SearchSuggestions
+    @cacheControl(scope: SEGMENT, maxAge: MEDIUM)
+    @withSegment
+
+  """
+  Get autocomplete search suggestions
+  """
+  autocompleteSearchSuggestions(
+    """
+    Text inputted by the user as the search term
+    """
+    fullText: String!
+  ): SearchSuggestions
+    @cacheControl(scope: SEGMENT, maxAge: MEDIUM)
+    @withSegment
+
+  """
+  Get product suggestions
+  """
+  productSuggestions(
+    """
+    Text inputted by the user as the search term
+    """
+    fullText: String!
+    """
+    Selected facet key
+    """
+    facetKey: String
+    """
+    Selected facet value
+    """
+    facetValue: String
+    """
+    Each search engine has its own database, but this database might not have all the product information like `clusterHighlights` or `productClusters`.
+    As an alternative, the search engine may use the VTEX API to complete this information by setting this field to true.
+    """
+    productOriginVtex: Boolean = false
+    """
+    If you want faster searches and do not care about most up to date prices and promotions, use skip value.
+    """
+    simulationBehavior: SimulationBehavior = default
+  ): ProductSuggestions
+    @cacheControl(scope: SEGMENT, maxAge: MEDIUM)
+    @withSegment
+
+  """
+  Get search urls access stats count
+  """
+  searchURLsCount(
+    """
+    Number of items that is returned
+    """
+    limit: Int = 100
+
+    """
+    Sorting strategy, asc: ascending, desc: descending
+    """
+    sort: SORT
+  ): [SearchURLStats] @cacheControl(scope: PUBLIC, maxAge: SHORT)
+}
+
+enum SimulationBehavior {
+  """
+  Does simulation on catalog as usual
+  """
+  default
+  """
+  Calls catalog passing a parameter to not simulate each SKU and get its most up to date price.
+  """
+  skip
+}

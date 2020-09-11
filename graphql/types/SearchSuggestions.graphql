@@ -1,0 +1,15 @@
+type SearchSuggestions {
+  searches: [SearchSuggestion]
+}
+
+type SearchSuggestion {
+  term: String!
+  count: Int!
+  attributes: [SearchSuggestionAttribute]
+}
+
+type SearchSuggestionAttribute {
+  key: String!
+  value: String!
+  labelValue: String!
+}

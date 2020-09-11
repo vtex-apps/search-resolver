@@ -1,0 +1,10 @@
+type Correction {
+  correction: SearchCorrection
+}
+
+type SearchCorrection {
+  text: String
+  highlighted: String
+  misspelled: Boolean
+  correction: Boolean
+}
