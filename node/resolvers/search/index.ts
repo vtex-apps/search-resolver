@@ -1,4 +1,9 @@
-import { NotFoundError, UserInputError, createMessagesLoader } from '@vtex/api'
+import {
+  NotFoundError,
+  UserInputError,
+  createMessagesLoader,
+  VBase,
+} from '@vtex/api'
 import { head, isEmpty, isNil, test, pathOr, path } from 'ramda'
 
 import { resolvers as assemblyOptionResolvers } from './assemblyOption'
@@ -23,10 +28,7 @@ import {
   getMapAndPriceRangeFromSelectedFacets,
 } from './utils'
 import { toCompatibilityArgs } from './newURLs'
-import {
-  PATH_SEPARATOR,
-  MAP_VALUES_SEP,
-} from './constants'
+import { PATH_SEPARATOR, MAP_VALUES_SEP, SELLERS_BUCKET } from './constants'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import {
   buildAttributePath,
@@ -38,6 +40,8 @@ import {
   attributesToFilters,
   sortAttributeValuesByCatalog,
 } from '../../utils/attributes'
+import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
+import { Checkout } from '../../clients/checkout'
 
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -129,7 +133,7 @@ const getCompatibilityArgsFromSelectedFacets = async (
 
 const translateToStoreDefaultLanguage = async (
   ctx: Context,
-  term: string,
+  term: string
 ): Promise<string> => {
   const {
     clients,
@@ -222,7 +226,11 @@ const isLegacySearchFormat = ({
 const isValidProductIdentifier = (identifier: ProductIndentifier | undefined) =>
   !!identifier && !isNil(identifier.value) && !isEmpty(identifier.value)
 
-const getTranslatedSearchTerm = async (query: SearchArgs['query'], map: SearchArgs['map'], ctx: Context) => {
+const getTranslatedSearchTerm = async (
+  query: SearchArgs['query'],
+  map: SearchArgs['map'],
+  ctx: Context
+) => {
   if (!query || !map || !shouldTranslateToTenantLocale(ctx)) {
     return query
   }
@@ -233,8 +241,36 @@ const getTranslatedSearchTerm = async (query: SearchArgs['query'], map: SearchAr
   const queryArray = query.split('/')
   const queryUnit = queryArray[ftSearchIndex]
   const translated = await translateToStoreDefaultLanguage(ctx, queryUnit)
-  const queryTranslated = [...queryArray.slice(0, ftSearchIndex), translated, ...queryArray.slice(ftSearchIndex + 1)]
+  const queryTranslated = [
+    ...queryArray.slice(0, ftSearchIndex),
+    translated,
+    ...queryArray.slice(ftSearchIndex + 1),
+  ]
   return queryTranslated.join('/')
+}
+
+const getSellers = async (
+  vbase: VBase,
+  checkout: Checkout,
+  channel?: number,
+  regionId?: string,
+) => {
+  if (!regionId) {
+    return []
+  }
+
+  const result = await staleFromVBaseWhileRevalidate(
+    vbase,
+    `${SELLERS_BUCKET}`,
+    regionId,
+    async (params: { regionId: string; checkout: Checkout }) => params.checkout.regions(params.regionId, channel),
+    { regionId, checkout },
+    {
+      expirationInMinutes: 10,
+    }
+  )
+
+  return result?.find((region: any) => region.id === regionId)?.sellers
 }
 
 export const queries = {
@@ -277,15 +313,18 @@ export const queries = {
     }
 
     const {
-      clients: { biggySearch, search },
+      clients: { biggySearch, search, checkout, vbase },
       vtex: { segment, account },
     } = ctx
+
+    const sellers = await getSellers(vbase, checkout, segment?.channel ,segment?.regionId,)
 
     const biggyArgs = {
       searchState,
       query: fullText,
       attributePath: buildAttributePath(args.selectedFacets),
       tradePolicy: segment && segment.channel,
+      sellers,
     }
 
     const result = await biggySearch.facets(biggyArgs)
@@ -428,7 +467,7 @@ export const queries = {
       args
     )) as ProductSearchInput
 
-    const { biggySearch } = ctx.clients
+    const { biggySearch, vbase, checkout } = ctx.clients
     const { segment } = ctx.vtex
     const {
       from,
@@ -440,6 +479,8 @@ export const queries = {
       searchState,
       simulationBehavior,
     } = args
+
+    const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
 
     const count = to - from + 1
     const page = Math.round((to + 1) / count)
@@ -454,6 +495,7 @@ export const queries = {
       query: fullText,
       tradePolicy: segment && segment.channel,
       sort: convertOrderBy(args.orderBy),
+      sellers
     }
 
     const result = await biggySearch.productSearch(biggyArgs)
@@ -522,7 +564,11 @@ export const queries = {
       args.map = map
     }
 
-    const query = await getTranslatedSearchTerm(args.query || '', args.map || '', ctx)
+    const query = await getTranslatedSearchTerm(
+      args.query || '',
+      args.map || '',
+      ctx
+    )
     const translatedArgs = {
       ...args,
       query,
@@ -552,13 +598,19 @@ export const queries = {
     args: SuggestionProductsArgs,
     ctx: Context
   ) => {
-    const { biggySearch } = ctx.clients
+    const {
+      clients: { biggySearch, checkout, vbase },
+      vtex: { segment },
+    } = ctx
+
+    const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
 
     const tradePolicy = path<string | undefined>(['segment', 'channel'], args)
 
     const result = await biggySearch.suggestionProducts({
       ...args,
       tradePolicy,
+      sellers
     })
 
     const productResolver = args.productOriginVtex

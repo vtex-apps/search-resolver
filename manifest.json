@@ -48,6 +48,13 @@
         "host": "search.biggylabs.com.br",
         "path": "/*"
       }
+    },
+    {
+      "attrs": {
+        "host": "{{account}}.vtexcommercebeta.com.br",
+        "path": "/*"
+      },
+      "name": "outbound-access"
     }
   ],
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"

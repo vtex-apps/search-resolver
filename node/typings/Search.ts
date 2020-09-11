@@ -37,6 +37,12 @@ interface SearchResultArgs {
   indexingType?: IndexingType
   fullText: string
   searchState?: string
+  sellers?: RegionSeller[]
+}
+
+interface RegionSeller {
+  id: string;
+  name: string;
 }
 
 interface SuggestionProductsArgs {
@@ -48,6 +54,7 @@ interface SuggestionProductsArgs {
   indexingType?: IndexingType
   productOriginVtex: boolean
   simulationBehavior: 'skip' | 'default' | null
+  sellers?: RegionSeller[]
 }
 
 interface SuggestionSearchesArgs {

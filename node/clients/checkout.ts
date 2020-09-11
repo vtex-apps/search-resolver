@@ -1,15 +1,15 @@
 import {
   InstanceOptions,
   IOContext,
-  JanusClient,
   RequestConfig,
+  ExternalClient,
 } from '@vtex/api'
 
 import { statusToError } from '../utils'
 
-export class Checkout extends JanusClient {
-  public constructor(ctx: IOContext, options?: InstanceOptions) {
-    super(ctx, {
+export class Checkout extends ExternalClient {
+  public constructor(context: IOContext, options?: InstanceOptions) {
+    super(`https://${context.account}.vtexcommercebeta.com.br/`, context, {
       ...options,
       headers: {
         ...(options && options.headers),
@@ -33,6 +33,9 @@ export class Checkout extends JanusClient {
       }
     )
 
+  public regions = (regionId: string, channel?: number) =>
+    this.http.get(this.routes.regions(regionId, channel))
+
   protected post = <T>(url: string, data?: any, config: RequestConfig = {}) => {
     return this.http.post<T>(url, data, config).catch(statusToError) as Promise<
       T
@@ -44,6 +47,8 @@ export class Checkout extends JanusClient {
     return {
       simulation: (queryString: string) =>
         `${base}/orderForms/simulation${queryString}`,
+      regions: (regionId: string, channel?: number) =>
+        `${base}/regions/${regionId}${channel ? `?sc=${channel}` : ''}`,
     }
   }
 }
