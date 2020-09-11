@@ -37,8 +37,8 @@ export class Checkout extends ExternalClient {
       }
     )
 
-  public regions = (regionId: string) =>
-    this.http.get(this.routes.regions(regionId))
+  public regions = (regionId: string, salesChannel?: number) =>
+    this.http.get(this.routes.regions(regionId, salesChannel))
 
   protected post = <T>(url: string, data?: any, config: RequestConfig = {}) => {
     return this.http.post<T>(url, data, config).catch(statusToError) as Promise<
@@ -51,7 +51,7 @@ export class Checkout extends ExternalClient {
     return {
       simulation: (queryString: string) =>
         `${base}/orderForms/simulation${queryString}`,
-      regions: (regionId: string) => `${base}/regions/${regionId}`,
+      regions: (regionId: string, salesChannel?: number) => `${base}/regions/${regionId}${salesChannel ? `&sc=${salesChannel}` : ''}`,
     }
   }
 }

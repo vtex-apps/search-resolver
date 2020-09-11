@@ -254,6 +254,7 @@ const getSellers = async (
   vbase: VBase,
   checkout: Checkout,
   regionId?: string,
+  salesChannel?: number,
 ) => {
   if (!regionId) {
     return []
@@ -263,7 +264,7 @@ const getSellers = async (
     vbase,
     `${SELLERS_BUCKET}`,
     regionId,
-    async (params: { regionId: string; checkout: Checkout }) => params.checkout.regions(params.regionId),
+    async (params: { regionId: string; checkout: Checkout }) => params.checkout.regions(params.regionId, salesChannel),
     { regionId, checkout },
     {
       expirationInMinutes: 10,
@@ -317,7 +318,7 @@ export const queries = {
       vtex: { segment, account },
     } = ctx
 
-    const sellers = await getSellers(vbase, checkout, segment?.regionId,)
+    const sellers = await getSellers(vbase, checkout, segment?.regionId, segment?.channel)
 
     const biggyArgs = {
       searchState,
@@ -480,7 +481,7 @@ export const queries = {
       simulationBehavior,
     } = args
 
-    const sellers = await getSellers(vbase, checkout, segment?.regionId)
+    const sellers = await getSellers(vbase, checkout, segment?.regionId, segment?.channel)
 
     const count = to - from + 1
     const page = Math.round((to + 1) / count)
@@ -603,7 +604,7 @@ export const queries = {
       vtex: { segment },
     } = ctx
 
-    const sellers = await getSellers(vbase, checkout, segment?.regionId)
+    const sellers = await getSellers(vbase, checkout, segment?.regionId, segment?.channel)
 
     const tradePolicy = path<string | undefined>(['segment', 'channel'], args)
 
