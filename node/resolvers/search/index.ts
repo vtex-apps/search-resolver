@@ -351,6 +351,7 @@ export const queries = {
     return {
       facets: attributesToFilters({ ...result, account }),
       queryArgs: {
+        map: args.map,
         query: args.query,
         selectedFacets: args.selectedFacets,
       },

@@ -67,6 +67,7 @@ interface SelectedFacet {
 }
 
 interface FacetsInput {
+  map: string;
   selectedFacets: SelectedFacet[]
   fullText: string
   query: string
