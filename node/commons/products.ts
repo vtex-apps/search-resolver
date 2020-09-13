@@ -5,7 +5,7 @@ import { queries } from '../resolvers/search'
 interface ConvertProductInput {
   searchResult: any
   ctx: any
-  simulationBehavior?: 'skip' | 'default' | null
+  simulationBehavior?: 'skip' | 'default' | 'async' | null
 }
 
 export const productsBiggy = async ({ searchResult, ctx, simulationBehavior = 'default' }: ConvertProductInput) => {

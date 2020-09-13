@@ -17,7 +17,8 @@ interface AutocompleteArgs {
 
 enum SimulationBehavior {
   SKIP = 'skip',
-  DEFAULT = 'default'
+  DEFAULT = 'default',
+  ASYNC = 'async'
 }
 
 

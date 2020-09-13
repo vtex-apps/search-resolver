@@ -53,7 +53,7 @@ interface SuggestionProductsArgs {
   segment?: SegmentData
   indexingType?: IndexingType
   productOriginVtex: boolean
-  simulationBehavior: 'skip' | 'default' | null
+  simulationBehavior: 'skip' | 'default' | 'async' | null
   sellers?: RegionSeller[]
 }
 
@@ -85,7 +85,7 @@ interface ProductSearchInput {
   orderBy: string
   productOriginVtex: boolean
   searchState?: string
-  simulationBehavior: 'skip' | 'default' | null
+  simulationBehavior: 'skip' | 'default' | 'async' | null
 }
 
 interface ElasticAttribute {
