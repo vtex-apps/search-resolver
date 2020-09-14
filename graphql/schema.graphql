@@ -51,8 +51,8 @@ type Query {
     """
     fullText: String!
   ): SearchSuggestions
-    @cacheControl(scope: SEGMENT, maxAge: MEDIUM)
-    @withSegment
+  @cacheControl(scope: SEGMENT, maxAge: MEDIUM)
+  @withSegment
 
   """
   Returns products list filtered and ordered
@@ -285,8 +285,8 @@ type Query {
   Get top searches from store
   """
   topSearches: SearchSuggestions
-    @cacheControl(scope: SEGMENT, maxAge: MEDIUM)
-    @withSegment
+  @cacheControl(scope: SEGMENT, maxAge: MEDIUM)
+  @withSegment
 
   """
   Get autocomplete search suggestions
@@ -297,8 +297,8 @@ type Query {
     """
     fullText: String!
   ): SearchSuggestions
-    @cacheControl(scope: SEGMENT, maxAge: MEDIUM)
-    @withSegment
+  @cacheControl(scope: SEGMENT, maxAge: MEDIUM)
+  @withSegment
 
   """
   Get product suggestions
@@ -326,8 +326,8 @@ type Query {
     """
     simulationBehavior: SimulationBehavior = default
   ): ProductSuggestions
-    @cacheControl(scope: SEGMENT, maxAge: MEDIUM)
-    @withSegment
+  @cacheControl(scope: SEGMENT, maxAge: MEDIUM)
+  @withSegment
 
   """
   Get search urls access stats count
@@ -354,4 +354,6 @@ enum SimulationBehavior {
   Calls catalog passing a parameter to not simulate each SKU and get its most up to date price.
   """
   skip
+
+  adync
 }
