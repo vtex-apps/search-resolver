@@ -1,15 +1,15 @@
 import {
   InstanceOptions,
   IOContext,
+  JanusClient,
   RequestConfig,
-  ExternalClient,
 } from '@vtex/api'
 
 import { statusToError } from '../utils'
 
-export class Checkout extends ExternalClient {
-  public constructor(context: IOContext, options?: InstanceOptions) {
-    super(`https://${context.account}.vtexcommercebeta.com.br/`, context, {
+export class Checkout extends JanusClient {
+  public constructor(ctx: IOContext, options?: InstanceOptions) {
+    super(ctx, {
       ...options,
       headers: {
         ...(options && options.headers),
