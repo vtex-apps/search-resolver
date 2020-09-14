@@ -46,6 +46,14 @@ export class Search extends AppClient {
   private searchEncodeURI: (x: string) => string
   private basePath: string
 
+  private addSalesChannel = (url: string, salesChannel?: string | number) => {
+    if (!salesChannel) {
+      return url
+    }
+
+    return url.concat(`&sc=${salesChannel}`)
+  }
+
   public constructor(ctx: IOContext, opts?: InstanceOptions) {
     super('vtex.catalog-api-proxy@0.x', ctx, opts)
 
@@ -78,11 +86,11 @@ export class Search extends AppClient {
       }
     )
 
-  public productsByEan = (ids: string[]) =>
+  public productsByEan = (ids: string[], salesChannel?: string | number) =>
     this.get<SearchProduct[]>(
-      `/pub/products/search?${ids
+      this.addSalesChannel(`/pub/products/search?${ids
         .map(id => `fq=alternateIds_Ean:${id}`)
-        .join('&')}`,
+        .join('&')}`, salesChannel),
       { metric: 'search-productByEan' }
     )
 
@@ -95,9 +103,11 @@ export class Search extends AppClient {
     })
   }
 
-  public productsById = (ids: string[]) =>
+  public productsById = (ids: string[], salesChannel?: string | number) =>
     this.get<SearchProduct[]>(
-      `/pub/products/search?${ids.map(id => `fq=productId:${id}`).join('&')}`,
+      this.addSalesChannel(`/pub/products/search?${ids
+        .map(id => `fq=productId:${id}`)
+        .join('&')}`, salesChannel),
       { metric: 'search-productById' }
     )
 
@@ -109,19 +119,19 @@ export class Search extends AppClient {
       }
     )
 
-  public productsByReference = (ids: string[]) =>
+  public productsByReference = (ids: string[], salesChannel?: string | number) =>
     this.get<SearchProduct[]>(
-      `/pub/products/search?${ids
+      this.addSalesChannel(`/pub/products/search?${ids
         .map(id => `fq=alternateIds_RefId:${id}`)
-        .join('&')}`,
+        .join('&')}`, salesChannel),
       { metric: 'search-productByReference' }
     )
 
-  public productBySku = (skuIds: string[]) =>
+  public productBySku = (skuIds: string[], salesChannel?: string | number) =>
     this.get<SearchProduct[]>(
-      `/pub/products/search?${skuIds
+      this.addSalesChannel(`/pub/products/search?${skuIds
         .map(skuId => `fq=skuId:${skuId}`)
-        .join('&')}`,
+        .join('&')}`, salesChannel),
       { metric: 'search-productBySku' }
     )
 

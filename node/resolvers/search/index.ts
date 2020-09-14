@@ -66,6 +66,7 @@ interface ProductRecommendationArg {
 interface ProductsByIdentifierArgs {
   field: 'id' | 'ean' | 'reference' | 'sku'
   values: string[]
+  salesChannel?: string
 }
 
 const inputToSearchCrossSelling = {
@@ -398,20 +399,20 @@ export const queries = {
     } = ctx
 
     let products = [] as SearchProduct[]
-    const { field, values } = args
+    const { field, values, salesChannel } = args
 
     switch (field) {
       case 'id':
-        products = await search.productsById(values)
+        products = await search.productsById(values, salesChannel)
         break
       case 'ean':
-        products = await search.productsByEan(values)
+        products = await search.productsByEan(values, salesChannel)
         break
       case 'reference':
-        products = await search.productsByReference(values)
+        products = await search.productsByReference(values, salesChannel)
         break
       case 'sku':
-        products = await search.productBySku(values)
+        products = await search.productBySku(values, salesChannel)
         break
     }
 
