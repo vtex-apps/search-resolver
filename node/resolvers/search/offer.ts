@@ -11,11 +11,27 @@ const InstallmentsCriteria = {
 const gte = (a: number, b: number) => a > b
 const lte = (a: number, b: number) => a < b
 
+const includesCaseInsensitive = (list: string[], item: string) => {
+  const normalizedList = list.map(j => String(j).toUpperCase())
+
+  return normalizedList.indexOf(String(item).toUpperCase()) > -1
+}
+
 export const resolvers = {
   Offer: {
     Installments: (
       { Installments }: CommertialOffer,
-      { criteria, rates }: { criteria?: string; rates?: boolean }
+      {
+        criteria,
+        rates,
+        excludedPaymentSystems,
+        includedPaymentSystems,
+      } : {
+        criteria?: string
+        rates?: boolean
+        excludedPaymentSystems?: string[]
+        includedPaymentSystems?: string[]
+      }
     ) => {
       if (criteria === InstallmentsCriteria.ALL || Installments.length === 0) {
         return Installments
@@ -27,9 +43,24 @@ export const resolvers = {
         criteria = InstallmentsCriteria.MAX
       }
 
-      const filteredInstallments = !rates
+      let filteredInstallments = !rates
         ? Installments
         : Installments.filter(({ InterestRate }) => !InterestRate)
+
+      if (includedPaymentSystems) {
+        filteredInstallments = filteredInstallments.filter(
+          ({ PaymentSystemName }) =>
+            includesCaseInsensitive(includedPaymentSystems, PaymentSystemName)
+        )
+      }
+
+      if (excludedPaymentSystems) {
+        filteredInstallments = filteredInstallments.filter(
+          ({ PaymentSystemName }) =>
+            (includesCaseInsensitive(excludedPaymentSystems, PaymentSystemName) === false)
+        )
+      }
+
 
       const compareFunc = criteria === InstallmentsCriteria.MAX ? gte : lte
       const value = filteredInstallments.reduce(
