@@ -17,7 +17,8 @@ interface AutocompleteArgs {
 
 enum SimulationBehavior {
   SKIP = 'skip',
-  DEFAULT = 'default'
+  DEFAULT = 'default',
+  ASYNC = 'async'
 }
 
 
@@ -287,7 +288,7 @@ export class Search extends AppClient {
     if (to != null && to > -1) {
       url += `&_to=${to}`
     }
-    if (simulationBehavior === SimulationBehavior.SKIP) {
+    if (simulationBehavior !== SimulationBehavior.DEFAULT) {
       url += `&simulation=false`
     }
     return url
