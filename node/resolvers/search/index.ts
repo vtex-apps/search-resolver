@@ -701,7 +701,13 @@ export const queries = {
       }
     )
 
-    return { ...result, products: convertedProducts }
+    const {
+      count,
+      operator,
+      correction: { misspelled },
+    } = result
+
+    return { count, operator, misspelled, products: convertedProducts }
   },
   banners: (
     _: any,
