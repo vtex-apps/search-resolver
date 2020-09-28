@@ -41,8 +41,8 @@ interface SearchResultArgs {
 }
 
 interface RegionSeller {
-  id: string;
-  name: string;
+  id: string
+  name: string
 }
 
 interface SuggestionProductsArgs {
@@ -67,6 +67,7 @@ interface SelectedFacet {
 }
 
 interface FacetsInput {
+  map: string
   selectedFacets: SelectedFacet[]
   fullText: string
   query: string

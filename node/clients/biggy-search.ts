@@ -18,8 +18,8 @@ const buildBSearchFilterCookie = (sellers?: RegionSeller[]) =>
   !sellers || sellers.length === 0
     ? ''
     : sellers.reduce((cookie: string, seller: RegionSeller, idx: number) => {
-      return `${cookie}${idx > 0 ? '/' : ''}${seller.id}`
-    }, 'bsearch-filter=skuSeller#')
+        return `${cookie}${idx > 0 ? '/' : ''}${seller.id}`
+      }, 'bsearch-filter=private-seller#')
 
 export class BiggySearchClient extends ExternalClient {
   private store: string

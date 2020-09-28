@@ -73,6 +73,14 @@ interface ProductsByIdentifierArgs {
   salesChannel?: string
 }
 
+interface Region {
+  id: string
+  sellers: {
+    id: string
+    name: string
+  }[]
+}
+
 const inputToSearchCrossSelling = {
   [CrossSellingInput.buy]: SearchCrossSellingTypes.whoboughtalsobought,
   [CrossSellingInput.view]: SearchCrossSellingTypes.whosawalsosaw,
@@ -253,8 +261,8 @@ const getTranslatedSearchTerm = async (
 const getSellers = async (
   vbase: VBase,
   checkout: Checkout,
+  channel?: number,
   regionId?: string,
-  salesChannel?: number,
 ) => {
   if (!regionId) {
     return []
@@ -264,14 +272,14 @@ const getSellers = async (
     vbase,
     `${SELLERS_BUCKET}`,
     regionId,
-    async (params: { regionId: string; checkout: Checkout }) => params.checkout.regions(params.regionId, salesChannel),
+    async (params: { regionId: string; checkout: Checkout }) => params.checkout.regions(params.regionId, channel),
     { regionId, checkout },
     {
       expirationInMinutes: 10,
     }
   )
 
-  return result?.find((region: any) => region.id === regionId)?.sellers
+  return result?.find((region: Region) => region.id === regionId)?.sellers
 }
 
 export const queries = {
@@ -318,7 +326,7 @@ export const queries = {
       vtex: { segment, account },
     } = ctx
 
-    const sellers = await getSellers(vbase, checkout, segment?.regionId, segment?.channel)
+    const sellers = await getSellers(vbase, checkout, segment?.channel ,segment?.regionId)
 
     const biggyArgs = {
       searchState,
@@ -352,6 +360,7 @@ export const queries = {
     return {
       facets: attributesToFilters({ ...result, account }),
       queryArgs: {
+        map: args.map,
         query: args.query,
         selectedFacets: args.selectedFacets,
       },
@@ -481,7 +490,7 @@ export const queries = {
       simulationBehavior,
     } = args
 
-    const sellers = await getSellers(vbase, checkout, segment?.regionId, segment?.channel)
+    const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
 
     const count = to - from + 1
     const page = Math.round((to + 1) / count)
@@ -566,8 +575,8 @@ export const queries = {
     }
 
     const query = await getTranslatedSearchTerm(
-      args.query || '',
-      args.map || '',
+      args.query ?? '',
+      args.map ?? '',
       ctx
     )
     const translatedArgs = {
@@ -604,7 +613,7 @@ export const queries = {
       vtex: { segment },
     } = ctx
 
-    const sellers = await getSellers(vbase, checkout, segment?.regionId, segment?.channel)
+    const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
 
     const tradePolicy = path<string | undefined>(['segment', 'channel'], args)
 
