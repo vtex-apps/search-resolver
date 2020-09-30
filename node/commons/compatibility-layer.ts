@@ -99,9 +99,11 @@ export const convertBiggyProduct = async (
       return checkout.simulation(payload)
     })
 
-    const simulations = await Promise.all(simulationPromises)
+    const simulationItems = (await Promise.all(simulationPromises.map(promise => promise.catch(() => undefined)))).filter((x) => x != undefined).map((x) => {
+     const orderForm = x as OrderForm
 
-    const simulationItems = simulations.map((simulation) => simulation.items.map(item => ({ ...item, paymentData: simulation.paymentData }))).reduce((acc, val) => acc.concat(val), [])
+     return orderForm.items.map(item => ({ ...item, paymentData: orderForm.paymentData }))
+    }).reduce((acc, val) => acc.concat(val), [])
 
     const groupedBySkuId = groupBy(prop("id"), simulationItems)
 
