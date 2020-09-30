@@ -10,6 +10,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Added selling price as option for price when filling product with simulation info.
 
+## [1.17.2] - 2020-09-30
+
+### Fixed
+- When a simulation call failed on compatibility-layer we returned an empty page.
+
+## [1.17.1] - 2020-09-30
+
+### Fixed
+- Return values to specifications.
+
 ## [1.17.0] - 2020-09-16
 ### Added
 - Support for `excludedPaymentSystems` and `includedPaymentSystems` arguments in `Installments` type.
