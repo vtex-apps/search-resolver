@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Added selling price as option for price when filling product with simulation info.
+
 ## [1.17.2] - 2020-09-30
+
 ### Fixed
 - When a simulation call failed on compatibility-layer we returned an empty page.
 
