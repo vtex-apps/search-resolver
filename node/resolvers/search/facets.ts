@@ -8,13 +8,6 @@ interface EitherFacet extends SearchFacet {
   Children?: EitherFacet[]
 }
 
-//This Type represents all kind of facets, from department, to categories, to brand and specifications
-interface GenericFacet extends SearchFacet {
-  NameWithTranslation?: string
-  Id?: string
-  Children?: GenericFacet
-}
-
 enum FilterType {
   TEXT = 'TEXT',
   NUMBER = 'NUMBER',
@@ -152,6 +145,19 @@ export const resolvers = {
     },
 
     name: formatTranslatableProp<SearchFacetCategory, 'Name', 'Id'>('Name', 'Id')
+  },
+  Facet: {
+    values: (facet: Facet, args: FacetValuesArgs) => {
+      const { values } = facet
+      if (args.from === undefined) {
+        return values
+      } else {
+        return values.slice(args.from, args.to)
+      }
+    },
+    quantity: (facet: Facet) => {
+      return facet.values.length || 0
+    }
   },
   Facets: {
     facets: async ({
