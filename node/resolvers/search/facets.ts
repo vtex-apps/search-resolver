@@ -151,9 +151,8 @@ export const resolvers = {
       const { values } = facet
       if (args.from === undefined) {
         return values
-      } else {
-        return values.slice(args.from, args.to)
       }
+      return values.slice(args.from, args.to)
     },
     quantity: (facet: Facet) => {
       return facet.values.length || 0
