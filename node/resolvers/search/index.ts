@@ -6,6 +6,7 @@ import { resolvers as autocompleteResolvers } from './autocomplete'
 import { resolvers as brandResolvers } from './brand'
 import { resolvers as categoryResolvers } from './category'
 import { resolvers as discountResolvers } from './discount'
+import { resolvers as facetsResolvers } from './facets'
 import { resolvers as itemMetadataResolvers } from './itemMetadata'
 import { resolvers as itemMetadataPriceTableItemResolvers } from './itemMetadataPriceTableItem'
 import { resolvers as itemMetadataUnitResolvers } from './itemMetadataUnit'
@@ -182,6 +183,7 @@ export const fieldResolvers = {
   ...itemMetadataPriceTableItemResolvers,
   ...offerResolvers,
   ...discountResolvers,
+  ...facetsResolvers,
   ...productResolvers,
   ...recommendationResolvers,
   ...skuResolvers,
