@@ -132,6 +132,12 @@ export const convertBiggyProduct = async (
         return attribute.labelValue
       })
     })
+
+    product.textAttributes.filter((attribute) => attribute.labelKey === "productClusterNames").forEach((attribute) => {
+      if (attribute.valueId) {
+        convertedProduct.productClusters[attribute.valueId] = attribute.labelValue
+      }
+    })
   }
 
   allSpecificationsGroups.forEach((specificationGroup) => {
