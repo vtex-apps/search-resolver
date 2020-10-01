@@ -13,7 +13,7 @@ const getMaxAndMinForAttribute = (
           ? currentOffer[attribute]
           : acc.highPrice
       const lowPrice =
-        currentOffer[attribute] < acc.lowPrice
+        currentOffer[attribute] < acc.lowPrice && currentOffer[attribute] !== 0
           ? currentOffer[attribute]
           : acc.lowPrice
       return { highPrice, lowPrice }
