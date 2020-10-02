@@ -152,7 +152,7 @@ export const resolvers = {
       if (args.from === undefined) {
         return values
       }
-      return values.slice(args.from, args.to)
+      return values.slice(args.from ?? 0, args.to)
     },
     quantity: (facet: Facet) => {
       return facet.values.length || 0
