@@ -6,9 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-
 ### Added
 - `Facets` field resolver to add `quantity` and make it possible to limit facet values.
+
+## [1.17.4] - 2020-10-05
+### Fixed
+- `lowValue` on `ProductPriceRange` cannot be `0` anymore.
 
 ## [1.17.3] - 2020-09-30
 
