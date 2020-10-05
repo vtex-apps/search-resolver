@@ -5,7 +5,7 @@ export const resolvers = {
       return values.slice(args.from ?? 0, args.to)
     },
     quantity: (facet: any) => {
-      return facet.values.length || 0
+      return facet.values.length ?? 0
     }
   },
 }
