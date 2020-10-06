@@ -290,13 +290,13 @@ const getSellers = async (
   return result?.find((region: Region) => region.id === regionId)?.sellers
   }
 
-const buildSpecificationFiltersAsFacets = (specificationFilters: string[]):SelectedFacet[]  => {
-  const facetsSpecificationFilters:SelectedFacet[] = []
-  specificationFilters.map((specificationFilter:string) => {
+const buildSpecificationFiltersAsFacets = (specificationFilters: string[]): SelectedFacet[]  => {
+  const specificationFilterFacets: SelectedFacet[] = []
+  specificationFilters.map((specificationFilter: string) => {
     const [key, value] = specificationFilter.split(":")
-    facetsSpecificationFilters.push({key: key, value: value})
+    specificationFilterFacets.push({key: key, value: value})
   })
-  return facetsSpecificationFilters
+  return specificationFilterFacets
 }
 
 const buildSelectedFacets = (args: SearchArgs) => {
