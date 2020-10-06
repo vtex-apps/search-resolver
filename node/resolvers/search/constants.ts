@@ -1,4 +1,5 @@
 export const SEARCH_URLS_BUCKET = 'newSearchURLs'
+export const SELLERS_BUCKET = 'sellersByRegionId'
 export const CATEGORY_TREE_ROOT_BUCKET = 'categoryTree'
 export const CATEGORY_TREE_CHILDREN_BUCKET = 'categoryTreeChildren'
 export const CATEGORY_TREE_ROOT_PATH = 'categoryTree.json'
