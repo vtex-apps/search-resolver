@@ -202,6 +202,9 @@ interface BiggyTextAttribute {
   labelValue: string
   key: string
   value: string
+  isFilter: boolean
+  id: string
+  valueId: string
 }
 
 interface BiggyCategoryTree {
