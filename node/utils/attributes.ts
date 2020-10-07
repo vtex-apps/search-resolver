@@ -1,4 +1,4 @@
-import { either, isEmpty, isNil } from 'ramda'
+import { either, isEmpty, isNil, last } from 'ramda'
 import unescape from 'unescape'
 
 type Attribute = (NumericalAttribute | TextAttribute) & {
@@ -26,6 +26,7 @@ interface NumericalAttribute {
 interface TextAttribute {
   type: 'text'
   values: {
+    id?: string
     key: string
     count: number
     active: boolean
@@ -70,17 +71,20 @@ export const attributesToFilters = ({
   total,
   attributes,
   account,
+  breadcrumb
 }: {
   total: number
   attributes?: Attribute[]
-  account: string
+  account: string,
+  breadcrumb: Breadcrumb[]
 }): Filter[] => {
   if (either(isNil, isEmpty)(attributes)) {
     return []
   }
 
   return attributes!.map(attribute => {
-    const { type, values } = convertValues(attribute, total, account)
+    const baseHref = (last(breadcrumb) ?? { href: '', name: '' }).href
+    const { type, values } = convertValues(attribute, total, account, baseHref)
 
     return {
       values,
@@ -110,7 +114,8 @@ export const attributesToFilters = ({
 const convertValues = (
   attribute: Attribute,
   total: number,
-  account: string
+  account: string,
+  baseHref: string
 ): { type: FilterType; values: FilterValue[] } => {
   // When creating a filter for price attribute, it should be the only one to use
   // the type `'PRICERANGE'`.
@@ -138,7 +143,11 @@ const convertValues = (
   }
 
   // FIXME: Remove this when creating the specificationType for filters
-  if (attribute.type === 'number' && attribute.key === 'quilometragem' && account === 'localizaseminovos') {
+  if (
+    attribute.type === 'number' &&
+    attribute.key === 'quilometragem' &&
+    account === 'localizaseminovos'
+  ) {
     return {
       type: 'NUMBER',
       values: attribute.values.map((value: any) => {
@@ -200,11 +209,13 @@ const convertValues = (
       type: 'TEXT',
       values: attribute.values.map(value => {
         return {
+          id: value.id,
           quantity: value.count,
           name: unescape(value.label),
           key: attribute.key,
           value: value.key,
           selected: value.active,
+          href: buildHref(baseHref, attribute.key, value.key),
         }
       }),
     }
@@ -228,4 +239,20 @@ export const sortAttributeValuesByCatalog = (
 
     return aPosition < bPosition ? -1 : 1
   })
+}
+
+export const buildHref = (
+  baseHref: string,
+  key: string,
+  value: string
+): string => {
+  if (isEmpty(key) || isEmpty(value)) {
+    return baseHref
+  }
+
+  const [path = '', map = ''] = baseHref.split('?map=')
+  const pathValues = [...path.split('/'), value].filter(x => !isEmpty(x))
+  const mapValues = [...map.split(','), key].filter(x => !isEmpty(x))
+
+  return `${pathValues.join('/')}?map=${mapValues.join(',')}`
 }

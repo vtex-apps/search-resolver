@@ -1,4 +1,4 @@
-import { attributesToFilters } from './attributes'
+import { attributesToFilters, buildHref } from './attributes'
 
 describe('attributesToFilters', () => {
   it('should convert a text attribute correctly', () => {
@@ -10,6 +10,7 @@ describe('attributesToFilters', () => {
             visible: true,
             values: [
               {
+                id: undefined,
                 count: 108,
                 active: false,
                 key: 'lions-pride',
@@ -21,6 +22,8 @@ describe('attributesToFilters', () => {
             type: 'text' as 'text',
           },
         ],
+        account: 'lions-pride',
+        breadcrumb: [],
       })
     ).toEqual([
       {
@@ -29,6 +32,8 @@ describe('attributesToFilters', () => {
         type: 'TEXT',
         values: [
           {
+            href: 'lions-pride?map=brand',
+            id: undefined,
             key: 'brand',
             name: 'Lions Pride',
             quantity: 108,
@@ -75,6 +80,8 @@ describe('attributesToFilters', () => {
             maxValue: 100,
           },
         ],
+        account: 'lions-pride',
+        breadcrumb: [],
       })
     ).toEqual([
       {
@@ -120,6 +127,8 @@ describe('attributesToFilters', () => {
             maxValue: 0,
           },
         ],
+        account: 'samsungbr',
+        breadcrumb: [],
       })
     ).toEqual([
       {
@@ -168,6 +177,8 @@ describe('attributesToFilters', () => {
             maxValue: 6533501.777013255,
           },
         ],
+        account: 'localizaseminovos',
+        breadcrumb: [],
       })
     ).toEqual([
       {
@@ -225,6 +236,8 @@ describe('attributesToFilters', () => {
             maxValue: 6533501.777013255,
           },
         ],
+        account: 'localizaseminovos',
+        breadcrumb: [],
       })
     ).toEqual([
       {
@@ -242,5 +255,18 @@ describe('attributesToFilters', () => {
         ],
       },
     ])
+  })
+})
+
+describe('buildHref', () => {
+  it('should create an href from nothing', () => {
+    expect(buildHref('', '', '')).toEqual('')
+    expect(buildHref('', 'hello', 'world')).toEqual('world?map=hello')
+  })
+
+  it('should create an href from existing base', () => {
+    expect(buildHref('hello?map=world', 'ola', 'mundo')).toEqual(
+      'hello/mundo?map=world,ola'
+    )
   })
 })

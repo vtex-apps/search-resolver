@@ -359,18 +359,20 @@ export const queries = {
       )
     }
 
+    const breadcrumb = buildBreadcrumb(
+      result.attributes || [],
+      decodeURIComponent(args.fullText),
+      args.selectedFacets
+    )
+
     return {
-      facets: attributesToFilters({ ...result, account }),
+      facets: attributesToFilters({ ...result, account, breadcrumb }),
       queryArgs: {
         map: args.map,
         query: args.query,
         selectedFacets: args.selectedFacets,
       },
-      breadcrumb: buildBreadcrumb(
-        result.attributes || [],
-        decodeURIComponent(args.fullText),
-        args.selectedFacets
-      ),
+      breadcrumb,
     }
   },
 
