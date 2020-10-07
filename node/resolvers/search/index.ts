@@ -299,6 +299,15 @@ const buildSpecificationFiltersAsFacets = (specificationFilters: string[]): Sele
   return specificationFilterFacets
 }
 
+const buildCategoriesAsFacets = (categories: string): SelectedFacet[]  => {
+  const categoriesFacets: SelectedFacet[] = []
+  const categoriesAndSubcategories = categories.split("/");
+  categoriesAndSubcategories.map((c: string) => {
+    categoriesFacets.push({key: "c", value: c})
+  })
+  return categoriesFacets
+}
+
 const buildSelectedFacets = (args: SearchArgs) => {
   const selectedFacets: SelectedFacet[] = []
 
@@ -307,7 +316,7 @@ const buildSelectedFacets = (args: SearchArgs) => {
   }
 
   if(args.category){
-    selectedFacets.push({key: "c", value: args.category})
+    selectedFacets.push(...buildCategoriesAsFacets(args.category))
   }
 
   if(args.collection){
