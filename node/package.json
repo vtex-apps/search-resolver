@@ -30,7 +30,7 @@
     "querystring": "^0.2.0",
     "ramda": "^0.26.1",
     "slugify": "^1.2.6",
-    "typescript": "3.8.3",
+    "typescript": "3.9.7",
     "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.36.0/public"
   },
   "devDependencies": {
