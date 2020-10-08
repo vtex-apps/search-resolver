@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Now productClusterIds generate breadcrumb through productClusterNames
+
 ## [1.19.0] - 2020-10-06
 ### Added
 - `Facets` field resolver to add `quantity` and make it possible to limit facet values.
