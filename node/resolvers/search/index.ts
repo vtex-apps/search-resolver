@@ -464,7 +464,7 @@ export const queries = {
 
   products: async (_: any, args: SearchArgs, ctx: Context) => {
     const {
-      clients: { biggySearch },
+      clients: { biggySearch, vbase, checkout },
       vtex: { segment }
     } = ctx
     const { query, to, from, orderBy, simulationBehavior } = args
@@ -477,11 +477,14 @@ export const queries = {
 
     const selectedFacets: SelectedFacet[] = buildSelectedFacets(args)
 
+    const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
+
     const biggyArgs: SearchResultArgs = {
       fullText: query,
       attributePath: buildAttributePath(selectedFacets),
       tradePolicy: segment && segment.channel,
       query: query,
+      sellers: sellers
     }
 
     if(orderBy) {
