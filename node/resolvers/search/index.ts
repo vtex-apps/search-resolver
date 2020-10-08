@@ -469,12 +469,6 @@ export const queries = {
     } = ctx
     const { query, to, from, orderBy, simulationBehavior } = args
 
-    if (query == null || test(/[?&[\]=]/, query)) {
-      throw new UserInputError(
-        `The query term contains invalid characters. query=${query}`
-      )
-    }
-
     if (to && to > 2500) {
       throw new UserInputError(
         `The maximum value allowed for the 'to' argument is 2500`
@@ -490,7 +484,7 @@ export const queries = {
       query: query,
     }
 
-    if(orderBy){
+    if(orderBy) {
       biggyArgs["sort"] = convertOrderBy(orderBy)
     }
 
