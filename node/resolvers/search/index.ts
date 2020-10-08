@@ -298,7 +298,7 @@ const buildSpecificationFiltersAsFacets = (specificationFilters: string[]): Sele
 }
 
 const buildCategoriesAndSubcategoriesAsFacets = (categories: string): SelectedFacet[]  => {
-  const categoriesAndSubcategories = categories.split("/")
+  const categoriesAndSubcategories = categories.split("/");
   return categoriesAndSubcategories.map((c: string) => {
     return {key: "c", value: c}
   })
@@ -488,7 +488,6 @@ export const queries = {
       attributePath: buildAttributePath(selectedFacets),
       tradePolicy: segment && segment.channel,
       query: query,
-      operator: "and"
     }
 
     if(orderBy){
