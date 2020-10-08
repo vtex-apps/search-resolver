@@ -288,38 +288,38 @@ const getSellers = async (
   )
 
   return result?.find((region: Region) => region.id === regionId)?.sellers
-  }
+}
 
-const buildSpecificationFiltersAsFacets = (specificationFilters: string[]): SelectedFacet[]  => {
+const buildSpecificationFiltersAsFacets = (specificationFilters: string[]): SelectedFacet[] => {
   return specificationFilters.map((specificationFilter: string) => {
     const [key, value] = specificationFilter.split(":")
-    return {key: key, value: value}
+    return { key: key, value: value }
   })
 }
 
-const buildCategoriesAndSubcategoriesAsFacets = (categories: string): SelectedFacet[]  => {
+const buildCategoriesAndSubcategoriesAsFacets = (categories: string): SelectedFacet[] => {
   const categoriesAndSubcategories = categories.split("/");
   return categoriesAndSubcategories.map((c: string) => {
-    return {key: "c", value: c}
+    return { key: "c", value: c }
   })
 }
 
 const buildSelectedFacets = (args: SearchArgs) => {
   const selectedFacets: SelectedFacet[] = []
 
-  if(args.priceRange){
-    selectedFacets.push({key: "priceRange", value: args.priceRange})
+  if (args.priceRange) {
+    selectedFacets.push({ key: "priceRange", value: args.priceRange })
   }
 
-  if(args.category){
+  if (args.category) {
     selectedFacets.push(...buildCategoriesAndSubcategoriesAsFacets(args.category))
   }
 
-  if(args.collection){
-    selectedFacets.push({key: "productClusterIds", value: args.collection})
+  if (args.collection) {
+    selectedFacets.push({ key: "productClusterIds", value: args.collection })
   }
 
-  if(args.specificationFilters){
+  if (args.specificationFilters) {
     selectedFacets.push(...buildSpecificationFiltersAsFacets(args.specificationFilters))
   }
 
@@ -370,7 +370,7 @@ export const queries = {
       vtex: { segment, account },
     } = ctx
 
-    const sellers = await getSellers(vbase, checkout, segment?.channel ,segment?.regionId)
+    const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
 
     const biggyArgs = {
       searchState,
@@ -487,11 +487,11 @@ export const queries = {
       sellers: sellers
     }
 
-    if(orderBy) {
+    if (orderBy) {
       biggyArgs["sort"] = convertOrderBy(orderBy)
     }
 
-    if(to !== null && from !== null) {
+    if (to !== null && from !== null) {
       const [count, page] = getProductsCountAndPage(from, to)
       biggyArgs["count"] = count
       biggyArgs["page"] = page
