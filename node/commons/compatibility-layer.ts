@@ -463,6 +463,8 @@ export const buildBreadcrumb = (
           href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
         })
       }
+
+      return
     }
 
     if (!value.visible) {
