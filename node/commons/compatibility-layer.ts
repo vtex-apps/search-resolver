@@ -454,6 +454,23 @@ export const buildBreadcrumb = (
     pivotValue.push(value.key)
     pivotMap.push(value.attributeKey)
 
+    if (value.attributeKey === "productClusterIds") {
+      const clusterName = attributes
+        .find(attribute => attribute.key === "productclusternames")
+        ?.values
+        .find(attrValue => attrValue.id === value.key)
+        ?.label
+
+      if (clusterName) {
+        breadcrumb.push({
+          name: unescape(clusterName),
+          href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
+        })
+      }
+
+      return
+    }
+
     if (!value.visible) {
       return
     }

@@ -104,6 +104,7 @@ interface ElasticAttributeValue {
   active: boolean
   key: string
   label: string
+  id: string
 }
 
 interface Breadcrumb {
