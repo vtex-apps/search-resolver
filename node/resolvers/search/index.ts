@@ -168,7 +168,7 @@ const translateToStoreDefaultLanguage = async (
 }
 
 const getProductsCountAndPage = (from: number, to: number): [number, number] => {
-  const count = to - from + 1;
+  const count = to - from + 1
   const page = Math.round((to + 1) / count)
   return [count, page]
 }
@@ -291,21 +291,17 @@ const getSellers = async (
   }
 
 const buildSpecificationFiltersAsFacets = (specificationFilters: string[]): SelectedFacet[]  => {
-  const specificationFilterFacets: SelectedFacet[] = []
-  specificationFilters.map((specificationFilter: string) => {
+  return specificationFilters.map((specificationFilter: string) => {
     const [key, value] = specificationFilter.split(":")
-    specificationFilterFacets.push({key: key, value: value})
+    return {key: key, value: value}
   })
-  return specificationFilterFacets
 }
 
-const buildCategoriesAsFacets = (categories: string): SelectedFacet[]  => {
-  const categoriesFacets: SelectedFacet[] = []
-  const categoriesAndSubcategories = categories.split("/");
-  categoriesAndSubcategories.map((c: string) => {
-    categoriesFacets.push({key: "c", value: c})
+const buildCategoriesAndSubcategoriesAsFacets = (categories: string): SelectedFacet[]  => {
+  const categoriesAndSubcategories = categories.split("/")
+  return categoriesAndSubcategories.map((c: string) => {
+    return {key: "c", value: c}
   })
-  return categoriesFacets
 }
 
 const buildSelectedFacets = (args: SearchArgs) => {
@@ -316,7 +312,7 @@ const buildSelectedFacets = (args: SearchArgs) => {
   }
 
   if(args.category){
-    selectedFacets.push(...buildCategoriesAsFacets(args.category))
+    selectedFacets.push(...buildCategoriesAndSubcategoriesAsFacets(args.category))
   }
 
   if(args.collection){
@@ -471,7 +467,7 @@ export const queries = {
       clients: { biggySearch },
       vtex: { segment }
     } = ctx
-    const {query, to, from, orderBy, simulationBehavior} = args;
+    const { query, to, from, orderBy, simulationBehavior } = args
 
     if (query == null || test(/[?&[\]=]/, query)) {
       throw new UserInputError(
@@ -493,16 +489,16 @@ export const queries = {
       tradePolicy: segment && segment.channel,
       query: query,
       operator: "and"
-    };
-
-    if(orderBy){
-      biggyArgs["sort"] = convertOrderBy(orderBy);
     }
 
-    if(to !== null && from !== null){
-      const [count, page] = getProductsCountAndPage(from, to);
-      biggyArgs["count"] = count;
-      biggyArgs["page"] = page;
+    if(orderBy){
+      biggyArgs["sort"] = convertOrderBy(orderBy)
+    }
+
+    if(to !== null && from !== null) {
+      const [count, page] = getProductsCountAndPage(from, to)
+      biggyArgs["count"] = count
+      biggyArgs["page"] = page
     }
 
     const products = await biggySearch.productSearch(biggyArgs)
@@ -567,7 +563,7 @@ export const queries = {
       simulationBehavior,
     } = args
     const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
-    const [count, page] = getProductsCountAndPage(from, to);
+    const [count, page] = getProductsCountAndPage(from, to)
 
     const biggyArgs = {
       page,
