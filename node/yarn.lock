@@ -5155,9 +5155,9 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.33.0/public":
+"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.36.0/public":
   version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.33.0/public#35bab67c525ded267cdef7dc3b045f05f83ab6fd"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.36.0/public#eecc3dee383eb1990fa2b8e0a2a30b99bba947c9"
 
 w3c-hr-time@^1.0.1:
   version "1.0.1"
