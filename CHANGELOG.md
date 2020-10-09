@@ -7,8 +7,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.20.1] - 2020-10-08
 ### Added
-- productClusters on compatibility layer return
+- Now productClusterIds generate breadcrumb through productClusterNames
+
+## [1.20.0] - 2020-10-08
+### Changed
+- Use new feature of Search API to group SKUs in product recommendation shelves.
+
+## [1.19.0] - 2020-10-06
+### Added
+- `Facets` field resolver to add `quantity` and make it possible to limit facet values.
+
+## [1.18.0] - 2020-10-06
+### Added
+- Filter by seller white label.
+
+## [1.17.4] - 2020-10-05
+### Fixed
+- `lowValue` on `ProductPriceRange` cannot be `0` anymore.
 
 ## [1.17.3] - 2020-09-30
 
