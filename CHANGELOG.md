@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.20.2] - 2020-10-09
+### Added
+- Support for other languages in the `PRICERANGE`.
+
 ## [1.20.1] - 2020-10-08
 ### Added
 - Now productClusterIds generate breadcrumb through productClusterNames
