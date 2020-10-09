@@ -293,7 +293,7 @@ const getSellers = async (
 const buildSpecificationFiltersAsFacets = (specificationFilters: string[]): SelectedFacet[] => {
   return specificationFilters.map((specificationFilter: string) => {
     const [key, value] = specificationFilter.split(":")
-    return { key: key, value: value }
+    return { key, value }
   })
 }
 
@@ -484,11 +484,8 @@ export const queries = {
       attributePath: buildAttributePath(selectedFacets),
       tradePolicy: segment && segment.channel,
       query: query,
-      sellers: sellers
-    }
-
-    if (orderBy) {
-      biggyArgs["sort"] = convertOrderBy(orderBy)
+      sellers: sellers,
+      sort: convertOrderBy(orderBy)
     }
 
     if (to !== null && from !== null) {
