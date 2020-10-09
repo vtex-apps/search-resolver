@@ -1,4 +1,4 @@
-import { attributesToFilters } from './attributes'
+import { attributesToFilters, buildHref } from './attributes'
 
 describe('attributesToFilters', () => {
   it('should convert a text attribute correctly', () => {
@@ -10,6 +10,7 @@ describe('attributesToFilters', () => {
             visible: true,
             values: [
               {
+                id: undefined,
                 count: 108,
                 active: false,
                 key: 'lions-pride',
@@ -21,6 +22,8 @@ describe('attributesToFilters', () => {
             type: 'text' as 'text',
           },
         ],
+        account: 'lions-pride',
+        breadcrumb: [],
       })
     ).toEqual([
       {
@@ -29,6 +32,8 @@ describe('attributesToFilters', () => {
         type: 'TEXT',
         values: [
           {
+            href: 'lions-pride?map=brand',
+            id: undefined,
             key: 'brand',
             name: 'Lions Pride',
             quantity: 108,
@@ -75,24 +80,37 @@ describe('attributesToFilters', () => {
             maxValue: 100,
           },
         ],
+        account: 'lions-pride',
+        breadcrumb: [],
       })
     ).toEqual([
       {
-        hidden: false,
-        name: 'Price',
-        type: 'PRICERANGE',
         values: [
           {
+            quantity: 180,
+            name: '',
             key: 'price',
-            name: 'Price',
-            quantity: 367,
-            value: 'price',
-            range: {
-              from: 10,
-              to: 100,
-            },
+            selected: false,
+            range: { from: 10, to: 30 },
+          },
+          {
+            quantity: 90,
+            name: '',
+            key: 'price',
+            selected: false,
+            range: { from: 30, to: 50 },
+          },
+          {
+            quantity: 97,
+            name: '',
+            key: 'price',
+            selected: false,
+            range: { from: 50, to: 100 },
           },
         ],
+        type: 'PRICERANGE',
+        name: 'Price',
+        hidden: false,
       },
     ])
   })
@@ -120,6 +138,8 @@ describe('attributesToFilters', () => {
             maxValue: 0,
           },
         ],
+        account: 'samsungbr',
+        breadcrumb: [],
       })
     ).toEqual([
       {
@@ -168,6 +188,8 @@ describe('attributesToFilters', () => {
             maxValue: 6533501.777013255,
           },
         ],
+        account: 'localizaseminovos',
+        breadcrumb: [],
       })
     ).toEqual([
       {
@@ -225,6 +247,8 @@ describe('attributesToFilters', () => {
             maxValue: 6533501.777013255,
           },
         ],
+        account: 'localizaseminovos',
+        breadcrumb: [],
       })
     ).toEqual([
       {
@@ -242,5 +266,18 @@ describe('attributesToFilters', () => {
         ],
       },
     ])
+  })
+})
+
+describe('buildHref', () => {
+  it('should create an href from nothing', () => {
+    expect(buildHref('', '', '')).toEqual('')
+    expect(buildHref('', 'hello', 'world')).toEqual('world?map=hello')
+  })
+
+  it('should create an href from existing base', () => {
+    expect(buildHref('hello?map=world', 'ola', 'mundo')).toEqual(
+      'hello/mundo?map=world,ola'
+    )
   })
 })
