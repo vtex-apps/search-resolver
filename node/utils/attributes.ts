@@ -1,4 +1,4 @@
-import { either, isEmpty, isNil, last } from 'ramda'
+import { either, isEmpty, isNil } from 'ramda'
 import unescape from 'unescape'
 
 type Attribute = (NumericalAttribute | TextAttribute) & {

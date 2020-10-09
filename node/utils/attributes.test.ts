@@ -85,21 +85,32 @@ describe('attributesToFilters', () => {
       })
     ).toEqual([
       {
-        hidden: false,
-        name: 'Price',
-        type: 'PRICERANGE',
         values: [
           {
+            quantity: 180,
+            name: '',
             key: 'price',
-            name: 'Price',
-            quantity: 367,
-            value: 'price',
-            range: {
-              from: 10,
-              to: 100,
-            },
+            selected: false,
+            range: { from: 10, to: 30 },
+          },
+          {
+            quantity: 90,
+            name: '',
+            key: 'price',
+            selected: false,
+            range: { from: 30, to: 50 },
+          },
+          {
+            quantity: 97,
+            name: '',
+            key: 'price',
+            selected: false,
+            range: { from: 50, to: 100 },
           },
         ],
+        type: 'PRICERANGE',
+        name: 'Price',
+        hidden: false,
       },
     ])
   })
