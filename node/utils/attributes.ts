@@ -83,7 +83,7 @@ export const attributesToFilters = ({
   }
 
   return attributes!.map(attribute => {
-    const baseHref = (last(breadcrumb) ?? { href: '', name: '' }).href
+    const baseHref = (breadcrumb[breadcrumb.length - 1] ?? { href: '', name: '' }).href
     const { type, values } = convertValues(attribute, total, account, baseHref)
 
     return {
@@ -246,13 +246,13 @@ export const buildHref = (
   key: string,
   value: string
 ): string => {
-  if (isEmpty(key) || isEmpty(value)) {
+  if (key === '' || value === '') {
     return baseHref
   }
 
   const [path = '', map = ''] = baseHref.split('?map=')
-  const pathValues = [...path.split('/'), value].filter(x => !isEmpty(x))
-  const mapValues = [...map.split(','), key].filter(x => !isEmpty(x))
+  const pathValues = [...path.split('/'), value].filter(x => x)
+  const mapValues = [...map.split(','), key].filter(x => x)
 
   return `${pathValues.join('/')}?map=${mapValues.join(',')}`
 }
