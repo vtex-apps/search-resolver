@@ -9,7 +9,7 @@ const lastSegment = compose<string, string[], string>(
 )
 
 function cleanUrl(url: string) {
-  return url.replace(/https:\/\/[A-z0-9]+\.vtexcommercestable\.com\.br/, '')
+  return url.replace(/https:\/\/[A-z0-9]+\.vtexcommercestable\.com\.br/, '').toLowerCase()
 }
 
 /** This type has to be created because the Catlog API to get category by ID does not return the url or children for now.
