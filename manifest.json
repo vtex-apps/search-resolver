@@ -23,6 +23,13 @@
       "name": "vtex.catalog-api-proxy:authenticated-catalog-proxy"
     },
     {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "/api/catalog_system/*"
+      }
+    },
+    {
       "name": "vtex.rewriter:resolve-graphql"
     },
     {
