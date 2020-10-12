@@ -80,6 +80,19 @@ const getProductFilterIdMap = async (product: SearchProduct, ctx: Context) => {
   return filterMapFromName
 }
 
+const getProductSpecificationGroupIdMap = async (skuId: string | number, ctx: Context) => {
+  const { clients: { catalog } } = ctx
+  const filters = await catalog.skuStockKeepingUnitById(skuId).then(response => response.ProductSpecifications)
+  const filterMapFromName = filters.reduce(
+    (acc, curr) => {
+      acc[curr.FieldGroupName] = curr.FieldGroupId.toString()
+      return acc
+    },
+    {} as Record<string, string>
+  )
+  return filterMapFromName
+}
+
 const getLastCategory = compose<string, string, string[], string>(
   last,
   split('/'),
@@ -264,12 +277,13 @@ export const resolvers = {
       if (!shouldTranslateToUserLocale(ctx)) {
         return noTranslationSpecificationGroups
       }
+      const sku = product.items[0]
+      const filterIdFromNameMap = await getProductSpecificationGroupIdMap(sku.itemId, ctx)
 
-      const filterIdFromNameMap = await getProductFilterIdMap(product, ctx)
       const translatedGroups = noTranslationSpecificationGroups.map(group => {
         return {
           originalName: group.name,
-          name: addContextToTranslatableString({ content: group.name, context: product.productId }, ctx),
+          name: addContextToTranslatableString({ content: group.name, context: filterIdFromNameMap[group.name] }, ctx),
           specifications: group.specifications.map(addTranslationParamsToSpecification(filterIdFromNameMap, ctx))
         }
       })
