@@ -85,7 +85,9 @@ const getProductSpecificationGroupIdMap = async (skuId: string | number, ctx: Co
   const filters = await catalog.skuStockKeepingUnitById(skuId).then(response => response.ProductSpecifications)
   const filterMapFromName = filters.reduce(
     (acc, curr) => {
-      acc[curr.FieldGroupName] = curr.FieldGroupId.toString()
+      if (curr.FieldGroupId && curr.FieldGroupName) {
+        acc[curr.FieldGroupName] = curr.FieldGroupId.toString()
+      }
       return acc
     },
     {} as Record<string, string>
@@ -274,10 +276,11 @@ export const resolvers = {
         })
       )
 
-      if (!shouldTranslateToUserLocale(ctx)) {
+      const sku = product.items[0]
+      if (!shouldTranslateToUserLocale(ctx) || !sku) {
         return noTranslationSpecificationGroups
       }
-      const sku = product.items[0]
+
       const filterIdFromNameMap = await getProductSpecificationGroupIdMap(sku.itemId, ctx)
 
       const translatedGroups = noTranslationSpecificationGroups.map(group => {
