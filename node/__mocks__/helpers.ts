@@ -1,5 +1,9 @@
-const promisify = (obj: any) => {
+export const promisify = (obj: any) => {
   return new Promise(resolve => resolve(obj))
+}
+
+const catalogClientMock = {
+  skuStockKeepingUnitById: jest.fn(),
 }
 
 const searchClientMock = {
@@ -60,6 +64,7 @@ export const mockContext: any = {
     ...generateDeepCopy(initialCtxState),
   },
   clients: {
+    catalog: catalogClientMock,
     search: searchClientMock,
     segment: segmentClientMock,
     messagesGraphQL: messagesGraphQLClientMock,

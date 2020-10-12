@@ -1,5 +1,5 @@
 import { resolvers } from './product'
-import { mockContext, getBindingLocale, resetContext } from '../../__mocks__/helpers'
+import { mockContext, getBindingLocale, resetContext, promisify } from '../../__mocks__/helpers'
 import { getProduct } from '../../__mocks__/product'
 
 describe('tests related to product resolver', () => {
@@ -215,6 +215,19 @@ describe('tests related to product resolver', () => {
       })
     })
     test('specifications groups should have expected format and translated values', async () => {
+      mockContext.clients.catalog.skuStockKeepingUnitById.mockImplementationOnce((_id: string) => promisify({
+        'ProductSpecifications': [
+          {
+            "FieldGroupId": "1",
+            "FieldGroupName": "Tamanho"
+          },
+          {
+            "FieldGroupId": "2",
+            "FieldGroupName": "allSpecifications"
+          }
+          ],
+        })
+      )
       mockContext.vtex.locale = 'fr-FR'
       const product = getProduct()
       mockContext.clients.search.filtersInCategoryFromId.mockImplementationOnce(() => ([{
@@ -224,11 +237,11 @@ describe('tests related to product resolver', () => {
       const result = await resolvers.Product.specificationGroups(product as any, {}, mockContext as any)
 
       expect(result[0]).toMatchObject({
-        name: 'Tamanho (((16))) <<<pt-BR>>>',
+        name: 'Tamanho (((1))) <<<pt-BR>>>',
         specifications: [{ name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>', values: ["35 (((specification-Id))) <<<pt-BR>>>"] }]
       })
       expect(result[1]).toMatchObject({
-        name: 'allSpecifications (((16))) <<<pt-BR>>>',
+        name: 'allSpecifications (((2))) <<<pt-BR>>>',
         specifications: [{ name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>', values: ["35 (((specification-Id))) <<<pt-BR>>>"] }]
       })
     })
