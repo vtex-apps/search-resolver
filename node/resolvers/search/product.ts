@@ -281,12 +281,13 @@ export const resolvers = {
         return noTranslationSpecificationGroups
       }
 
-      const filterIdFromNameMap = await getProductSpecificationGroupIdMap(sku.itemId, ctx)
+      const groupdNameIdMap = await getProductSpecificationGroupIdMap(sku.itemId, ctx)
+      const filterIdFromNameMap = await getProductFilterIdMap(product, ctx)
 
       const translatedGroups = noTranslationSpecificationGroups.map(group => {
         return {
           originalName: group.name,
-          name: addContextToTranslatableString({ content: group.name, context: filterIdFromNameMap[group.name] }, ctx),
+          name: addContextToTranslatableString({ content: group.name, context: groupdNameIdMap[group.name] }, ctx),
           specifications: group.specifications.map(addTranslationParamsToSpecification(filterIdFromNameMap, ctx))
         }
       })
