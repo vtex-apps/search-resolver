@@ -67,7 +67,7 @@ export const convertBiggyProduct = async (
     description: product.description,
     items: skus,
     allSpecifications,
-    categoryId: product.categoryIds?.[0],
+    categoryId: product.categoryIds?.slice(-1)[0],
     productTitle: "",
     metaTagDescription: "",
     clusterHighlights: {},
