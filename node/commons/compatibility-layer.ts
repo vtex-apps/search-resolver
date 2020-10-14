@@ -156,7 +156,7 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
       }
 
       seller.commertialOffer.AvailableQuantity = orderFormItem?.availability === 'withoutPriceFulfillment' ? 0 : seller.commertialOffer.AvailableQuantity
-      seller.commertialOffer.Price = orderFormItem.price / 100
+      seller.commertialOffer.Price = orderFormItem.sellingPrice / 100
       seller.commertialOffer.PriceValidUntil = orderFormItem.priceValidUntil
       seller.commertialOffer.ListPrice = orderFormItem.listPrice / 100
 
