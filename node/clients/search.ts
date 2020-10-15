@@ -54,6 +54,14 @@ export class Search extends AppClient {
     return url.concat(`&sc=${salesChannel}`)
   }
 
+  private addCompleteSpecifications = (url: string) => {
+    if (!url.includes('?')) {
+      return `${url}?compSpecs=true`
+    }
+
+    return `${url}&compSpecs=true`
+  }
+
   public constructor(ctx: IOContext, opts?: InstanceOptions) {
     super('vtex.catalog-api-proxy@0.x', ctx, opts)
 
@@ -74,13 +82,13 @@ export class Search extends AppClient {
 
   public product = (slug: string) =>
     this.get<SearchProduct[]>(
-      `/pub/products/search/${this.searchEncodeURI(slug && slug.toLowerCase())}/p`,
+      this.addCompleteSpecifications(`/pub/products/search/${this.searchEncodeURI(slug && slug.toLowerCase())}/p`),
       { metric: 'search-product' }
     )
 
   public productByEan = (id: string) =>
     this.get<SearchProduct[]>(
-      `/pub/products/search?fq=alternateIds_Ean:${id}`,
+      this.addCompleteSpecifications(`/pub/products/search?fq=alternateIds_Ean:${id}`),
       {
         metric: 'search-productByEan',
       }
@@ -88,16 +96,21 @@ export class Search extends AppClient {
 
   public productsByEan = (ids: string[], salesChannel?: string | number) =>
     this.get<SearchProduct[]>(
-      this.addSalesChannel(`/pub/products/search?${ids
-        .map(id => `fq=alternateIds_Ean:${id}`)
-        .join('&')}`, salesChannel),
+      this.addCompleteSpecifications(
+        this.addSalesChannel(`/pub/products/search?${ids
+          .map(id => `fq=alternateIds_Ean:${id}`)
+          .join('&')}`, salesChannel)
+      ),
       { metric: 'search-productByEan' }
     )
 
   public productById = (id: string, cacheable: boolean = true) => {
     const isVtex = this.context.platform === 'vtex'
-    const url = isVtex ? '/pub/products/search?fq=productId:' : '/products/'
-    return this.get<SearchProduct[]>(`${url}${id}`, {
+    const url = isVtex
+      ? this.addCompleteSpecifications(`/pub/products/search?fq=productId:${id}`)
+      : `/products/${id}`
+
+    return this.get<SearchProduct[]>(url, {
       metric: 'search-productById',
       ...(cacheable ? {} : { cacheable: CacheType.None })
     })
@@ -105,15 +118,17 @@ export class Search extends AppClient {
 
   public productsById = (ids: string[], salesChannel?: string | number) =>
     this.get<SearchProduct[]>(
-      this.addSalesChannel(`/pub/products/search?${ids
-        .map(id => `fq=productId:${id}`)
-        .join('&')}`, salesChannel),
+      this.addCompleteSpecifications(
+        this.addSalesChannel(`/pub/products/search?${ids
+          .map(id => `fq=productId:${id}`)
+          .join('&')}`, salesChannel)
+      ),
       { metric: 'search-productById' }
     )
 
   public productByReference = (id: string) =>
     this.get<SearchProduct[]>(
-      `/pub/products/search?fq=alternateIds_RefId:${id}`,
+      this.addCompleteSpecifications(`/pub/products/search?fq=alternateIds_RefId:${id}`),
       {
         metric: 'search-productByReference',
       }
@@ -121,9 +136,11 @@ export class Search extends AppClient {
 
   public productsByReference = (ids: string[], salesChannel?: string | number) =>
     this.get<SearchProduct[]>(
-      this.addSalesChannel(`/pub/products/search?${ids
-        .map(id => `fq=alternateIds_RefId:${id}`)
-        .join('&')}`, salesChannel),
+      this.addCompleteSpecifications(
+        this.addSalesChannel(`/pub/products/search?${ids
+          .map(id => `fq=alternateIds_RefId:${id}`)
+          .join('&')}`, salesChannel)
+      ),
       { metric: 'search-productByReference' }
     )
 
@@ -261,6 +278,7 @@ export class Search extends AppClient {
     map = '',
     hideUnavailableItems = false,
     simulationBehavior = SimulationBehavior.DEFAULT,
+    completeSpecifications = true,
   }: SearchArgs) => {
     const sanitizedQuery = encodeURIComponent(
       this.searchEncodeURI(decodeURIComponent(query || '').trim())
@@ -299,6 +317,9 @@ export class Search extends AppClient {
     }
     if (simulationBehavior === SimulationBehavior.SKIP) {
       url += `&simulation=false`
+    }
+    if (completeSpecifications) {
+      url = this.addCompleteSpecifications(url)
     }
     return url
   }
