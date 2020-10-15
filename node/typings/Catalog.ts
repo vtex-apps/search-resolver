@@ -25,6 +25,7 @@ interface SearchArgs extends QueryArgs {
   to: number | null
   hideUnavailableItems: boolean | null
   simulationBehavior: 'skip' | 'default' | null
+  completeSpecifications: boolean
 }
 
 interface Metadata {
@@ -101,6 +102,7 @@ interface SearchProduct {
   Specifications?: string[]
   allSpecifications?: string[]
   allSpecificationsGroups?: string[]
+  completeSpecifications?: CompleteSpecification[]
   skuSpecifications?: SkuSpecification[]
 }
 
@@ -129,6 +131,18 @@ interface SearchItem {
     itemId: string
     amount: number
   }[]
+}
+
+interface CompleteSpecification {
+  Values: {
+    Id: string
+    Position: number
+    Value: string
+  }[]
+  Name: string
+  Position: number
+  IsOnProductDetails: boolean
+  FieldId: string
 }
 
 interface SearchItemExtended extends SearchItem {
