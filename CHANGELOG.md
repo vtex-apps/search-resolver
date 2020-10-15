@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Removed early return from building breadcrumb if textAttribute was not visible
+
 ## [1.21.3] - 2020-10-13
 ### Fixed
 - Now getting last category from tree instead of first for product categoryId

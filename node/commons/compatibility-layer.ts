@@ -477,10 +477,6 @@ export const buildBreadcrumb = (
       return
     }
 
-    if (!value.visible) {
-      return
-    }
-
     breadcrumb.push({
       name: unescape(value.label),
       href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
