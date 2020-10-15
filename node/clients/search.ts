@@ -127,12 +127,22 @@ export class Search extends AppClient {
       { metric: 'search-productByReference' }
     )
 
-  public productBySku = (skuIds: string[], salesChannel?: string | number) =>
+  public productBySku = (skuId: string) =>
     this.get<SearchProduct[]>(
-      this.addSalesChannel(`/pub/products/search?${skuIds
-        .map(skuId => `fq=skuId:${skuId}`)
-        .join('&')}`, salesChannel),
-      { metric: 'search-productBySku' }
+      this.addCompleteSpecifications(`/pub/products/search?fq=skuId:${skuId}`),
+      {
+        metric: 'search-productBySku',
+      }
+    )
+
+  public productsBySku = (skuIds: string[], salesChannel?: string | number) =>
+    this.get<SearchProduct[]>(
+      this.addCompleteSpecifications(
+        this.addSalesChannel(`/pub/products/search?${skuIds
+          .map(skuId => `fq=skuId:${skuId}`)
+          .join('&')}`, salesChannel)
+      ),
+      { metric: 'search-productsBySku' }
     )
 
   public productsRaw = (args: SearchArgs) => {
