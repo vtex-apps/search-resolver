@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.21.4] - 2020-10-15
+
 ### Changed
 - Removed early return from building breadcrumb if textAttribute was not visible
 
