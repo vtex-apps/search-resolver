@@ -43,7 +43,7 @@ export const resolvers = {
       !kitItems
         ? []
         : kitItems.map(async kitItem => {
-            const products = await search.productBySku([kitItem.itemId])
+            const products = await search.productBySku(kitItem.itemId)
             const { items: skus = [], ...product } = head(products) || {}
             const sku = find(({ itemId }) => itemId === kitItem.itemId, skus)
             return { ...kitItem, product, sku }

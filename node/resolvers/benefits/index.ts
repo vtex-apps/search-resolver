@@ -25,7 +25,7 @@ export const fieldResolvers = {
                 SKU_SEPARATOR
               )
               const discount = effectsParameters[index].value
-              const products = await search.productBySku(skuIds)
+              const products = await search.productsBySku(skuIds)
 
               return products.map((product: any) => {
                 const benefitSKUIds: any = []

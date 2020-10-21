@@ -449,7 +449,7 @@ export const queries = {
         products = await search.productByReference(value)
         break
       case 'sku':
-        products = await search.productBySku([value])
+        products = await search.productBySku(value)
         break
     }
 
@@ -526,7 +526,7 @@ export const queries = {
         products = await search.productsByReference(values, salesChannel)
         break
       case 'sku':
-        products = await search.productBySku(values, salesChannel)
+        products = await search.productsBySku(values, salesChannel)
         break
     }
 
