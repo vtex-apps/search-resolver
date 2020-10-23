@@ -168,7 +168,6 @@ interface BiggySearchSKU {
   unitMultiplier: number
   link: string
   attributes: BiggySKUAttribute[]
-  sellers: BiggySeller[]
   policies: BiggyPolicy[]
 }
 
