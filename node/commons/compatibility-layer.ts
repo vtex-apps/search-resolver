@@ -456,7 +456,8 @@ export const buildBreadcrumb = (
       : 1
   )
 
-  activeValues.filter(x => x.key.toLowerCase() !== "trade-policy" && x.key.toLowerCase() !== "private-seller").forEach(value => {
+  const hiddenActiveValues = ["trade-policy", "private-seller", "activeprivatesellers"]
+  activeValues.filter(x => !hiddenActiveValues.includes(x.attributeKey.toLowerCase())).forEach(value => {
     pivotValue.push(value.key)
     pivotMap.push(value.attributeKey)
 
