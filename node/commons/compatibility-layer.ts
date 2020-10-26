@@ -161,6 +161,7 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
       seller.commertialOffer.Price = orderFormItem.sellingPrice ? orderFormItem.sellingPrice / 100 : orderFormItem.price / 100
       seller.commertialOffer.PriceValidUntil = orderFormItem.priceValidUntil
       seller.commertialOffer.ListPrice = orderFormItem.listPrice / 100
+      seller.commertialOffer.AvailableQuantity = orderFormItem.availability?.toLowerCase() == 'withoutstock' ? 0 : 100
 
       const installmentOptions = orderFormItem?.paymentData?.installmentOptions || []
 
@@ -221,6 +222,7 @@ const getSKUSpecifications = (product: BiggySearchProduct): string[] => {
 const buildCommertialOffer = (
   price: number,
   oldPrice: number,
+  stock: number,
   installment?: BiggyInstallment,
   tax?: number,
 ): CommertialOffer => {
@@ -234,10 +236,12 @@ const buildCommertialOffer = (
     PaymentSystemGroupName: '',
   }] : [];
 
+  const availableQuantity = stock && stock > 0 ? 10000 : 0
+
   return {
     DeliverySlaSamplesPerRegion: {},
     DeliverySlaSamples: [],
-    AvailableQuantity: 10000,
+    AvailableQuantity: availableQuantity,
     DiscountHighLight: [],
     Teasers: [],
     Installments: installments,
@@ -270,7 +274,10 @@ const getSellersIndexedByApi = (
     const price = seller.price || sku.price || product.price
     const oldPrice = seller.oldPrice || sku.oldPrice || product.oldPrice
     const installment = seller.installment || product.installment
-    const commertialOffer = buildCommertialOffer(price, oldPrice, installment, seller.tax)
+
+    const stock = seller.stock || sku.stock || product.stock
+
+    const commertialOffer = buildCommertialOffer(price, oldPrice, stock, installment, seller.tax)
 
     return {
       sellerId: seller.id,
@@ -286,7 +293,10 @@ const getSellersIndexedByXML = (product: BiggySearchProduct): Seller[] => {
   const price = product.price
   const oldPrice = product.oldPrice
   const installment = product.installment
-  const commertialOffer = buildCommertialOffer(price, oldPrice, installment, product.tax)
+
+  const stock = product.stock
+
+  const commertialOffer = buildCommertialOffer(price, oldPrice, stock, installment, product.tax)
 
   return [{
     sellerId: '1',

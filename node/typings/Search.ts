@@ -123,6 +123,7 @@ interface BiggySearchProduct {
   link: string
   oldPrice: number
   price: number
+  stock: number
   brand: string
   brandId: string
   installment?: BiggyInstallment

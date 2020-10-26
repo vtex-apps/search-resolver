@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Added `stock` field to BiggySearchProduct, now using the seller.stock || sku.stock || product.stock and the return from simulation to check seller availability.
+
 ## [1.22.2] - 2020-10-26
 
 ## Fixed
