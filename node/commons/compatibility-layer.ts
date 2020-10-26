@@ -157,11 +157,10 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
         return
       }
 
-      seller.commertialOffer.AvailableQuantity = orderFormItem?.availability === 'withoutPriceFulfillment' ? 0 : seller.commertialOffer.AvailableQuantity
+      seller.commertialOffer.AvailableQuantity = orderFormItem?.availability === 'available' ? 10000 : seller.commertialOffer.AvailableQuantity
       seller.commertialOffer.Price = orderFormItem.sellingPrice ? orderFormItem.sellingPrice / 100 : orderFormItem.price / 100
       seller.commertialOffer.PriceValidUntil = orderFormItem.priceValidUntil
       seller.commertialOffer.ListPrice = orderFormItem.listPrice / 100
-      seller.commertialOffer.AvailableQuantity = orderFormItem.availability?.toLowerCase() == 'withoutstock' ? 0 : 100
 
       const installmentOptions = orderFormItem?.paymentData?.installmentOptions || []
 
