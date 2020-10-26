@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## Fixed
+- Add `activeprivatesellers` to hiddenActiveValues
+
 ## [1.22.1] - 2020-10-21
 ### Fixed
 - Return only visible product specifications.
