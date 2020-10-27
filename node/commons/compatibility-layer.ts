@@ -157,7 +157,7 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
         return
       }
 
-      seller.commertialOffer.AvailableQuantity = orderFormItem?.availability === 'available' ? 10000 : seller.commertialOffer.AvailableQuantity
+      seller.commertialOffer.AvailableQuantity = orderFormItem?.availability === 'available' ? 10000 : 0
       seller.commertialOffer.Price = orderFormItem.sellingPrice ? orderFormItem.sellingPrice / 100 : orderFormItem.price / 100
       seller.commertialOffer.PriceValidUntil = orderFormItem.priceValidUntil
       seller.commertialOffer.ListPrice = orderFormItem.listPrice / 100
