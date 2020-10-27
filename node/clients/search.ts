@@ -8,7 +8,10 @@ import {
 } from '@vtex/api'
 import { stringify } from 'qs'
 
-import { searchEncodeURI, SearchCrossSellingTypes } from '../resolvers/search/utils'
+import {
+  searchEncodeURI,
+  SearchCrossSellingTypes,
+} from '../resolvers/search/utils'
 
 interface AutocompleteArgs {
   maxRows: number | string
@@ -17,9 +20,8 @@ interface AutocompleteArgs {
 
 enum SimulationBehavior {
   SKIP = 'skip',
-  DEFAULT = 'default'
+  DEFAULT = 'default',
 }
-
 
 const inflightKey = ({ baseURL, url, params, headers }: RequestConfig) => {
   return (
@@ -57,7 +59,9 @@ export class Search extends AppClient {
   public constructor(ctx: IOContext, opts?: InstanceOptions) {
     super('vtex.catalog-api-proxy@0.x', ctx, opts)
 
-    this.basePath = ctx.sessionToken ? '/proxy/authenticated/catalog' : '/proxy/catalog'
+    this.basePath = ctx.sessionToken
+      ? '/proxy/authenticated/catalog'
+      : '/proxy/catalog'
     this.searchEncodeURI = searchEncodeURI(ctx.account)
   }
 
@@ -74,7 +78,9 @@ export class Search extends AppClient {
 
   public product = (slug: string) =>
     this.get<SearchProduct[]>(
-      `/pub/products/search/${this.searchEncodeURI(slug && slug.toLowerCase())}/p`,
+      `/pub/products/search/${this.searchEncodeURI(
+        slug && slug.toLowerCase()
+      )}/p`,
       { metric: 'search-product' }
     )
 
@@ -88,9 +94,12 @@ export class Search extends AppClient {
 
   public productsByEan = (ids: string[], salesChannel?: string | number) =>
     this.get<SearchProduct[]>(
-      this.addSalesChannel(`/pub/products/search?${ids
-        .map(id => `fq=alternateIds_Ean:${id}`)
-        .join('&')}`, salesChannel),
+      this.addSalesChannel(
+        `/pub/products/search?${ids
+          .map(id => `fq=alternateIds_Ean:${id}`)
+          .join('&')}`,
+        salesChannel
+      ),
       { metric: 'search-productByEan' }
     )
 
@@ -99,15 +108,16 @@ export class Search extends AppClient {
     const url = isVtex ? '/pub/products/search?fq=productId:' : '/products/'
     return this.get<SearchProduct[]>(`${url}${id}`, {
       metric: 'search-productById',
-      ...(cacheable ? {} : { cacheable: CacheType.None })
+      ...(cacheable ? {} : { cacheable: CacheType.None }),
     })
   }
 
   public productsById = (ids: string[], salesChannel?: string | number) =>
     this.get<SearchProduct[]>(
-      this.addSalesChannel(`/pub/products/search?${ids
-        .map(id => `fq=productId:${id}`)
-        .join('&')}`, salesChannel),
+      this.addSalesChannel(
+        `/pub/products/search?${ids.map(id => `fq=productId:${id}`).join('&')}`,
+        salesChannel
+      ),
       { metric: 'search-productById' }
     )
 
@@ -119,19 +129,28 @@ export class Search extends AppClient {
       }
     )
 
-  public productsByReference = (ids: string[], salesChannel?: string | number) =>
+  public productsByReference = (
+    ids: string[],
+    salesChannel?: string | number
+  ) =>
     this.get<SearchProduct[]>(
-      this.addSalesChannel(`/pub/products/search?${ids
-        .map(id => `fq=alternateIds_RefId:${id}`)
-        .join('&')}`, salesChannel),
+      this.addSalesChannel(
+        `/pub/products/search?${ids
+          .map(id => `fq=alternateIds_RefId:${id}`)
+          .join('&')}`,
+        salesChannel
+      ),
       { metric: 'search-productByReference' }
     )
 
   public productBySku = (skuIds: string[], salesChannel?: string | number) =>
     this.get<SearchProduct[]>(
-      this.addSalesChannel(`/pub/products/search?${skuIds
-        .map(skuId => `fq=skuId:${skuId}`)
-        .join('&')}`, salesChannel),
+      this.addSalesChannel(
+        `/pub/products/search?${skuIds
+          .map(skuId => `fq=skuId:${skuId}`)
+          .join('&')}`,
+        salesChannel
+      ),
       { metric: 'search-productBySku' }
     )
 
@@ -167,16 +186,19 @@ export class Search extends AppClient {
     })
 
   public getCategoryChildren = (id: number) =>
-    this.get<Record<string, string>>(`/pub/category/categories/children?id=${id}`, {
-      metric: 'search-category-children'
-    })
+    this.get<Record<string, string>>(
+      `/pub/category/categories/children?id=${id}`,
+      {
+        metric: 'search-category-children',
+      }
+    )
 
   public facets = (facets: string = '') => {
     const [path, options] = decodeURI(facets).split('?')
     return this.get<SearchFacets>(
-      `/pub/facets/search/${encodeURI(this.searchEncodeURI(
-        `${path.trim()}${options ? '?' + options : ''}`
-      ))}`,
+      `/pub/facets/search/${encodeURI(
+        this.searchEncodeURI(`${path.trim()}${options ? '?' + options : ''}`)
+      )}`,
       { metric: 'search-facets' }
     )
   }
@@ -187,20 +209,26 @@ export class Search extends AppClient {
     })
 
   public crossSelling = (id: string, type: SearchCrossSellingTypes) =>
-    this.get<SearchProduct[]>(`/pub/products/crossselling/${type}/${id}?groupByProduct=true`, {
-      metric: 'search-crossSelling',
-    })
+    this.get<SearchProduct[]>(
+      `/pub/products/crossselling/${type}/${id}?groupByProduct=true`,
+      {
+        metric: 'search-crossSelling',
+      }
+    )
 
   public filtersInCategoryFromId = (id: string | number) =>
-    this.get<FilterListTreeCategoryById[]>(`/pub/specification/field/listTreeByCategoryId/${id}`, {
-      metric: 'search-listTreeByCategoryId'
-    })
+    this.get<FilterListTreeCategoryById[]>(
+      `/pub/specification/field/listTreeByCategoryId/${id}`,
+      {
+        metric: 'search-listTreeByCategoryId',
+      }
+    )
 
   public autocomplete = ({ maxRows, searchTerm }: AutocompleteArgs) =>
     this.get<{ itemsReturned: SearchAutocompleteUnit[] }>(
-      `/buscaautocomplete?maxRows=${maxRows}&productNameContains=${
-      encodeURIComponent(this.searchEncodeURI(searchTerm))
-      }`,
+      `/buscaautocomplete?maxRows=${maxRows}&productNameContains=${encodeURIComponent(
+        this.searchEncodeURI(searchTerm)
+      )}`,
       { metric: 'search-autocomplete' }
     )
 
@@ -219,10 +247,9 @@ export class Search extends AppClient {
   }
 
   public getField = (id: number) =>
-    this.get<FieldResponseAPI>(
-      `/pub/specification/fieldGet/${id}`,
-      { metric: 'catalog-get-field-by-id' }
-    )
+    this.get<FieldResponseAPI>(`/pub/specification/fieldGet/${id}`, {
+      metric: 'catalog-get-field-by-id',
+    })
 
   private getRaw = <T = any>(url: string, config: RequestConfig = {}) => {
     const segmentData: SegmentData | undefined = (this
@@ -255,41 +282,60 @@ export class Search extends AppClient {
     const sanitizedQuery = encodeURIComponent(
       this.searchEncodeURI(decodeURIComponent(query || '').trim())
     )
+
     if (hideUnavailableItems) {
       const segmentData = (this.context as CustomIOContext).segment
       salesChannel = (segmentData && segmentData.channel.toString()) || ''
     }
+
     let url = `/pub/products/search/${sanitizedQuery}?`
+
     if (category && !query) {
       url += `&fq=C:/${category}/`
     }
+
     if (specificationFilters && specificationFilters.length > 0) {
       url += specificationFilters.map(filter => `&fq=${filter}`)
     }
+
     if (priceRange) {
       url += `&fq=P:[${priceRange}]`
     }
+
     if (collection) {
       url += `&fq=productClusterIds:${collection}`
     }
+
     if (salesChannel) {
       url += `&fq=isAvailablePerSalesChannel_${salesChannel}:1`
     }
-    if (orderBy) {
+
+    // To obtain results in the same order as they are inside a collection
+    // we should NOT add any `O` query string. The catalog search API will
+    // respect collection ordering in case `productClusterIds:{collection}`
+    // is present. If not, the API will default to `OrderByScoreDESC`, in
+    // case this is a full-text query, and `OrderByTopSaleDESC` in case it
+    // is not.
+    if (orderBy && orderBy !== 'OrderByCollection') {
       url += `&O=${orderBy}`
     }
+
     if (map) {
       url += `&map=${map}`
     }
+
     if (from != null && from > -1) {
       url += `&_from=${from}`
     }
+
     if (to != null && to > -1) {
       url += `&_to=${to}`
     }
+
     if (simulationBehavior === SimulationBehavior.SKIP) {
       url += `&simulation=false`
     }
+
     return url
   }
 }
