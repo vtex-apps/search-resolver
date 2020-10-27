@@ -8,7 +8,10 @@ import {
 } from '@vtex/api'
 import { stringify } from 'qs'
 
-import { searchEncodeURI, SearchCrossSellingTypes } from '../resolvers/search/utils'
+import {
+  searchEncodeURI,
+  SearchCrossSellingTypes,
+} from '../resolvers/search/utils'
 
 interface AutocompleteArgs {
   maxRows: number | string
@@ -17,9 +20,8 @@ interface AutocompleteArgs {
 
 enum SimulationBehavior {
   SKIP = 'skip',
-  DEFAULT = 'default'
+  DEFAULT = 'default',
 }
-
 
 const inflightKey = ({ baseURL, url, params, headers }: RequestConfig) => {
   return (
@@ -65,7 +67,9 @@ export class Search extends AppClient {
   public constructor(ctx: IOContext, opts?: InstanceOptions) {
     super('vtex.catalog-api-proxy@0.x', ctx, opts)
 
-    this.basePath = ctx.sessionToken ? '/proxy/authenticated/catalog' : '/proxy/catalog'
+    this.basePath = ctx.sessionToken
+      ? '/proxy/authenticated/catalog'
+      : '/proxy/catalog'
     this.searchEncodeURI = searchEncodeURI(ctx.account)
   }
 
@@ -82,13 +86,19 @@ export class Search extends AppClient {
 
   public product = (slug: string) =>
     this.get<SearchProduct[]>(
-      this.addCompleteSpecifications(`/pub/products/search/${this.searchEncodeURI(slug && slug.toLowerCase())}/p`),
+      this.addCompleteSpecifications(
+        `/pub/products/search/${this.searchEncodeURI(
+          slug && slug.toLowerCase()
+        )}/p`
+      ),
       { metric: 'search-product' }
     )
 
   public productByEan = (id: string) =>
     this.get<SearchProduct[]>(
-      this.addCompleteSpecifications(`/pub/products/search?fq=alternateIds_Ean:${id}`),
+      this.addCompleteSpecifications(
+        `/pub/products/search?fq=alternateIds_Ean:${id}`
+      ),
       {
         metric: 'search-productByEan',
       }
@@ -97,9 +107,12 @@ export class Search extends AppClient {
   public productsByEan = (ids: string[], salesChannel?: string | number) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
-        this.addSalesChannel(`/pub/products/search?${ids
-          .map(id => `fq=alternateIds_Ean:${id}`)
-          .join('&')}`, salesChannel)
+        this.addSalesChannel(
+          `/pub/products/search?${ids
+            .map(id => `fq=alternateIds_Ean:${id}`)
+            .join('&')}`,
+          salesChannel
+        )
       ),
       { metric: 'search-productByEan' }
     )
@@ -107,39 +120,52 @@ export class Search extends AppClient {
   public productById = (id: string, cacheable: boolean = true) => {
     const isVtex = this.context.platform === 'vtex'
     const url = isVtex
-      ? this.addCompleteSpecifications(`/pub/products/search?fq=productId:${id}`)
+      ? this.addCompleteSpecifications(
+          `/pub/products/search?fq=productId:${id}`
+        )
       : `/products/${id}`
 
     return this.get<SearchProduct[]>(url, {
       metric: 'search-productById',
-      ...(cacheable ? {} : { cacheable: CacheType.None })
+      ...(cacheable ? {} : { cacheable: CacheType.None }),
     })
   }
 
   public productsById = (ids: string[], salesChannel?: string | number) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
-        this.addSalesChannel(`/pub/products/search?${ids
-          .map(id => `fq=productId:${id}`)
-          .join('&')}`, salesChannel)
+        this.addSalesChannel(
+          `/pub/products/search?${ids
+            .map(id => `fq=productId:${id}`)
+            .join('&')}`,
+          salesChannel
+        )
       ),
       { metric: 'search-productById' }
     )
 
   public productByReference = (id: string) =>
     this.get<SearchProduct[]>(
-      this.addCompleteSpecifications(`/pub/products/search?fq=alternateIds_RefId:${id}`),
+      this.addCompleteSpecifications(
+        `/pub/products/search?fq=alternateIds_RefId:${id}`
+      ),
       {
         metric: 'search-productByReference',
       }
     )
 
-  public productsByReference = (ids: string[], salesChannel?: string | number) =>
+  public productsByReference = (
+    ids: string[],
+    salesChannel?: string | number
+  ) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
-        this.addSalesChannel(`/pub/products/search?${ids
-          .map(id => `fq=alternateIds_RefId:${id}`)
-          .join('&')}`, salesChannel)
+        this.addSalesChannel(
+          `/pub/products/search?${ids
+            .map(id => `fq=alternateIds_RefId:${id}`)
+            .join('&')}`,
+          salesChannel
+        )
       ),
       { metric: 'search-productByReference' }
     )
@@ -155,9 +181,12 @@ export class Search extends AppClient {
   public productsBySku = (skuIds: string[], salesChannel?: string | number) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
-        this.addSalesChannel(`/pub/products/search?${skuIds
-          .map(skuId => `fq=skuId:${skuId}`)
-          .join('&')}`, salesChannel)
+        this.addSalesChannel(
+          `/pub/products/search?${skuIds
+            .map(skuId => `fq=skuId:${skuId}`)
+            .join('&')}`,
+          salesChannel
+        )
       ),
       { metric: 'search-productsBySku' }
     )
@@ -194,16 +223,19 @@ export class Search extends AppClient {
     })
 
   public getCategoryChildren = (id: number) =>
-    this.get<Record<string, string>>(`/pub/category/categories/children?id=${id}`, {
-      metric: 'search-category-children'
-    })
+    this.get<Record<string, string>>(
+      `/pub/category/categories/children?id=${id}`,
+      {
+        metric: 'search-category-children',
+      }
+    )
 
   public facets = (facets: string = '') => {
     const [path, options] = decodeURI(facets).split('?')
     return this.get<SearchFacets>(
-      `/pub/facets/search/${encodeURI(this.searchEncodeURI(
-        `${path.trim()}${options ? '?' + options : ''}`
-      ))}`,
+      `/pub/facets/search/${encodeURI(
+        this.searchEncodeURI(`${path.trim()}${options ? '?' + options : ''}`)
+      )}`,
       { metric: 'search-facets' }
     )
   }
@@ -214,20 +246,26 @@ export class Search extends AppClient {
     })
 
   public crossSelling = (id: string, type: SearchCrossSellingTypes) =>
-    this.get<SearchProduct[]>(`/pub/products/crossselling/${type}/${id}?groupByProduct=true`, {
-      metric: 'search-crossSelling',
-    })
+    this.get<SearchProduct[]>(
+      `/pub/products/crossselling/${type}/${id}?groupByProduct=true`,
+      {
+        metric: 'search-crossSelling',
+      }
+    )
 
   public filtersInCategoryFromId = (id: string | number) =>
-    this.get<FilterListTreeCategoryById[]>(`/pub/specification/field/listTreeByCategoryId/${id}`, {
-      metric: 'search-listTreeByCategoryId'
-    })
+    this.get<FilterListTreeCategoryById[]>(
+      `/pub/specification/field/listTreeByCategoryId/${id}`,
+      {
+        metric: 'search-listTreeByCategoryId',
+      }
+    )
 
   public autocomplete = ({ maxRows, searchTerm }: AutocompleteArgs) =>
     this.get<{ itemsReturned: SearchAutocompleteUnit[] }>(
-      `/buscaautocomplete?maxRows=${maxRows}&productNameContains=${
-      encodeURIComponent(this.searchEncodeURI(searchTerm))
-      }`,
+      `/buscaautocomplete?maxRows=${maxRows}&productNameContains=${encodeURIComponent(
+        this.searchEncodeURI(searchTerm)
+      )}`,
       { metric: 'search-autocomplete' }
     )
 
@@ -246,21 +284,22 @@ export class Search extends AppClient {
   }
 
   public getField = (id: number) =>
-    this.get<FieldResponseAPI>(
-      `/pub/specification/fieldGet/${id}`,
-      { metric: 'catalog-get-field-by-id' }
-    )
+    this.get<FieldResponseAPI>(`/pub/specification/fieldGet/${id}`, {
+      metric: 'catalog-get-field-by-id',
+    })
 
   public getFieldValues = (id: number) => {
     try {
-      return this.get<FieldValuesResponseAPI>(`/pub/specification/fieldvalue/${id}`, {
-        metric: 'catalog-get-field-value-by-id',
-      })
+      return this.get<FieldValuesResponseAPI>(
+        `/pub/specification/fieldvalue/${id}`,
+        {
+          metric: 'catalog-get-field-value-by-id',
+        }
+      )
     } catch {
       return []
     }
   }
-
 
   private getRaw = <T = any>(url: string, config: RequestConfig = {}) => {
     const segmentData: SegmentData | undefined = (this
@@ -294,44 +333,64 @@ export class Search extends AppClient {
     const sanitizedQuery = encodeURIComponent(
       this.searchEncodeURI(decodeURIComponent(query || '').trim())
     )
+
     if (hideUnavailableItems) {
       const segmentData = (this.context as CustomIOContext).segment
       salesChannel = (segmentData && segmentData.channel.toString()) || ''
     }
+
     let url = `/pub/products/search/${sanitizedQuery}?`
+
     if (category && !query) {
       url += `&fq=C:/${category}/`
     }
+
     if (specificationFilters && specificationFilters.length > 0) {
       url += specificationFilters.map(filter => `&fq=${filter}`)
     }
+
     if (priceRange) {
       url += `&fq=P:[${priceRange}]`
     }
+
     if (collection) {
       url += `&fq=productClusterIds:${collection}`
     }
+
     if (salesChannel) {
       url += `&fq=isAvailablePerSalesChannel_${salesChannel}:1`
     }
-    if (orderBy) {
+
+    // To obtain results in the same order as they are inside a collection
+    // we should NOT add any `O` query string. The catalog search API will
+    // respect collection ordering in case `productClusterIds:{collection}`
+    // is present. If not, the API will default to `OrderByScoreDESC`, in
+    // case this is a full-text query, and `OrderByTopSaleDESC` in case it
+    // is not.
+    if (orderBy && orderBy !== 'OrderByCollection') {
       url += `&O=${orderBy}`
     }
+
     if (map) {
       url += `&map=${map}`
     }
+
     if (from != null && from > -1) {
       url += `&_from=${from}`
     }
+
     if (to != null && to > -1) {
       url += `&_to=${to}`
     }
+
     if (simulationBehavior === SimulationBehavior.SKIP) {
       url += `&simulation=false`
     }
+
     if (completeSpecifications) {
       url = this.addCompleteSpecifications(url)
     }
+
     return url
   }
 }
