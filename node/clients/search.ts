@@ -316,7 +316,7 @@ export class Search extends AppClient {
     // is present. If not, the API will default to `OrderByScoreDESC`, in
     // case this is a full-text query, and `OrderByTopSaleDESC` in case it
     // is not.
-    if (orderBy && orderBy !== 'OrderByCollection') {
+    if (orderBy && orderBy !== 'OrderByDefault') {
       url += `&O=${orderBy}`
     }
 
