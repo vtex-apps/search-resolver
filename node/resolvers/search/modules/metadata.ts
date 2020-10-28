@@ -124,7 +124,8 @@ const getClusterMetadata = async (
     from: null,
     to: null,
     hideUnavailableItems: null,
-    simulationBehavior: null
+    simulationBehavior: null,
+    completeSpecifications: false,
   })
 
   const clusterId = head(args.query?.split(',') ?? [])
