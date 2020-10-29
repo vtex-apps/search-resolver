@@ -393,7 +393,7 @@ const convertSKU = (
  * @param {OrderBy} orderBy VTEX OrderBy.
  * @returns {string} Biggy's sort.
  */
-export const convertOrderBy = (orderBy?: string | null): string => {
+export const convertOrderBy = (orderBy?: string): string => {
   switch (orderBy) {
     case 'OrderByPriceDESC':
       return 'price:desc'

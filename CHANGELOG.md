@@ -11,12 +11,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Added `stock` field to BiggySearchProduct, now using the seller.stock || sku.stock || product.stock and the return from simulation to check seller availability.
 
+## [1.22.3] - 2020-10-26
+
+### Fixed 
+
+- Revert `Products` query with biggy search
+
 ## [1.22.2] - 2020-10-26
 
 ## Fixed
+
 - Add `activeprivatesellers` to hiddenActiveValues
 
 ## [1.22.1] - 2020-10-21
+
 ### Fixed
 - Return only visible product specifications.
 
@@ -27,7 +35,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Products query to use biggy's search
 
 ## [1.21.5] - 2020-10-16
-
 ### Fixed
 - Filter trade-policy and private-seller from appearing on breadcrumb
 
