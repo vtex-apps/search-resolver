@@ -70,7 +70,7 @@ export const convertBiggyProduct = async (
     categoryId: product.categoryIds?.slice(-1)[0],
     productTitle: "",
     metaTagDescription: "",
-    clusterHighlights: {},
+    clusterHighlights: product.clusterHighlights,
     productClusters: {},
     searchableClusters: {},
     titleTag: "",
