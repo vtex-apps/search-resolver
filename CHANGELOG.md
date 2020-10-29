@@ -43,6 +43,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Products query to use biggy's search
 
+### Added
+
+- ClusterHighlights to biggy's product
+
 ## [1.21.5] - 2020-10-16
 ### Fixed
 - Filter trade-policy and private-seller from appearing on breadcrumb

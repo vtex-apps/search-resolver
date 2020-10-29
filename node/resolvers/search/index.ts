@@ -436,9 +436,13 @@ export const queries = {
         `The maximum value allowed for the 'to' argument is 2500`
       )
     }
-    const products = await search.products(args)
-    searchFirstElements(products, args.from, ctx.clients.search)
-    return products
+
+    const products = await biggySearch.productSearch(biggyArgs)
+
+    const convertedProducts = await productsBiggy({ ctx, simulationBehavior, searchResult: products })
+    convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
+
+    return convertedProducts
   },
 
   productsByIdentifier: async (
