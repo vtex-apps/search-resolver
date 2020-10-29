@@ -22,7 +22,6 @@ describe('attributesToFilters', () => {
             type: 'text' as 'text',
           },
         ],
-        account: 'lions-pride',
         breadcrumb: [],
       })
     ).toEqual([
@@ -80,7 +79,6 @@ describe('attributesToFilters', () => {
             maxValue: 100,
           },
         ],
-        account: 'lions-pride',
         breadcrumb: [],
       })
     ).toEqual([
@@ -138,7 +136,6 @@ describe('attributesToFilters', () => {
             maxValue: 0,
           },
         ],
-        account: 'samsungbr',
         breadcrumb: [],
       })
     ).toEqual([
@@ -149,10 +146,14 @@ describe('attributesToFilters', () => {
         values: [
           {
             key: 'polegadas',
-            name: '0 - *',
+            name: '0 - 0',
             quantity: 13,
             selected: false,
-            value: '0:*',
+            value: '0:0',
+            range: {
+              from: 0,
+              to: 0,
+            },
           },
         ],
       },
@@ -188,7 +189,6 @@ describe('attributesToFilters', () => {
             maxValue: 6533501.777013255,
           },
         ],
-        account: 'localizaseminovos',
         breadcrumb: [],
       })
     ).toEqual([
@@ -203,6 +203,10 @@ describe('attributesToFilters', () => {
             quantity: 71,
             selected: false,
             value: 'l:0:5505580',
+            range: {
+              from: 0,
+              to: 5505580,
+            },
           },
           {
             key: 'location',
@@ -210,6 +214,10 @@ describe('attributesToFilters', () => {
             quantity: 53,
             selected: false,
             value: 'l:0:4477620',
+            range: {
+              from: 0,
+              to: 4477620,
+            },
           },
         ],
       },
@@ -247,7 +255,6 @@ describe('attributesToFilters', () => {
             maxValue: 6533501.777013255,
           },
         ],
-        account: 'localizaseminovos',
         breadcrumb: [],
       })
     ).toEqual([
@@ -262,6 +269,10 @@ describe('attributesToFilters', () => {
             quantity: 124,
             selected: true,
             value: 'l:0:3605120',
+            range: {
+              from: 2421698.143072009,
+              to: 6533501.777013255,
+            },
           },
         ],
       },

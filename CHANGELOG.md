@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Always return `range` for numeric facets.
+- Show `maxValue` and `minValue` instead of `*` for bucket numeric facets.
+
 ## [1.23.0] - 2020-10-29
 
 ### Changed
