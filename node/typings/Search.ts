@@ -38,6 +38,7 @@ interface SearchResultArgs {
   fullText: string
   searchState?: string
   sellers?: RegionSeller[]
+  hideUnavailableItems?: boolean
 }
 
 interface RegionSeller {
@@ -72,6 +73,7 @@ interface FacetsInput {
   fullText: string
   query: string
   searchState?: string
+  hideUnavailableItems: boolean
 }
 
 interface ProductSearchInput {
@@ -86,6 +88,7 @@ interface ProductSearchInput {
   productOriginVtex: boolean
   searchState?: string
   simulationBehavior: 'skip' | 'default' | null
+  hideUnavailableItems: boolean
 }
 
 interface ElasticAttribute {
