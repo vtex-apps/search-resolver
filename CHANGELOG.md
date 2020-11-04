@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `clusterHighlights` prop to the product
+
 ## [1.23.1] - 2020-11-05
 
 ### Changed
@@ -42,10 +46,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 - Products query to use biggy's search
-
-### Added
-
-- ClusterHighlights to biggy's product
 
 ## [1.21.5] - 2020-10-16
 ### Fixed
