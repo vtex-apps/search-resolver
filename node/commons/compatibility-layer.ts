@@ -161,6 +161,7 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
       seller.commertialOffer.Price = orderFormItem.sellingPrice ? orderFormItem.sellingPrice / 100 : orderFormItem.price / 100
       seller.commertialOffer.PriceValidUntil = orderFormItem.priceValidUntil
       seller.commertialOffer.ListPrice = orderFormItem.listPrice / 100
+      seller.commertialOffer.PriceWithoutDiscount = orderFormItem.price / 100
 
       const installmentOptions = orderFormItem?.paymentData?.installmentOptions || []
 
