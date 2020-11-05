@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.23.1] - 2020-11-05
+
 ### Changed
 
 - Always return `range` for numeric facets.
