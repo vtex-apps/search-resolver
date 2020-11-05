@@ -140,6 +140,7 @@ interface BiggySearchProduct {
   textAttributes: BiggyTextAttribute[]
   split: BiggySplit
   categoryTrees: BiggyCategoryTree[]
+  clusterHighlights: Record<string, string>
 }
 
 interface BiggySplit {

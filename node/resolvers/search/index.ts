@@ -167,6 +167,12 @@ const translateToStoreDefaultLanguage = async (
   })
 }
 
+const getProductsCountAndPage = (from: number, to: number): [number, number] => {
+  const count = to - from + 1
+  const page = Math.round((to + 1) / count)
+  return [count, page]
+}
+
 const noop = () => { }
 
 // Does prefetching and warms up cache for up to the 10 first elements of a search, so if user clicks on product page
@@ -284,6 +290,42 @@ const getSellers = async (
   return result?.find((region: Region) => region.id === regionId)?.sellers
 }
 
+const buildSpecificationFiltersAsFacets = (specificationFilters: string[]): SelectedFacet[] => {
+  return specificationFilters.map((specificationFilter: string) => {
+    const [key, value] = specificationFilter.split(":")
+    return { key, value }
+  })
+}
+
+const buildCategoriesAndSubcategoriesAsFacets = (categories: string): SelectedFacet[] => {
+  const categoriesAndSubcategories = categories.split("/");
+  return categoriesAndSubcategories.map((c: string) => {
+    return { key: "c", value: c }
+  })
+}
+
+const buildSelectedFacets = (args: SearchArgs) => {
+  const selectedFacets: SelectedFacet[] = []
+
+  if (args.priceRange) {
+    selectedFacets.push({ key: "priceRange", value: args.priceRange })
+  }
+
+  if (args.category) {
+    selectedFacets.push(...buildCategoriesAndSubcategoriesAsFacets(args.category))
+  }
+
+  if (args.collection) {
+    selectedFacets.push({ key: "productClusterIds", value: args.collection })
+  }
+
+  if (args.specificationFilters) {
+    selectedFacets.push(...buildSpecificationFiltersAsFacets(args.specificationFilters))
+  }
+
+  return selectedFacets
+}
+
 export const queries = {
   autocomplete: async (
     _: any,
@@ -328,7 +370,7 @@ export const queries = {
       vtex: { segment },
     } = ctx
 
-    const sellers = await getSellers(vbase, checkout, segment?.channel ,segment?.regionId)
+    const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
 
     const biggyArgs = {
       searchState,
@@ -422,23 +464,42 @@ export const queries = {
 
   products: async (_: any, args: SearchArgs, ctx: Context) => {
     const {
-      clients: { search },
+      clients: { biggySearch, vbase, checkout },
+      vtex: { segment }
     } = ctx
-    const queryTerm = args.query
-    if (queryTerm == null || test(/[?&[\]=]/, queryTerm)) {
-      throw new UserInputError(
-        `The query term contains invalid characters. query=${queryTerm}`
-      )
-    }
+    const { query, to, from, orderBy, simulationBehavior } = args
 
-    if (args.to && args.to > 2500) {
+    if (to && to > 2500) {
       throw new UserInputError(
         `The maximum value allowed for the 'to' argument is 2500`
       )
     }
-    const products = await search.products(args)
-    searchFirstElements(products, args.from, ctx.clients.search)
-    return products
+
+    const selectedFacets: SelectedFacet[] = buildSelectedFacets(args)
+
+    const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
+
+    const biggyArgs: SearchResultArgs = {
+      fullText: query,
+      attributePath: buildAttributePath(selectedFacets),
+      tradePolicy: segment && segment.channel,
+      query: query,
+      sellers: sellers,
+      sort: convertOrderBy(orderBy)
+    }
+
+    if (to !== null && from !== null) {
+      const [count, page] = getProductsCountAndPage(from, to)
+      biggyArgs["count"] = count
+      biggyArgs["page"] = page
+    }
+
+    const products = await biggySearch.productSearch(biggyArgs)
+
+    const convertedProducts = await productsBiggy({ ctx, simulationBehavior, searchResult: products })
+    convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
+
+    return convertedProducts
   },
 
   productsByIdentifier: async (
@@ -493,11 +554,8 @@ export const queries = {
       searchState,
       simulationBehavior,
     } = args
-
     const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
-
-    const count = to - from + 1
-    const page = Math.round((to + 1) / count)
+    const [count, page] = getProductsCountAndPage(from, to)
 
     const biggyArgs = {
       page,
