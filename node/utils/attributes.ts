@@ -70,12 +70,10 @@ interface CatalogAttributeValues {
 export const attributesToFilters = ({
   total,
   attributes,
-  account,
   breadcrumb
 }: {
   total: number
   attributes?: Attribute[]
-  account: string,
   breadcrumb: Breadcrumb[]
 }): Filter[] => {
   if (either(isNil, isEmpty)(attributes)) {
@@ -84,7 +82,7 @@ export const attributesToFilters = ({
 
   return attributes!.map(attribute => {
     const baseHref = (breadcrumb[breadcrumb.length - 1] ?? { href: '', name: '' }).href
-    const { type, values } = convertValues(attribute, total, account, baseHref)
+    const { type, values } = convertValues(attribute, total, baseHref)
 
     return {
       values,
@@ -114,7 +112,6 @@ export const attributesToFilters = ({
 const convertValues = (
   attribute: Attribute,
   total: number,
-  account: string,
   baseHref: string
 ): { type: FilterType; values: FilterValue[] } => {
   // When creating a filter for price attribute, it should be the only one to use
@@ -142,32 +139,6 @@ const convertValues = (
     }
   }
 
-  // FIXME: Remove this when creating the specificationType for filters
-  if (
-    attribute.type === 'number' &&
-    attribute.key === 'quilometragem' &&
-    account === 'localizaseminovos'
-  ) {
-    return {
-      type: 'NUMBER',
-      values: attribute.values.map((value: any) => {
-        return {
-          quantity: value.count,
-          name: unescape(value.label),
-          key: attribute.key,
-          value: value.key,
-          selected: value.active,
-          range: {
-            from: parseFloat(
-              isNaN(value.from) ? attribute.minValue : value.from
-            ),
-            to: parseFloat(isNaN(value.to) ? attribute.maxValue : value.to),
-          },
-        }
-      }),
-    }
-  }
-
   // For other `number` and `location` attributes we use TEXT based filters (checkboxes),
   // with buckets (e.g.: 0 - 30, 30 - 90, etc).
   if (attribute.type === 'number' || attribute.type === 'location') {
@@ -175,15 +146,23 @@ const convertValues = (
 
     // When a bucket is active, we should only show it, and none of the othter options.
     if (attribute.active) {
+      const from = !isNaN(parseFloat(attribute.activeFrom ?? '')) ? parseFloat(attribute.activeFrom!) : attribute.minValue
+      const to = !isNaN(parseFloat(attribute.activeTo ?? '')) ? parseFloat(attribute.activeTo!) : attribute.maxValue
+
       return {
         type: 'TEXT',
         values: [
           {
             quantity: total,
-            name: unescape(`${attribute.activeFrom} - ${attribute.activeTo}`),
-            value: `${valuePrefix}${attribute.activeFrom}:${attribute.activeTo}`,
+            name: unescape(`${from} - ${to}`),
+            value: `${valuePrefix}${from}:${to}`,
             key: attribute.key,
             selected: attribute.active,
+            range: {
+              // Using absolute values so that slider remains the same.
+              from: attribute.minValue,
+              to: attribute.maxValue,
+            },
           },
         ],
       }
@@ -192,12 +171,19 @@ const convertValues = (
     return {
       type: 'TEXT',
       values: attribute.values.map(value => {
+        const from = !isNaN(parseFloat(value.from)) ? parseFloat(value.from) : attribute.minValue
+        const to = !isNaN(parseFloat(value.to)) ? parseFloat(value.to) : attribute.maxValue
+
         return {
           quantity: value.count,
-          name: unescape(`${value.from} - ${value.to}`),
+          name: unescape(`${from} - ${to}`),
           key: attribute.key,
-          value: `${valuePrefix}${value.from}:${value.to}`,
+          value: `${valuePrefix}${from}:${to}`,
           selected: value.active,
+          range: {
+            from,
+            to
+          },
         }
       }),
     }

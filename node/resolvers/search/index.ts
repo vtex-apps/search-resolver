@@ -325,7 +325,7 @@ export const queries = {
 
     const {
       clients: { biggySearch, search, checkout, vbase },
-      vtex: { segment, account },
+      vtex: { segment },
     } = ctx
 
     const sellers = await getSellers(vbase, checkout, segment?.channel ,segment?.regionId)
@@ -366,7 +366,7 @@ export const queries = {
     )
 
     return {
-      facets: attributesToFilters({ ...result, account, breadcrumb }),
+      facets: attributesToFilters({ ...result, breadcrumb }),
       queryArgs: {
         map: args.map,
         query: args.query,
