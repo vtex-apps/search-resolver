@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Fill `PriceWithoutDiscount` when `simulationBehavior` is `default`.
+
 ## [1.23.2] - 2020-11-05
 
 ### Added
