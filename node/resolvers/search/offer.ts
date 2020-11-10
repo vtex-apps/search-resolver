@@ -82,7 +82,7 @@ export const resolvers = {
         return []
       }
 
-      const catalogGiftProducts = await ctx.clients.search.productBySku(GiftSkuIds).catch(() => null)
+      const catalogGiftProducts = await ctx.clients.search.productsBySku(GiftSkuIds).catch(() => null)
 
       if (!catalogGiftProducts || catalogGiftProducts.length === 0) {
         return []

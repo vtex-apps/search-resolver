@@ -259,22 +259,37 @@ export const resolvers = {
 
     specificationGroups: async (product: SearchProduct, _: unknown, ctx: Context) => {
       const allSpecificationsGroups = (product.allSpecificationsGroups ?? []).concat(['allSpecifications'])
-      const noTranslationSpecificationGroups = allSpecificationsGroups.map(
-        (groupName: string) => ({
-          originalName: groupName,
-          name: groupName,
-          specifications: ((product as unknown as DynamicKey<string[]>)?.[groupName] ?? []).map(
-            (name: string) => {
-              const values = (product as unknown as DynamicKey<string[]>)[name] || []
-              return {
-                originalName: name,
-                name,
-                values,
+
+      const visibleSpecifications = product.completeSpecifications
+        ? product.completeSpecifications.reduce<Record<string, boolean>>((acc, specification) => {
+            acc[specification.Name] = specification.IsOnProductDetails
+            return acc
+          }, {})
+        : {}
+
+      let noTranslationSpecificationGroups = allSpecificationsGroups.map(
+        (groupName: string) => {
+          let groupSpecifications = (product as unknown as DynamicKey<string[]>)?.[groupName] ?? []
+
+          groupSpecifications = groupSpecifications.filter(specificationName => visibleSpecifications[specificationName])
+
+          return {
+            originalName: groupName,
+            name: groupName,
+            specifications: groupSpecifications.map((name) => {
+                const values = (product as unknown as DynamicKey<string[]>)[name] || []
+                return {
+                  originalName: name,
+                  name,
+                  values,
+                }
               }
-            }
-          ),
-        })
+            ),
+          }
+        }
       )
+
+      noTranslationSpecificationGroups = noTranslationSpecificationGroups.filter(group => group.specifications.length > 0)
 
       const sku = product.items[0]
       if (!shouldTranslateToUserLocale(ctx) || !sku) {
