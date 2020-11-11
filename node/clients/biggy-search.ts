@@ -146,6 +146,7 @@ export class BiggySearchClient extends ExternalClient {
       leap,
       searchState,
       sellers,
+      hideUnavailableItems
     } = args
 
     const url = `${this.store}/api/split/attribute_search/${buildPathFromArgs(
@@ -161,6 +162,7 @@ export class BiggySearchClient extends ExternalClient {
         operator,
         fuzzy,
         bgy_leap: leap ? true : undefined,
+        ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
         ...parseState(searchState),
       },
       metric: 'search-result',
@@ -183,6 +185,7 @@ export class BiggySearchClient extends ExternalClient {
       leap,
       searchState,
       sellers,
+      hideUnavailableItems
     } = args
 
     const url = `${this.store}/api/split/product_search/${buildPathFromArgs(
@@ -198,6 +201,7 @@ export class BiggySearchClient extends ExternalClient {
         operator,
         fuzzy,
         bgy_leap: leap ? true : undefined,
+        ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
         ...parseState(searchState),
       },
       metric: 'search-result',

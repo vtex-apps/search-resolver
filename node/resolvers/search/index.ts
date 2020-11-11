@@ -378,6 +378,7 @@ export const queries = {
       attributePath: buildAttributePath(args.selectedFacets),
       tradePolicy: segment && segment.channel,
       sellers,
+      hideUnavailableItems: args.hideUnavailableItems,
     }
 
     const result = await biggySearch.facets(biggyArgs)
@@ -553,6 +554,7 @@ export const queries = {
       operator,
       searchState,
       simulationBehavior,
+      hideUnavailableItems,
     } = args
     const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
     const [count, page] = getProductsCountAndPage(from, to)
@@ -567,7 +569,8 @@ export const queries = {
       query: fullText,
       tradePolicy: segment && segment.channel,
       sort: convertOrderBy(args.orderBy),
-      sellers
+      sellers,
+      hideUnavailableItems,
     }
 
     const result = await biggySearch.productSearch(biggyArgs)
