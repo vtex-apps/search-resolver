@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.25.0] - 2020-11-12
+
 ### Added
 
 - `hideUnavailableItems` field to the `products` query.
