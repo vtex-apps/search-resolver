@@ -468,7 +468,7 @@ export const queries = {
       clients: { biggySearch, vbase, checkout },
       vtex: { segment }
     } = ctx
-    const { query, to, from, orderBy, simulationBehavior } = args
+    const { query, to, from, orderBy, simulationBehavior, hideUnavailableItems } = args
 
     if (to && to > 2500) {
       throw new UserInputError(
@@ -486,7 +486,8 @@ export const queries = {
       tradePolicy: segment && segment.channel,
       query: query,
       sellers: sellers,
-      sort: convertOrderBy(orderBy)
+      sort: convertOrderBy(orderBy),
+      hideUnavailableItems,
     }
 
     if (to !== null && from !== null) {

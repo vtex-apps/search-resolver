@@ -38,7 +38,7 @@ interface SearchResultArgs {
   fullText: string
   searchState?: string
   sellers?: RegionSeller[]
-  hideUnavailableItems?: boolean
+  hideUnavailableItems?: boolean | null
 }
 
 interface RegionSeller {
