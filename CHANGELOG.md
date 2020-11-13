@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## Added
+
+- X-VTEX-IS-ID header to calls to search.biggylabs
+
 ## [1.24.0] - 2020-11-11
 
 ### Added

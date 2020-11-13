@@ -90,6 +90,7 @@ export class BiggySearchClient extends ExternalClient {
         metric: 'suggestion-products',
         headers: {
           Cookie: buildBSearchFilterCookie(sellers),
+          "X-VTEX-IS-ID": `${this.store}`,
         },
       }
     )
@@ -168,6 +169,7 @@ export class BiggySearchClient extends ExternalClient {
       metric: 'search-result',
       headers: {
         Cookie: buildBSearchFilterCookie(sellers),
+        "X-VTEX-IS-ID": `${this.store}`,
       },
     })
 
@@ -207,6 +209,7 @@ export class BiggySearchClient extends ExternalClient {
       metric: 'search-result',
       headers: {
         Cookie: buildBSearchFilterCookie(sellers),
+        "X-VTEX-IS-ID": `${this.store}`,
       },
     })
 
