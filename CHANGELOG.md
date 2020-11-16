@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Replace `key` with `originalKey` in the `facets` query.
+
 ## [1.27.2] - 2020-12-01
 ### Fixed
 - Return all specifications if there's no information on which specifications are visibile or not.

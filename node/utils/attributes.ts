@@ -3,6 +3,7 @@ import unescape from 'unescape'
 
 type Attribute = (NumericalAttribute | TextAttribute) & {
   key: string
+  originalKey: string
   label: string
   type: 'text' | 'number' | 'location'
   visible: boolean
@@ -125,7 +126,7 @@ const convertValues = (
         return {
           quantity: value.count,
           name: unescape(value.label),
-          key: attribute.key,
+          key: attribute.originalKey,
           value: value.key,
           selected: value.active,
           range: {
@@ -156,7 +157,7 @@ const convertValues = (
             quantity: total,
             name: unescape(`${from} - ${to}`),
             value: `${valuePrefix}${from}:${to}`,
-            key: attribute.key,
+            key: attribute.originalKey,
             selected: attribute.active,
             range: {
               // Using absolute values so that slider remains the same.
@@ -177,7 +178,7 @@ const convertValues = (
         return {
           quantity: value.count,
           name: unescape(`${from} - ${to}`),
-          key: attribute.key,
+          key: attribute.originalKey,
           value: `${valuePrefix}${from}:${to}`,
           selected: value.active,
           range: {
@@ -198,7 +199,7 @@ const convertValues = (
           id: value.id,
           quantity: value.count,
           name: unescape(value.label),
-          key: attribute.key,
+          key: attribute.originalKey,
           value: value.key,
           selected: value.active,
           href: buildHref(baseHref, attribute.key, value.key),
