@@ -156,12 +156,14 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
         console.warn(`Product ${searchItem.itemId} is unavailable for seller ${seller.sellerId}`)
         return
       }
+      const unitMultiplier = orderFormItem.unitMultiplier ? orderFormItem.unitMultiplier : 1
+      const { listPrice, price, priceValidUntil, sellingPrice } = orderFormItem
 
       seller.commertialOffer.AvailableQuantity = orderFormItem?.availability === 'available' ? 10000 : 0
-      seller.commertialOffer.Price = orderFormItem.sellingPrice ? orderFormItem.sellingPrice / 100 : orderFormItem.price / 100
-      seller.commertialOffer.PriceValidUntil = orderFormItem.priceValidUntil
-      seller.commertialOffer.ListPrice = orderFormItem.listPrice / 100
-      seller.commertialOffer.PriceWithoutDiscount = orderFormItem.price / 100
+      seller.commertialOffer.Price = sellingPrice ? sellingPrice / (unitMultiplier * 100) : price / 100
+      seller.commertialOffer.PriceValidUntil = priceValidUntil
+      seller.commertialOffer.ListPrice = listPrice / 100
+      seller.commertialOffer.PriceWithoutDiscount = price / 100
 
       const installmentOptions = orderFormItem?.paymentData?.installmentOptions || []
 
