@@ -265,13 +265,17 @@ export const resolvers = {
             acc[specification.Name] = specification.IsOnProductDetails
             return acc
           }, {})
-        : {}
+        : null
 
       let noTranslationSpecificationGroups = allSpecificationsGroups.map(
         (groupName: string) => {
           let groupSpecifications = (product as unknown as DynamicKey<string[]>)?.[groupName] ?? []
 
-          groupSpecifications = groupSpecifications.filter(specificationName => visibleSpecifications[specificationName])
+          groupSpecifications = groupSpecifications.filter(specificationName => {
+            if (visibleSpecifications)
+              return visibleSpecifications[specificationName]
+            return true
+          })
 
           return {
             originalName: groupName,
