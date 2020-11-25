@@ -560,6 +560,7 @@ export const queries = {
       simulationBehavior,
       hideUnavailableItems,
     } = args
+
     const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
     const [count, page] = getProductsCountAndPage(from, to)
 
