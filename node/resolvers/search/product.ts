@@ -257,7 +257,7 @@ export const resolvers = {
           let groupSpecifications = (product as unknown as DynamicKey<string[]>)?.[groupName] ?? []
 
           groupSpecifications = groupSpecifications.filter(specificationName => {
-            if (visibleSpecifications)
+            if (visibleSpecifications && visibleSpecifications[specificationName] != null)
               return visibleSpecifications[specificationName]
             return true
           })
