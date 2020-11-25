@@ -17,16 +17,16 @@ export class Checkout extends JanusClient {
     })
   }
 
-  private getChannelQueryString = () => {
+  private getChannelQueryString = (tradePolicy?: string) => {
     const { segment } = this.context as CustomIOContext
     const channel = segment && segment.channel
-    const queryString = channel ? `?sc=${channel}` : ''
+    const queryString = channel ? `?sc=${tradePolicy || channel}` : ''
     return queryString
   }
 
   public simulation = (simulation: SimulationPayload) =>
     this.post<OrderForm>(
-      this.routes.simulation(this.getChannelQueryString()),
+      this.routes.simulation(this.getChannelQueryString(simulation.tradePolicy)),
       simulation,
       {
         metric: 'checkout-simulation',

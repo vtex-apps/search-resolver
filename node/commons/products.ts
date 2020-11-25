@@ -6,16 +6,17 @@ interface ConvertProductInput {
   searchResult: any
   ctx: any
   simulationBehavior?: 'skip' | 'default' | null
+  tradePolicy?: string | null
 }
 
-export const productsBiggy = async ({ searchResult, ctx, simulationBehavior = 'default' }: ConvertProductInput) => {
+export const productsBiggy = async ({ searchResult, ctx, simulationBehavior = 'default', tradePolicy }: ConvertProductInput) => {
   const { segment } = ctx.vtex
   const checkout = ctx.clients.checkout
   const products: any[] = []
 
   searchResult.products.forEach((product: any) => {
     try {
-      products.push(convertBiggyProduct(product, checkout, simulationBehavior, segment?.channel, segment?.priceTables, segment?.regionId))
+      products.push(convertBiggyProduct(product, checkout, simulationBehavior, tradePolicy || segment?.channel, segment?.priceTables, segment?.regionId))
     } catch (err) {
       console.error(err)
     }

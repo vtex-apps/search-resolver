@@ -91,6 +91,10 @@ const inputToSearchCrossSelling = {
   [CrossSellingInput.suggestions]: SearchCrossSellingTypes.suggestions,
 }
 
+const getTradePolicyFromSelectedFacets = (selectedFacets: SelectedFacet[]): string | null => {
+  const tradePolicy = selectedFacets.filter(selectedFacet => selectedFacet.key == "trade-policy")
+  return tradePolicy && tradePolicy[0].value
+}
 /**
  * There is an URL pattern in VTEX where the number of mapSegments doesn't match the number of querySegments. This function deals with these cases.
  * Since this should not be a search concern, this function will be removed soon.
@@ -543,7 +547,6 @@ export const queries = {
       ctx,
       args
     )) as ProductSearchInput
-
     const { biggySearch, vbase, checkout } = ctx.clients
     const { segment } = ctx.vtex
     const {
@@ -559,6 +562,8 @@ export const queries = {
     } = args
     const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
     const [count, page] = getProductsCountAndPage(from, to)
+
+    const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets)
 
     const biggyArgs = {
       page,
@@ -579,7 +584,8 @@ export const queries = {
     const productResolver = args.productOriginVtex
       ? productsCatalog
       : productsBiggy
-    const convertedProducts = await productResolver({ ctx, simulationBehavior, searchResult: result })
+
+    const convertedProducts = await productResolver({ ctx, simulationBehavior, searchResult: result, tradePolicy})
 
     // Add prefix to the cacheId to avoid conflicts. Repeated cacheIds in the same page are causing strange behavior.
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)

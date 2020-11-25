@@ -91,7 +91,8 @@ export const convertBiggyProduct = async (
       return {
         priceTables: priceTable ? [priceTable] : undefined,
         items: [item],
-        shippingData: { logisticsInfo: [{ regionId }] }
+        shippingData: { logisticsInfo: [{ regionId }] },
+        tradePolicy
       }
     })
 
@@ -208,6 +209,7 @@ const getSimulationPayloads = (product: SearchProduct) => {
         id: item.itemId,
         quantity: 1,
         seller: seller.sellerId
+
       } as PayloadItem
     })
   }).reduce((acc, val) => acc.concat(val), []).filter(distinct)
