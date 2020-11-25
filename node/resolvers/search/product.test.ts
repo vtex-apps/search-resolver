@@ -1,6 +1,7 @@
 import { resolvers } from './product'
 import { mockContext, getBindingLocale, resetContext, promisify } from '../../__mocks__/helpers'
 import { getProduct } from '../../__mocks__/product'
+import productSpecs from '../../__mocks__/productSpecs'
 
 describe('tests related to product resolver', () => {
   beforeEach(() => {
@@ -202,6 +203,7 @@ describe('tests related to product resolver', () => {
   })
 
   describe('specificationGroups resolver', () => {
+
     test('specifications groups should have expected format but not translated if same locale as tenant', async () => {
       const product = getProduct()
       const result = await resolvers.Product.specificationGroups(product as any, {}, mockContext as any)
@@ -214,6 +216,7 @@ describe('tests related to product resolver', () => {
         specifications: [{ name: 'Numero do calçado', values: ["35"] }]
       })
     })
+
     test('specifications groups should have expected format and translated values', async () => {
       mockContext.clients.catalog.skuStockKeepingUnitById.mockImplementationOnce((_id: string) => promisify({
         'ProductSpecifications': [
@@ -244,6 +247,16 @@ describe('tests related to product resolver', () => {
         name: 'allSpecifications (((2))) <<<pt-BR>>>',
         specifications: [{ name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>', values: ["35 (((specification-Id))) <<<pt-BR>>>"] }]
       })
+    })
+
+    test('should filter specifications that are not visible', async () => {
+      const specificationGroups = await resolvers.Product.specificationGroups(productSpecs as any, {}, mockContext)
+
+      expect(specificationGroups).toHaveLength(5)
+
+      // If the completeSpecifications doesn't give info on the specs, return it
+      const cucardas = specificationGroups.find(group => group.name === 'Cucardas')
+      expect(cucardas).toBeTruthy()
     })
   })
 
