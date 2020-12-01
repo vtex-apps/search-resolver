@@ -198,7 +198,7 @@ describe('tests related to the name resolver', () => {
       metadataMap: {},
     }
     const result = await resolvers.SearchBreadcrumb.name(payload as any, {}, mockContext as any)
-    expect(result).toBe('Cool Cluster')
+    expect(result).toBe('Cool Cluster (((140))) <<<pt-BR>>>')
   })
 
   test('if productsClusterIds not found, fail gracefully', async () => {
