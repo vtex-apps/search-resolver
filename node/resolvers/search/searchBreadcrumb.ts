@@ -97,7 +97,11 @@ export const resolvers = {
       if (isProductClusterMap(mapUnit)) {
         const clusterName = findClusterNameFromId(products, queryUnit)
         if (clusterName) {
-          return clusterName
+          const translatableData = {
+            id: queryUnit,
+            name: clusterName,
+          }
+          return formatTranslatableProp<TranslatableData, 'name', 'id'>('name', 'id')(translatableData, _, ctx)
         }
       }
       if (isCategoryMap(mapUnit)) {
