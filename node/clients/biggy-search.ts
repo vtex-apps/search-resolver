@@ -3,6 +3,8 @@ import { IndexingType } from '../commons/compatibility-layer'
 import { parseState } from '../utils/searchState'
 import path from 'path'
 
+const isLinked = process.env.VTEX_APP_LINK
+
 const buildPathFromArgs = (args: SearchResultArgs) => {
   const { attributePath, tradePolicy, indexingType } = args
 
@@ -193,6 +195,25 @@ export class BiggySearchClient extends ExternalClient {
     const url = `${this.store}/api/split/product_search/${buildPathFromArgs(
       args
     )}`
+
+    if (isLinked) {
+      // eslint-disable-next-line no-console
+      console.log({
+        productSearch: {
+          url,
+          query: decodeURIComponent(query ?? ''),
+          page,
+          count,
+          sort,
+          operator,
+          fuzzy,
+          bgy_leap: leap ? true : undefined,
+          ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
+          ...parseState(searchState),
+          cookie: buildBSearchFilterCookie(sellers)
+        }
+      })
+    }
 
     const result = await this.http.getRaw(url, {
       params: {
