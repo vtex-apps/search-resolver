@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- Use trade policy from seleted facets in product search query. 
+- Use trade policy from selected facets in `productSearch` query. 
 
 ## [1.28.1] - 2020-12-03
 
