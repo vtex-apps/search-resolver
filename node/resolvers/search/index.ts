@@ -92,9 +92,10 @@ const inputToSearchCrossSelling = {
 }
 
 const getTradePolicyFromSelectedFacets = (selectedFacets: SelectedFacet[]): string | null => {
-  const tradePolicy = selectedFacets.filter(selectedFacet => selectedFacet.key == "trade-policy")
-  return tradePolicy && tradePolicy[0].value
+  const tradePolicy = selectedFacets.filter(selectedFacet => selectedFacet.key === "trade-policy")
+  return tradePolicy.length > 0 ? tradePolicy[0].value : null
 }
+
 /**
  * There is an URL pattern in VTEX where the number of mapSegments doesn't match the number of querySegments. This function deals with these cases.
  * Since this should not be a search concern, this function will be removed soon.
@@ -547,6 +548,7 @@ export const queries = {
       ctx,
       args
     )) as ProductSearchInput
+
     const { biggySearch, vbase, checkout } = ctx.clients
     const { segment } = ctx.vtex
     const {
