@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- Log an object with the current search call when the app is linked.
+
 ## [1.28.0] - 2020-12-01
 
 ### Changed
