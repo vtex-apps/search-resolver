@@ -20,8 +20,8 @@ export class Checkout extends JanusClient {
   private getChannelQueryString = (tradePolicy?: string) => {
     const { segment } = this.context as CustomIOContext
     const channel = segment && segment.channel
-    const queryString = channel ? `?sc=${tradePolicy ?? channel}` : ''
-    return queryString
+    const selectedTradePolicy = tradePolicy ? tradePolicy : (channel ? channel : "")
+    return selectedTradePolicy ? `?sc=${selectedTradePolicy}` : ''
   }
 
   public simulation = (simulation: SimulationPayload, tradePolicy?: string) =>
