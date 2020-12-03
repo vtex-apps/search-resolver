@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.28.3] - 2020-12-03
+
 ### Fixed
 
 - Default value of `selectedFacets` at trade policy method
