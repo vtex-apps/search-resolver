@@ -96,7 +96,7 @@ export const convertBiggyProduct = async (
     })
 
     const simulationPromises = simulationPayloads.map((payload) => {
-      return checkout.simulation(payload)
+      return checkout.simulation(payload, tradePolicy)
     })
 
     const simulationItems = (await Promise.all(simulationPromises.map(promise => promise.catch(() => undefined)))).filter((x) => x != undefined).map((x) => {
