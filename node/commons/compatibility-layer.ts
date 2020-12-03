@@ -208,7 +208,6 @@ const getSimulationPayloads = (product: SearchProduct) => {
         id: item.itemId,
         quantity: 1,
         seller: seller.sellerId
-
       } as PayloadItem
     })
   }).reduce((acc, val) => acc.concat(val), []).filter(distinct)

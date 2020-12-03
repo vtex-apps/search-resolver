@@ -587,7 +587,6 @@ export const queries = {
     const productResolver = args.productOriginVtex
       ? productsCatalog
       : productsBiggy
-
     const convertedProducts = await productResolver({ ctx, simulationBehavior, searchResult: result, tradePolicy})
 
     // Add prefix to the cacheId to avoid conflicts. Repeated cacheIds in the same page are causing strange behavior.
