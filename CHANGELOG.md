@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Error when `installments` is an empty array.
+
 ## [1.29.1] - 2020-12-22
 
 ### Changed
