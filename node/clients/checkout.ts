@@ -24,9 +24,9 @@ export class Checkout extends JanusClient {
     return queryString
   }
 
-  public simulation = (simulation: SimulationPayload) =>
+  public simulation = (simulation: SimulationPayload, tradePolicy?: string) =>
     this.post<OrderForm>(
-      this.routes.simulation(this.getChannelQueryString(simulation.tradePolicy)),
+      this.routes.simulation(this.getChannelQueryString(tradePolicy)),
       simulation,
       {
         metric: 'checkout-simulation',

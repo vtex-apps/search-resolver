@@ -247,7 +247,6 @@ interface SimulationPayload {
   priceTables?: string[]
   marketingData?: Record<string, string>
   shippingData?: ShippingData
-  tradePolicy?: string
 }
 
 interface ShippingData {
