@@ -72,7 +72,6 @@ interface AttributesToFilters {
   solrFacets: SearchFacets,
   selectedFacets: SelectedFacet[]
   showCategoryTree: boolean
-
 }
 
 /**
@@ -89,7 +88,7 @@ export const attributesToFilters = ({
   removeHiddenFacets,
   solrFacets,
   selectedFacets,
-  showCategoryTree
+  showCategoryTree,
 }: AttributesToFilters): Filter[] => {
   if (either(isNil, isEmpty)(attributes)) {
     return []
