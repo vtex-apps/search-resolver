@@ -1,5 +1,6 @@
 import { either, isEmpty, isNil } from 'ramda'
 import unescape from 'unescape'
+import { buildCategoryTreeBasedOnIntelligentSearch, convertSolrTree } from '../commons/compatibility-layer'
 
 export type Attribute = (NumericalAttribute | TextAttribute) & {
   key: string
@@ -36,15 +37,15 @@ export interface TextAttribute {
   }[]
 }
 
-type FilterType = 'PRICERANGE' | 'TEXT' | 'NUMBER'
+type FilterType = 'PRICERANGE' | 'TEXT' | 'NUMBER' | 'CATEGORYTREE'
 export interface Filter {
   type: FilterType
   name: string
   hidden: boolean
-  values: FilterValue[]
+  values: FilterValue[],
 }
 
-interface FilterValue {
+export interface FilterValue {
   quantity: number
   name: string
   key: string
@@ -53,7 +54,8 @@ interface FilterValue {
   range?: {
     from: number
     to: number
-  }
+  },
+  children?: FilterValue[]
 }
 
 interface CatalogAttributeValues {
@@ -72,17 +74,22 @@ interface CatalogAttributeValues {
 export const attributesToFilters = ({
   total,
   attributes,
-  breadcrumb
+  breadcrumb,
+  solrFacets,
+  selectedFacets,
 }: {
   total: number
   attributes?: Attribute[]
   breadcrumb: Breadcrumb[]
+  solrFacets: SearchFacets,
+  selectedFacets: SelectedFacet[]
 }): Filter[] => {
   if (either(isNil, isEmpty)(attributes)) {
     return []
   }
 
-  return attributes!.map(attribute => {
+  const categoryRegex = /category-[0-9]+/
+  const filters = attributes!.filter(attribute => !categoryRegex.test(attribute.originalKey)).map(attribute => {
     const baseHref = (breadcrumb[breadcrumb.length - 1] ?? { href: '', name: '' }).href
     const { type, values } = convertValues(attribute, total, baseHref)
 
@@ -93,6 +100,22 @@ export const attributesToFilters = ({
       hidden: !attribute.visible,
     }
   })
+
+  // add solr categoryTree
+  if (attributes && solrFacets && solrFacets.CategoriesTrees) {
+    const intelligentSearchTree = attributes.filter(facet => categoryRegex.test(facet.originalKey))
+
+    const [tree] = buildCategoryTreeBasedOnIntelligentSearch(solrFacets.CategoriesTrees, intelligentSearchTree)
+
+    filters.push({
+      name: '',
+      type:  'CATEGORYTREE',
+      values: [convertSolrTree(tree, selectedFacets)!],
+      hidden: false,
+    })
+  }
+
+  return filters
 }
 
 /**
