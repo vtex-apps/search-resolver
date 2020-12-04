@@ -1,8 +1,9 @@
 import { distinct } from '../utils/object'
 import unescape from 'unescape'
 import { Checkout } from '../clients/checkout'
-import { groupBy, prop, indexBy, mergeAll } from 'ramda'
+import { groupBy, prop, indexBy, mergeAll, clone } from 'ramda'
 import { removeDiacriticsFromURL } from '../utils/string'
+import { FilterValue, Attribute } from '../utils/attributes'
 
 export enum IndexingType {
   API = 'API',
@@ -587,4 +588,42 @@ export const buildAttributePath = (selectedFacets: SelectedFacet[]) => {
         : attributePath
     }, '')
     : ''
+}
+
+export const buildCategoryTreeBasedOnIntelligentSearch = (solrTree: SearchFacetCategory[], intelligentSearchTree: Attribute[]): any => {
+  const removeInvalidChildren = (tree: {Children: SearchFacetCategory[]}, intelligentSearchTree: Attribute[], currentDepth = 0): any => {
+    if (currentDepth >= intelligentSearchTree.length) {
+      return
+    }
+
+    const currentNode = intelligentSearchTree[currentDepth]
+
+    tree.Children = tree.Children.filter(category => currentNode.values.some((facet: any) => facet.label === category.Name))
+
+    tree.Children.forEach(child => {
+      removeInvalidChildren(child, intelligentSearchTree, currentDepth + 1)
+    })
+  }
+
+  const newSolrTree = clone(solrTree)
+  removeInvalidChildren({ Children: newSolrTree }, intelligentSearchTree)
+
+  return newSolrTree
+}
+
+export const convertSolrTree = (node: SearchFacetCategory, selectedFaces: SelectedFacet[]): FilterValue => {
+  const children = node.Children.map((child) => convertSolrTree(child, selectedFaces))
+
+  const isSelected = selectedFaces.some(facet =>
+    facet.key === node.Map && facet.value.toLocaleLowerCase() === node.Value.toLocaleLowerCase()
+  )
+
+  return {
+    quantity: node.Quantity,
+    name: node.Name,
+    key: node.Map,
+    selected: isSelected,
+    value: node.Value,
+    children: children
+  }
 }
