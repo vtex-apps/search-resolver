@@ -21,7 +21,9 @@ import { formatTranslatableProp, translateManyToCurrentLanguage, Message, should
 
 type TupleString = [string, string]
 
-const isTupleMap = (t: TupleString) => t[1] ? (t[1] === 'c' || t[1] === 'category') : false
+const categoryKeys = ['c', 'category', 'category-1', 'category-2', 'category-3']
+
+const isTupleMap = (t: TupleString) => t[1] ? categoryKeys.includes(t[1]) : false
 
 const getLastCategoryIndex = findLastIndex(isTupleMap)
 
@@ -152,7 +154,7 @@ const getPrimaryMetadata = (
 ): Promise<SearchMetadata> | SearchMetadata => {
   const map = args.map || ''
   const firstMap = head(map.split(','))
-  if (firstMap === 'c' || firstMap === 'category') {
+  if (categoryKeys.includes(firstMap)) {
     return getCategoryMetadata(args, ctx)
   }
   if (firstMap === 'b' || firstMap === 'brand') {
