@@ -2,7 +2,6 @@ import {
   tail,
   head,
   compose,
-  equals,
   prop,
   join,
   map,
@@ -22,10 +21,9 @@ import { formatTranslatableProp, translateManyToCurrentLanguage, Message, should
 
 type TupleString = [string, string]
 
-const isTupleMap = compose<TupleString, string, boolean>(
-  equals('c'),
-  prop('1')
-)
+const categoryKeys = ['c', 'category', 'category-1', 'category-2', 'category-3']
+
+const isTupleMap = (t: TupleString) => t[1] ? categoryKeys.includes(t[1]) : false
 
 const getLastCategoryIndex = findLastIndex(isTupleMap)
 
@@ -105,17 +103,65 @@ export const getSpecificationFilterName = (name: string) => {
   return toTitleCase(searchDecodeURI(decodeURI(name)))
 }
 
+const getClusterMetadata = async (
+  args: SearchMetadataArgs,
+  ctx: Context,
+): Promise<SearchMetadata> => {
+  const {
+    clients: { search }
+  } = ctx
+
+  const searchArgs: SearchArgs = Object.assign({}, {
+    query: args.query ?? "",
+    map: args.map ?? "",
+    selectedFacets: args.selectedFacets
+  }, {
+    category: null,
+    specificationFilters: null,
+    collection: null,
+    salesChannel: null,
+    orderBy: null,
+    from: null,
+    to: null,
+    hideUnavailableItems: null,
+    simulationBehavior: null,
+    completeSpecifications: false,
+  })
+
+  const clusterId = head(args.query?.split(',') ?? [])
+  const products = await search.products(searchArgs)
+  const productWithCluster = products?.find(
+    ({ productClusters }) => !!productClusters[clusterId]
+  )
+  const clusterName = (productWithCluster && productWithCluster.productClusters[clusterId]) || ""
+
+  try {
+    return {
+      titleTag: decodeURI(clusterName),
+      metaTagDescription: null,
+    }
+  } catch {
+    return {
+      titleTag: clusterName,
+      metaTagDescription: null,
+    }
+  }
+}
+
 const getPrimaryMetadata = (
   args: SearchMetadataArgs,
   ctx: Context
 ): Promise<SearchMetadata> | SearchMetadata => {
   const map = args.map || ''
   const firstMap = head(map.split(','))
-  if (firstMap === 'c') {
+  if (categoryKeys.includes(firstMap)) {
     return getCategoryMetadata(args, ctx)
   }
-  if (firstMap === 'b') {
+  if (firstMap === 'b' || firstMap === 'brand') {
     return getBrandMetadata(args.query, ctx)
+  }
+  if (firstMap === 'productClusterIds') {
+    return getClusterMetadata(args, ctx)
   }
   if (firstMap && firstMap.includes('specificationFilter')) {
     const cleanQuery = args.query || ''
@@ -155,7 +201,7 @@ const getNameForRemainingMaps = async (
           return pagetype.name
         }
       }
-      if (map === 'b' && !isGC) {
+      if ((map === 'b' || map === 'brand') && !isGC) {
         const brand = await search.pageType(decodeURI(query), 'map=b').catch(() => null)
         if (brand) {
           return brand.name
@@ -218,6 +264,7 @@ export const getSearchMetaData = async (
   const validTuples = tailTuples.filter(
     ([_, m]) =>
       m === 'b' ||
+      m === 'brand' ||
       m.includes('specificationFilter') ||
       (m === 'c' && !isFirstCategory)
   )
