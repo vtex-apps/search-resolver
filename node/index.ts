@@ -1,6 +1,7 @@
 import './globals'
 
 import { Cached, LRUCache, RecorderState, Service } from '@vtex/api'
+// @ts-expect-error - currently we don't support typings for graphql
 import schema from 'vtex.search-graphql/graphql'
 
 import { Clients } from './clients'
