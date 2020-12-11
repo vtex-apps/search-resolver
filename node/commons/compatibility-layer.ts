@@ -349,7 +349,13 @@ const convertSKU = (
   indexingType?: IndexingType,
   tradePolicy?: string
 ) => (sku: BiggySearchSKU): SearchItem & { [key: string]: any } => {
-  const images = convertImages(product.images, indexingType)
+  let skuImages: BiggyProductImage[] = []
+  if (sku.image) {
+    const imageName = sku.image.split('/')[6]?.split('.')[0] ?? sku.id
+    skuImages.push({name: imageName, value: sku.image})
+  }
+
+  const images = convertImages(skuImages.length > 0 ? skuImages : product.images, indexingType)
 
   const sellers =
     indexingType === IndexingType.XML
