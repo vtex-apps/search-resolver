@@ -25,21 +25,21 @@ const buildBSearchFilterCookie = (sellers?: RegionSeller[]) =>
 
 export class BiggySearchClient extends ExternalClient {
   private store: string
-  private language: string | undefined
+  private locale: string | undefined
 
   public constructor(context: IOContext, options?: InstanceOptions) {
     super('http://search.biggylabs.com.br/search-api/v1/', context, options)
 
     const { account, locale, tenant } = context
     this.store = account
-    this.language = locale ?? tenant?.locale
+    this.locale = locale ?? tenant?.locale
   }
 
   public async topSearches(): Promise<any> {
     const result = await this.http.get(`${this.store}/api/top_searches`, {
       metric: 'top-searches',
       params: {
-        language: this.language,
+        locale: this.locale,
       }
     })
 
@@ -54,7 +54,7 @@ export class BiggySearchClient extends ExternalClient {
       {
         params: {
           term: decodeURIComponent(term),
-          language: this.language,
+          locale: this.locale,
         },
         metric: 'suggestion-searches',
       }
@@ -97,7 +97,7 @@ export class BiggySearchClient extends ExternalClient {
       {
         metric: 'suggestion-products',
         params: {
-          language: this.language,
+          locale: this.locale,
         },
         headers: {
           Cookie: buildBSearchFilterCookie(sellers),
@@ -133,7 +133,7 @@ export class BiggySearchClient extends ExternalClient {
         sort,
         operator,
         fuzzy,
-        language: this.language,
+        locale: this.locale,
         bgy_leap: leap ? true : undefined,
         ...parseState(searchState),
       },
@@ -174,7 +174,7 @@ export class BiggySearchClient extends ExternalClient {
         sort,
         operator,
         fuzzy,
-        language: this.language,
+        locale: this.locale,
         bgy_leap: leap ? true : undefined,
         ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
         ...parseState(searchState),
@@ -234,7 +234,7 @@ export class BiggySearchClient extends ExternalClient {
         sort,
         operator,
         fuzzy,
-        language: this.language,
+        locale: this.locale,
         bgy_leap: leap ? true : undefined,
         ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
         ...parseState(searchState),
@@ -259,7 +259,7 @@ export class BiggySearchClient extends ExternalClient {
     const result = await this.http.getRaw(url, {
       params: {
         query: decodeURIComponent(fullText),
-        language: this.language,
+        locale: this.locale,
       },
       metric: 'search-result',
     })
@@ -279,7 +279,7 @@ export class BiggySearchClient extends ExternalClient {
       {
         params: {
           term: decodeURIComponent(fullText),
-          language: this.language,
+          locale: this.locale,
         },
         metric: 'search-autocomplete-suggestions',
       }
@@ -296,7 +296,7 @@ export class BiggySearchClient extends ExternalClient {
     const result = await this.http.getRaw(url, {
       params: {
         query: decodeURIComponent(fullText),
-        language: this.language,
+        locale: this.locale,
       },
       metric: 'search-correction',
     })
@@ -314,7 +314,7 @@ export class BiggySearchClient extends ExternalClient {
     const result = await this.http.getRaw(url, {
       params: {
         query: decodeURIComponent(fullText),
-        language: this.language,
+        locale: this.locale,
       },
       metric: 'search-suggestions',
     })
