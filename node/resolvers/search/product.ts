@@ -189,7 +189,7 @@ export const resolvers = {
     properties: async (product: SearchProduct, _: unknown, ctx: Context) => {
       const valuesUntranslated = (product.allSpecifications ?? []).map((name: string) => {
         const value = (product as unknown as DynamicKey<string[]>)[name]
-        return { name, values: value }
+        return { name, originalName: name, values: value }
       })
       if (!shouldTranslateToUserLocale(ctx)) {
         return valuesUntranslated
