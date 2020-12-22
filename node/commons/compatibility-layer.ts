@@ -174,6 +174,11 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
       }
 
       const { installments } = installmentOption
+
+      if (!installments || installments.length === 0) {
+        return
+      }
+
       const correctInstallment = installments.reduce((previous, current) => {
         if (previous.hasInterestRate && !current.hasInterestRate) {
           return current
