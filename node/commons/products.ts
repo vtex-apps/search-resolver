@@ -11,13 +11,14 @@ interface ConvertProductInput {
 }
 
 export const productsBiggy = async ({ searchResult, ctx, simulationBehavior = 'default', tradePolicy, regionId }: ConvertProductInput) => {
-  const { segment } = ctx.vtex
+  const { segment, locale: ctxLocale, tenant } = ctx.vtex
   const checkout = ctx.clients.checkout
+  const locale = ctxLocale ?? tenant?.locale;
   const products: any[] = []
 
   searchResult.products.forEach((product: any) => {
     try {
-      products.push(convertBiggyProduct(product, checkout, simulationBehavior, tradePolicy ?? segment?.channel, segment?.priceTables, regionId))
+      products.push(convertBiggyProduct(product, checkout, simulationBehavior, tradePolicy ?? segment?.channel, segment?.priceTables, regionId, locale))
     } catch (err) {
       console.error(err)
     }

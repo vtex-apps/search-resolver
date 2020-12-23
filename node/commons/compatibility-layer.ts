@@ -3,6 +3,10 @@ import unescape from 'unescape'
 import { Checkout } from '../clients/checkout'
 import { groupBy, prop, indexBy, mergeAll } from 'ramda'
 import { removeDiacriticsFromURL } from '../utils/string'
+import {
+  formatTranslatableStringV2
+} from '@vtex/api'
+
 
 const ALLOWED_TEASER_TYPES = ["Catalog", "Profiler", "ConditionalPrice"]
 
@@ -26,6 +30,7 @@ export const convertBiggyProduct = async (
   tradePolicy?: string,
   priceTable?: string,
   regionId?: string | null,
+  locale?: string,
   indexingType?: IndexingType,
 ) => {
   const categories: string[] = []
@@ -123,13 +128,25 @@ export const convertBiggyProduct = async (
     categoriesIds,
     productId: product.id,
     cacheId: `sp-${product.id}`,
-    productName: product.name,
+    productName: formatTranslatableStringV2({
+      content: product.name,
+      context: product.id,
+      from: locale,
+    }),
     productReference: product.reference || product.product || product.id,
     linkText: product.link,
-    brand: product.brand || '',
+    brand: formatTranslatableStringV2({
+      content: product.brand || '',
+      context: product.id,
+      from: locale,
+    }),
     brandId,
     link: product.url,
-    description: product.description,
+    description: formatTranslatableStringV2({
+      content: product.description,
+      context: product.id,
+      from: locale,
+    }),
     items: skus,
     allSpecifications,
     categoryId: product.categoryIds?.slice(-1)[0],
@@ -427,7 +444,7 @@ const convertImages = (images: ElasticImage[], indexingType?: IndexingType) => {
 const convertSKU = (
   product: BiggySearchProduct,
   indexingType?: IndexingType,
-  tradePolicy?: string
+  tradePolicy?: string,
 ) => (sku: BiggySearchSKU): SearchItem & { [key: string]: any } => {
   const images = convertImages(sku.images ?? product.images, indexingType)
 
