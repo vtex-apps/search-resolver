@@ -220,12 +220,14 @@ interface Seller {
 }
 
 interface SearchFacet {
-  Quantity: number
-  Name: string
-  Link: string
-  LinkEncoded: string
-  Map: string
-  Value: string
+  id: string,
+  name:  string,
+  value: string,
+  quantity: string,
+  key: string,
+  selected: boolean,
+  href: string,
+  Map: string,
 }
 
 interface SearchFacetCategory {
