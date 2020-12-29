@@ -777,10 +777,10 @@
     lodash.unescape "4.0.1"
     semver "5.5.0"
 
-"@vtex/api@6.37.0":
-  version "6.37.0"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.37.0.tgz#a07e6adbfc02866f901cf0cfff2155f2c279adc5"
-  integrity sha512-Vy970ZfgOttrxeiJW2oM8rQ0E8t/HE5cQhbGIawfJsu35HEWA9NnWRSR3bdLMczT9oYIY9QwE8IfdU4b44dhKw==
+"@vtex/api@6.37.1":
+  version "6.37.1"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.37.1.tgz#d6ded4f4a98e10596729af7097cff18be43a0e54"
+  integrity sha512-24BaVHCIbkC84UWAlGPuTnUYIFngOpeRa4u/6KCJDnir5GXjoCWAkj4E7OoQ2uvBy/uvs9X2+DIkqtiz1x5bvw==
   dependencies:
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"
@@ -5160,9 +5160,9 @@ verror@1.10.0:
   version "1.52.1"
   resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.52.1/public/@types/vtex.rewriter#c7e856428a22957c295e6ea76ae9997ff32e80a2"
 
-"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.37.0/public":
+"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.38.0-beta.1/public":
   version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.37.0/public#2347dd9f5b9fb375e306df3e9fe364a95b071798"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.38.0-beta.1/public#671b5404998308ccf28dbdc68c24113bcd239387"
 
 "vtex.search-resolver@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-resolver@0.6.3-hkignore.1/public/_types/react":
   version "0.0.0"
