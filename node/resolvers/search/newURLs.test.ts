@@ -52,7 +52,6 @@ describe('Search new URLs dicovery', () => {
       this.categoryChildrenResponse = categoryChildren
       this.facetsResponse = facets
     }
-
     public categories = async (_: number) => {
       return Promise.resolve(this.categoriesResponse)
     }
@@ -260,7 +259,6 @@ describe('Search new URLs dicovery', () => {
     const result = await mountCompatibilityQuery({vbase: vbaseMock, search: searchMock, args})
     expect(result).toStrictEqual({query: 'department/1/2/3', map: 'c,specificationFilter_1,specificationFilter_2,specificationFilter_3'})
   })
-
   it('Should transform /department/style_1/brand?map=b in /department/style_1/brand?map=c,specificationFilter_1,b', async () => {
     const args = {
       query: 'department/style_1/brand',
@@ -298,7 +296,6 @@ describe('Search new URLs dicovery', () => {
   })
 
   it('Should not transform urls in the format query?map=c', async () => {
-
     const argsList = [
       {
         map: 'c',
