@@ -1,6 +1,6 @@
 import { IOClients } from '@vtex/api'
+import { Search } from '@vtex/clients'
 
-import { Search } from './search'
 import { Checkout } from './checkout'
 import { Rewriter } from './rewriter'
 import { Catalog } from './catalog'
