@@ -1,6 +1,6 @@
 import { searchSlugify } from './slug'
 import { VBase } from '@vtex/api'
-import { Search } from '../clients/search'
+import { Search } from '@vtex/clients'
 import { CATEGORY_TREE_CHILDREN_BUCKET, CATEGORY_TREE_ROOT_BUCKET, CATEGORY_TREE_ROOT_PATH } from '../resolvers/search/constants'
 import { staleFromVBaseWhileRevalidate } from './vbase'
 interface Clients{
@@ -20,7 +20,7 @@ export interface CategoryIdNamePair{
 }
 
 export class CategoryTreeSegmentsFinder {
-  
+
   private clients: Clients
   private segments: string[]
   protected categoryTreeRoot: Record<string, LazyCategoryTreeNode>
@@ -40,9 +40,9 @@ export class CategoryTreeSegmentsFinder {
     if(!rootCategorySegment){
       return []
     }
-  
+
     const {category, index} = rootCategorySegment
-  
+
     result[index] = {id: category.id.toString(), name: category.name}
     const segmentsTail = segments.slice(index+1)
     const categorySegmentsFromChildren = await this.findCategoriesFromChildren(category.id, segmentsTail)
@@ -80,7 +80,7 @@ export class CategoryTreeSegmentsFinder {
     this.categoryTreeRoot = await this.staleWhileRevalidate<Record<string, LazyCategoryTreeNode>>(
       CATEGORY_TREE_ROOT_BUCKET, CATEGORY_TREE_ROOT_PATH, this.getCategoryTreeRoot)
   }
-  
+
   // Returns {id: categoryId, name: categorySlug }
   private findCategoriesFromChildren = async (categoryId: number, segments: string[]) => {
     const result: (CategoryIdNamePair|null)[] = []
@@ -96,7 +96,7 @@ export class CategoryTreeSegmentsFinder {
     }
     return result
   }
-  
+
   private findRootCategorySegment = () => {
     const { segments, categoryTreeRoot } = this
     const segmentIndex = segments.findIndex(segment => !!categoryTreeRoot[segment])
@@ -106,7 +106,7 @@ export class CategoryTreeSegmentsFinder {
   private getChildren = async (id: number) => {
     return await this.lazyFetchChildren(id)
   }
-  
+
   // Returns { categorySlug: categoryId }
   private fetchChildrenFromSearch = async (params: { search: Search, id: number }): Promise<Record<string, string>> => {
     const {search, id} = params

@@ -1,4 +1,4 @@
-import { Search } from '../../clients/search'
+import { Search } from '@vtex/clients'
 import { VBase } from '@vtex/api'
 import {
   SEARCH_URLS_BUCKET,
@@ -31,7 +31,7 @@ export const mountCompatibilityQuery = async (params: {vbase: VBase, search: Sea
   const categoryTreeFinder = new CategoryTreeSegmentsFinder({vbase, search}, querySegments)
   const categories = await categoryTreeFinder.find()
   const facetsQuery = getFacetsQueryFromCategories(categories)
-  
+
   const fieldsLookup = facetsQuery? await getCategoryFilters(vbase, search, facetsQuery): {}
   const mapSegments = fillCategoriesMapSegments(categories, map)
 
@@ -40,10 +40,10 @@ export const mountCompatibilityQuery = async (params: {vbase: VBase, search: Sea
 
   for(let segmentIndex = 0; segmentIndex < querySegments.length; segmentIndex++ ) {
     const querySegment = querySegments[segmentIndex]
-    
+
     const [fieldName, fieldValue] = querySegment.split('_')
     const compatMapSegmentField = fieldsLookup[fieldName]
-    
+
     const mapSegment = compatMapSegmentField || mapSegments.shift() || FULL_TEXT_SEGMENT
     compatMapSegments.push(mapSegment)
     compatQuerySegments.push(fieldValue || querySegment)
