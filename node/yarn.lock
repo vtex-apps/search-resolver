@@ -5160,9 +5160,9 @@ verror@1.10.0:
   version "1.52.1"
   resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.52.1/public/@types/vtex.rewriter#c7e856428a22957c295e6ea76ae9997ff32e80a2"
 
-"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.38.0-beta.1/public":
+"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.38.0/public":
   version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.38.0-beta.1/public#671b5404998308ccf28dbdc68c24113bcd239387"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.38.0/public#29c339be22afc3ba03aa9410ffe5c8bd981c235d"
 
 "vtex.search-resolver@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-resolver@0.6.3-hkignore.1/public/_types/react":
   version "0.0.0"

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
 - Increase maxReplicas to 150.
+- Updates the version of search-graphql dependency.
 
 ## [0.16.6] - 2020-12-14
 ### Fixed
