@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Price range for stores in Italian and French.
+
 ## [1.29.3] - 2020-12-22
 ### Fixed
 - Guarantee that `properties` will have `originalName`.
