@@ -117,7 +117,7 @@ const convertValues = (
 ): { type: FilterType; values: FilterValue[] } => {
   // When creating a filter for price attribute, it should be the only one to use
   // the type `'PRICERANGE'`.
-  const knownPriceKeys = ['price', 'pre-', 'precio', 'preco', 'pret']
+  const knownPriceKeys = ['price', 'pre-', 'precio', 'preco', 'pret', 'prezzo', 'prix']
 
   if (attribute.type === 'number' && knownPriceKeys.some(p => p === attribute.key)) {
     return {
