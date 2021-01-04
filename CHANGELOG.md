@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.29.4] - 2021-01-04
+
 ### Fixed
 - Price range for stores in Italian and French.
 
