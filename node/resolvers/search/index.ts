@@ -4,7 +4,7 @@ import {
   createMessagesLoader,
   VBase,
 } from '@vtex/api'
-import { head, isEmpty, isNil, test, pathOr, path } from 'ramda'
+import { head, isEmpty, isNil, test, pathOr } from 'ramda'
 
 import { resolvers as assemblyOptionResolvers } from './assemblyOption'
 import { resolvers as autocompleteResolvers } from './autocomplete'
@@ -689,7 +689,7 @@ export const queries = {
 
     const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
 
-    const tradePolicy = path<string | undefined>(['segment', 'channel'], args)
+    const tradePolicy = segment && segment?.channel
 
     const result = await biggySearch.suggestionProducts({
       ...args,

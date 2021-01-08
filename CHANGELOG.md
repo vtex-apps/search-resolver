@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- `productSuggestions` trade policy.
+
 ## [1.29.4] - 2021-01-04
 
 ### Fixed
