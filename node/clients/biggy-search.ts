@@ -84,7 +84,7 @@ export class BiggySearchClient extends ExternalClient {
     if (indexingType !== IndexingType.XML && tradePolicy) {
       attributes.push({
         key: 'trade-policy',
-        value: tradePolicy,
+        value: tradePolicy.toString(),
       })
     }
 
