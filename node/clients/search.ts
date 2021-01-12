@@ -276,6 +276,15 @@ export class Search extends AppClient {
     return this.http.getRaw<T>(`${this.basePath}${url}`, config)
   }
 
+  public specificationsByCategoryId = (categoryId: number) => {
+    return this.get<FieldTreeResponseAPI[]>(
+      `/pub/specification/field/listByCategoryId/${categoryId}`,
+      {
+        metric: 'catalog-get-field-value-by-id',
+      }
+    )
+  }
+
   private productSearchUrl = ({
     query = '',
     category = '',
