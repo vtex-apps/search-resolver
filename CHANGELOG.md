@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Duplicated trade policy on headless stores.
+
 ## [1.30.1] - 2021-01-14
 
 ### Fixed
