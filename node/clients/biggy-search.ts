@@ -8,8 +8,11 @@ const isLinked = process.env.VTEX_APP_LINK
 const buildPathFromArgs = (args: SearchResultArgs) => {
   const { attributePath, tradePolicy, indexingType } = args
 
+  // On headless stores, the trade-policy is already present in the selectedFacets, so there is no need to add it again.
+  const alreadyHasTradePolicy =  /(\/|^)trade-policy\//.test(attributePath)
+
   const policyAttr =
-    tradePolicy && indexingType !== IndexingType.XML
+    tradePolicy && indexingType !== IndexingType.XML && !alreadyHasTradePolicy
       ? `trade-policy/${tradePolicy}`
       : ''
 
