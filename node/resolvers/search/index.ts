@@ -414,7 +414,7 @@ export const queries = {
       args.selectedFacets
     )
 
-    const attributesWithVisibilitySet = await setFilterVisibility(vbase, search, result.attributes)
+    const attributesWithVisibilitySet = await setFilterVisibility(vbase, search, result.attributes ?? [])
 
     return {
       facets: attributesToFilters({ breadcrumb, total: result.total, attributes: attributesWithVisibilitySet }),
