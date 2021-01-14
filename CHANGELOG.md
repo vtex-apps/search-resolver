@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.30.1] - 2021-01-14
+
 ### Fixed
 - Deal with undefined `attributes` array when setting the filter visibility.
 
