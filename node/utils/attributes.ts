@@ -7,6 +7,7 @@ export type Attribute = (NumericalAttribute | TextAttribute) & {
   type: 'text' | 'number' | 'location'
   visible: boolean
   originalLabel: string
+  originalKey: string
 }
 
 interface NumericalAttribute {
@@ -31,6 +32,7 @@ export interface TextAttribute {
     count: number
     active: boolean
     label: string
+    id: string
   }[]
 }
 

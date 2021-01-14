@@ -391,7 +391,7 @@ export const queries = {
       )
     }
 
-    const attributesWithVisibilitySet = await setFilterVisibility(vbase, search, result.attributes)
+    const attributesWithVisibilitySet = await setFilterVisibility(vbase, search, result.attributes ?? [])
 
     return {
       facets: attributesToFilters({ ...result, account, attributes: attributesWithVisibilitySet}),
