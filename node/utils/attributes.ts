@@ -1,12 +1,13 @@
 import { either, isEmpty, isNil } from 'ramda'
 import unescape from 'unescape'
 
-type Attribute = (NumericalAttribute | TextAttribute) & {
+export type Attribute = (NumericalAttribute | TextAttribute) & {
   key: string
   originalKey: string
   label: string
   type: 'text' | 'number' | 'location'
   visible: boolean
+  originalLabel: string
 }
 
 interface NumericalAttribute {
@@ -24,7 +25,7 @@ interface NumericalAttribute {
   }[]
 }
 
-interface TextAttribute {
+export interface TextAttribute {
   type: 'text'
   values: {
     id?: string
@@ -36,7 +37,7 @@ interface TextAttribute {
 }
 
 type FilterType = 'PRICERANGE' | 'TEXT' | 'NUMBER'
-interface Filter {
+export interface Filter {
   type: FilterType
   name: string
   hidden: boolean

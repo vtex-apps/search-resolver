@@ -43,6 +43,7 @@ import {
 } from '../../utils/attributes'
 import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
 import { Checkout } from '../../clients/checkout'
+import setFilterVisibility from '../../utils/setFilterVisibility'
 
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -413,8 +414,10 @@ export const queries = {
       args.selectedFacets
     )
 
+    const attributesWithVisibilitySet = await setFilterVisibility(vbase, search, result.attributes)
+
     return {
-      facets: attributesToFilters({ ...result, breadcrumb }),
+      facets: attributesToFilters({ breadcrumb, total: result.total, attributes: attributesWithVisibilitySet }),
       queryArgs: {
         map: args.map,
         query: args.query,
