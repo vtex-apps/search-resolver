@@ -1,6 +1,6 @@
 import { addContextToTranslatableString } from '../../utils/i18n'
 
-// if it has `originalName`, the specification is already coming from the API in the appropriate format and language
+// if it has `originalName`, the specification is already coming in the appropriate format and language
 export const resolvers = {
   SKUSpecificationField: {
     originalName: (value: SKUSpecificationField) => {

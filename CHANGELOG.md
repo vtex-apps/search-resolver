@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- `skuSpecifications` prop to the product.
+
 ## [1.30.2] - 2021-01-14
 
 ### Fixed
