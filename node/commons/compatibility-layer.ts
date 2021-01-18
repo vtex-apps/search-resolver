@@ -53,6 +53,35 @@ export const convertBiggyProduct = async (
     },
   ]
 
+  const specificationAttributes = product.textAttributes.filter(attribute => attribute.isSku)
+
+  const specificationsByKey = specificationAttributes.reduce((specsByKey: {[key: string]: BiggyTextAttribute[]}, spec) => {
+    // the joinedKey has the format text@@@key@@@labelKey@@@originalKey@@@originalLabelKey
+    const value = spec.joinedKey.split('@@@')[3]
+    specsByKey[value] = (specsByKey[value] || []).concat(spec)
+
+    return specsByKey
+  }, {})
+
+  const specKeys = Object.keys(specificationsByKey)
+
+  const skuSpecifications = specKeys.map((key) => {
+    const originalFieldName = specificationsByKey[key][0].joinedKey.split('@@@')[4]
+
+    return {
+      field: {
+        name: specificationsByKey[key][0].labelKey,
+        originalName: originalFieldName,
+      },
+      values: specificationsByKey[key].map((specification) => {
+        return {
+          name: specification.labelValue,
+          originalName: specification.joinedValue.split('@@@')[1],
+        }
+      })
+    }
+  })
+
   const convertedProduct: SearchProduct & { cacheId?: string, [key: string]: any } = {
     categories,
     categoriesIds,
@@ -80,6 +109,7 @@ export const convertBiggyProduct = async (
       items: []
     },
     selectedProperties,
+    skuSpecifications,
     // This field is only maintained for backwards compatibility reasons, it shouldn't exist.
     skus: skus.find(sku => sku.sellers && sku.sellers.length > 0),
   }

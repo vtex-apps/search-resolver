@@ -156,13 +156,15 @@ interface SkuSpecification {
 
 interface SKUSpecificationField {
   name: string,
-  id: string
+  originalName?: string,
+  id?: string
 }
 
 interface SKUSpecificationValue {
   name: string
-  id: string
-  fieldId: string
+  id?: string
+  fieldId?: string
+  originalName?: string
 }
 
 interface SearchImage {
