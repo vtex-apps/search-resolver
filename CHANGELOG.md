@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Error when `textAttributes` is `undefined`.
+
 ## [1.31.0] - 2021-01-18
 
 ### Added
