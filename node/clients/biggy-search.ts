@@ -5,6 +5,43 @@ import path from 'path'
 
 const isLinked = process.env.VTEX_APP_LINK
 
+// O(n) product sort
+const countingSort = (products: {id: string}[], order: string[]) => {
+  const sortedProducts = new Array(order.length)
+  const orderMap = order.reduce(
+    (acc, id, index) => {
+      acc.set(id, index)
+      return acc
+    },
+    new Map<string, number>()
+  )
+
+  for (const product of products) {
+    const index = orderMap.get(product.id)
+
+    if (index === undefined) {
+      continue
+    }
+
+    sortedProducts[index] = product
+  }
+
+  return sortedProducts
+}
+
+const isProductQuery = /^product:(([0-9])+;)+([0-9])+$/g
+const sortProducts = (search: { total: number, products: {id: string}[]}, query: string | undefined) => {
+  if (typeof query === 'string' && isProductQuery.test(query) && search.total > 0) {
+    const order = query.replace('product:', '').split(';')
+
+    if (order.length === search.total) {
+      search.products = countingSort(search.products, order)
+    }
+  }
+
+  return search
+}
+
 const buildPathFromArgs = (args: SearchResultArgs) => {
   const { attributePath, tradePolicy, indexingType } = args
 
@@ -249,7 +286,7 @@ export class BiggySearchClient extends ExternalClient {
       },
     })
 
-    return result.data
+    return sortProducts(result.data, query)
   }
 
   public async banners(args: SearchResultArgs): Promise<any> {
