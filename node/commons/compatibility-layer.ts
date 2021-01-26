@@ -171,7 +171,7 @@ export const convertBiggyProduct = async (
   }
 
   allSpecificationsGroups.forEach((specificationGroup) => {
-    convertedProduct[specificationGroup] = specificationGroups[specificationGroup]
+    convertedProduct[specificationGroup] = convertedProduct[specificationGroup] ?? specificationGroups[specificationGroup]
   })
 
   return convertedProduct

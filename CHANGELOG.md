@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- `specificationGroups` when the group and the specification names are the same.
+
 ## [1.32.0] - 2021-01-21
 ### Fixed
 - Sorts to specified product order when querying `"fullText":"product:78;90;356"`
