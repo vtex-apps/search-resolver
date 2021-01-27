@@ -70,7 +70,7 @@ interface ProductRecommendationArg {
 }
 
 interface ProductsByIdentifierArgs {
-  field: 'id' | 'ean' | 'reference' | 'sku'
+  field: 'product' | 'ean' | 'reference' | 'sku'
   values: string[]
   salesChannel?: string
 }
@@ -525,7 +525,7 @@ export const queries = {
     const { field, values, salesChannel } = args
 
     switch (field) {
-      case 'id':
+      case 'product':
         products = await search.productsById(values, salesChannel)
         break
       case 'ean':

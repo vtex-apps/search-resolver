@@ -37,7 +37,7 @@ export const productsCatalog = async ({ searchResult, ctx }: ConvertProductInput
     products = await queries.productsByIdentifier(
       undefined,
       {
-        field: 'id',
+        field: 'product',
         values: productIds,
       },
       ctx
@@ -45,7 +45,7 @@ export const productsCatalog = async ({ searchResult, ctx }: ConvertProductInput
 
     // Add extra data and correct index
     products.forEach((product: any) => {
-      const idx = indexOf(product.productId, productIds)
+      const idx = indexOf(product.product, productIds)
       const biggyProduct = biggyProducts[idx]
 
       // This will help to sort the products
