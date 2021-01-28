@@ -31,21 +31,22 @@ export const productsCatalog = async ({ searchResult, ctx }: ConvertProductInput
   const productIds = map<any, string>((product: any) => {
     return prop('product', product) || prop('id', product) || ''
   }, biggyProducts)
-
   if (!isEmpty(productIds)) {
     // Get products' model from VTEX search API
     products = await queries.productsByIdentifier(
       undefined,
       {
-        field: 'product',
+        field: 'id',
         values: productIds,
       },
       ctx
     )
 
+
+
     // Add extra data and correct index
     products.forEach((product: any) => {
-      const idx = indexOf(product.product, productIds)
+      const idx = indexOf(product.productId, productIds)
       const biggyProduct = biggyProducts[idx]
 
       // This will help to sort the products
