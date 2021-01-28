@@ -258,6 +258,7 @@ export class BiggySearchClient extends ExternalClient {
           sort,
           operator,
           fuzzy,
+          locale: this.locale,
           bgy_leap: leap ? true : undefined,
           ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
           ...parseState(searchState),
