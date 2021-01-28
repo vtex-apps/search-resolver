@@ -309,54 +309,11 @@ const getSellersIndexedByXML = (product: BiggySearchProduct): Seller[] => {
   }]
 }
 
-const getImageId = (imageUrl: string) => {
-  const baseUrlRegex = new RegExp(/.+ids\/(\d+)/)
-  return baseUrlRegex.test(imageUrl)
-    ? baseUrlRegex.exec(imageUrl)![1]
-    : undefined
-}
-
-const elasticImageToSearchImage = (image: ElasticImage, imageId: string): SearchImage => {
-  return {
-    imageId,
-    imageTag: "",
-    imageLabel: image.name,
-    imageText: image.name,
-    imageUrl: image.value,
-  }
-}
-
-const convertImages = (images: ElasticImage[], indexingType?: IndexingType) => {
-  const vtexImages: SearchImage[] = []
-
-  if (indexingType && indexingType === IndexingType.XML) {
-    const selectedImage: ElasticImage = images[0]
-    const imageId = getImageId(selectedImage.value)
-
-    return imageId ? [elasticImageToSearchImage(selectedImage, imageId)] : []
-  }
-
-  images.forEach(image => {
-    const imageId = getImageId(image.value)
-    imageId ? vtexImages.push(elasticImageToSearchImage(image, imageId)) : []
-  })
-
-  return vtexImages
-}
-
 const convertSKU = (
   product: BiggySearchProduct,
   indexingType?: IndexingType,
   tradePolicy?: string
 ) => (sku: BiggySearchSKU): SearchItem & { [key: string]: any } => {
-  let skuImages: BiggyProductImage[] = []
-  if (sku.image) {
-    const imageName = sku.image.split('/')[6]?.split('.')[0] ?? sku.id
-    skuImages.push({name: imageName, value: sku.image})
-  }
-
-  const images = convertImages(skuImages.length > 0 ? skuImages : product.images, indexingType)
-
   const sellers =
     indexingType === IndexingType.XML
       ? getSellersIndexedByXML(product)
@@ -366,7 +323,7 @@ const convertSKU = (
 
   const item: SearchItem & { [key: string]: any } = {
     sellers,
-    images,
+    images: sku.images,
     itemId: sku.id,
     name: product.name,
     nameComplete: product.name,

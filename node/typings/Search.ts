@@ -166,6 +166,7 @@ interface BiggySearchSKU {
   id: string
   reference: string
   image: string
+  images: SearchImage[] // check
   stock: number
   oldPrice: number
   price: number
