@@ -1,5 +1,3 @@
-import { either, isEmpty, isNil } from 'ramda'
-
 /**
  * Parse `searchState` string into a `object`.
  * We treat `searchState` as a stringified javascript object.
@@ -14,12 +12,12 @@ import { either, isEmpty, isNil } from 'ramda'
  * @memberof BiggySearchClient
  */
 export const parseState = (state?: string): { [key: string]: string } => {
-  if (either(isNil, isEmpty)(state)) {
+  if (!state) {
     return {}
   }
 
   try {
-    const parsed = JSON.parse(state!)
+    const parsed = JSON.parse(decodeURI(state))
     if (typeof parsed === 'object') {
       return parsed
     }

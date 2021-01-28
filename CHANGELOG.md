@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Decode `searchState`.
+
 ## [1.32.1] - 2021-01-26
 
 ### Fixed
