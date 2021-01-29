@@ -32,7 +32,7 @@
     "slugify": "^1.2.6",
     "typescript": "3.9.7",
     "unescape": "^1.0.1",
-    "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.37.0/public"
+    "vtex.search-graphql": "http://hideunavailable--checkoutio.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.38.0+build1611934674/public"
   },
   "devDependencies": {
     "@types/atob": "^2.1.2",
