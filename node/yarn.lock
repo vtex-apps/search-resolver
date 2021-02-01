@@ -777,10 +777,10 @@
     lodash.unescape "4.0.1"
     semver "5.5.0"
 
-"@vtex/api@6.37.1":
-  version "6.37.1"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.37.1.tgz#d6ded4f4a98e10596729af7097cff18be43a0e54"
-  integrity sha512-24BaVHCIbkC84UWAlGPuTnUYIFngOpeRa4u/6KCJDnir5GXjoCWAkj4E7OoQ2uvBy/uvs9X2+DIkqtiz1x5bvw==
+"@vtex/api@6.39.0":
+  version "6.39.0"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.39.0.tgz#5f5b6c54713f4e3c6671d86feb3faec543b449f2"
+  integrity sha512-YoHLnMb0V2LMxoXQgIskbsHNkG/TprXjsE60RItHNjALx2b6/+gYFLSa8x/sJp+O6OJQQT3pSkFT7Ff5A8ER9g==
   dependencies:
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"
@@ -5163,21 +5163,21 @@ verror@1.10.0:
   version "1.61.0"
   resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.61.0/public/@types/vtex.messages#9f539aa5e98ad8024b2b92e7218c2ae5a1a59a94"
 
-"vtex.rewriter@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.52.1/public/@types/vtex.rewriter":
-  version "1.52.1"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.52.1/public/@types/vtex.rewriter#c7e856428a22957c295e6ea76ae9997ff32e80a2"
+"vtex.rewriter@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.53.0/public/@types/vtex.rewriter":
+  version "1.53.0"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.53.0/public/@types/vtex.rewriter#90aa934f19138cf65adb554117183d2dbf5103ef"
 
-"vtex.sae-analytics@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.sae-analytics@2.2.0/public/@types/vtex.sae-analytics":
-  version "2.2.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.sae-analytics@2.2.0/public/@types/vtex.sae-analytics#7b3036d420f796f6bb4d95091606eb0cb5de71c2"
+"vtex.sae-analytics@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.sae-analytics@2.4.0/public/@types/vtex.sae-analytics":
+  version "2.4.0"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.sae-analytics@2.4.0/public/@types/vtex.sae-analytics#6577d7d735b5bf0e05cceb0357080cf4f733703e"
 
-"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.37.0/public":
+"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.39.0/public":
   version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.37.0/public#2347dd9f5b9fb375e306df3e9fe364a95b071798"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.39.0/public#5c4b5d473526833769ea5d94df5d5b6add6bff9d"
 
-"vtex.search-resolver@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-resolver@1.29.0/public/_types/react":
+"vtex.search-resolver@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-resolver@1.32.2/public/_types/react":
   version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-resolver@1.29.0/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-resolver@1.32.2/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
 
 w3c-hr-time@^1.0.1:
   version "1.0.1"

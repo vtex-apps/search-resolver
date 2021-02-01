@@ -56,6 +56,7 @@ interface SuggestionProductsArgs {
   productOriginVtex: boolean
   simulationBehavior: 'skip' | 'default' | null
   sellers?: RegionSeller[]
+  hideUnavailableItems?: boolean | null
 }
 
 interface SuggestionSearchesArgs {
