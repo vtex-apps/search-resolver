@@ -164,9 +164,13 @@ interface BiggyProductExtraData {
 
 interface BiggySearchSKU {
   name: string
+  nameComplete: string
   id: string
+  ean?: string
   reference: string
   image: string
+  images: any[]
+  videos?: string[]
   stock: number
   oldPrice: number
   price: number

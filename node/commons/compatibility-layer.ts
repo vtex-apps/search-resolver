@@ -384,7 +384,7 @@ const convertSKU = (
   indexingType?: IndexingType,
   tradePolicy?: string
 ) => (sku: BiggySearchSKU): SearchItem & { [key: string]: any } => {
-  const images = convertImages(product.images, indexingType)
+  const images = convertImages(sku.images ?? product.images, indexingType)
 
   const sellers =
     indexingType === IndexingType.XML
@@ -397,8 +397,8 @@ const convertSKU = (
     sellers,
     images,
     itemId: sku.id,
-    name: product.name,
-    nameComplete: product.name,
+    name: sku.name,
+    nameComplete: sku.nameComplete,
     complementName: product.name,
     referenceId: [
       {
@@ -409,9 +409,9 @@ const convertSKU = (
     measurementUnit: sku.measurementUnit || product.measurementUnit,
     unitMultiplier: sku.unitMultiplier || product.unitMultiplier,
     variations,
-    ean: '',
+    ean: sku.ean ?? '',
     modalType: '',
-    Videos: [],
+    Videos: sku.videos ?? [],
     attachments: [],
     isKit: false,
   }
