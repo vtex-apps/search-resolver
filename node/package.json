@@ -32,7 +32,7 @@
     "slugify": "^1.2.6",
     "typescript": "3.9.7",
     "unescape": "^1.0.1",
-    "vtex.search-graphql": "http://hideunavailable--checkoutio.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.38.0+build1611934674/public"
+    "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.39.0/public"
   },
   "devDependencies": {
     "@types/atob": "^2.1.2",
@@ -55,10 +55,10 @@
     "typemoq": "^2.1.0",
     "vtex.catalog-api-proxy": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.10.1/public/_types/react",
     "vtex.messages": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.61.0/public/@types/vtex.messages",
-    "vtex.rewriter": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.52.1/public/@types/vtex.rewriter",
-    "vtex.sae-analytics": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.sae-analytics@2.2.0/public/@types/vtex.sae-analytics",
-    "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.37.0/public/@types/vtex.search-graphql",
-    "vtex.search-resolver": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-resolver@1.29.0/public/_types/react"
+    "vtex.rewriter": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.53.0/public/@types/vtex.rewriter",
+    "vtex.sae-analytics": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.sae-analytics@2.4.0/public/@types/vtex.sae-analytics",
+    "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.39.0/public/@types/vtex.search-graphql",
+    "vtex.search-resolver": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-resolver@1.32.2/public/_types/react"
   },
   "version": "1.32.2"
 }
