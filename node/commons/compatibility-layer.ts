@@ -320,7 +320,7 @@ const getSellersIndexedByApi = (
       sellerId: seller.id,
       sellerName: seller.name,
       addToCartLink: "",
-      sellerDefault: false,
+      sellerDefault: seller.default ?? false,
       commertialOffer,
     }
   })

@@ -169,7 +169,7 @@ interface BiggySearchSKU {
   ean?: string
   reference: string
   image: string
-  images: any[]
+  images: BiggyProductImage[]
   videos?: string[]
   stock: number
   oldPrice: number
@@ -194,6 +194,7 @@ interface BiggySeller {
   price: number
   stock: number
   tax: number
+  default: boolean
   installment?: BiggyInstallment
 }
 
