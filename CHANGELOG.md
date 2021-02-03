@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.34.0] - 2021-02-03
+
 ### Added
 - Fields `name`, `nameComplete`, `ean` and `Videos` to SKU.
 ### Fixed
