@@ -190,7 +190,9 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
       const { listPrice, price, priceValidUntil, sellingPrice } = orderFormItem
 
       seller.commertialOffer.AvailableQuantity = orderFormItem?.availability === 'available' ? 10000 : 0
-      seller.commertialOffer.Price = sellingPrice ? sellingPrice / (unitMultiplier * 100) : price / 100
+      seller.commertialOffer.Price = sellingPrice
+        ? Number((sellingPrice / (unitMultiplier * 100)).toFixed(2))
+        : price / 100
       seller.commertialOffer.PriceValidUntil = priceValidUntil
       seller.commertialOffer.ListPrice = listPrice / 100
       seller.commertialOffer.PriceWithoutDiscount = price / 100
