@@ -99,6 +99,8 @@ interface ElasticAttribute {
   label: string
   type: string
   values: ElasticAttributeValue[]
+  originalKey?: string
+  originalLabel?: string
   minValue?: number
   maxValue?: number
 }
@@ -109,6 +111,8 @@ interface ElasticAttributeValue {
   key: string
   label: string
   id: string
+  originalKey?: string
+  originalLabel?: string
 }
 
 interface Breadcrumb {
