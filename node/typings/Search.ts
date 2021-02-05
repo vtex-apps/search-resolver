@@ -195,6 +195,7 @@ interface BiggySeller {
   stock: number
   tax: number
   default: boolean
+  teasers?: object[]
   installment?: BiggyInstallment
 }
 

@@ -193,7 +193,7 @@ interface CommertialOffer {
   Installments: SearchInstallment[]
   DiscountHighLight: any[]
   GiftSkuIds: string[]
-  Teasers: any[]
+  Teasers: object[]
   BuyTogether: any[]
   ItemMetadataAttachment: any[]
   Price: number
