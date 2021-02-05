@@ -260,6 +260,7 @@ const buildCommertialOffer = (
   price: number,
   oldPrice: number,
   stock: number,
+  teasers: object[],
   installment?: BiggyInstallment,
   tax?: number,
 ): CommertialOffer => {
@@ -280,7 +281,7 @@ const buildCommertialOffer = (
     DeliverySlaSamples: [],
     AvailableQuantity: availableQuantity,
     DiscountHighLight: [],
-    Teasers: [],
+    Teasers: teasers,
     Installments: installments,
     Price: price,
     ListPrice: oldPrice,
@@ -313,8 +314,9 @@ const getSellersIndexedByApi = (
     const installment = seller.installment || product.installment
 
     const stock = seller.stock || sku.stock || product.stock
+    const teasers = seller.teasers ?? [];
 
-    const commertialOffer = buildCommertialOffer(price, oldPrice, stock, installment, seller.tax)
+    const commertialOffer = buildCommertialOffer(price, oldPrice, stock, teasers, installment, seller.tax)
 
     return {
       sellerId: seller.id,
@@ -333,7 +335,7 @@ const getSellersIndexedByXML = (product: BiggySearchProduct): Seller[] => {
 
   const stock = product.stock
 
-  const commertialOffer = buildCommertialOffer(price, oldPrice, stock, installment, product.tax)
+  const commertialOffer = buildCommertialOffer(price, oldPrice, stock, [], installment, product.tax)
 
   return [{
     sellerId: '1',

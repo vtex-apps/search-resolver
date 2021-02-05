@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Field `teasers` to Seller.
+
 ## [1.34.0] - 2021-02-03
 
 ### Added
