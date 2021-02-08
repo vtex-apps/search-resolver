@@ -502,7 +502,7 @@ export const buildBreadcrumb = (
     selectedFacet => selectedFacet.value
   )
   activeValues.sort((a, b) =>
-    selectedFacetsValues.indexOf(a.key) < selectedFacetsValues.indexOf(b.key)
+    selectedFacetsValues.indexOf(a.originalKey ?? a.key) < selectedFacetsValues.indexOf(b.originalKey ?? b.key)
       ? -1
       : 1
   )
