@@ -120,7 +120,7 @@ const convertValues = (
   // the type `'PRICERANGE'`.
   const knownPriceKeys = ['price', 'pre-', 'precio', 'preco', 'pret', 'prezzo', 'prix']
 
-  if (attribute.type === 'number' && knownPriceKeys.some(p => p === attribute.key)) {
+  if (attribute.type === 'number' && (knownPriceKeys.some(p => p === attribute.key) || knownPriceKeys.some(p => p === attribute.originalKey))) {
     return {
       type: 'PRICERANGE',
       values: attribute.values.map((value: any) => {

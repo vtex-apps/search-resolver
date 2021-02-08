@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- `priceRange` not working for non-standard translations.
+
 ## [1.34.3] - 2021-02-08
 
 ### Fixed
