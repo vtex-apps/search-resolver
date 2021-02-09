@@ -157,10 +157,12 @@ export const convertBiggyProduct = async (
 
   if (product.textAttributes) {
     allSpecifications.forEach((specification) => {
-      const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == specification)
-      convertedProduct[specification] = attributes.map((attribute) => {
+      if(!convertedProduct[specification]){
+        const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == specification)
+        convertedProduct[specification] = attributes.map((attribute) => {
         return attribute.labelValue
       })
+      }
     })
 
     product.textAttributes.filter((attribute) => attribute.labelKey === "productClusterNames").forEach((attribute) => {
