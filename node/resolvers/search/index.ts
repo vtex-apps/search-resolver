@@ -235,7 +235,7 @@ export const getCompatibilityArgs = async <T extends QueryArgs>(
   //  Query contains something not suited for search
   formattedArgs.map = formattedArgs.map
     ?.replace(/brand/g, 'b')
-    ?.replace(/category(-[0-9])?/g, 'c')
+    ?.replace(/category(-[0-9]*)?/g, 'c')
 
   return formattedArgs
 }
