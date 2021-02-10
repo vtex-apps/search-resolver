@@ -39,6 +39,7 @@ interface SearchResultArgs {
   searchState?: string
   sellers?: RegionSeller[]
   hideUnavailableItems?: boolean | null
+  removeHiddenFacets?: boolean | null
 }
 
 interface RegionSeller {
@@ -74,6 +75,7 @@ interface FacetsInput {
   fullText: string
   query: string
   searchState?: string
+  removeHiddenFacets: boolean
   hideUnavailableItems: boolean
 }
 

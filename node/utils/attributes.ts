@@ -62,6 +62,13 @@ interface CatalogAttributeValues {
   Position: number
 }
 
+interface AttributesToFilters {
+  total: number
+  attributes?: Attribute[]
+  breadcrumb: Breadcrumb[]
+  removeHiddenFacets: boolean
+}
+
 /**
  * Convert from Biggy's attributes into Specification Filters.
  *
@@ -72,17 +79,14 @@ interface CatalogAttributeValues {
 export const attributesToFilters = ({
   total,
   attributes,
-  breadcrumb
-}: {
-  total: number
-  attributes?: Attribute[]
-  breadcrumb: Breadcrumb[]
-}): Filter[] => {
+  breadcrumb,
+  removeHiddenFacets
+}: AttributesToFilters): Filter[] => {
   if (either(isNil, isEmpty)(attributes)) {
     return []
   }
 
-  return attributes!.map(attribute => {
+  const response = attributes!.map(attribute => {
     const baseHref = (breadcrumb[breadcrumb.length - 1] ?? { href: '', name: '' }).href
     const { type, values } = convertValues(attribute, total, baseHref)
 
@@ -93,6 +97,12 @@ export const attributesToFilters = ({
       hidden: !attribute.visible,
     }
   })
+
+  if (removeHiddenFacets) {
+    return response.filter(attribute => !attribute.hidden)
+  }
+
+  return response
 }
 
 /**

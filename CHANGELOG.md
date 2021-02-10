@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `removeHiddenFacets` to `facets` query.
+
 ## [1.34.6] - 2021-02-10
 ### Fixed
 - Replaces `brand`, `category-*` to `b`, `c` respectively so portal does not explode when using the new search terms
