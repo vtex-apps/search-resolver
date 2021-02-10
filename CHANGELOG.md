@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.34.5] - 2021-02-10
+
 ### Fixed
 - `extraData` being overrided by `textAttributes`
 
