@@ -229,16 +229,16 @@ export const getCompatibilityArgs = async <T extends QueryArgs>(
     ? args
     : await toCompatibilityArgs(vbase, search, args)
 
-  const formatedArgs = compatArgs ? { ...args, ...compatArgs } : args
+  const formattedArgs = compatArgs ? { ...args, ...compatArgs } : args
 
   // VTEX search does not understand brand/category/department and fails with error:
   //  Query contains something not suited for search
-  formatedArgs.map
-    ?.replace('brand', 'b')
-    ?.replace('category', 'c')
-    ?.replace('department', 'c')
+  formattedArgs.map = formattedArgs.map
+    ?.replace(/brand/g, 'b')
+    ?.replace(/category/g, 'c')
+    ?.replace(/department/g, 'c')
 
-  return formatedArgs
+  return formattedArgs
 }
 
 // Legacy search format is our search with path?map=c,c,specificationFilter
