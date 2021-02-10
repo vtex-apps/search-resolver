@@ -228,7 +228,17 @@ export const getCompatibilityArgs = async <T extends QueryArgs>(
   const compatArgs = isLegacySearchFormat(args)
     ? args
     : await toCompatibilityArgs(vbase, search, args)
-  return compatArgs ? { ...args, ...compatArgs } : args
+
+  const formatedArgs = compatArgs ? { ...args, ...compatArgs } : args
+
+  // VTEX search does not understand brand/category/department and fails with error:
+  //  Query contains something not suited for search
+  formatedArgs.map
+    ?.replace('brand', 'b')
+    ?.replace('category', 'c')
+    ?.replace('department', 'c')
+
+  return formatedArgs
 }
 
 // Legacy search format is our search with path?map=c,c,specificationFilter
