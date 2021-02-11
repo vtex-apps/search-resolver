@@ -75,6 +75,7 @@ interface FacetsInput {
   query: string
   searchState?: string
   hideUnavailableItems: boolean
+  showCategoryTree: boolean
 }
 
 interface ProductSearchInput {
