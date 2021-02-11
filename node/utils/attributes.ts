@@ -71,6 +71,8 @@ interface AttributesToFilters {
   removeHiddenFacets: boolean
   solrFacets: SearchFacets,
   selectedFacets: SelectedFacet[]
+  showCategoryTree: boolean
+
 }
 
 /**
@@ -86,7 +88,8 @@ export const attributesToFilters = ({
   breadcrumb,
   removeHiddenFacets,
   solrFacets,
-  selectedFacets
+  selectedFacets,
+  showCategoryTree
 }: AttributesToFilters): Filter[] => {
   if (either(isNil, isEmpty)(attributes)) {
     return []
@@ -94,7 +97,7 @@ export const attributesToFilters = ({
 
   const categoryRegex = /category-[0-9]+/
   const response = attributes!
-  .filter(attribute => !categoryRegex.test(attribute.originalKey))
+  .filter(attribute => !showCategoryTree || !categoryRegex.test(attribute.originalKey))
   .map(attribute => {
     const baseHref = (breadcrumb[breadcrumb.length - 1] ?? { href: '', name: '' }).href
     const { type, values } = convertValues(attribute, total, baseHref)

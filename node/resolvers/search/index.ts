@@ -493,6 +493,7 @@ export const queries = {
       attributes: attributesWithVisibilitySet,
       selectedFacets: args.selectedFacets,
       removeHiddenFacets: args.removeHiddenFacets,
+      showCategoryTree: args.showCategoryTree,
     })
 
     return {
