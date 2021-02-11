@@ -436,7 +436,10 @@ export const queries = {
 
     const facetPromises = [biggySearch.facets(biggyArgs)]
 
-    if (!fullText) {
+    // TODO this is harcoded because it is not on the graphql schema yet. DO NOT publish a release with the followingl ine
+    args.showCategoryTree = true;
+
+    if (!fullText && args.showCategoryTree) {
       const categorySelectedFacets = args.selectedFacets.filter(facet => facet.key === 'c')
       const solrQuery = categorySelectedFacets.map(facet => facet.value).join('/')
       const solrMap = categorySelectedFacets.map(facet => facet.key).join(',')
