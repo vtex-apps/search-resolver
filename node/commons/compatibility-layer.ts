@@ -347,6 +347,15 @@ const getSellersIndexedByApi = (
 
   const biggySellers = (selectedPolicy && selectedPolicy.sellers) || []
 
+  biggySellers.forEach((seller, idx) => {
+    // If the seller is a "head seller", move it to the first position
+    // That way, the product-summary will show the correct price
+    if (typeof seller.price === 'undefined') {
+      biggySellers.splice(idx, 1)
+      biggySellers.unshift(seller)
+    }
+  })
+
   return biggySellers.map((seller: BiggySeller): Seller => {
     const price = seller.price || sku.price || product.price
     const oldPrice = seller.oldPrice || sku.oldPrice || product.oldPrice
