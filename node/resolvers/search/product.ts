@@ -227,10 +227,7 @@ export const resolvers = {
         ctx
       ),
 
-    productName: formatTranslatableProp<SearchProduct, 'productName', 'productId'>(
-      'productName',
-      'productId'
-    ),
+    productName: ({ productName = '' }: SearchProduct) => productName,
 
     linkText: async ({ productId, linkText }: SearchProduct, _: unknown, ctx: Context) => {
       const { clients: { rewriter }, vtex: { binding } } = ctx
