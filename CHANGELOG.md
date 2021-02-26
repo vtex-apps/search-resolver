@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Breadcrumb `href`.
+
 ## [1.35.0] - 2021-02-11
 
 ### Added

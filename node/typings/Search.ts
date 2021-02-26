@@ -101,8 +101,8 @@ interface ElasticAttribute {
   label: string
   type: string
   values: ElasticAttributeValue[]
-  originalKey?: string
-  originalLabel?: string
+  originalKey: string
+  originalLabel: string
   minValue?: number
   maxValue?: number
 }

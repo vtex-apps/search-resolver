@@ -494,7 +494,7 @@ export const buildBreadcrumb = (
         activeValues.push({
           ...value,
           visible: attribute.visible,
-          attributeKey: attribute.key,
+          attributeKey: attribute.originalKey,
         })
       }
     })
