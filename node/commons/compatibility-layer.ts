@@ -82,6 +82,47 @@ export const convertBiggyProduct = async (
     }
   })
 
+  const numberAttributes = product.numberAttributes ?? []
+
+  const numberSpecificationsByKey = numberAttributes.reduce((specsByKey: {[key: string]: BiggyTextAttribute[]}, spec) => {
+    const value = spec.labelKey
+    specsByKey[value] = (specsByKey[value] || []).concat(spec)
+
+    return specsByKey
+  }, {})
+
+  const numberSpecKeys = Object.keys(numberSpecificationsByKey)
+
+  // eslint-disable-next-line no-console
+  console.log("NumberSpecKeys", numberSpecKeys)
+
+  const skuNumberSpecifications = numberSpecKeys.map((key) => {
+    const originalFieldName = numberSpecificationsByKey[key][0].labelKey
+
+    // eslint-disable-next-line no-console
+    const x = specificationsByKey[key].map((specification) => {
+      return {
+        name: specification.value,
+        originalName: specification.value,
+      }
+    })
+
+    const y = x.sort((x, y) => Number(x.name) - Number(y.name))
+
+    // eslint-disable-next-line no-console
+    console.log("x", x, "      y", y)
+
+    return {
+      field: {
+        name: originalFieldName,
+        originalName: originalFieldName,
+      },
+      values: y
+    }
+  })
+
+  const allSkuSpecification = skuSpecifications.concat(skuNumberSpecifications)
+
   const convertedProduct: SearchProduct & { cacheId?: string, [key: string]: any } = {
     categories,
     categoriesIds,
@@ -109,7 +150,7 @@ export const convertBiggyProduct = async (
       items: []
     },
     selectedProperties,
-    skuSpecifications,
+    allSkuSpecification,
     // This field is only maintained for backwards compatibility reasons, it shouldn't exist.
     skus: skus.find(sku => sku.sellers && sku.sellers.length > 0),
   }
