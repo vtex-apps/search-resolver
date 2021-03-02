@@ -93,31 +93,24 @@ export const convertBiggyProduct = async (
 
   const numberSpecKeys = Object.keys(numberSpecificationsByKey)
 
-  // eslint-disable-next-line no-console
-  console.log("NumberSpecKeys", numberSpecKeys)
-
   const skuNumberSpecifications = numberSpecKeys.map((key) => {
     const originalFieldName = numberSpecificationsByKey[key][0].labelKey
 
-    // eslint-disable-next-line no-console
-    const x = specificationsByKey[key].map((specification) => {
+    const values = numberSpecificationsByKey[key].map((specification) => {
       return {
-        name: specification.value,
-        originalName: specification.value,
+        name: specification.value.toString(),
+        originalName: specification.value.toString(),
       }
     })
 
-    const y = x.sort((x, y) => Number(x.name) - Number(y.name))
-
-    // eslint-disable-next-line no-console
-    console.log("x", x, "      y", y)
+    values.sort((x, y) => Number(x.name) - Number(y.name))
 
     return {
       field: {
-        name: originalFieldName,
-        originalName: originalFieldName,
+        name: originalFieldName.toString(),
+        originalName: originalFieldName.toString(),
       },
-      values: y
+      values
     }
   })
 
@@ -150,7 +143,7 @@ export const convertBiggyProduct = async (
       items: []
     },
     selectedProperties,
-    allSkuSpecification,
+    skuSpecifications: allSkuSpecification,
     // This field is only maintained for backwards compatibility reasons, it shouldn't exist.
     skus: skus.find(sku => sku.sellers && sku.sellers.length > 0),
   }
