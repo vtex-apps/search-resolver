@@ -148,6 +148,7 @@ interface BiggySearchProduct {
   productSpecifications: string[]
   specificationGroups: string
   textAttributes: BiggyTextAttribute[]
+  numberAttributes: BiggyTextAttribute[]
   split: BiggySplit
   categoryTrees: BiggyCategoryTree[]
   clusterHighlights: Record<string, string>

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- `numberAttributes` to the `skuSpecifications`.
+
 ## [1.35.1] - 2021-02-26
 
 ### Fixed
