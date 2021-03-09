@@ -438,9 +438,9 @@ export const queries = {
 
     // TODO this is harcoded because it is not on the graphql schema yet. DO NOT publish a release with the followingl ine
     args.showCategoryTree = true;
+    const categorySelectedFacets = args.selectedFacets.filter(facet => facet.key === 'c')
 
-    if (!fullText && args.showCategoryTree) {
-      const categorySelectedFacets = args.selectedFacets.filter(facet => facet.key === 'c')
+    if (!fullText && args.showCategoryTree && categorySelectedFacets.length > 0) {
       const solrQuery = categorySelectedFacets.map(facet => facet.value).join('/')
       const solrMap = categorySelectedFacets.map(facet => facet.key).join(',')
       const assembledQuery = `${solrQuery}?map=${solrMap}`
@@ -493,7 +493,7 @@ export const queries = {
       attributes: attributesWithVisibilitySet,
       selectedFacets: args.selectedFacets,
       removeHiddenFacets: args.removeHiddenFacets,
-      showCategoryTree: args.showCategoryTree && !fullText,
+      showCategoryTree: args.showCategoryTree && !fullText && categorySelectedFacets.length > 0,
     })
 
     return {
