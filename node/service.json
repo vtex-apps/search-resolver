@@ -1,6 +1,6 @@
 {
   "stack": "nodejs",
-  "memory": 1536,
+  "memory": 2048,
   "cpu": {
     "type": "shared",
     "value": 80,
