@@ -97,6 +97,20 @@ const getTradePolicyFromSelectedFacets = (selectedFacets: SelectedFacet[] = []):
   return tradePolicy.length > 0 ? tradePolicy[0].value : null
 }
 
+const getRegionIdFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): [(string | null), SelectedFacet[]] => {
+  let regionId = null
+
+  const regionIdIndex = selectedFacets.findIndex(selectedFacet => selectedFacet.key === "region-id")
+
+  if(regionIdIndex > -1) {
+    regionId = selectedFacets[regionIdIndex].value
+
+    selectedFacets.splice(regionIdIndex, 1)
+  }
+
+  return [regionId, selectedFacets]
+}
+
 /**
  * There is an URL pattern in VTEX where the number of mapSegments doesn't match the number of querySegments. This function deals with these cases.
  * Since this should not be a search concern, this function will be removed soon.
@@ -285,7 +299,7 @@ const getSellers = async (
   vbase: VBase,
   checkout: Checkout,
   channel?: number,
-  regionId?: string,
+  regionId?: string | null,
 ) => {
   if (!regionId) {
     return []
@@ -385,12 +399,14 @@ export const queries = {
       vtex: { segment },
     } = ctx
 
-    const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
+    const [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
+
+    const sellers = await getSellers(vbase, checkout, segment?.channel, regionId || segment?.regionId)
 
     const biggyArgs = {
       searchState,
       query: fullText,
-      attributePath: buildAttributePath(args.selectedFacets),
+      attributePath: buildAttributePath(selectedFacets),
       tradePolicy: segment && segment.channel,
       sellers,
       hideUnavailableItems: args.hideUnavailableItems,
@@ -573,7 +589,6 @@ export const queries = {
     const {
       from,
       to,
-      selectedFacets,
       fullText,
       fuzzy,
       operator,
@@ -581,11 +596,12 @@ export const queries = {
       simulationBehavior,
       hideUnavailableItems,
     } = args
+    const [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
 
-    const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
+    const sellers = await getSellers(vbase, checkout, segment?.channel, regionId || segment?.regionId)
     const [count, page] = getProductsCountAndPage(from, to)
 
-    const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets)
+    const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets) || segment?.channel
 
     const biggyArgs = {
       page,
@@ -595,7 +611,7 @@ export const queries = {
       searchState,
       attributePath: buildAttributePath(selectedFacets),
       query: fullText,
-      tradePolicy: segment && segment.channel,
+      tradePolicy: tradePolicy,
       sort: convertOrderBy(args.orderBy),
       sellers,
       hideUnavailableItems,
@@ -606,7 +622,7 @@ export const queries = {
     const productResolver = args.productOriginVtex
       ? productsCatalog
       : productsBiggy
-    const convertedProducts = await productResolver({ ctx, simulationBehavior, searchResult: result, tradePolicy})
+    const convertedProducts = await productResolver({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })
 
     // Add prefix to the cacheId to avoid conflicts. Repeated cacheIds in the same page are causing strange behavior.
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
@@ -706,7 +722,9 @@ export const queries = {
       vtex: { segment },
     } = ctx
 
-    const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
+    const regionId = args.regionId || segment?.regionId
+
+    const sellers = await getSellers(vbase, checkout, segment?.channel, regionId)
 
     const tradePolicy = segment && segment?.channel
 
@@ -724,7 +742,8 @@ export const queries = {
       {
         ctx,
         searchResult: result,
-        simulationBehavior: args.simulationBehavior
+        simulationBehavior: args.simulationBehavior,
+        regionId
       }
     )
 
