@@ -601,7 +601,7 @@ export const queries = {
     const sellers = await getSellers(vbase, checkout, segment?.channel, regionId || segment?.regionId)
     const [count, page] = getProductsCountAndPage(from, to)
 
-    const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets) || segment?.channel
+    const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets)
 
     const biggyArgs = {
       page,
@@ -611,7 +611,7 @@ export const queries = {
       searchState,
       attributePath: buildAttributePath(selectedFacets),
       query: fullText,
-      tradePolicy: tradePolicy,
+      tradePolicy: segment && segment.channel,
       sort: convertOrderBy(args.orderBy),
       sellers,
       hideUnavailableItems,
@@ -722,7 +722,7 @@ export const queries = {
       vtex: { segment },
     } = ctx
 
-    const regionId = args.regionId || segment?.regionId
+    const regionId = args.regionId || segment?.regionIdgst
 
     const sellers = await getSellers(vbase, checkout, segment?.channel, regionId)
 
