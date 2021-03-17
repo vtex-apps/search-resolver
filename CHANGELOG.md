@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.36.1] - 2021-03-17
+
 ### Fixed
 - Only send number attributes that are sku attributes. 
 
