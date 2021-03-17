@@ -112,7 +112,7 @@ export const convertBiggyProduct = async (
       },
       values
     }
-  })
+  }).filter(specification => allSpecifications.includes(specification.field.name))
 
   const allSkuSpecification = skuSpecifications.concat(skuNumberSpecifications)
 
