@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.37.0] - 2021-03-17
+
 ### Added
 
 - Handle for `regionId` as query parameter. 
