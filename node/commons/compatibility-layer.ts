@@ -23,7 +23,7 @@ export const convertBiggyProduct = async (
   simulationBehavior: 'skip' | 'default' | null,
   tradePolicy?: string,
   priceTable?: string,
-  regionId?: string,
+  regionId?: string | null,
   indexingType?: IndexingType,
 ) => {
   const categories: string[] = []

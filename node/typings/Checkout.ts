@@ -250,5 +250,5 @@ interface SimulationPayload {
 }
 
 interface ShippingData {
-  logisticsInfo?: { regionId?: string }[]
+  logisticsInfo?: { regionId?: string | null }[]
 }
