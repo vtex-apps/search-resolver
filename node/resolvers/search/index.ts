@@ -596,9 +596,11 @@ export const queries = {
       simulationBehavior,
       hideUnavailableItems,
     } = args
-    const [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
+    let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
 
-    const sellers = await getSellers(vbase, checkout, segment?.channel, regionId || segment?.regionId)
+    regionId = regionId || segment?.regionId
+
+    const sellers = await getSellers(vbase, checkout, segment?.channel, regionId)
     const [count, page] = getProductsCountAndPage(from, to)
 
     const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets)
@@ -722,7 +724,7 @@ export const queries = {
       vtex: { segment },
     } = ctx
 
-    const regionId = args.regionId || segment?.regionIdgst
+    const regionId = args.regionId || segment?.regionId
 
     const sellers = await getSellers(vbase, checkout, segment?.channel, regionId)
 
