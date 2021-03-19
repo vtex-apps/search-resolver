@@ -106,7 +106,7 @@ export class Search extends AppClient {
       }
     )
 
-  public productsByEan = (ids: string[],  salesChannel?: string | number) =>
+  public productsByEan = (ids: string[], salesChannel?: string | number) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(`/pub/products/search?${ids
@@ -154,7 +154,7 @@ export class Search extends AppClient {
       }
     )
 
-  public productsByReference = (ids: string[], salesChannel? :string) =>
+  public productsByReference = (ids: string[], salesChannel? :string | number) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(`/pub/products/search?${ids

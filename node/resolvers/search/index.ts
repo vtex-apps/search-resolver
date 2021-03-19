@@ -99,7 +99,7 @@ const getTradePolicyFromSelectedFacets = (selectedFacets: SelectedFacet[] = []):
   return tradePolicy.length > 0 ? tradePolicy[0].value : null
 }
 
-const getRegionIdFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): [(string | null | undefined), SelectedFacet[]] => {
+const getRegionIdFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): [(string | null), SelectedFacet[]] => {
   let regionId = null
 
   const regionIdIndex = selectedFacets.findIndex(selectedFacet => selectedFacet.key === "region-id")
@@ -207,7 +207,6 @@ const searchFirstElements = (
     // We do not want this for pages other than the first
     return
   }
-
   products
     .slice(0, Math.min(10, products.length))
     .forEach(product =>
@@ -477,12 +476,11 @@ export const queries = {
     if (!args.identifier) {
       throw new UserInputError('No product identifier provided')
     }
+    const salesChannel = rawArgs.salesChannel
 
     let vtexSegment: string | undefined = ""
 
-    const { segment } = ctx.vtex
-
-    let cookie: SegmentData | undefined = segment
+    let cookie: SegmentData | undefined = ctx.vtex.segment
 
     const { field, value } = args.identifier
     let products = [] as SearchProduct[]
@@ -490,7 +488,7 @@ export const queries = {
       cookie = {
         regionId: rawArgs.regionId,
         // @ts-ignore
-        channel: rawArgs.salesChannel,
+        channel: salesChannel || cookie?.channel,
         utm_campaign: cookie?.utm_campaign || "",
         utm_source: cookie?.utm_source || "",
         utmi_campaign: cookie?.utmi_campaign || "",
@@ -499,27 +497,26 @@ export const queries = {
         countryCode: cookie?.countryCode || "",
         cultureInfo: cookie?.cultureInfo || "",
       }
-      let buff = new Buffer(JSON.stringify(cookie));
-      vtexSegment = buff.toString('base64');
+      vtexSegment = new Buffer(JSON.stringify(cookie)).toString('base64');
     }else{
       vtexSegment = ctx.vtex.segmentToken
     }
 
     switch (field) {
       case 'id':
-        products = await search.productById(value, vtexSegment, rawArgs.salesChannel)
+        products = await search.productById(value, vtexSegment, salesChannel)
         break
       case 'slug':
-        products = await search.product(value, vtexSegment, rawArgs.salesChannel)
+        products = await search.product(value, vtexSegment, salesChannel)
         break
       case 'ean':
-        products = await search.productByEan(value, vtexSegment, rawArgs.salesChannel)
+        products = await search.productByEan(value, vtexSegment, salesChannel)
         break
       case 'reference':
-        products = await search.productByReference(value, vtexSegment, rawArgs.salesChannel)
+        products = await search.productByReference(value, vtexSegment, salesChannel)
         break
       case 'sku':
-        products = await search.productBySku(value, vtexSegment, rawArgs.salesChannel)
+        products = await search.productBySku(value, vtexSegment, salesChannel)
         break
     }
 
@@ -547,7 +544,7 @@ export const queries = {
 
     const selectedFacets: SelectedFacet[] = buildSelectedFacets(args)
 
-    const sellers = await getSellers(vbase, checkout, segment && segment.channel, segment?.regionId)
+    const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
 
     const biggyArgs: SearchResultArgs = {
       fullText: query,
