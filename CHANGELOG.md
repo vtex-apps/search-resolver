@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Undefined `regionId` on simulation in the `ProductSearch` query.
 
+### Added
+
+- `RegionId` and `SalesChannel` to `product` query.
+
 ## [1.37.1] - 2021-03-17
 
 ### Changed
