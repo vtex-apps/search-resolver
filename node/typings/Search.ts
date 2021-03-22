@@ -51,7 +51,7 @@ interface SuggestionProductsArgs {
   fullText: string
   facetKey?: string
   facetValue?: string
-  tradePolicy?: number
+  salesChannel?: number
   segment?: SegmentData
   indexingType?: IndexingType
   productOriginVtex: boolean
