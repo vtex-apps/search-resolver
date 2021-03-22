@@ -54,7 +54,7 @@ interface ProductArgs {
   slug?: string
   identifier?: ProductIndentifier
   regionId?: string
-  salesChannel?: string
+  salesChannel?: number
 }
 
 enum CrossSellingInput {
@@ -476,19 +476,19 @@ export const queries = {
     if (!args.identifier) {
       throw new UserInputError('No product identifier provided')
     }
-    const salesChannel = rawArgs.salesChannel
 
     let vtexSegment: string | undefined = ""
 
     let cookie: SegmentData | undefined = ctx.vtex.segment
+
+    const salesChannel = rawArgs.salesChannel || cookie?.channel || 1
 
     const { field, value } = args.identifier
     let products = [] as SearchProduct[]
     if (!cookie || (!cookie?.regionId && rawArgs.regionId)) {
       cookie = {
         regionId: rawArgs.regionId,
-        // @ts-ignore
-        channel: salesChannel || cookie?.channel,
+        channel: salesChannel,
         utm_campaign: cookie?.utm_campaign || "",
         utm_source: cookie?.utm_source || "",
         utmi_campaign: cookie?.utmi_campaign || "",
