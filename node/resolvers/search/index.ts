@@ -484,6 +484,7 @@ export const queries = {
     const salesChannel = rawArgs.salesChannel || cookie?.channel || 1
 
     const { field, value } = args.identifier
+
     let products = [] as SearchProduct[]
     if (!cookie || (!cookie?.regionId && rawArgs.regionId)) {
       cookie = {
@@ -753,13 +754,13 @@ export const queries = {
 
     const regionId = args.regionId || segment?.regionId
 
-    const tradePolicy = args.tradePolicy || segment && segment?.channel
+    const tradePolicy = args.salesChannel || segment?.channel
 
     const sellers = await getSellers(vbase, checkout, tradePolicy, regionId)
 
     const result = await biggySearch.suggestionProducts({
       ...args,
-      tradePolicy,
+      salesChannel: tradePolicy,
       sellers
     })
 
