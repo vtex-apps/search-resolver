@@ -20,10 +20,6 @@ enum SimulationBehavior {
   DEFAULT = 'default'
 }
 
-const getVtexSegmentCookie = (vtexSegment?: string): string => {
-  return vtexSegment ? `vtex_segment=${vtexSegment}` : ""
-}
-
 const inflightKey = ({ baseURL, url, params, headers }: RequestConfig) => {
   return (
     baseURL! +
@@ -90,7 +86,7 @@ export class Search extends AppClient {
       {
         metric: 'search-product',
         headers:{
-          cookie: getVtexSegmentCookie(vtexSegment)
+          "x-vtex-segment": vtexSegment
         },
       }
     )
@@ -101,7 +97,7 @@ export class Search extends AppClient {
       {
         metric: 'search-productByEan',
         headers:{
-          cookie: getVtexSegmentCookie(vtexSegment)
+          "x-vtex-segment": vtexSegment
         },
       }
     )
@@ -122,11 +118,10 @@ export class Search extends AppClient {
       ? this.addCompleteSpecifications(
         this.addSalesChannel(`/pub/products/search?fq=productId:${id}`, salesChannel))
       : `/products/${id}`
-
     return this.get<SearchProduct[]>(url, {
       metric: 'search-productById',
       headers:{
-        cookie: `vtex_segment=${vtexSegment}`
+        "x-vtex-segment": vtexSegment
       },
       ...(cacheable ? {} : { cacheable: CacheType.None })
     })
@@ -148,8 +143,8 @@ export class Search extends AppClient {
         this.addSalesChannel(`/pub/products/search?fq=alternateIds_RefId:${id}`,salesChannel)),
       {
         metric: 'search-productByReference',
-        headers:{
-          cookie: getVtexSegmentCookie(vtexSegment)
+        headers: {
+          "x-vtex-segment": vtexSegment
         }
       }
     )
@@ -171,7 +166,7 @@ export class Search extends AppClient {
       {
         metric: 'search-productBySku',
         headers:  {
-          cookie: getVtexSegmentCookie(vtexSegment)
+          "x-vtex-segment": vtexSegment
         }
       }
     )
