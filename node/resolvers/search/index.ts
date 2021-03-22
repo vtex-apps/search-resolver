@@ -301,7 +301,7 @@ const getSellers = async (
   vbase: VBase,
   checkout: Checkout,
   channel?: number,
-  regionId?: string | null | undefined,
+  regionId?: string | null,
 ) => {
   if (!regionId) {
     return []
@@ -403,7 +403,7 @@ export const queries = {
 
     const [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
 
-    const tradePolicy = getTradePolicyFromSelectedFacets(selectedFacets) || segment && segment.channel
+    const tradePolicy = getTradePolicyFromSelectedFacets(selectedFacets) || segment?.channel
 
     const sellers = await getSellers(vbase, checkout, tradePolicy, regionId || segment?.regionId)
 
@@ -626,7 +626,7 @@ export const queries = {
 
     regionId = regionId || segment?.regionId
 
-    const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets) || segment && segment.channel
+    const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets) || segment?.channel
 
     const sellers = await getSellers(vbase, checkout, tradePolicy, regionId)
 
