@@ -61,6 +61,10 @@ export class Search extends AppClient {
     return `${url}&compSpecs=true`
   }
 
+  private getVtexSegmentCookieAsHeader = (vtexSegment?: string) => {
+    return vtexSegment ? {"x-vtex-segment": vtexSegment} : {}
+  }
+
   public constructor(ctx: IOContext, opts?: InstanceOptions) {
     super('vtex.catalog-api-proxy@0.x', ctx, opts)
 
@@ -85,9 +89,7 @@ export class Search extends AppClient {
         this.addSalesChannel(`/pub/products/search/${this.searchEncodeURI(slug && slug.toLowerCase())}/p`, salesChannel)),
       {
         metric: 'search-product',
-        headers:{
-          "x-vtex-segment": vtexSegment
-        },
+        headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
       }
     )
 
@@ -96,9 +98,7 @@ export class Search extends AppClient {
       this.addCompleteSpecifications(this.addSalesChannel(`/pub/products/search?fq=alternateIds_Ean:${id}`, salesChannel)),
       {
         metric: 'search-productByEan',
-        headers:{
-          "x-vtex-segment": vtexSegment
-        },
+        headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
       }
     )
 
@@ -120,9 +120,7 @@ export class Search extends AppClient {
       : `/products/${id}`
     return this.get<SearchProduct[]>(url, {
       metric: 'search-productById',
-      headers:{
-        "x-vtex-segment": vtexSegment
-      },
+      headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
       ...(cacheable ? {} : { cacheable: CacheType.None })
     })
   }
@@ -143,9 +141,7 @@ export class Search extends AppClient {
         this.addSalesChannel(`/pub/products/search?fq=alternateIds_RefId:${id}`,salesChannel)),
       {
         metric: 'search-productByReference',
-        headers: {
-          "x-vtex-segment": vtexSegment
-        }
+        headers: this.getVtexSegmentCookieAsHeader(vtexSegment)
       }
     )
 
@@ -165,9 +161,7 @@ export class Search extends AppClient {
         this.addSalesChannel(`/pub/products/search?fq=skuId:${skuId}`, salesChannel)),
       {
         metric: 'search-productBySku',
-        headers:  {
-          "x-vtex-segment": vtexSegment
-        }
+        headers: this.getVtexSegmentCookieAsHeader(vtexSegment)
       }
     )
 
