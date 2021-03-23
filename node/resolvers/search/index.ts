@@ -411,7 +411,7 @@ export const queries = {
       searchState,
       query: fullText,
       attributePath: buildAttributePath(selectedFacets),
-      tradePolicy: tradePolicy,
+      tradePolicy,
       sellers,
       hideUnavailableItems: args.hideUnavailableItems,
     }
@@ -641,7 +641,7 @@ export const queries = {
       searchState,
       attributePath: buildAttributePath(selectedFacets),
       query: fullText,
-      tradePolicy: tradePolicy,
+      tradePolicy,
       sort: convertOrderBy(args.orderBy),
       sellers,
       hideUnavailableItems,
