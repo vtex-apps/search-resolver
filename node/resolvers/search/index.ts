@@ -2,7 +2,7 @@ import {
   NotFoundError,
   UserInputError,
   createMessagesLoader,
-  VBase,
+  VBase
 } from '@vtex/api'
 import { head, isEmpty, isNil, test, pathOr } from 'ramda'
 
@@ -53,6 +53,8 @@ interface ProductIndentifier {
 interface ProductArgs {
   slug?: string
   identifier?: ProductIndentifier
+  regionId?: string
+  salesChannel?: number
 }
 
 enum CrossSellingInput {
@@ -72,7 +74,8 @@ interface ProductRecommendationArg {
 interface ProductsByIdentifierArgs {
   field: 'id' | 'ean' | 'reference' | 'sku'
   values: string[]
-  salesChannel?: string
+  salesChannel?: string | null,
+  regionId?: string | null
 }
 
 interface Region {
@@ -109,6 +112,21 @@ const getRegionIdFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): [(
   }
 
   return [regionId, selectedFacets]
+}
+
+const buildVtexSegment = (vtexSegment?: SegmentData, tradePolicy?: number, regionId?: string | null): string => {
+    const cookie = {
+      regionId: regionId,
+      channel: tradePolicy,
+      utm_campaign: vtexSegment?.utm_campaign || "",
+      utm_source: vtexSegment?.utm_source || "",
+      utmi_campaign: vtexSegment?.utmi_campaign || "",
+      currencyCode: vtexSegment?.currencyCode || "",
+      currencySymbol: vtexSegment?.currencySymbol || "",
+      countryCode: vtexSegment?.countryCode || "",
+      cultureInfo: vtexSegment?.cultureInfo || "",
+    }
+    return new Buffer(JSON.stringify(cookie)).toString('base64');
 }
 
 /**
@@ -208,7 +226,7 @@ const searchFirstElements = (
   products
     .slice(0, Math.min(10, products.length))
     .forEach(product =>
-      search.productById(product.productId, false).catch(noop)
+      search.productById(product.productId, undefined, undefined, false).catch(noop)
     )
 }
 
@@ -401,13 +419,15 @@ export const queries = {
 
     const [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
 
-    const sellers = await getSellers(vbase, checkout, segment?.channel, regionId || segment?.regionId)
+    const tradePolicy = getTradePolicyFromSelectedFacets(selectedFacets) || segment?.channel
+
+    const sellers = await getSellers(vbase, checkout, tradePolicy, regionId || segment?.regionId)
 
     const biggyArgs = {
       searchState,
       query: fullText,
       attributePath: buildAttributePath(selectedFacets),
-      tradePolicy: segment && segment.channel,
+      tradePolicy,
       sellers,
       hideUnavailableItems: args.hideUnavailableItems,
     }
@@ -473,24 +493,33 @@ export const queries = {
       throw new UserInputError('No product identifier provided')
     }
 
+    let cookie: SegmentData | undefined = ctx.vtex.segment
+
+    const salesChannel = rawArgs.salesChannel || cookie?.channel || 1
+
     const { field, value } = args.identifier
+
     let products = [] as SearchProduct[]
+
+    const vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
+
+
 
     switch (field) {
       case 'id':
-        products = await search.productById(value)
+        products = await search.productById(value, vtexSegment, salesChannel)
         break
       case 'slug':
-        products = await search.product(value)
+        products = await search.product(value, vtexSegment, salesChannel)
         break
       case 'ean':
-        products = await search.productByEan(value)
+        products = await search.productByEan(value, vtexSegment, salesChannel)
         break
       case 'reference':
-        products = await search.productByReference(value)
+        products = await search.productByReference(value, vtexSegment, salesChannel)
         break
       case 'sku':
-        products = await search.productBySku(value)
+        products = await search.productBySku(value, vtexSegment, salesChannel)
         break
     }
 
@@ -556,18 +585,20 @@ export const queries = {
     let products = [] as SearchProduct[]
     const { field, values, salesChannel } = args
 
+    const vtexSegment =  (!ctx.vtex.segment || (!ctx.vtex.segment?.regionId && args.regionId)) ? buildVtexSegment(ctx.vtex.segment, Number(args.salesChannel), args.regionId) : ctx.vtex.segmentToken
+
     switch (field) {
       case 'id':
-        products = await search.productsById(values, salesChannel)
+        products = await search.productsById(values, vtexSegment, salesChannel)
         break
       case 'ean':
-        products = await search.productsByEan(values, salesChannel)
+        products = await search.productsByEan(values, vtexSegment, salesChannel)
         break
       case 'reference':
-        products = await search.productsByReference(values, salesChannel)
+        products = await search.productsByReference(values, vtexSegment, salesChannel)
         break
       case 'sku':
-        products = await search.productsBySku(values, salesChannel)
+        products = await search.productsBySku(values, vtexSegment, salesChannel)
         break
     }
 
@@ -596,12 +627,15 @@ export const queries = {
       simulationBehavior,
       hideUnavailableItems,
     } = args
-    const [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
+    let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
 
-    const sellers = await getSellers(vbase, checkout, segment?.channel, regionId || segment?.regionId)
+    regionId = regionId || segment?.regionId
+
+    const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets) || segment?.channel
+
+    const sellers = await getSellers(vbase, checkout, tradePolicy, regionId)
+
     const [count, page] = getProductsCountAndPage(from, to)
-
-    const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets)
 
     const biggyArgs = {
       page,
@@ -611,7 +645,7 @@ export const queries = {
       searchState,
       attributePath: buildAttributePath(selectedFacets),
       query: fullText,
-      tradePolicy: segment && segment.channel,
+      tradePolicy,
       sort: convertOrderBy(args.orderBy),
       sellers,
       hideUnavailableItems,
@@ -722,15 +756,15 @@ export const queries = {
       vtex: { segment },
     } = ctx
 
-    const regionId = args.regionId || segment?.regionIdgst
+    const regionId = args.regionId || segment?.regionId
 
-    const sellers = await getSellers(vbase, checkout, segment?.channel, regionId)
+    const tradePolicy = args.salesChannel || segment?.channel
 
-    const tradePolicy = segment && segment?.channel
+    const sellers = await getSellers(vbase, checkout, tradePolicy, regionId)
 
     const result = await biggySearch.suggestionProducts({
       ...args,
-      tradePolicy,
+      salesChannel: tradePolicy,
       sellers
     })
 
@@ -743,6 +777,7 @@ export const queries = {
         ctx,
         searchResult: result,
         simulationBehavior: args.simulationBehavior,
+        tradePolicy: String(tradePolicy),
         regionId
       }
     )

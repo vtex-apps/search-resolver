@@ -108,7 +108,7 @@ export class BiggySearchClient extends ExternalClient {
       fullText: term,
       facetKey: attributeKey,
       facetValue: attributeValue,
-      tradePolicy,
+      salesChannel: tradePolicy,
       indexingType,
       sellers,
       hideUnavailableItems = false,
