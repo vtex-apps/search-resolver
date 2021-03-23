@@ -45,7 +45,7 @@ export class Search extends AppClient {
   private searchEncodeURI: (x: string) => string
   private basePath: string
 
-  private addSalesChannel = (url: string, salesChannel?: string | number) => {
+  private addSalesChannel = (url: string, salesChannel?: string | number | null) => {
     if (!salesChannel) {
       return url
     }
@@ -83,7 +83,7 @@ export class Search extends AppClient {
     )
   }
 
-  public product = (slug: string, vtexSegment?: string,  salesChannel?: string | number) =>
+  public product = (slug: string, vtexSegment?: string,  salesChannel?: string | number | null) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(`/pub/products/search/${this.searchEncodeURI(slug && slug.toLowerCase())}/p`, salesChannel)),
@@ -93,7 +93,7 @@ export class Search extends AppClient {
       }
     )
 
-  public productByEan = (id: string, vtexSegment?: string,  salesChannel?: string | number) =>
+  public productByEan = (id: string, vtexSegment?: string,  salesChannel?: string | number | null) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(this.addSalesChannel(`/pub/products/search?fq=alternateIds_Ean:${id}`, salesChannel)),
       {
@@ -102,17 +102,20 @@ export class Search extends AppClient {
       }
     )
 
-  public productsByEan = (ids: string[], salesChannel?: string | number) =>
+  public productsByEan = (ids: string[], vtexSegment?: string, salesChannel?: string | number | null) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(`/pub/products/search?${ids
           .map(id => `fq=alternateIds_Ean:${id}`)
           .join('&')}`, salesChannel)
       ),
-      { metric: 'search-productByEan' },
+      {
+        metric: 'search-productByEan',
+        headers: this.getVtexSegmentCookieAsHeader(vtexSegment)
+    },
     )
 
-  public productById = (id: string, vtexSegment?: string, salesChannel?: string | number, cacheable: boolean = true) => {
+  public productById = (id: string, vtexSegment?: string, salesChannel?: string | number | null, cacheable: boolean = true) => {
     const isVtex = this.context.platform === 'vtex'
     const url = isVtex
       ? this.addCompleteSpecifications(
@@ -125,17 +128,20 @@ export class Search extends AppClient {
     })
   }
 
-  public productsById = (ids: string[], salesChannel?: string | number) =>
+  public productsById = (ids: string[], vtexSegment?: string, salesChannel?: string | number | null) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(`/pub/products/search?${ids
           .map(id => `fq=productId:${id}`)
           .join('&')}`, salesChannel)
       ),
-      { metric: 'search-productById' }
+      {
+        metric: 'search-productById',
+        headers: this.getVtexSegmentCookieAsHeader(vtexSegment)
+      }
     )
 
-  public productByReference = (id: string, vtexSegment?: string, salesChannel?: string | number) =>
+  public productByReference = (id: string, vtexSegment?: string, salesChannel?: string | number | null) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(`/pub/products/search?fq=alternateIds_RefId:${id}`,salesChannel)),
@@ -145,17 +151,20 @@ export class Search extends AppClient {
       }
     )
 
-  public productsByReference = (ids: string[], salesChannel?: string | number) =>
+  public productsByReference = (ids: string[], vtexSegment?: string, salesChannel?: string | number | null) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(`/pub/products/search?${ids
           .map(id => `fq=alternateIds_RefId:${id}`)
           .join('&')}`, salesChannel)
       ),
-      { metric: 'search-productByReference' }
+      {
+        metric: 'search-productByReference',
+        headers: this.getVtexSegmentCookieAsHeader(vtexSegment)
+      }
     )
 
-  public productBySku = (skuId: string, vtexSegment?: string, salesChannel?: string | number) =>
+  public productBySku = (skuId: string, vtexSegment?: string, salesChannel?: string | number | null) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(`/pub/products/search?fq=skuId:${skuId}`, salesChannel)),
@@ -165,14 +174,17 @@ export class Search extends AppClient {
       }
     )
 
-  public productsBySku = (skuIds: string[], salesChannel?: string | number) =>
+  public productsBySku = (skuIds: string[], vtexSegment?: string, salesChannel?: string | number | null) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(`/pub/products/search?${skuIds
           .map(skuId => `fq=skuId:${skuId}`)
           .join('&')}`, salesChannel)
       ),
-      { metric: 'search-productsBySku' }
+      {
+        metric: 'search-productsBySku',
+        headers: this.getVtexSegmentCookieAsHeader(vtexSegment)
+      }
     )
 
   public productsRaw = (args: SearchArgs) => {

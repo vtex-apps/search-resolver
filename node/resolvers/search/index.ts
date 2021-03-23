@@ -2,7 +2,7 @@ import {
   NotFoundError,
   UserInputError,
   createMessagesLoader,
-  VBase,
+  VBase
 } from '@vtex/api'
 import { head, isEmpty, isNil, test, pathOr } from 'ramda'
 
@@ -74,7 +74,8 @@ interface ProductRecommendationArg {
 interface ProductsByIdentifierArgs {
   field: 'id' | 'ean' | 'reference' | 'sku'
   values: string[]
-  salesChannel?: string
+  salesChannel?: string | null,
+  regionId?: string | null
 }
 
 interface Region {
@@ -111,6 +112,21 @@ const getRegionIdFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): [(
   }
 
   return [regionId, selectedFacets]
+}
+
+const buildVtexSegment = (vtexSegment?: SegmentData, tradePolicy?: number, regionId?: string | null): string => {
+    const cookie = {
+      regionId: regionId,
+      channel: tradePolicy,
+      utm_campaign: vtexSegment?.utm_campaign || "",
+      utm_source: vtexSegment?.utm_source || "",
+      utmi_campaign: vtexSegment?.utmi_campaign || "",
+      currencyCode: vtexSegment?.currencyCode || "",
+      currencySymbol: vtexSegment?.currencySymbol || "",
+      countryCode: vtexSegment?.countryCode || "",
+      cultureInfo: vtexSegment?.cultureInfo || "",
+    }
+    return new Buffer(JSON.stringify(cookie)).toString('base64');
 }
 
 /**
@@ -477,8 +493,6 @@ export const queries = {
       throw new UserInputError('No product identifier provided')
     }
 
-    let vtexSegment: string | undefined = ""
-
     let cookie: SegmentData | undefined = ctx.vtex.segment
 
     const salesChannel = rawArgs.salesChannel || cookie?.channel || 1
@@ -486,22 +500,10 @@ export const queries = {
     const { field, value } = args.identifier
 
     let products = [] as SearchProduct[]
-    if (!cookie || (!cookie?.regionId && rawArgs.regionId)) {
-      cookie = {
-        regionId: rawArgs.regionId,
-        channel: salesChannel,
-        utm_campaign: cookie?.utm_campaign || "",
-        utm_source: cookie?.utm_source || "",
-        utmi_campaign: cookie?.utmi_campaign || "",
-        currencyCode: cookie?.currencyCode || "",
-        currencySymbol: cookie?.currencySymbol || "",
-        countryCode: cookie?.countryCode || "",
-        cultureInfo: cookie?.cultureInfo || "",
-      }
-      vtexSegment = new Buffer(JSON.stringify(cookie)).toString('base64');
-    }else{
-      vtexSegment = ctx.vtex.segmentToken
-    }
+
+    const vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
+
+
 
     switch (field) {
       case 'id':
@@ -583,18 +585,20 @@ export const queries = {
     let products = [] as SearchProduct[]
     const { field, values, salesChannel } = args
 
+    const vtexSegment =  (!ctx.vtex.segment || (!ctx.vtex.segment?.regionId && args.regionId)) ? buildVtexSegment(ctx.vtex.segment, Number(args.salesChannel), args.regionId) : ctx.vtex.segmentToken
+
     switch (field) {
       case 'id':
-        products = await search.productsById(values, salesChannel)
+        products = await search.productsById(values, vtexSegment, salesChannel)
         break
       case 'ean':
-        products = await search.productsByEan(values, salesChannel)
+        products = await search.productsByEan(values, vtexSegment, salesChannel)
         break
       case 'reference':
-        products = await search.productsByReference(values, salesChannel)
+        products = await search.productsByReference(values, vtexSegment, salesChannel)
         break
       case 'sku':
-        products = await search.productsBySku(values, salesChannel)
+        products = await search.productsBySku(values, vtexSegment, salesChannel)
         break
     }
 
@@ -773,6 +777,7 @@ export const queries = {
         ctx,
         searchResult: result,
         simulationBehavior: args.simulationBehavior,
+        tradePolicy: String(tradePolicy),
         regionId
       }
     )

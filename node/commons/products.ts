@@ -26,7 +26,7 @@ export const productsBiggy = async ({ searchResult, ctx, simulationBehavior = 'd
   return products
 }
 
-export const productsCatalog = async ({ searchResult, ctx }: ConvertProductInput) => {
+export const productsCatalog = async ({ searchResult, ctx, tradePolicy, regionId }: ConvertProductInput) => {
   let biggyProducts: any[] = searchResult.products
   let products: any[] = []
   const productIds = map<any, string>((product: any) => {
@@ -40,6 +40,8 @@ export const productsCatalog = async ({ searchResult, ctx }: ConvertProductInput
       {
         field: 'id',
         values: productIds,
+        salesChannel: tradePolicy,
+        regionId
       },
       ctx
     )
