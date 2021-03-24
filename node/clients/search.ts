@@ -50,6 +50,10 @@ export class Search extends AppClient {
       return url
     }
 
+    if (!url.includes('?')) {
+      return url.concat(`?sc=${salesChannel}`)
+    }
+
     return url.concat(`&sc=${salesChannel}`)
   }
 
