@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Removed biggy search cache
+
 ## [1.37.4] - 2021-03-25
 ### Changed
 - Reduced the number of workers to 2 
