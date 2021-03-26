@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Yanked `v1.37.6` changes.
 
-## (YANKED) [1.37.6] - 2021-03-26
+## [1.37.6] - 2021-03-26 [YANKED]
 ### Fixed
 - Regionalization not working on shelves.
 
