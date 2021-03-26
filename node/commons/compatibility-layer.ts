@@ -308,8 +308,8 @@ const buildCommertialOffer = (
     TotalValuePlusInterestRate: price,
     NumberOfInstallments: installment.count,
     Name: '',
-    PaymentSystemName: '',
-    PaymentSystemGroupName: '',
+    PaymentSystemName: installment.paymentName ?? '',
+    PaymentSystemGroupName: installment.paymentGroupName ?? '',
   }] : [];
 
   const availableQuantity = stock && stock > 0 ? 10000 : 0

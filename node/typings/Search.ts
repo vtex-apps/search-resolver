@@ -211,6 +211,8 @@ interface BiggyInstallment {
   value: number
   count: number
   interest: boolean
+  paymentName?: string
+  paymentGroupName?: string
 }
 
 interface BiggyPolicy {
