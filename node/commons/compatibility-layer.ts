@@ -499,7 +499,7 @@ export const convertOrderBy = (orderBy?: string | null): string => {
 export const buildBreadcrumb = (
   attributes: ElasticAttribute[],
   fullText: string,
-  selectedFacets: SelectedFacet[]
+  selectedFacets: SelectedFacet[] = []
 ) => {
   const pivotValue: string[] = []
   const pivotMap: string[] = []

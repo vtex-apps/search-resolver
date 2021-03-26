@@ -418,7 +418,7 @@ export const queries = {
       vtex: { segment },
     } = ctx
 
-    const [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets ?? [])
+    const [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
 
     const tradePolicy = getTradePolicyFromSelectedFacets(selectedFacets) || segment?.channel
 
@@ -457,7 +457,7 @@ export const queries = {
     const breadcrumb = buildBreadcrumb(
       result.attributes || [],
       decodeURIComponent(args.fullText),
-      args.selectedFacets ?? []
+      args.selectedFacets
     )
 
     const attributesWithVisibilitySet = await setFilterVisibility(vbase, search, result.attributes ?? [])
@@ -474,7 +474,7 @@ export const queries = {
       queryArgs: {
         map: args.map,
         query: args.query,
-        selectedFacets: args.selectedFacets ?? [],
+        selectedFacets: args.selectedFacets,
       },
       breadcrumb,
     }
@@ -628,7 +628,7 @@ export const queries = {
       simulationBehavior,
       hideUnavailableItems,
     } = args
-    let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets ?? [])
+    let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
 
     regionId = regionId || segment?.regionId
 
