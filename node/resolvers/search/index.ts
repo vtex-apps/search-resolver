@@ -406,10 +406,11 @@ export const queries = {
       args
     )) as FacetsInput
 
-    let { fullText, searchState } = args
+    let { fullText, searchState, query } = args
 
+    fullText = fullText != null && fullText.length > 0 ? fullText : query
     if (fullText) {
-      fullText = await translateToStoreDefaultLanguage(ctx, args.fullText!)
+      fullText = await translateToStoreDefaultLanguage(ctx, fullText)
     }
 
     const {
@@ -503,8 +504,6 @@ export const queries = {
 
     const vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
 
-
-
     switch (field) {
       case 'id':
         products = await search.productById(value, vtexSegment, salesChannel)
@@ -567,7 +566,8 @@ export const queries = {
 
     const products = await biggySearch.productSearch(biggyArgs)
 
-    const convertedProducts = await productsBiggy({ ctx, simulationBehavior, searchResult: products })
+    const regionId = segment?.regionId
+    const convertedProducts = await productsBiggy({ ctx, simulationBehavior, searchResult: products, regionId })
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
 
     return convertedProducts
@@ -621,6 +621,7 @@ export const queries = {
       from,
       to,
       fullText,
+      query,
       fuzzy,
       operator,
       searchState,
@@ -644,7 +645,7 @@ export const queries = {
       operator,
       searchState,
       attributePath: buildAttributePath(selectedFacets),
-      query: fullText,
+      query: fullText != null && fullText.length > 0 ? fullText : query,
       tradePolicy,
       sort: convertOrderBy(args.orderBy),
       sellers,
