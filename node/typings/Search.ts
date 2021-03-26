@@ -57,7 +57,7 @@ interface SuggestionProductsArgs {
   productOriginVtex: boolean
   simulationBehavior: 'skip' | 'default' | null
   sellers?: RegionSeller[]
-  hideUnavailableItems?: boolean | null,
+  hideUnavailableItems?: boolean | null
   regionId?: string
 }
 
@@ -84,7 +84,7 @@ interface ProductSearchInput {
   query: string
   from: number
   to: number
-  selectedFacets: SelectedFacet[]
+  selectedFacets?: SelectedFacet[]
   fullText: string
   fuzzy: string
   operator: string

@@ -406,10 +406,11 @@ export const queries = {
       args
     )) as FacetsInput
 
-    let { fullText, searchState } = args
+    let { fullText, searchState, query } = args
 
+    fullText = fullText != null && fullText.length > 0 ? fullText : query
     if (fullText) {
-      fullText = await translateToStoreDefaultLanguage(ctx, args.fullText!)
+      fullText = await translateToStoreDefaultLanguage(ctx, fullText)
     }
 
     const {
@@ -417,7 +418,7 @@ export const queries = {
       vtex: { segment },
     } = ctx
 
-    const [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
+    const [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets ?? [])
 
     const tradePolicy = getTradePolicyFromSelectedFacets(selectedFacets) || segment?.channel
 
@@ -456,7 +457,7 @@ export const queries = {
     const breadcrumb = buildBreadcrumb(
       result.attributes || [],
       decodeURIComponent(args.fullText),
-      args.selectedFacets
+      args.selectedFacets ?? []
     )
 
     const attributesWithVisibilitySet = await setFilterVisibility(vbase, search, result.attributes ?? [])
@@ -473,7 +474,7 @@ export const queries = {
       queryArgs: {
         map: args.map,
         query: args.query,
-        selectedFacets: args.selectedFacets,
+        selectedFacets: args.selectedFacets ?? [],
       },
       breadcrumb,
     }
@@ -502,8 +503,6 @@ export const queries = {
     let products = [] as SearchProduct[]
 
     const vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
-
-
 
     switch (field) {
       case 'id':
@@ -567,7 +566,8 @@ export const queries = {
 
     const products = await biggySearch.productSearch(biggyArgs)
 
-    const convertedProducts = await productsBiggy({ ctx, simulationBehavior, searchResult: products })
+    const regionId = segment?.regionId
+    const convertedProducts = await productsBiggy({ ctx, simulationBehavior, searchResult: products, regionId })
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
 
     return convertedProducts
@@ -621,13 +621,14 @@ export const queries = {
       from,
       to,
       fullText,
+      query,
       fuzzy,
       operator,
       searchState,
       simulationBehavior,
       hideUnavailableItems,
     } = args
-    let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
+    let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets ?? [])
 
     regionId = regionId || segment?.regionId
 
@@ -644,7 +645,7 @@ export const queries = {
       operator,
       searchState,
       attributePath: buildAttributePath(selectedFacets),
-      query: fullText,
+      query: fullText != null && fullText.length > 0 ? fullText : query,
       tradePolicy,
       sort: convertOrderBy(args.orderBy),
       sellers,
