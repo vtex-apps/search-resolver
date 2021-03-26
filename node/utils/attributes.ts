@@ -235,7 +235,15 @@ export const sortAttributeValuesByCatalog = (
     const aPosition = findPositionByLabel(a.label)
     const bPosition = findPositionByLabel(b.label)
 
-    return aPosition < bPosition ? -1 : 1
+    // Order attribute values keeping selected ones at the top.
+    if (a.active && !b.active) {
+      return -1;
+    } else if (b.active && !a.active) {
+      return 1;
+    } else {
+      // If both, or neither, are selected, order using catalog's position.
+      return aPosition < bPosition ? -1 : 1
+    }
   })
 }
 
