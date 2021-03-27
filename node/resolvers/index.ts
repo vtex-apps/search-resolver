@@ -3,6 +3,7 @@ import {
   fieldResolvers as searchFieldResolvers,
   queries as searchQueries,
 } from './search'
+import { productInventory } from './inventory'
 
 import { queries as statsQueries } from './stats'
 
@@ -11,6 +12,7 @@ export const resolvers = {
   ...benefitsFieldResolvers,
   Query: {
     ...searchQueries,
-    ...statsQueries
+    ...statsQueries,
+    productInventory
   },
 }

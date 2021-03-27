@@ -44,7 +44,7 @@ import {
 import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
 import { Checkout } from '../../clients/checkout'
 import setFilterVisibility from '../../utils/setFilterVisibility'
-
+import atob from 'atob'
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
   value: string
@@ -628,7 +628,7 @@ export const queries = {
       hideUnavailableItems,
     } = args
     let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
-
+    
     regionId = regionId || segment?.regionId
 
     const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets) || segment?.channel
@@ -659,8 +659,38 @@ export const queries = {
     const convertedProducts = await productResolver({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })
 
     // Add prefix to the cacheId to avoid conflicts. Repeated cacheIds in the same page are causing strange behavior.
-    convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
+    convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)    
 
+
+    console.log("--------------_CANTIDAD_--------------")
+
+    convertedProducts[0].items[0].sellers[0].commertialOffer.AvailableQuantity = 777
+    console.log(convertedProducts[0].items[0].sellers[0].commertialOffer.AvailableQuantity)
+    console.log(convertedProducts[0].items[0].sellers[0].commertialOffer.ListPrice, convertedProducts[0].items[0].sellers[0].commertialOffer.Price)
+
+
+    /*
+    convertedProducts.filter((product)=>{
+      // Productos q tengan stock en su respectivo whitelabel, si el producto es electro tengo que preguntarle a el WL ELECTRO.
+      if (isElectro(product)){
+        return hasStockInElectro(product)
+      } else {
+        hasStockInThisRegion(product)
+      }
+    })
+
+    const isElectro = (product) => {
+      const smv = product.completeSpecifications.find((specification: any)=>{
+        return specification.Name === "Surtido Modalidad Venta"
+      })
+
+      return (smv.Values[0].Value === "MarketPlace")
+    }*/
+    //LUCAS
+    console.log({regionId})
+    const sellerIdRegion: any = regionId != null ? atob(regionId) : null
+    console.log(sellerIdRegion)
+    
     return {
       searchState,
       products: convertedProducts,
