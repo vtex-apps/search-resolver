@@ -7,6 +7,7 @@ import {
   CacheType,
 } from '@vtex/api'
 import { stringify } from 'qs'
+import atob from 'atob'
 
 import { searchEncodeURI, SearchCrossSellingTypes } from '../resolvers/search/utils'
 
@@ -66,7 +67,18 @@ export class Search extends AppClient {
   }
 
   private getVtexSegmentCookieAsHeader = (vtexSegment?: string) => {
-    return vtexSegment ? {"x-vtex-segment": vtexSegment} : {}
+    let decodedVtexSegment = JSON.parse(atob(vtexSegment ? vtexSegment : ""))
+    let newRegionId = "";
+    if (atob(decodedVtexSegment.regionId).indexOf("SW#poccarrefourarg0206") == -1 ){
+      newRegionId = "SW#poccarrefourarg0206;" + atob(decodedVtexSegment.regionId)
+    }
+    decodedVtexSegment.regionId = newRegionId
+    let buff = new Buffer(decodedVtexSegment.stringify());
+    const encodedNewVtexSegment = buff.toString('base64');
+    console.log("---------------------- clients/search.ts --------------------------")
+    console.log(encodedNewVtexSegment)
+
+    return vtexSegment ? {"x-vtex-segment": encodedNewVtexSegment} : {}
   }
 
   public constructor(ctx: IOContext, opts?: InstanceOptions) {

@@ -45,6 +45,8 @@ import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
 import { Checkout } from '../../clients/checkout'
 import setFilterVisibility from '../../utils/setFilterVisibility'
 
+import atob from 'atob'
+
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
   value: string
@@ -567,8 +569,25 @@ export const queries = {
 
     const products = await biggySearch.productSearch(biggyArgs)
 
+    let decodedVtexSegment = JSON.parse(atob(ctx.vtex.segmentToken ? ctx.vtex.segmentToken : ""))
+    let newRegionId = "";
+    let encodedRegionId = "";
+    if (atob(decodedVtexSegment.regionId).indexOf("SW#poccarrefourarg0206") == -1 ){
+      newRegionId = "SW#poccarrefourarg0206;" + atob(decodedVtexSegment.regionId)
+      let buff = new Buffer(newRegionId);
+      encodedRegionId = buff.toString('base64');
+      decodedVtexSegment.regionId = encodedRegionId
+    }
+    console.log("---------------------- resolvers/search/index.ts --------------------------")
+    console.log(encodedRegionId)
+    console.log(newRegionId)
+    console.log(decodedVtexSegment.regionId)
+
     const convertedProducts = await productsBiggy({ ctx, simulationBehavior, searchResult: products })
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
+
+    console.log("---------- resolvers/search/index.ts -----------------")
+    console.log(ctx.vtex.segmentToken)
 
     return convertedProducts
   },
@@ -765,7 +784,8 @@ export const queries = {
     const result = await biggySearch.suggestionProducts({
       ...args,
       salesChannel: tradePolicy,
-      sellers
+      sellers,
+      regionId: regionId
     })
 
     const productResolver = args.productOriginVtex

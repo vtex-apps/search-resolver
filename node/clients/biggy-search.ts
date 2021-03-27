@@ -2,6 +2,7 @@ import { ExternalClient, InstanceOptions, IOContext } from '@vtex/api'
 import { IndexingType } from '../commons/compatibility-layer'
 import { parseState } from '../utils/searchState'
 import path from 'path'
+import atob from 'atob'
 
 const isLinked = process.env.VTEX_APP_LINK
 
@@ -61,7 +62,7 @@ const buildBSearchFilterCookie = (sellers?: RegionSeller[]) =>
     ? ''
     : sellers.reduce((cookie: string, seller: RegionSeller, idx: number) => {
         return `${cookie}${idx > 0 ? '/' : ''}${seller.id}`
-      }, 'bsearch-filter=private-seller#')
+      }, 'bsearch-filter=private-seller#') + ";"
 
 export class BiggySearchClient extends ExternalClient {
   private store: string
@@ -112,6 +113,7 @@ export class BiggySearchClient extends ExternalClient {
       indexingType,
       sellers,
       hideUnavailableItems = false,
+      regionId,
     } = args
     const attributes: { key: string; value: string }[] = []
 
@@ -129,6 +131,32 @@ export class BiggySearchClient extends ExternalClient {
       })
     }
 
+    let newRegionId = "", encodedNewRegionId = ""
+    if (atob(regionId ? regionId : "").indexOf("SW#poccarrefourarg0206") == -1 ){
+      newRegionId = "SW#poccarrefourarg0206;" + atob(regionId ? regionId : "")
+      let buff = new Buffer(newRegionId)
+      encodedNewRegionId = buff.toString('base64')
+    }
+    console.log("---------------------- clients/biggy-search.ts --------------------------")
+    console.log(encodedNewRegionId)
+
+    // let vtexSegmentCookieObject = {
+    //   "campaigns": null,
+    //   "channel": "1",
+    //   "priceTables": null,
+    //   "regionId": encodedNewRegionId,
+    //   "utm_campaign": null,
+    //   "utm_source": null,
+    //   "utmi_campaign": null,
+    //   "currencyCode": "ARS",
+    //   "currencySymbol": "$",
+    //   "countryCode": "ARG",
+    //   "cultureInfo": "es-AR",
+    //   "admin_cultureInfo": "es-AR",
+    //   "channelPrivacy": "public"
+    // }
+    // let vtexSegmentCookie = JSON.stringify(vtexSegmentCookieObject)
+
     const result = await this.http.post(
       `${this.store}/api/suggestion_products`,
       {
@@ -142,7 +170,7 @@ export class BiggySearchClient extends ExternalClient {
           ['hide-unavailable-items']: hideUnavailableItems ?? false,
         },
         headers: {
-          Cookie: buildBSearchFilterCookie(sellers),
+          Cookie: buildBSearchFilterCookie(sellers),// + vtexSegmentCookie,
           "X-VTEX-IS-ID": `${this.store}`,
         },
       }
