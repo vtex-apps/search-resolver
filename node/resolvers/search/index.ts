@@ -45,6 +45,8 @@ import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
 import { Checkout } from '../../clients/checkout'
 import setFilterVisibility from '../../utils/setFilterVisibility'
 
+import atob from 'atob'
+
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
   value: string
@@ -319,6 +321,8 @@ const getSellers = async (
   channel?: number,
   regionId?: string | null,
 ) => {
+  regionId = new Buffer('SW#poccarrefourarg0206;' + atob(regionId ? regionId : "")).toString('base64')
+
   if (!regionId) {
     return []
   }
@@ -501,9 +505,17 @@ export const queries = {
 
     let products = [] as SearchProduct[]
 
-    const vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
+    let vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
 
-
+    // FPA APUB
+    let decodedVtexSegment = JSON.parse(atob(vtexSegment ? vtexSegment : ""))
+    let decodedVtexSegmentRegionId = atob(decodedVtexSegment.regionId)
+    let newRegionId = "";
+    if (decodedVtexSegmentRegionId.indexOf("SW#poccarrefourarg0206") == -1 ){
+      newRegionId = new Buffer("SW#poccarrefourarg0206;" + decodedVtexSegmentRegionId).toString('base64')
+    }
+    decodedVtexSegment.regionId = newRegionId
+    vtexSegment = new Buffer(JSON.stringify(decodedVtexSegment)).toString('base64')
 
     switch (field) {
       case 'id':
@@ -567,8 +579,12 @@ export const queries = {
 
     const products = await biggySearch.productSearch(biggyArgs)
 
-    const convertedProducts = await productsBiggy({ ctx, simulationBehavior, searchResult: products })
+    let convertedProducts = await productsBiggy({ ctx, simulationBehavior, searchResult: products })
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
+
+    convertedProducts = convertedProducts.filter( product => {
+      return product.items[0].sellers[0].commertialOffer.AvailableQuantity > 0
+    })
 
     return convertedProducts
   },
@@ -585,7 +601,17 @@ export const queries = {
     let products = [] as SearchProduct[]
     const { field, values, salesChannel } = args
 
-    const vtexSegment =  (!ctx.vtex.segment || (!ctx.vtex.segment?.regionId && args.regionId)) ? buildVtexSegment(ctx.vtex.segment, Number(args.salesChannel), args.regionId) : ctx.vtex.segmentToken
+    let vtexSegment = (!ctx.vtex.segment || (!ctx.vtex.segment?.regionId && args.regionId)) ? buildVtexSegment(ctx.vtex.segment, Number(args.salesChannel), args.regionId) : ctx.vtex.segmentToken
+
+    // FPA APUB
+    let decodedVtexSegment = JSON.parse(atob(vtexSegment ? vtexSegment : ""))
+    let decodedVtexSegmentRegionId = atob(decodedVtexSegment.regionId)
+    let newRegionId = ""
+    if (decodedVtexSegmentRegionId.indexOf("SW#poccarrefourarg0206") == -1 ){
+      newRegionId = new Buffer("SW#poccarrefourarg0206;" + decodedVtexSegmentRegionId).toString('base64')
+    }
+    decodedVtexSegment.regionId = newRegionId
+    vtexSegment = new Buffer(JSON.stringify(decodedVtexSegment)).toString('base64')
 
     switch (field) {
       case 'id':
