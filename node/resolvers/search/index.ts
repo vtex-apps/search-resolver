@@ -535,6 +535,10 @@ export const queries = {
         break
     }
 
+    products = products.filter( product => {
+      return product.items[0].sellers[0].commertialOffer.AvailableQuantity > 0
+    })
+
     if (products.length > 0) {
       return head(products)
     }
@@ -628,6 +632,10 @@ export const queries = {
         break
     }
 
+    products = products.filter( product => {
+      return product.items[0].sellers[0].commertialOffer.AvailableQuantity > 0
+    })
+
     if (products.length > 0) {
       return products
     }
@@ -682,10 +690,14 @@ export const queries = {
     const productResolver = args.productOriginVtex
       ? productsCatalog
       : productsBiggy
-    const convertedProducts = await productResolver({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })
+    let convertedProducts = await productResolver({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })
 
     // Add prefix to the cacheId to avoid conflicts. Repeated cacheIds in the same page are causing strange behavior.
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
+
+    convertedProducts = convertedProducts.filter( product => {
+      return product.items[0].sellers[0].commertialOffer.AvailableQuantity > 0
+    })
 
     return {
       searchState,
