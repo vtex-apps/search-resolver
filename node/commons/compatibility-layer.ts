@@ -178,6 +178,7 @@ export const convertBiggyProduct = async (
     }))
 
     convertedProduct.items.map((item) => {
+      // console.log({item})
       fillSearchItemWithSimulation(item, orderItemsBySellerById[item.itemId])
     })
   }
@@ -215,6 +216,9 @@ export const convertBiggyProduct = async (
 
 const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: OrderFormItemBySeller) => {
   if (orderFormItems) {
+    console.log('-----------fillSearchItemWithSimulation--------------')
+    console.log(searchItem)
+    console.log(orderFormItems)
     searchItem.sellers.forEach((seller) => {
       const orderFormItem = orderFormItems[seller.sellerId]
 
@@ -430,6 +434,9 @@ const convertSKU = (
     indexingType === IndexingType.XML
       ? getSellersIndexedByXML(product)
       : getSellersIndexedByApi(product, sku, tradePolicy)
+
+  console.log('-------------------- compatibility-layer.ts')
+  console.log(sellers)
 
   const variations = getVariations(sku)
 

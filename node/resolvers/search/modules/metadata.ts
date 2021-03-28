@@ -129,6 +129,9 @@ const getClusterMetadata = async (
   })
 
   const clusterId = head(args.query?.split(',') ?? [])
+
+  console.log(searchArgs)
+
   const products = await search.products(searchArgs)
   const productWithCluster = products?.find(
     ({ productClusters }) => !!productClusters[clusterId]

@@ -40,6 +40,7 @@ interface SearchResultArgs {
   sellers?: RegionSeller[]
   hideUnavailableItems?: boolean | null
   removeHiddenFacets?: boolean | null
+  regionId?: string
 }
 
 interface RegionSeller {

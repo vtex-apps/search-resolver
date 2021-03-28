@@ -115,8 +115,9 @@ const getRegionIdFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): [(
 }
 
 const buildVtexSegment = (vtexSegment?: SegmentData, tradePolicy?: number, regionId?: string | null): string => {
+    console.log(regionId)
     const cookie = {
-      regionId: regionId,
+      regionId: "U1cjcG9jY2FycmVmb3VyYXJnMDAwMjtTVyNwb2NjYXJyZWZvdXJhcmcwMjA2",
       channel: tradePolicy,
       utm_campaign: vtexSegment?.utm_campaign || "",
       utm_source: vtexSegment?.utm_source || "",
@@ -421,7 +422,19 @@ export const queries = {
 
     const tradePolicy = getTradePolicyFromSelectedFacets(selectedFacets) || segment?.channel
 
-    const sellers = await getSellers(vbase, checkout, tradePolicy, regionId || segment?.regionId)
+    let sellers = await getSellers(vbase, checkout, tradePolicy, regionId || segment?.regionId)
+    // console.log(sellers2)
+
+    // let sellers = [
+    //   {
+    //     id: 'poccarrefourarg0002',
+    //     name: 'Tienda Vicente Lopez'
+    //   },
+    //   {
+    //     id: 'poccarrefourarg0206',
+    //     name: 'poccarrefourarg0206'
+    //   }
+    // ]
 
     const biggyArgs = {
       searchState,
@@ -501,9 +514,13 @@ export const queries = {
 
     let products = [] as SearchProduct[]
 
-    const vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
+    let vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
 
 
+    console.log('------------2-------------')
+    console.log(vtexSegment)
+
+    vtexSegment = "eyJjYW1wYWlnbnMiOm51bGwsImNoYW5uZWwiOiIxIiwicHJpY2VUYWJsZXMiOm51bGwsInJlZ2lvbklkIjoiVTFjamNHOWpZMkZ5Y21WbWIzVnlZWEpuTURJd05nPT0iLCJ1dG1fY2FtcGFpZ24iOm51bGwsInV0bV9zb3VyY2UiOm51bGwsInV0bWlfY2FtcGFpZ24iOm51bGwsImN1cnJlbmN5Q29kZSI6IkFSUyIsImN1cnJlbmN5U3ltYm9sIjoiJCIsImNvdW50cnlDb2RlIjoiQVJHIiwiY3VsdHVyZUluZm8iOiJlcy1BUiIsImFkbWluX2N1bHR1cmVJbmZvIjoiZXMtQVIiLCJjaGFubmVsUHJpdmFjeSI6InB1YmxpYyJ9"
 
     switch (field) {
       case 'id':
@@ -547,7 +564,19 @@ export const queries = {
 
     const selectedFacets: SelectedFacet[] = buildSelectedFacets(args)
 
-    const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
+    let sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
+    // console.log(sellers2)
+
+    // let sellers = [
+    //   {
+    //     id: 'poccarrefourarg0002',
+    //     name: 'Tienda Vicente Lopez'
+    //   },
+    //   {
+    //     id: 'poccarrefourarg0206',
+    //     name: 'poccarrefourarg0206'
+    //   }
+    // ]
 
     const biggyArgs: SearchResultArgs = {
       fullText: query,
@@ -556,7 +585,7 @@ export const queries = {
       query: query,
       sellers: sellers,
       sort: convertOrderBy(orderBy),
-      hideUnavailableItems,
+      hideUnavailableItems
     }
 
     if (to !== null && from !== null) {
@@ -566,6 +595,12 @@ export const queries = {
     }
 
     const products = await biggySearch.productSearch(biggyArgs)
+
+    console.log("--------------- resolvers/search/index.ts:570")
+    console.log("queryyy:", query)
+
+    console.log({simulationBehavior})
+    console.log(ctx.vtex.segment)
 
     const convertedProducts = await productsBiggy({ ctx, simulationBehavior, searchResult: products })
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
@@ -585,7 +620,12 @@ export const queries = {
     let products = [] as SearchProduct[]
     const { field, values, salesChannel } = args
 
-    const vtexSegment =  (!ctx.vtex.segment || (!ctx.vtex.segment?.regionId && args.regionId)) ? buildVtexSegment(ctx.vtex.segment, Number(args.salesChannel), args.regionId) : ctx.vtex.segmentToken
+    let vtexSegment =  (!ctx.vtex.segment || (!ctx.vtex.segment?.regionId && args.regionId)) ? buildVtexSegment(ctx.vtex.segment, Number(args.salesChannel), args.regionId) : ctx.vtex.segmentToken
+
+    console.log('-----------1-----------')
+    console.log(vtexSegment)
+
+    vtexSegment = "eyJjYW1wYWlnbnMiOm51bGwsImNoYW5uZWwiOiIxIiwicHJpY2VUYWJsZXMiOm51bGwsInJlZ2lvbklkIjoiVTFjamNHOWpZMkZ5Y21WbWIzVnlZWEpuTURJd05nPT0iLCJ1dG1fY2FtcGFpZ24iOm51bGwsInV0bV9zb3VyY2UiOm51bGwsInV0bWlfY2FtcGFpZ24iOm51bGwsImN1cnJlbmN5Q29kZSI6IkFSUyIsImN1cnJlbmN5U3ltYm9sIjoiJCIsImNvdW50cnlDb2RlIjoiQVJHIiwiY3VsdHVyZUluZm8iOiJlcy1BUiIsImFkbWluX2N1bHR1cmVJbmZvIjoiZXMtQVIiLCJjaGFubmVsUHJpdmFjeSI6InB1YmxpYyJ9"
 
     switch (field) {
       case 'id':
@@ -615,6 +655,8 @@ export const queries = {
       args
     )) as ProductSearchInput
 
+    console.log("productSearch2")
+
     const { biggySearch, vbase, checkout } = ctx.clients
     const { segment } = ctx.vtex
     const {
@@ -633,7 +675,19 @@ export const queries = {
 
     const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets) || segment?.channel
 
-    const sellers = await getSellers(vbase, checkout, tradePolicy, regionId)
+    let sellers = await getSellers(vbase, checkout, tradePolicy, regionId)
+    // console.log(sellers2)
+
+    // let sellers = [
+    //   {
+    //     id: 'poccarrefourarg0002',
+    //     name: 'Tienda Vicente Lopez'
+    //   },
+    //   {
+    //     id: 'poccarrefourarg0206',
+    //     name: 'poccarrefourarg0206'
+    //   }
+    // ]
 
     const [count, page] = getProductsCountAndPage(from, to)
 
@@ -649,6 +703,7 @@ export const queries = {
       sort: convertOrderBy(args.orderBy),
       sellers,
       hideUnavailableItems,
+      regionId
     }
 
     const result = await biggySearch.productSearch(biggyArgs)
@@ -656,10 +711,22 @@ export const queries = {
     const productResolver = args.productOriginVtex
       ? productsCatalog
       : productsBiggy
-    const convertedProducts = await productResolver({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })
+    let convertedProducts = await productResolver({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })
 
     // Add prefix to the cacheId to avoid conflicts. Repeated cacheIds in the same page are causing strange behavior.
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
+
+    console.log('----------resolvers/search/index.ts------------')
+    // console.log({convertedProducts})
+    // console.log(convertedProducts[0].items[0].sellers)
+    console.log({convertedProducts})
+    convertedProducts = convertedProducts.filter( product => {
+      // console.log(product.items[0].sellers[0].commertialOffer.AvailableQuantity > 0)
+      // console.log(product.items[0].sellers[0].commertialOffer)
+      // console.log(product.items[0].sellers[0])
+      return product.items[0].sellers[0].commertialOffer.AvailableQuantity > 0
+    })
+    console.log({convertedProducts})
 
     return {
       searchState,
@@ -712,6 +779,8 @@ export const queries = {
       )
     }
 
+    console.log('---------11-----------')
+
     if (args.selectedFacets) {
       const [map] = getMapAndPriceRangeFromSelectedFacets(args.selectedFacets)
       args.map = map
@@ -744,6 +813,8 @@ export const queries = {
   ) => {
     const { biggySearch } = ctx.clients
 
+    console.log('---------12-----------')
+
     return biggySearch.autocompleteSearchSuggestions(args)
   },
   productSuggestions: async (
@@ -756,11 +827,25 @@ export const queries = {
       vtex: { segment },
     } = ctx
 
+    console.log('----------4------------')
+
     const regionId = args.regionId || segment?.regionId
 
     const tradePolicy = args.salesChannel || segment?.channel
 
-    const sellers = await getSellers(vbase, checkout, tradePolicy, regionId)
+    let sellers = await getSellers(vbase, checkout, tradePolicy, regionId)
+    // console.log(sellers2)
+
+    // let sellers = [
+    //   {
+    //     id: 'poccarrefourarg0002',
+    //     name: 'Tienda Vicente Lopez'
+    //   },
+    //   {
+    //     id: 'poccarrefourarg0206',
+    //     name: 'poccarrefourarg0206'
+    //   }
+    // ]
 
     const result = await biggySearch.suggestionProducts({
       ...args,
@@ -772,13 +857,12 @@ export const queries = {
       ? productsCatalog
       : productsBiggy
 
-    const convertedProducts = productResolver(
+    let convertedProducts = productResolver(
       {
         ctx,
         searchResult: result,
         simulationBehavior: args.simulationBehavior,
-        tradePolicy: String(tradePolicy),
-        regionId
+        tradePolicy: String(tradePolicy)
       }
     )
 
@@ -809,6 +893,8 @@ export const queries = {
   },
   searchSuggestions: (_: any, args: { fullText: string }, ctx: Context) => {
     const { biggySearch } = ctx.clients
+
+    console.log('----------5------------')
 
     return biggySearch.searchSuggestions(args)
   },
