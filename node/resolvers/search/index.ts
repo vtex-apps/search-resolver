@@ -107,7 +107,7 @@ const getRegionIdFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): [(
 
   const regionIdIndex = selectedFacets.findIndex(selectedFacet => selectedFacet.key === "region-id")
 
-  if(regionIdIndex > -1) {
+  if (regionIdIndex > -1) {
     regionId = selectedFacets[regionIdIndex].value
 
     selectedFacets.splice(regionIdIndex, 1)
@@ -117,18 +117,18 @@ const getRegionIdFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): [(
 }
 
 const buildVtexSegment = (vtexSegment?: SegmentData, tradePolicy?: number, regionId?: string | null): string => {
-    const cookie = {
-      regionId: regionId,
-      channel: tradePolicy,
-      utm_campaign: vtexSegment?.utm_campaign || "",
-      utm_source: vtexSegment?.utm_source || "",
-      utmi_campaign: vtexSegment?.utmi_campaign || "",
-      currencyCode: vtexSegment?.currencyCode || "",
-      currencySymbol: vtexSegment?.currencySymbol || "",
-      countryCode: vtexSegment?.countryCode || "",
-      cultureInfo: vtexSegment?.cultureInfo || "",
-    }
-    return new Buffer(JSON.stringify(cookie)).toString('base64');
+  const cookie = {
+    regionId: regionId,
+    channel: tradePolicy,
+    utm_campaign: vtexSegment?.utm_campaign || "",
+    utm_source: vtexSegment?.utm_source || "",
+    utmi_campaign: vtexSegment?.utmi_campaign || "",
+    currencyCode: vtexSegment?.currencyCode || "",
+    currencySymbol: vtexSegment?.currencySymbol || "",
+    countryCode: vtexSegment?.countryCode || "",
+    cultureInfo: vtexSegment?.cultureInfo || "",
+  }
+  return new Buffer(JSON.stringify(cookie)).toString('base64');
 }
 
 /**
@@ -511,7 +511,7 @@ export const queries = {
     let decodedVtexSegment = JSON.parse(atob(vtexSegment ? vtexSegment : ""))
     let decodedVtexSegmentRegionId = atob(decodedVtexSegment.regionId)
     let newRegionId = "";
-    if (decodedVtexSegmentRegionId.indexOf("SW#poccarrefourarg0206") == -1 ){
+    if (decodedVtexSegmentRegionId.indexOf("SW#poccarrefourarg0206") == -1) {
       newRegionId = new Buffer("SW#poccarrefourarg0206;" + decodedVtexSegmentRegionId).toString('base64')
     }
     decodedVtexSegment.regionId = newRegionId
@@ -535,9 +535,7 @@ export const queries = {
         break
     }
 
-    products = products.filter( product => {
-      return product.items[0].sellers[0].commertialOffer.AvailableQuantity > 0
-    })
+    products = filterProductsByAvailableQuantity(products)
 
     if (products.length > 0) {
       return head(products)
@@ -586,9 +584,7 @@ export const queries = {
     let convertedProducts = await productsBiggy({ ctx, simulationBehavior, searchResult: products })
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
 
-    convertedProducts = convertedProducts.filter( product => {
-      return product.items[0].sellers[0].commertialOffer.AvailableQuantity > 0
-    })
+    convertedProducts = filterProductsByAvailableQuantity(convertedProducts)
 
     return convertedProducts
   },
@@ -611,7 +607,7 @@ export const queries = {
     let decodedVtexSegment = JSON.parse(atob(vtexSegment ? vtexSegment : ""))
     let decodedVtexSegmentRegionId = atob(decodedVtexSegment.regionId)
     let newRegionId = ""
-    if (decodedVtexSegmentRegionId.indexOf("SW#poccarrefourarg0206") == -1 ){
+    if (decodedVtexSegmentRegionId.indexOf("SW#poccarrefourarg0206") == -1) {
       newRegionId = new Buffer("SW#poccarrefourarg0206;" + decodedVtexSegmentRegionId).toString('base64')
     }
     decodedVtexSegment.regionId = newRegionId
@@ -632,9 +628,7 @@ export const queries = {
         break
     }
 
-    products = products.filter( product => {
-      return product.items[0].sellers[0].commertialOffer.AvailableQuantity > 0
-    })
+    products = filterProductsByAvailableQuantity(products)
 
     if (products.length > 0) {
       return products
@@ -695,9 +689,7 @@ export const queries = {
     // Add prefix to the cacheId to avoid conflicts. Repeated cacheIds in the same page are causing strange behavior.
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
 
-    convertedProducts = convertedProducts.filter( product => {
-      return product.items[0].sellers[0].commertialOffer.AvailableQuantity > 0
-    })
+    convertedProducts = filterProductsByAvailableQuantity(convertedProducts)
 
     return {
       searchState,
@@ -850,4 +842,15 @@ export const queries = {
 
     return biggySearch.searchSuggestions(args)
   },
+}
+
+const filterProductsByAvailableQuantity = (convertedProducts: any) =>{
+  const result = convertedProducts.filter((product: any)=> {
+    if (product === undefined || product.items === undefined || product.items.length === 0 || product.items[0].sellers.length === 0) {
+      return false
+    }
+    return product.items[0].sellers[0].commertialOffer.AvailableQuantity > 0
+  })
+
+  return result
 }
