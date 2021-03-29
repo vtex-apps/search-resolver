@@ -48,6 +48,7 @@ export default new Service<Clients, RecorderState, CustomContext>({
       },
       biggySearch: {
         concurrency: 10,
+        timeout: SIX_SECONDS_MS,
       },
       vbase: {
         concurrency: 2,
