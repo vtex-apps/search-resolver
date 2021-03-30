@@ -503,8 +503,6 @@ export const queries = {
 
     const vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
 
-
-
     switch (field) {
       case 'id':
         products = await search.productById(value, vtexSegment, salesChannel)
@@ -567,7 +565,8 @@ export const queries = {
 
     const products = await biggySearch.productSearch(biggyArgs)
 
-    const convertedProducts = await productsBiggy({ ctx, simulationBehavior, searchResult: products })
+    const regionId = segment?.regionId
+    const convertedProducts = await productsBiggy({ ctx, simulationBehavior, searchResult: products, regionId })
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
 
     return convertedProducts
