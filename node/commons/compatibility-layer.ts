@@ -213,6 +213,16 @@ export const convertBiggyProduct = async (
   return convertedProduct
 }
 
+const generatePaymentName = (interestRate: number | null, paymentSystemName: string | null, numberOfInstallments: number) => {
+  if (interestRate === null) {
+    return paymentSystemName
+  } else if (interestRate == 0) {
+    return `${paymentSystemName} ${numberOfInstallments === 1 ? 'à vista' : `${numberOfInstallments} vezes sem juros`}`
+  } else {
+    return `${paymentSystemName} ${numberOfInstallments === 1 ? 'à vista com juros' : `${numberOfInstallments} vezes com juros`}`
+  }
+}
+
 const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: OrderFormItemBySeller) => {
   if (orderFormItems) {
     searchItem.sellers.forEach((seller) => {
@@ -241,33 +251,33 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
         return
       }
 
-      const { installments } = installmentOption
+      seller.commertialOffer.Installments = installmentOptions.reduce((acc: any, installmentOption) => {
+        const correctInstallment = installmentOption.installments.reduce((previous, current) => {
+          if (previous.hasInterestRate && !current.hasInterestRate) {
+            return current
+          }
 
-      if (!installments || installments.length === 0) {
-        return
-      }
+          if ((previous.hasInterestRate === current.hasInterestRate) && current.count > previous.count) {
+            return current
+          }
 
-      const correctInstallment = installments.reduce((previous, current) => {
-        if (previous.hasInterestRate && !current.hasInterestRate) {
-          return current
-        }
+          return previous
+        })
 
-        if ((previous.hasInterestRate === current.hasInterestRate) && current.count > previous.count) {
-          return current
-        }
+        const { value, interestRate, total, count } = correctInstallment
 
-        return previous
-      })
+        acc.push({
+          Value: value / 100,
+          InterestRate: interestRate,
+          TotalValuePlusInterestRate: total / 100,
+          NumberOfInstallments: count,
+          Name: generatePaymentName(interestRate, installmentOption.paymentName, count),
+          PaymentSystemName: installmentOption.paymentName,
+          PaymentSystemGroupName: installmentOption.paymentGroupName,
+        })
 
-      seller.commertialOffer.Installments = [{
-        Value: correctInstallment.value / 100,
-        InterestRate: correctInstallment.interestRate,
-        TotalValuePlusInterestRate: correctInstallment.total / 100,
-        NumberOfInstallments: correctInstallment.count,
-        Name: '',
-        PaymentSystemName: '',
-        PaymentSystemGroupName: '',
-      }]
+        return acc;
+      }, [])
     })
   }
 

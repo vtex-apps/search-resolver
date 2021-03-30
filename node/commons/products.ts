@@ -6,7 +6,7 @@ interface ConvertProductInput {
   searchResult: any
   ctx: any
   simulationBehavior?: 'skip' | 'default' | null
-  tradePolicy?: string | null
+  tradePolicy?: string | number | null
   regionId?: string | null
 }
 

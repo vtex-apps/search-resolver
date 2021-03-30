@@ -74,7 +74,7 @@ interface ProductRecommendationArg {
 interface ProductsByIdentifierArgs {
   field: 'id' | 'ean' | 'reference' | 'sku'
   values: string[]
-  salesChannel?: string | null,
+  salesChannel?: string | number | null,
   regionId?: string | null
 }
 
@@ -481,7 +481,7 @@ export const queries = {
 
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
     const {
-      clients: { search },
+      clients: { search, biggySearch },
     } = ctx
 
     const args =
@@ -503,11 +503,26 @@ export const queries = {
 
     const vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
 
+    const biggyArgs = {
+      attributePath: '',
+      query: `product:${value}`,
+      fullText: `product:${value}`,
+      tradePolicy: salesChannel,
+    }
 
+    console.log({ field, value })
 
+    // const convertedProducts = await productResolver({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })
     switch (field) {
       case 'id':
-        products = await search.productById(value, vtexSegment, salesChannel)
+        products = await productsBiggy(
+          {
+            ctx,
+            simulationBehavior: 'default',
+            searchResult: (await biggySearch.productSearch(biggyArgs)),
+            tradePolicy: salesChannel
+          }
+        )
         break
       case 'slug':
         products = await search.product(value, vtexSegment, salesChannel)

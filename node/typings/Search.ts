@@ -32,7 +32,7 @@ interface SearchResultArgs {
   operator?: string
   fuzzy?: string
   leap?: boolean
-  tradePolicy?: number
+  tradePolicy?: number | string
   segment?: SegmentData
   indexingType?: IndexingType
   fullText: string
