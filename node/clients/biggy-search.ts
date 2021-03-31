@@ -148,6 +148,10 @@ export class BiggySearchClient extends ExternalClient {
       }
     )
 
+    //FPA APUB
+    console.log("**************** node/clients/biggy-search.ts:152 ***********************")
+    console.log({result})
+    console.log("**************** node/clients/biggy-search.ts:154 ***********************")
     return result
   }
 
