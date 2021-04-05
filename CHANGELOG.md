@@ -7,10 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [1.37.9] - 2021-04-05
-### Changed
-- Removed biggy search cache
-
 ## [1.37.8] - 2021-03-30
 ### Fixed
 - Regionalization not working on shelves (`products` query).
