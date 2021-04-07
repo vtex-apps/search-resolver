@@ -436,7 +436,6 @@ export const queries = {
 
     const facetPromises = [biggySearch.facets(biggyArgs)]
 
-    // TODO this is harcoded because it is not on the graphql schema yet. DO NOT publish a release with the followingl ine
     const showCategoryTree = args.categoryTreeBehavior === 'show';
     const categorySelectedFacets = args.selectedFacets.filter(facet => facet.key === 'c')
 
