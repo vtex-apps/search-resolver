@@ -268,28 +268,32 @@ export class BiggySearchClient extends ExternalClient {
         }
       })
     }
+    try {
+      const result = await this.http.getRaw(url, {
+        params: {
+          query: decodeURIComponent(query ?? ''),
+          page,
+          count,
+          sort,
+          operator,
+          fuzzy,
+          locale: this.locale,
+          bgy_leap: leap ? true : undefined,
+          ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
+          ...parseState(searchState),
+        },
+        metric: 'search-result',
+        headers: {
+          Cookie: buildBSearchFilterCookie(sellers),
+          "X-VTEX-IS-ID": `${this.store}`,
+        },
+      })
+      return sortProducts(result.data, query)
+    } catch (e) {
+      this.context.logger.error(`Error from search-api: ${e}`)
+      throw e
+    }
 
-    const result = await this.http.getRaw(url, {
-      params: {
-        query: decodeURIComponent(query ?? ''),
-        page,
-        count,
-        sort,
-        operator,
-        fuzzy,
-        locale: this.locale,
-        bgy_leap: leap ? true : undefined,
-        ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
-        ...parseState(searchState),
-      },
-      metric: 'search-result',
-      headers: {
-        Cookie: buildBSearchFilterCookie(sellers),
-        "X-VTEX-IS-ID": `${this.store}`,
-      },
-    })
-
-    return sortProducts(result.data, query)
   }
 
   public async banners(args: SearchResultArgs): Promise<any> {
