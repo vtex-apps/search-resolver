@@ -83,7 +83,7 @@ export class BiggySearchClient extends ExternalClient {
   private locale: string | undefined
 
   public constructor(context: IOContext, options?: InstanceOptions) {
-    super('http://search.biggylabs.com.br/search-api/v1/', context, {...options, timeout: 30000})
+    super('http://search.biggylabs.com.br/search-api/v1/', context, {...options})
 
     const { account, locale, tenant } = context
     this.store = account
