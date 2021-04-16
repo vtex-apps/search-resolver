@@ -93,6 +93,7 @@ interface ProductSearchInput {
   searchState?: string
   simulationBehavior: 'skip' | 'default' | null
   hideUnavailableItems: boolean
+  map?: string
 }
 
 interface ElasticAttribute {

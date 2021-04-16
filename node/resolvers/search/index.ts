@@ -27,6 +27,7 @@ import { getSearchMetaData } from './modules/metadata'
 import {
   SearchCrossSellingTypes,
   getMapAndPriceRangeFromSelectedFacets,
+  validMapAndQuery,
 } from './utils'
 import { toCompatibilityArgs } from './newURLs'
 import { PATH_SEPARATOR, MAP_VALUES_SEP, SELLERS_BUCKET } from './constants'
@@ -613,6 +614,14 @@ export const queries = {
       ctx,
       args
     )) as ProductSearchInput
+
+    if (!validMapAndQuery(args.query, args.map)) {
+      ctx.vtex.logger.warn({
+        message: 'Invalid map or query',
+        query: args.query,
+        map: args.map
+      })
+    }
 
     const { biggySearch, vbase, checkout } = ctx.clients
     const { segment } = ctx.vtex
