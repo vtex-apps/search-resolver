@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- `teasers` and `discountHighlights` from the simulation call.
+
 ## [1.38.2] - 2021-04-27
 
 ### Fixed
