@@ -186,3 +186,9 @@ export const getMapAndPriceRangeFromSelectedFacets = (
 export const breadcrumbMapKey = (queryUnit: string, mapUnit: string) => {
   return `${queryUnit}-${mapUnit}`
 }
+
+export const validMapAndQuery = (query?: string, map?: string) => {
+  const values = query?.split('/').filter(value => value)
+  const facets = map?.split(',').filter(facetKey => facetKey)
+  return values?.length === facets?.length
+}

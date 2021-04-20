@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Splunk log for invalid map or query.
+
 ## [1.37.9] - 2021-04-05
 ### Changed
 - Removed biggy search cache
