@@ -866,7 +866,7 @@
     "@typescript-eslint/types" "4.22.0"
     eslint-visitor-keys "^2.0.0"
 
-"@vtex/api@^6.41.0":
+"@vtex/api@6.41.0":
   version "6.41.0"
   resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.41.0.tgz#cee074ff49de8a5de92f3d353a4689275cb92f7b"
   integrity sha512-RvfdpczsxCFacZkDSl2v2NmfD/bHFxHHn2xQsEwSQ+40snGxfOz56TlCbPbgMEtkC8Bf+1GGUkCIChRE6xnlLg==
@@ -5236,7 +5236,7 @@ static-extend@^0.1.1:
     define-property "^0.2.5"
     object-copy "^0.1.0"
 
-stats-lite@vtex/node-stats-lite#dist:
+"stats-lite@github:vtex/node-stats-lite#dist":
   version "2.2.0"
   resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/1b0d39cc41ef7aaecfd541191f877887a2044797"
   dependencies:
