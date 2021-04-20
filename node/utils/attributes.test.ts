@@ -19,9 +19,12 @@ describe('attributesToFilters', () => {
             ],
             key: 'brand',
             label: 'Brand',
+            originalKey: 'brand',
+            originalLabel: 'Brand',
             type: 'text' as 'text',
           },
         ],
+        removeHiddenFacets: false,
         breadcrumb: [],
       })
     ).toEqual([
@@ -74,11 +77,14 @@ describe('attributesToFilters', () => {
             active: false,
             key: 'price',
             label: 'Price',
+            originalKey: 'price',
+            originalLabel: 'Price',
             type: 'number' as 'number',
             minValue: 10,
             maxValue: 100,
           },
         ],
+        removeHiddenFacets: false,
         breadcrumb: [],
       })
     ).toEqual([
@@ -131,11 +137,14 @@ describe('attributesToFilters', () => {
             active: false,
             key: 'polegadas',
             label: 'Polegadas',
+            originalKey: 'polegadas',
+            originalLabel: 'Polegadas',
             type: 'number' as 'number',
             minValue: 0,
             maxValue: 0,
           },
         ],
+        removeHiddenFacets: false,
         breadcrumb: [],
       })
     ).toEqual([
@@ -184,11 +193,14 @@ describe('attributesToFilters', () => {
             active: false,
             key: 'location',
             label: 'Location',
+            originalKey: 'location',
+            originalLabel: 'Location',
             type: 'location' as 'location',
             minValue: 2421698.143072009,
             maxValue: 6533501.777013255,
           },
         ],
+        removeHiddenFacets: false,
         breadcrumb: [],
       })
     ).toEqual([
@@ -250,11 +262,14 @@ describe('attributesToFilters', () => {
             activeTo: '3605120',
             key: 'location',
             label: 'Location',
+            originalKey: 'location',
+            originalLabel: 'Location',
             type: 'location' as 'location',
             minValue: 2421698.143072009,
             maxValue: 6533501.777013255,
           },
         ],
+        removeHiddenFacets: false,
         breadcrumb: [],
       })
     ).toEqual([

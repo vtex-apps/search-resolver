@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import * as TypeMoq from 'typemoq'
-import { VBase, IOContext } from "@vtex/api"
+import { VBase, IOContext } from '@vtex/api'
 import { Search } from '../../clients/search'
 import { mountCompatibilityQuery } from './newURLs'
 import { getCompatibilityArgs } from '.'
 import { Clients } from '../../clients'
-
 
 const contextMock = TypeMoq.Mock.ofType<IOContext>()
 const categoryTreeResponseMock = TypeMoq.Mock.ofType<CategoryTreeResponse>()
@@ -26,14 +25,22 @@ describe('Search new URLs dicovery', () => {
       this.jsonData = {}
     }
 
-    public getJSON = async <T>(bucket: string, file: string, nullOrUndefined?: boolean | undefined): Promise<T> => {
+    public getJSON = async <T>(
+      bucket: string,
+      file: string,
+      nullOrUndefined?: boolean | undefined
+    ): Promise<T> => {
       if (!this.jsonData[bucket]) {
         return (nullOrUndefined ? null : {}) as T
       }
       return Promise.resolve(this.jsonData[bucket][file] as T)
     }
 
-    public saveJSON = async <T>(bucket: string, file: string, data: T): Promise<void> => {
+    public saveJSON = async <T>(
+      bucket: string,
+      file: string,
+      data: T
+    ): Promise<void> => {
       if (!this.jsonData[bucket]) {
         this.jsonData[bucket] = {}
       }
@@ -46,13 +53,17 @@ describe('Search new URLs dicovery', () => {
     private categoryChildrenResponse: Record<number, Record<string, string>>
     private facetsResponse: SearchFacets
 
-    public constructor(categories: CategoryTreeResponse[], categoryChildren: Record<number, Record<string, string>>, facets: SearchFacets){
+    public constructor(
+      categories: CategoryTreeResponse[],
+      categoryChildren: Record<number, Record<string, string>>,
+      facets: SearchFacets
+    ) {
       super(contextMock.object)
       this.categoriesResponse = categories
       this.categoryChildrenResponse = categoryChildren
       this.facetsResponse = facets
     }
-    
+
     public categories = async (_: number) => {
       return Promise.resolve(this.categoriesResponse)
     }
@@ -87,7 +98,7 @@ describe('Search new URLs dicovery', () => {
   it('Should transform /category in /category?map=c', async () => {
     const args = {
       query: 'category',
-      map: ''
+      map: '',
     }
 
     const categoryTree: CategoryTreeResponse[] = [
@@ -96,24 +107,28 @@ describe('Search new URLs dicovery', () => {
         id: 1,
         name: 'category',
         hasChildren: false,
-      }
+      },
     ]
 
     const facets = {
+      ...facetsMock.object,
       SpecificationFilters: {},
-      ...facetsMock.object
     }
 
     const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, {}, facets)
-    const result = await mountCompatibilityQuery({vbase: vbaseMock, search: searchMock, args})
-    expect(result).toStrictEqual({query: 'category', map: 'c'})
+    const result = await mountCompatibilityQuery({
+      vbase: vbaseMock,
+      search: searchMock,
+      args,
+    })
+    expect(result).toStrictEqual({ query: 'category', map: 'c' })
   })
 
   it('Should transform /department/category/subcategory in /department/category/subcategory?map=c,c,c', async () => {
     const args = {
       query: 'department/category/subcategory',
-      map: ''
+      map: '',
     }
 
     const categoryTree: CategoryTreeResponse[] = [
@@ -122,29 +137,36 @@ describe('Search new URLs dicovery', () => {
         id: 1,
         name: 'department',
         hasChildren: true,
-      }
+      },
     ]
 
     const categoryChildren = {
-      1: {'2': 'category'},
-      2: {'3': 'subcategory'}
+      1: { '2': 'category' },
+      2: { '3': 'subcategory' },
     }
 
     const facets = {
+      ...facetsMock.object,
       SpecificationFilters: {},
-      ...facetsMock.object
     }
 
     const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
-    const result = await mountCompatibilityQuery({vbase: vbaseMock, search: searchMock, args})
-    expect(result).toStrictEqual({query: 'department/category/subcategory', map: 'c,c,c'})
+    const result = await mountCompatibilityQuery({
+      vbase: vbaseMock,
+      search: searchMock,
+      args,
+    })
+    expect(result).toStrictEqual({
+      query: 'department/category/subcategory',
+      map: 'c,c,c',
+    })
   })
 
   it('Should transform /category/brand?map=b in /category?map=c,b', async () => {
     const args = {
       query: 'category/brand',
-      map: 'b'
+      map: 'b',
     }
 
     const categoryTree: CategoryTreeResponse[] = [
@@ -153,26 +175,30 @@ describe('Search new URLs dicovery', () => {
         id: 1,
         name: 'category',
         hasChildren: false,
-      }
+      },
     ]
 
     const categoryChildren = { 1: {} }
 
     const facets = {
+      ...facetsMock.object,
       SpecificationFilters: {},
-      ...facetsMock.object
     }
 
     const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
-    const result = await mountCompatibilityQuery({vbase: vbaseMock, search: searchMock, args})
-    expect(result).toStrictEqual({query: 'category/brand', map: 'c,b'})
+    const result = await mountCompatibilityQuery({
+      vbase: vbaseMock,
+      search: searchMock,
+      args,
+    })
+    expect(result).toStrictEqual({ query: 'category/brand', map: 'c,b' })
   })
 
   it('Should transform /collection?map=productClusterIds in /collection?map=productClusterIds', async () => {
     const args = {
       query: 'collection',
-      map: 'productClusterIds'
+      map: 'productClusterIds',
     }
 
     const categoryTree: CategoryTreeResponse[] = []
@@ -180,20 +206,27 @@ describe('Search new URLs dicovery', () => {
     const categoryChildren = {}
 
     const facets = {
+      ...facetsMock.object,
       SpecificationFilters: {},
-      ...facetsMock.object
     }
 
     const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
-    const result = await mountCompatibilityQuery({vbase: vbaseMock, search: searchMock, args})
-    expect(result).toStrictEqual({query: 'collection', map: 'productClusterIds'})
+    const result = await mountCompatibilityQuery({
+      vbase: vbaseMock,
+      search: searchMock,
+      args,
+    })
+    expect(result).toStrictEqual({
+      query: 'collection',
+      map: 'productClusterIds',
+    })
   })
 
   it('Should transform /filterxpto?map=specificationFilter_0 in /filterxpto?map=specificationFilter_0', async () => {
     const args = {
       query: 'filterxpto',
-      map: 'specificationFilter_0'
+      map: 'specificationFilter_0',
     }
 
     const categoryTree: CategoryTreeResponse[] = []
@@ -201,20 +234,27 @@ describe('Search new URLs dicovery', () => {
     const categoryChildren = {}
 
     const facets = {
+      ...facetsMock.object,
       SpecificationFilters: {},
-      ...facetsMock.object
     }
 
     const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
-    const result = await mountCompatibilityQuery({vbase: vbaseMock, search: searchMock, args})
-    expect(result).toStrictEqual({query: 'filterxpto', map: 'specificationFilter_0'})
+    const result = await mountCompatibilityQuery({
+      vbase: vbaseMock,
+      search: searchMock,
+      args,
+    })
+    expect(result).toStrictEqual({
+      query: 'filterxpto',
+      map: 'specificationFilter_0',
+    })
   })
 
   it('Should transform /department/style_1/color_2/size_3 in /department/1/2/3?map=c,specificationFilter_1,specificationFilter_2,specificationFilter_3', async () => {
     const args = {
       query: 'department/style_1/color_2/size_3',
-      map: ''
+      map: '',
     }
 
     const categoryTree: CategoryTreeResponse[] = [
@@ -223,48 +263,65 @@ describe('Search new URLs dicovery', () => {
         id: 1,
         name: 'department',
         hasChildren: false,
-      }
+      },
     ]
 
     const categoryChildren = { 1: {} }
 
     const facets = {
+      ...facetsMock.object,
       SpecificationFilters: {
         style: [
           {
-              Name: "1",
-              Map: "specificationFilter_1",
-              Value: "1"
+            Name: '1',
+            Map: 'specificationFilter_1',
+            Value: '1',
+            Quantity: 1,
+            Link: '1',
+            LinkEncoded: '1',
           },
         ],
         color: [
           {
-              Name: "2",
-              Map: "specificationFilter_2",
-              Value: "2"
+            Name: '2',
+            Map: 'specificationFilter_2',
+            Value: '2',
+            Quantity: 2,
+            Link: '2',
+            LinkEncoded: '2',
           },
         ],
         size: [
           {
-              Name: "3",
-              Map: "specificationFilter_3",
-              Value: "3"
+            Name: '3',
+            Map: 'specificationFilter_3',
+            Value: '3',
+            Quantity: 3,
+            Link: '3',
+            LinkEncoded: '3',
           },
-        ]
+        ],
       },
-      ...facetsMock.object
     }
 
     const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
-    const result = await mountCompatibilityQuery({vbase: vbaseMock, search: searchMock, args})
-    expect(result).toStrictEqual({query: 'department/1/2/3', map: 'c,specificationFilter_1,specificationFilter_2,specificationFilter_3'})
+    const result = await mountCompatibilityQuery({
+      vbase: vbaseMock,
+      search: searchMock,
+      args,
+    })
+    expect(result).toStrictEqual({
+      query: 'department/1/2/3',
+      map:
+        'c,specificationFilter_1,specificationFilter_2,specificationFilter_3',
+    })
   })
-  
+
   it('Should transform /department/style_1/brand?map=b in /department/style_1/brand?map=c,specificationFilter_1,b', async () => {
     const args = {
       query: 'department/style_1/brand',
-      map: 'b'
+      map: 'b',
     }
 
     const categoryTree: CategoryTreeResponse[] = [
@@ -273,52 +330,61 @@ describe('Search new URLs dicovery', () => {
         id: 1,
         name: 'department',
         hasChildren: false,
-      }
+      },
     ]
 
     const categoryChildren = { 1: {} }
 
     const facets = {
+      ...facetsMock.object,
       SpecificationFilters: {
         style: [
           {
-              Name: "1",
-              Map: "specificationFilter_1",
-              Value: "1"
+            Name: '1',
+            Map: 'specificationFilter_1',
+            Value: '1',
+            Quantity: 1,
+            Link: '1',
+            LinkEncoded: '1',
           },
         ],
       },
-      ...facetsMock.object
     }
 
     const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
-    const result = await mountCompatibilityQuery({vbase: vbaseMock, search: searchMock, args})
-    expect(result).toStrictEqual({query: 'department/1/brand', map: 'c,specificationFilter_1,b'})
+    const result = await mountCompatibilityQuery({
+      vbase: vbaseMock,
+      search: searchMock,
+      args,
+    })
+    expect(result).toStrictEqual({
+      query: 'department/1/brand',
+      map: 'c,specificationFilter_1,b',
+    })
   })
 
   it('Should not transform urls in the format query?map=c', async () => {
-    
     const argsList = [
       {
         map: 'c',
-        query: 'category'
+        query: 'category',
       },
       {
         map: 'specificationFilter_1',
-        query: 'filtertest'
+        query: 'filtertest',
       },
       {
         map: 'c,specificationFilter_1',
-        query: 'category/filtertest'
+        query: 'category/filtertest',
       },
       {
         map: 'specificationFilter_1,c,b',
-        query: 'filtertest/category/brand'
-      }
+        query: 'filtertest/category/brand',
+      },
     ]
 
-    for(const args of argsList){
+    for (const args of argsList) {
       const result = await getCompatibilityArgs(context, args)
       expect(result).toStrictEqual(args)
     }
