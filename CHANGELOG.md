@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.38.0] - 2021-04-20
+
 ### Added
 - Splunk log for invalid map or query.
 
