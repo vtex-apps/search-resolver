@@ -1,4 +1,5 @@
-import { AppGraphQLClient, IOContext, InstanceOptions, GraphQLResponse, Serializable } from "@vtex/api"
+import type { IOContext, InstanceOptions, GraphQLResponse, Serializable } from "@vtex/api";
+import { AppGraphQLClient } from "@vtex/api"
 
 const getRouteQuery = `query GetRoute($id: String!, $type: String!) {
   internal {
@@ -29,6 +30,7 @@ class CustomGraphQLError extends Error {
     this.graphQLErrors = graphQLErrors
   }
 }
+
 export function throwOnGraphQLErrors<T extends Serializable>(message: string) {
   return function maybeGraphQLResponse(response: GraphQLResponse<T>) {
     if (response && response.errors && response.errors.length > 0) {
@@ -40,7 +42,7 @@ export function throwOnGraphQLErrors<T extends Serializable>(message: string) {
 }
 
 export class Rewriter extends AppGraphQLClient {
-  public constructor(context: IOContext, options?: InstanceOptions) {
+  constructor(context: IOContext, options?: InstanceOptions) {
     super('vtex.rewriter@1.x', context, {
       ...options,
       headers: {

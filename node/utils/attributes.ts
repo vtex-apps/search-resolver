@@ -17,23 +17,23 @@ interface NumericalAttribute {
   active: boolean
   activeFrom?: string
   activeTo?: string
-  values: {
+  values: Array<{
     count: number
     from: string
     to: string
     active: boolean
-  }[]
+  }>
 }
 
 export interface TextAttribute {
   type: 'text'
-  values: {
+  values: Array<{
     id?: string
     key: string
     count: number
     active: boolean
     label: string
-  }[]
+  }>
 }
 
 type FilterType = 'PRICERANGE' | 'TEXT' | 'NUMBER'
@@ -228,6 +228,7 @@ export const sortAttributeValuesByCatalog = (
 ) => {
   const findPositionByLabel = (label: string) => {
     const catalogValue = values.find(value => value.Value === label)
+
     return catalogValue ? catalogValue.Position : -1
   }
 
@@ -238,12 +239,15 @@ export const sortAttributeValuesByCatalog = (
     // Order attribute values keeping selected ones at the top.
     if (a.active && !b.active) {
       return -1;
-    } else if (b.active && !a.active) {
+    }
+
+ if (b.active && !a.active) {
       return 1;
-    } else {
+    }
+ 
       // If both, or neither, are selected, order using catalog's position.
       return aPosition < bPosition ? -1 : 1
-    }
+    
   })
 }
 

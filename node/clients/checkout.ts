@@ -1,14 +1,15 @@
-import {
+import type {
   InstanceOptions,
   IOContext,
-  JanusClient,
-  RequestConfig,
+  RequestConfig} from '@vtex/api';
+import {
+  JanusClient
 } from '@vtex/api'
 
 import { statusToError } from '../utils'
 
 export class Checkout extends JanusClient {
-  public constructor(ctx: IOContext, options?: InstanceOptions) {
+  constructor(ctx: IOContext, options?: InstanceOptions) {
     super(ctx, {
       ...options,
       headers: {
@@ -20,7 +21,8 @@ export class Checkout extends JanusClient {
   private getChannelQueryString = (tradePolicy?: string) => {
     const { segment } = this.context as CustomIOContext
     const channel = segment && segment.channel
-    const selectedTradePolicy = tradePolicy ? tradePolicy : (channel ? channel : "")
+    const selectedTradePolicy = tradePolicy || (channel || "")
+
     return selectedTradePolicy ? `?sc=${selectedTradePolicy}` : ''
   }
 
@@ -44,6 +46,7 @@ export class Checkout extends JanusClient {
 
   private get routes() {
     const base = '/api/checkout/pub'
+
     return {
       simulation: (queryString: string) =>
         `${base}/orderForms/simulation${queryString}`,

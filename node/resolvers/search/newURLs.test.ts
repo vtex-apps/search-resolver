@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import * as TypeMoq from 'typemoq'
-import { VBase, IOContext } from '@vtex/api'
+import type { IOContext } from '@vtex/api';
+import { VBase } from '@vtex/api'
+
 import { Search } from '../../clients/search'
 import { mountCompatibilityQuery } from './newURLs'
 import { getCompatibilityArgs } from '.'
@@ -20,7 +22,7 @@ describe('Search new URLs dicovery', () => {
   class VBaseMock extends vbaseTypeMock.object {
     private jsonData: any
 
-    public constructor() {
+    constructor() {
       super(contextMock.object)
       this.jsonData = {}
     }
@@ -33,6 +35,7 @@ describe('Search new URLs dicovery', () => {
       if (!this.jsonData[bucket]) {
         return (nullOrUndefined ? null : {}) as T
       }
+
       return Promise.resolve(this.jsonData[bucket][file] as T)
     }
 
@@ -44,6 +47,7 @@ describe('Search new URLs dicovery', () => {
       if (!this.jsonData[bucket]) {
         this.jsonData[bucket] = {}
       }
+
       this.jsonData[bucket][file] = data
     }
   }
@@ -53,7 +57,7 @@ describe('Search new URLs dicovery', () => {
     private categoryChildrenResponse: Record<number, Record<string, string>>
     private facetsResponse: SearchFacets
 
-    public constructor(
+    constructor(
       categories: CategoryTreeResponse[],
       categoryChildren: Record<number, Record<string, string>>,
       facets: SearchFacets
@@ -122,6 +126,7 @@ describe('Search new URLs dicovery', () => {
       search: searchMock,
       args,
     })
+
     expect(result).toStrictEqual({ query: 'category', map: 'c' })
   })
 
@@ -157,6 +162,7 @@ describe('Search new URLs dicovery', () => {
       search: searchMock,
       args,
     })
+
     expect(result).toStrictEqual({
       query: 'department/category/subcategory',
       map: 'c,c,c',
@@ -192,6 +198,7 @@ describe('Search new URLs dicovery', () => {
       search: searchMock,
       args,
     })
+
     expect(result).toStrictEqual({ query: 'category/brand', map: 'c,b' })
   })
 
@@ -217,6 +224,7 @@ describe('Search new URLs dicovery', () => {
       search: searchMock,
       args,
     })
+
     expect(result).toStrictEqual({
       query: 'collection',
       map: 'productClusterIds',
@@ -245,6 +253,7 @@ describe('Search new URLs dicovery', () => {
       search: searchMock,
       args,
     })
+
     expect(result).toStrictEqual({
       query: 'filterxpto',
       map: 'specificationFilter_0',
@@ -311,6 +320,7 @@ describe('Search new URLs dicovery', () => {
       search: searchMock,
       args,
     })
+
     expect(result).toStrictEqual({
       query: 'department/1/2/3',
       map:
@@ -358,6 +368,7 @@ describe('Search new URLs dicovery', () => {
       search: searchMock,
       args,
     })
+
     expect(result).toStrictEqual({
       query: 'department/1/brand',
       map: 'c,specificationFilter_1,b',
@@ -386,6 +397,7 @@ describe('Search new URLs dicovery', () => {
 
     for (const args of argsList) {
       const result = await getCompatibilityArgs(context, args)
+
       expect(result).toStrictEqual(args)
     }
   })

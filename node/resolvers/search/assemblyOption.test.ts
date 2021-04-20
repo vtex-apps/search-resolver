@@ -39,16 +39,17 @@ test('should return an OPTIONS type', async () => {
   expect(result).toHaveLength(2)
 
   const [line1, line2] = result
+
   expect(line1.label).toBe('Line 1')
   expect(line1.type).toBe('OPTIONS')
-  expect(line1.maxLength).toBe(undefined)
+  expect(line1.maxLength).toBeUndefined()
   expect(line1.domain).toHaveLength(1)
   expect(line1.domain![0]).toBe('One option')
   expect(line1.defaultValue).toBe('One option')
 
   expect(line2.label).toBe('Line 2')
   expect(line2.type).toBe('OPTIONS')
-  expect(line2.maxLength).toBe(undefined)
+  expect(line2.maxLength).toBeUndefined()
   expect(line2.domain).toHaveLength(2)
   expect(line2.defaultValue).toBe('Two')
 })
@@ -72,15 +73,16 @@ test('should return a BOOLEAN type', async () => {
   expect(result).toHaveLength(2)
 
   const [thingA, thingB] = result
+
   expect(thingA.label).toBe('Use thing A')
   expect(thingA.type).toBe('BOOLEAN')
-  expect(thingA.maxLength).toBe(undefined)
+  expect(thingA.maxLength).toBeUndefined()
   expect(thingA.domain).not.toBeDefined()
   expect(thingA.defaultValue).toBe(true)
 
   expect(thingB.label).toBe('Use thing B')
   expect(thingB.type).toBe('BOOLEAN')
-  expect(thingB.maxLength).toBe(undefined)
+  expect(thingB.maxLength).toBeUndefined()
   expect(thingB.domain).not.toBeDefined()
   expect(thingB.defaultValue).toBe(false)
 })

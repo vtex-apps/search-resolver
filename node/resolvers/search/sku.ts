@@ -1,4 +1,5 @@
 import { find, head, map, replace, slice } from 'ramda'
+
 import { formatTranslatableProp, addContextToTranslatableString } from '../../utils/i18n'
 
 export const resolvers = {
@@ -46,6 +47,7 @@ export const resolvers = {
             const products = await search.productBySku(kitItem.itemId)
             const { items: skus = [], ...product } = head(products) || {}
             const sku = find(({ itemId }) => itemId === kitItem.itemId, skus)
+
             return { ...kitItem, product, sku }
           }),
 
@@ -53,14 +55,17 @@ export const resolvers = {
       if (!sku) {
         return sku
       }
+
       const variations = (sku.variations || []).map(variationName => {
         const fieldId = (sku.skuSpecifications || []).find(specification => specification.field.name === variationName)?.field?.id
         const variationsValues = (sku as any)[variationName] as string[]
+
         return {
           name: addContextToTranslatableString({ content: variationName, context: fieldId }, ctx),
           values: variationsValues.map(value => addContextToTranslatableString({ content: value, context: fieldId }, ctx))
         }
       })
+
       return variations
     },
 

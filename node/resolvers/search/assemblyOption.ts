@@ -35,7 +35,7 @@ export const resolvers = {
 }
 
 function defineInputValueType(inputValue: RawInputValue): InputValueType {
-  const domain = inputValue.domain
+  const {domain} = inputValue
 
   // If domain is something like ['true', 'false'] or ['false', 'true']
   if (
@@ -55,8 +55,6 @@ function defineInputValueType(inputValue: RawInputValue): InputValueType {
 
 function stringToBoolean(value: string) {
   return value === 'true'
-    ? true
-    : false
 }
 
 

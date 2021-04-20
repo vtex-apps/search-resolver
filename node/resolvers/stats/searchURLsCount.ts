@@ -1,6 +1,7 @@
-import { VBase } from '@vtex/api'
+import type { VBase } from '@vtex/api'
+
 import { VBASE_BUCKET, URL_COUNT_FILE_PATH } from './constants'
-import { SearchStatsUrlCount } from './searchStats'
+import type { SearchStatsUrlCount } from './searchStats'
 
 export enum SORT {
   ASC = 'ASC',
@@ -17,6 +18,7 @@ export const searchURLsCount = async (
     URL_COUNT_FILE_PATH,
     true
   )) as SearchStatsUrlCount
+
   let comparator = urlsCountDESCComparator
 
   if (sort === SORT.ASC) {

@@ -48,6 +48,7 @@ export const addContextToTranslatableString = (message: Message, ctx: Context) =
 
 export const translateToCurrentLanguage = (message: MessageWithContext, ctx: Context) => {
   const { state, clients, vtex: { binding, tenant, locale } } = ctx
+
   if (!state.messagesBindingLanguage) {
     state.messagesBindingLanguage = createMessagesLoader(clients, locale ?? binding!.locale)
   }
@@ -61,6 +62,7 @@ export const translateToCurrentLanguage = (message: MessageWithContext, ctx: Con
 
 export const translateManyToCurrentLanguage = (messages: Message[], ctx: Context) => {
   const { state, clients, vtex: { binding, tenant, locale } } = ctx
+
   if (!state.messagesBindingLanguage) {
     state.messagesBindingLanguage = createMessagesLoader(clients, locale ?? binding!.locale)
   }

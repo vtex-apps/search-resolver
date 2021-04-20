@@ -30,7 +30,7 @@ export const count = async (ctx: Context, args: SearchArgs) => {
     )) || { updatedCount: 0, searchUrlCount: {} }) as SearchStatsUrlCount
 
     data.searchUrlCount[searchURLPath] = (data.searchUrlCount[searchURLPath] || 0) + 1
-    data.updatedCount = data.updatedCount + 1
+    data.updatedCount += 1
     if (data.updatedCount === INDEXING_UPDATE_FREQUENCY) {
       data.updatedCount = 0
       sendIndexSearchUrlsEvent(ctx)
@@ -42,5 +42,6 @@ export const count = async (ctx: Context, args: SearchArgs) => {
 
 const sendIndexSearchUrlsEvent = async (ctx: Context) => {
   const { clients: { events }, vtex: { locale, tenant, binding } } = ctx
+
   events.sendEvent('', INDEXING_EVENT_ROUTE_NAME, {locale, tenant, binding})
 }

@@ -11,7 +11,7 @@ interface FacetValuesArgs {
   to: number
 }
 
-//This Type represents all kind of facets, from department, to categories, to brand and specifications
+// This Type represents all kind of facets, from department, to categories, to brand and specifications
 interface GenericFacet extends SearchFacet {
   NameWithTranslation?: string
   Id?: string

@@ -1,6 +1,7 @@
 import './globals'
 
-import { Cached, LRUCache, RecorderState, Service } from '@vtex/api'
+import type { Cached, RecorderState} from '@vtex/api';
+import { LRUCache, Service } from '@vtex/api'
 import schema from 'vtex.search-graphql/graphql'
 
 import { Clients } from './clients'

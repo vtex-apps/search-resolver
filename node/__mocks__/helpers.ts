@@ -16,7 +16,7 @@ const searchClientMock = {
   categories: jest.fn(),
   crossSelling: jest.fn(),
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  productById: jest.fn((_id: string, _cacheable: boolean = true) =>
+  productById: jest.fn((_id: string, _cacheable = true) =>
     promisify(null)
   ),
   productsRaw: jest.fn(() => ({ data: [] })),
@@ -37,7 +37,7 @@ const biggySearchClientMock = {
   categories: jest.fn(),
   crossSelling: jest.fn(),
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  productById: jest.fn((_id: string, _cacheable: boolean = true) =>
+  productById: jest.fn((_id: string, _cacheable = true) =>
     promisify(null)
   ),
   productsRaw: jest.fn(() => ({ data: [] })),

@@ -669,6 +669,7 @@ export const getProduct = (customFields = {}) => {
     ...customFields,
   }
 }
+
 export const getItem = (
   id = '1',
   price = 90,

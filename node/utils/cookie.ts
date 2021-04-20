@@ -3,6 +3,7 @@ import { keys } from 'ramda'
 
 const isUserLoggedIn = (ctx: Context) => {
   const { vtex: { account } } = ctx
+
   return !!ctx.cookies.get(`VtexIdclientAutCookie_${account}`)
 }
 
@@ -16,6 +17,7 @@ const parseCookie = (cookie: string) => {
     domain: parsed.domain,
     expires: parsed.expires ? new Date(parsed.expires) : undefined,
   }
+
   return {
     name: cookieName,
     value: cookieValue,
@@ -30,6 +32,7 @@ const checkoutCookieFormat = (orderFormId: string) => `${CHECKOUT_COOKIE}=__ofid
 
 const getOrderFormIdFromCookie = (cookies: Context['cookies']) => {
   const cookie = cookies.get(CHECKOUT_COOKIE)
+
   return cookie && cookie.split('=')[1]
 }
 

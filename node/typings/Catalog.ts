@@ -112,7 +112,7 @@ interface SearchItem {
   nameComplete: string
   complementName: string
   ean: string
-  referenceId: { Key: string; Value: string }[]
+  referenceId: Array<{ Key: string; Value: string }>
   measurementUnit: string
   unitMultiplier: number
   modalType: any | null
@@ -120,25 +120,25 @@ interface SearchItem {
   Videos: string[]
   variations: string[]
   sellers: Seller[]
-  attachments: {
+  attachments: Array<{
     id: number
     name: string
     required: boolean
     domainValues: string
-  }[]
+  }>
   isKit: boolean
-  kitItems?: {
+  kitItems?: Array<{
     itemId: string
     amount: number
-  }[]
+  }>
 }
 
 interface CompleteSpecification {
-  Values: {
+  Values: Array<{
     Id: string
     Position: number
     Value: string
-  }[]
+  }>
   Name: string
   Position: number
   IsOnProductDetails: boolean
@@ -203,10 +203,10 @@ interface CommertialOffer {
   PriceValidUntil: string
   AvailableQuantity: number
   Tax: number
-  DeliverySlaSamples: {
+  DeliverySlaSamples: Array<{
     DeliverySlaPerTypes: any[]
     Region: any | null
-  }[]
+  }>
   GetInfoErrorMessage: any | null
   CacheVersionUsedToCallCheckout: string
 }
@@ -249,7 +249,7 @@ interface SearchFacets {
   Brands: SearchFacet[]
   SpecificationFilters: Record<string, SearchFacet[]>
   CategoriesTrees: SearchFacetCategory[]
-  PriceRanges: {
+  PriceRanges: Array<{
     Slug: string
     Quantity: number
     Name: string
@@ -257,7 +257,7 @@ interface SearchFacets {
     LinkEncoded: string
     Map: null
     Value: string
-  }[]
+  }>
   Summary: {
     Departments: SummaryItem
     CategoriesTrees: SummaryItem

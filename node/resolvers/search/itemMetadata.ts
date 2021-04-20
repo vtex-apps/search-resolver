@@ -1,6 +1,7 @@
-import { Segment } from '@vtex/api'
+import type { Segment } from '@vtex/api'
 import camelCase from 'camelcase'
 import { both, pickBy } from 'ramda'
+
 import { renameKeysWith } from '../../utils'
 
 const isTruthy = (val?: string) => !!val
@@ -22,6 +23,7 @@ const getSimulationPayload = async (
   const segmentData = await segment.getSegment()
 
   let marketingData: Record<string, string> = {}
+
   try {
     marketingData = renameKeysWith(
       camelCase,
@@ -40,13 +42,13 @@ const getSimulationPayload = async (
 
 type PriceTableMap = Record<
   string,
-  {
+  Array<{
     compositionItem: CompositionItem
     simulationPayload: SimulationPayload
     items: SearchMetadataItem[]
     parent: SearchMetadataItem
     assemblyOption: AssemblyOption
-  }[]
+  }>
 >
 
 export const resolvers = {
@@ -70,6 +72,7 @@ export const resolvers = {
 
           for (const compItem of assemblyOption.composition.items) {
             const currentArray = acc[compItem.priceTable] || []
+
             currentArray.push({
               compositionItem: compItem,
               simulationPayload,

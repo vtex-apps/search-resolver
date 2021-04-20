@@ -1,7 +1,8 @@
-import { distinct } from '../utils/object'
 import unescape from 'unescape'
-import { Checkout } from '../clients/checkout'
 import { groupBy, prop, indexBy, mergeAll } from 'ramda'
+
+import { distinct } from '../utils/object'
+import type { Checkout } from '../clients/checkout'
 import { removeDiacriticsFromURL } from '../utils/string'
 
 export enum IndexingType {
@@ -58,6 +59,7 @@ export const convertBiggyProduct = async (
   const specificationsByKey = specificationAttributes.reduce((specsByKey: {[key: string]: BiggyTextAttribute[]}, spec) => {
     // the joinedKey has the format text@@@key@@@labelKey@@@originalKey@@@originalLabelKey
     const value = spec.joinedKey.split('@@@')[3]
+
     specsByKey[value] = (specsByKey[value] || []).concat(spec)
 
     return specsByKey
@@ -86,6 +88,7 @@ export const convertBiggyProduct = async (
 
   const numberSpecificationsByKey = numberAttributes.reduce((specsByKey: {[key: string]: BiggyTextAttribute[]}, spec) => {
     const value = spec.labelKey
+
     specsByKey[value] = (specsByKey[value] || []).concat(spec)
 
     return specsByKey
@@ -193,6 +196,7 @@ export const convertBiggyProduct = async (
     allSpecifications.forEach((specification) => {
       if(!convertedProduct[specification]){
         const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == specification)
+
         convertedProduct[specification] = attributes.map((attribute) => {
           return attribute.labelValue
         })
@@ -220,8 +224,10 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
 
       if (orderFormItem == null) {
         console.warn(`Product ${searchItem.itemId} is unavailable for seller ${seller.sellerId}`)
+
         return
       }
+
       const unitMultiplier = orderFormItem.unitMultiplier ? orderFormItem.unitMultiplier : 1
       const { listPrice, price, priceValidUntil, sellingPrice } = orderFormItem
 
@@ -367,11 +373,11 @@ const getSellersIndexedByApi = (
 }
 
 const getSellersIndexedByXML = (product: BiggySearchProduct): Seller[] => {
-  const price = product.price
-  const oldPrice = product.oldPrice
-  const installment = product.installment
+  const {price} = product
+  const {oldPrice} = product
+  const {installment} = product
 
-  const stock = product.stock
+  const {stock} = product
 
   const commertialOffer = buildCommertialOffer(price, oldPrice, stock, [], installment, product.tax)
 
@@ -386,6 +392,7 @@ const getSellersIndexedByXML = (product: BiggySearchProduct): Seller[] => {
 
 const getImageId = (imageUrl: string) => {
   const baseUrlRegex = new RegExp(/.+ids\/(\d+)/)
+
   return baseUrlRegex.test(imageUrl)
     ? baseUrlRegex.exec(imageUrl)![1]
     : undefined
@@ -413,6 +420,7 @@ const convertImages = (images: ElasticImage[], indexingType?: IndexingType) => {
 
   images.forEach(image => {
     const imageId = getImageId(image.value)
+
     imageId ? vtexImages.push(elasticImageToSearchImage(image, imageId)) : []
   })
 
@@ -458,6 +466,7 @@ const convertSKU = (
 
   variations.forEach((variation) => {
     const attribute = sku.attributes.find((attribute) => attribute.key == variation)
+
     item[variation] = attribute != null ? [attribute.value] : []
   })
 
@@ -475,22 +484,31 @@ export const convertOrderBy = (orderBy?: string | null): string => {
   switch (orderBy) {
     case 'OrderByPriceDESC':
       return 'price:desc'
+
     case 'OrderByPriceASC':
       return 'price:asc'
+
     case 'OrderByTopSaleDESC':
       return 'orders:desc'
+
     case 'OrderByReviewRateDESC':
       return '' // TODO: Not Supported
+
     case 'OrderByNameDESC':
       return 'name:desc'
+
     case 'OrderByNameASC':
       return 'name:asc'
+
     case 'OrderByReleaseDateDESC':
       return 'release:desc'
+
     case 'OrderByBestDiscountDESC':
       return 'discount:desc'
+
     case 'OrderByScoreDESC':
       return ''
+
     default:
       return orderBy || ''
   }
@@ -517,10 +535,10 @@ export const buildBreadcrumb = (
   }
 
   const activeAttributes = attributes.filter(attribute => attribute.active)
-  const activeValues: (ElasticAttributeValue & {
+  const activeValues: Array<ElasticAttributeValue & {
     visible: boolean
     attributeKey: string
-  })[] = []
+  }> = []
 
   activeAttributes.forEach(attribute => {
     attribute.values.forEach(value => {
@@ -537,6 +555,7 @@ export const buildBreadcrumb = (
   const selectedFacetsValues = selectedFacets.map(
     selectedFacet => selectedFacet.value
   )
+
   activeValues.sort((a, b) =>
     selectedFacetsValues.indexOf(a.originalKey ?? a.key) < selectedFacetsValues.indexOf(b.originalKey ?? b.key)
       ? -1
@@ -544,6 +563,7 @@ export const buildBreadcrumb = (
   )
 
   const hiddenActiveValues = ["trade-policy", "private-seller", "activeprivatesellers"]
+
   activeValues.filter(x => !hiddenActiveValues.includes(x.attributeKey.toLowerCase())).forEach(value => {
     pivotValue.push(value.key)
     pivotMap.push(value.attributeKey)

@@ -1,6 +1,8 @@
 import * as TypeMoq from 'typemoq'
+import type { IOContext } from "@vtex/api";
+import { VBase } from "@vtex/api"
+
 import { CategoryTreeSegmentsFinder } from "./CategoryTreeSegmentsFinder"
-import { VBase, IOContext } from "@vtex/api"
 import { Search } from "../clients/search"
 
 /*  CategoryTree 
@@ -39,18 +41,20 @@ const clients = {vbase: new vbaseMock.object(context.object), search: new search
 const toPair = (categories: any[]) => 
   categories.map(c => {
     const [key, value] = c && Object.entries(c)[0] || []
+
     return key? { id: value, name: key }: null
   })
 
 describe('Category Tree Search tests', () => {
   const finder = class CategoryTreeSegmentsFinderMock extends CategoryTreeSegmentsFinder {
-    public constructor(segments: string[]){
+    constructor(segments: string[]){
       super(clients, segments)
       this.categoryTreeRoot = root
     }
 
     protected lazyFetchChildren = async (id: number) => {
       const children = childrenTree[id.toString()]
+
       return children
     }
 
@@ -63,24 +67,28 @@ describe('Category Tree Search tests', () => {
       return this.categoryTreeRoot as any
     }
   }
-  test('It should find a complete tree of categories', async () => {
+
+  it('should find a complete tree of categories', async () => {
     const segments = 'c0/c1/c4'.split('/')
     const treeFinder = new finder(segments)
     const result = await treeFinder.find()
+
     expect(result).toStrictEqual(toPair([c0, c1, c4]))
   })
 
-  test('It should find the maximum categories possible ', async () => {
+  it('should find the maximum categories possible', async () => {
     const segments = 'c0/c1/c2'.split('/')
     const treeFinder = new finder(segments)
     const result = await treeFinder.find()
+
     expect(result).toStrictEqual(toPair([c0, c1, null]))
   })
 
-  test('It should not find when doesnt exist', async () => {
+  it('should not find when doesnt exist', async () => {
     const segments = 'x/c1/c4'.split('/')
     const treeFinder = new finder(segments)
     const result = await treeFinder.find()
+
     expect(result).toStrictEqual([])
   })
 })

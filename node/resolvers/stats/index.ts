@@ -1,4 +1,5 @@
-import { searchURLsCount, SORT } from "./searchURLsCount"
+import type { SORT } from "./searchURLsCount";
+import { searchURLsCount } from "./searchURLsCount"
 
 export const queries = {
   searchURLsCount: async (
@@ -8,6 +9,7 @@ export const queries = {
   ) => {
     const { clients: { vbase } } = ctx
     const count = searchURLsCount(vbase, args.limit, args.sort)
+
     return count
   },
 }

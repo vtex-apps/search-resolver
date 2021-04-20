@@ -1,5 +1,6 @@
-import { convertBiggyProduct } from './compatibility-layer'
 import { map, prop, isEmpty, sort, indexOf } from 'ramda'
+
+import { convertBiggyProduct } from './compatibility-layer'
 import { queries } from '../resolvers/search'
 
 interface ConvertProductInput {
@@ -12,7 +13,7 @@ interface ConvertProductInput {
 
 export const productsBiggy = async ({ searchResult, ctx, simulationBehavior = 'default', tradePolicy, regionId }: ConvertProductInput) => {
   const { segment } = ctx.vtex
-  const checkout = ctx.clients.checkout
+  const {checkout} = ctx.clients
   const products: any[] = []
 
   searchResult.products.forEach((product: any) => {
@@ -27,7 +28,7 @@ export const productsBiggy = async ({ searchResult, ctx, simulationBehavior = 'd
 }
 
 export const productsCatalog = async ({ searchResult, ctx, tradePolicy, regionId }: ConvertProductInput) => {
-  let biggyProducts: any[] = searchResult.products
+  const biggyProducts: any[] = searchResult.products
   let products: any[] = []
   const productIds = map<any, string>((product: any) => {
     return prop('product', product) || prop('id', product) || ''

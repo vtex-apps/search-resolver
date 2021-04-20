@@ -1,8 +1,9 @@
+import { clone } from 'ramda'
+
 import { resolvers } from './product'
 import { resolvers as productPriceResolvers } from './productPriceRange'
 import { mockContext } from '../../__mocks__/helpers'
 import { productPriceRange } from '../../__mocks__/productPriceRange'
-import { clone } from 'ramda'
 
 describe('tests related to ProductPriceRange type', () => {
   beforeEach(() => {
@@ -10,7 +11,7 @@ describe('tests related to ProductPriceRange type', () => {
     mockContext.vtex.platform = 'vtex'
   })
 
-  test('gets correct value for product with many skus and prices', () => {
+  it('gets correct value for product with many skus and prices', () => {
     const { offers } = resolvers.Product.priceRange(
       productPriceRange as any
     ) as { offers: CommertialOffer[] }
@@ -18,6 +19,7 @@ describe('tests related to ProductPriceRange type', () => {
     const sellingPrice = productPriceResolvers.ProductPriceRange.sellingPrice({
       offers,
     })
+
     expect(sellingPrice).toMatchObject({ highPrice: 100, lowPrice: 20 })
 
     const listPrice = productPriceResolvers.ProductPriceRange.listPrice({
@@ -26,8 +28,9 @@ describe('tests related to ProductPriceRange type', () => {
 
     expect(listPrice).toMatchObject({ highPrice: 150, lowPrice: 30 })
   })
-  test('works for products with many sellers', () => {
+  it('works for products with many sellers', () => {
     const cloneProduct = clone(productPriceRange)
+
     cloneProduct.items[0].sellers.push({
       sellerId: '99',
       commertialOffer: {
@@ -40,9 +43,11 @@ describe('tests related to ProductPriceRange type', () => {
     const { offers } = resolvers.Product.priceRange(cloneProduct as any) as {
       offers: CommertialOffer[]
     }
+
     const sellingPrice = productPriceResolvers.ProductPriceRange.sellingPrice({
       offers,
     })
+
     expect(sellingPrice).toMatchObject({ highPrice: 100, lowPrice: 10 })
 
     const listPrice = productPriceResolvers.ProductPriceRange.listPrice({
@@ -52,8 +57,9 @@ describe('tests related to ProductPriceRange type', () => {
     expect(listPrice).toMatchObject({ highPrice: 160, lowPrice: 30 })
   })
 
-  test('ignores sellers with no availability', () => {
+  it('ignores sellers with no availability', () => {
     const cloneProduct = clone(productPriceRange)
+
     cloneProduct.items[0].sellers.push({
       sellerId: '99',
       commertialOffer: {
@@ -66,9 +72,11 @@ describe('tests related to ProductPriceRange type', () => {
     const { offers } = resolvers.Product.priceRange(cloneProduct as any) as {
       offers: CommertialOffer[]
     }
+
     const sellingPrice = productPriceResolvers.ProductPriceRange.sellingPrice({
       offers,
     })
+
     expect(sellingPrice).toMatchObject({ highPrice: 100, lowPrice: 20 })
 
     const listPrice = productPriceResolvers.ProductPriceRange.listPrice({

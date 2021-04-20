@@ -19,15 +19,18 @@ const objToNameValue = (
   if (!record) {
     return []
   }
+
   return Object.keys(record).reduce(
     (acc, key: any) => {
       const value = record[key]
+
       if (typeof value === 'string') {
         acc.push({ [keyName]: key, [valueName]: value })
       }
+
       return acc
     },
-    [] as Record<string, string>[]
+    [] as Array<Record<string, string>>
   )
 }
 
@@ -73,10 +76,12 @@ const getProductFilterIdMap = async (product: SearchProduct, ctx: Context) => {
   const filterMapFromName = filters.reduce(
     (acc, curr) => {
       acc[curr.Name] = curr.FieldId.toString()
+
       return acc
     },
     {} as Record<string, string>
   )
+
   return filterMapFromName
 }
 
@@ -96,6 +101,7 @@ const findMainTree = (categoriesIds: string[], prodCategoryId: string) => {
   const mainTree = categoriesIds.find(
     treeIdString => getLastCategory(treeIdString) === prodCategoryId
   )
+
   if (mainTree) {
     return treeStringToArray(mainTree)
   }
@@ -125,6 +131,7 @@ const productCategoriesToCategoryTree = async (
   if (platform === 'vtex') {
     return mainTreeIds.map(categoryId => search.category(Number(categoryId)))
   }
+
   const categoriesTree = await search.categories(mainTreeIds.length)
   const categoryMap = buildCategoryMap(categoriesTree)
   const mappedCategories = mainTreeIds
@@ -138,14 +145,17 @@ const urlToSlug = (slug: string | undefined) => {
   if (!slug) {
     return slug
   }
-  const erasedSlash = slug.replace(/^\//g, '') //removing starting / char
-  const finalSlug = erasedSlash.replace(/(\/p)$/g, '') //remove ending /p chars
+
+  const erasedSlash = slug.replace(/^\//g, '') // removing starting / char
+  const finalSlug = erasedSlash.replace(/(\/p)$/g, '') // remove ending /p chars
+
   return finalSlug
 }
 
 const addTranslationParamsToSpecification = (filterIdFromNameMap: Record<string, string>, ctx: Context) => (specification: { name: string, values: string[] }) => {
   const { name, values } = specification
   const filterId = filterIdFromNameMap[name]
+
   return {
     originalName: name,
     name: addContextToTranslatableString({ content: name, context: filterId }, ctx),
@@ -176,10 +186,12 @@ export const resolvers = {
       const specificationsMap = Specifications.reduce(
         (acc: Record<string, string>, key: string) => {
           acc[key] = (product as any)[key]
+
           return acc
         },
         {}
       )
+
       return JSON.stringify(specificationsMap)
     },
 
@@ -189,20 +201,24 @@ export const resolvers = {
     properties: async (product: SearchProduct, _: unknown, ctx: Context) => {
       const valuesUntranslated = (product.allSpecifications ?? []).map((name: string) => {
         const value = (product as unknown as DynamicKey<string[]>)[name]
+
         return { name, originalName: name, values: value }
       })
+
       if (!shouldTranslateToUserLocale(ctx)) {
         return valuesUntranslated
       }
 
       const filterIdFromNameMap = await getProductFilterIdMap(product, ctx)
       const valuesWithTranslations = valuesUntranslated.map(addTranslationParamsToSpecification(filterIdFromNameMap, ctx))
+
       return valuesWithTranslations
     },
 
     propertyGroups: (product: SearchProduct) => {
       const { allSpecifications = [] } = product
       const notPG = knownNotPG.concat(allSpecifications)
+
       return objToNameValue('name', 'values', omit(notPG, product))
     },
 
@@ -238,7 +254,9 @@ export const resolvers = {
       if (!shouldTranslateToBinding(ctx)) {
         return linkText
       }
+
       const route = await rewriter.getRoute(productId, 'product', binding!.id!)
+
       return urlToSlug(route) ?? linkText
     },
 
@@ -248,6 +266,7 @@ export const resolvers = {
       const visibleSpecifications = product.completeSpecifications
         ? product.completeSpecifications.reduce<Record<string, boolean>>((acc, specification) => {
             acc[specification.Name] = specification.IsOnProductDetails
+
             return acc
           }, {})
         : null
@@ -259,6 +278,7 @@ export const resolvers = {
           groupSpecifications = groupSpecifications.filter(specificationName => {
             if (visibleSpecifications && visibleSpecifications[specificationName] != null)
               return visibleSpecifications[specificationName]
+
             return true
           })
 
@@ -267,6 +287,7 @@ export const resolvers = {
             name: groupName,
             specifications: groupSpecifications.map((name) => {
                 const values = (product as unknown as DynamicKey<string[]>)[name] || []
+
                 return {
                   originalName: name,
                   name,
@@ -297,17 +318,23 @@ export const resolvers = {
     },
     items: ({ items: searchItems, skuSpecifications = [] }: SearchProduct, { filter }: ItemArg) => {
       const searchItemsWithVariations = searchItems.map(item => ({ ...item, skuSpecifications }))
+
       if (filter === ItemsFilterEnum.ALL) {
         return searchItemsWithVariations
       }
+
       if (filter === ItemsFilterEnum.FIRST_AVAILABLE) {
         const firstAvailable = searchItemsWithVariations.find(isAvailable)
+
         return firstAvailable ? [firstAvailable] : [searchItemsWithVariations[0]]
       }
+
       if (filter === ItemsFilterEnum.ALL_AVAILABLE) {
         const onlyAvailable = searchItemsWithVariations.filter(isAvailable)
+
         return onlyAvailable.length > 0 ? onlyAvailable : [searchItemsWithVariations[0]]
       }
+
       return searchItemsWithVariations
     },
     priceRange: ({ items: searchItems }: SearchProduct) => {
@@ -318,6 +345,7 @@ export const resolvers = {
               acc.push(seller.commertialOffer)
             }
           }
+
           return acc
         },
         []

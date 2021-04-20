@@ -30,10 +30,12 @@ export const resolvers = {
     href: async ({ url, id }: SafeCategory, _: unknown, ctx: Context) => {
       if (shouldTranslateToBinding(ctx)) {
         const rewriterUrl = await ctx.clients.rewriter.getRoute(id.toString(), 'anyCategoryEntity', ctx.vtex.binding!.id!)
+
         if (rewriterUrl) {
           url = rewriterUrl
         }
       }
+
       return cleanUrl(url)
     },
 
@@ -50,10 +52,12 @@ export const resolvers = {
     slug: async ({ url, id }: SafeCategory, _: unknown, ctx: Context) => {
       if (shouldTranslateToBinding(ctx)) {
         const rewriterUrl = await ctx.clients.rewriter.getRoute(id.toString(), 'anyCategoryEntity', ctx.vtex.binding!.id!)
+
         if (rewriterUrl) {
           url = rewriterUrl
         }
       }
+
       return url ? lastSegment(url) : null
     },
 
@@ -64,8 +68,10 @@ export const resolvers = {
     ) => {
       if (children == null) {
         const category = await getCategoryInfo(search, id, 5)
+
         children = category.children
       }
+
       return children
     },
   },

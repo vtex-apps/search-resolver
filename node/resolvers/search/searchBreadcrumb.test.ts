@@ -8,7 +8,7 @@ describe('tests related to the name resolver', () => {
     resetContext()
   })
 
-  test('get name for category', async () => {
+  it('get name for category', async () => {
     const payload = {
       queryUnit: 'category',
       mapUnit: 'c',
@@ -21,11 +21,13 @@ describe('tests related to the name resolver', () => {
       metadataMap: {},
       hrefs: null,
     }
+
     const result = await resolvers.SearchBreadcrumb.name(payload as any, {}, mockContext as any)
+
     expect(result).toBe('category (((1))) <<<pt-BR>>>')
   })
 
-  test('get name for category from metadata map', async () => {
+  it('get name for category from metadata map', async () => {
     const payload = {
       queryUnit: 'category',
       mapUnit: 'c',
@@ -36,14 +38,16 @@ describe('tests related to the name resolver', () => {
       categoriesSearched: ['category'],
       products: {},
       metadataMap: {
-        ['category-c']: { name: 'category', id: 'id' }
+        'category-c': { name: 'category', id: 'id' }
       },
     }
+
     const result = await resolvers.SearchBreadcrumb.name(payload as any, {}, mockContext as any)
+
     expect(result).toBe('category (((id))) <<<pt-BR>>>')
   })
 
-  test('get name for brand', async () => {
+  it('get name for brand', async () => {
     const payload = {
       queryUnit: 'brand',
       mapUnit: 'b',
@@ -55,11 +59,13 @@ describe('tests related to the name resolver', () => {
       products: {},
       metadataMap: {},
     }
+
     const result = await resolvers.SearchBreadcrumb.name(payload as any, {}, mockContext as any)
+
     expect(result).toBe('brand (((1))) <<<pt-BR>>>')
   })
 
-  test('get name for brand from metadata map', async () => {
+  it('get name for brand from metadata map', async () => {
     const payload = {
       queryUnit: 'brand',
       mapUnit: 'b',
@@ -70,14 +76,16 @@ describe('tests related to the name resolver', () => {
       categoriesSearched: ['brand'],
       products: {},
       metadataMap: {
-        ['brand-b']: { name: 'brand', id: 'id' },
+        'brand-b': { name: 'brand', id: 'id' },
       },
     }
+
     const result = await resolvers.SearchBreadcrumb.name(payload as any, {}, mockContext as any)
+
     expect(result).toBe('brand (((id))) <<<pt-BR>>>')
   })
 
-  test('get name for subcategory', async () => {
+  it('get name for subcategory', async () => {
     const payload = {
       queryUnit: 'category2',
       mapUnit: 'c',
@@ -89,11 +97,13 @@ describe('tests related to the name resolver', () => {
       products: {},
       metadataMap: {},
     }
+
     const result = await resolvers.SearchBreadcrumb.name(payload as any, {}, mockContext as any)
+
     expect(result).toBe('category/category2 (((1))) <<<pt-BR>>>')
   })
 
-  test('get name for subcategory from metadata map', async () => {
+  it('get name for subcategory from metadata map', async () => {
     const payload = {
       queryUnit: 'category2',
       mapUnit: 'c',
@@ -103,15 +113,17 @@ describe('tests related to the name resolver', () => {
       categories: [],
       categoriesSearched: ['category', 'category2'],
       metadataMap: {
-        ['category-c']: { name: 'category', id: 'id' },
-        ['category2-c']: { name: 'category2', id: 'id2' },
+        'category-c': { name: 'category', id: 'id' },
+        'category2-c': { name: 'category2', id: 'id2' },
       },
     }
+
     const result = await resolvers.SearchBreadcrumb.name(payload as any, {}, mockContext as any)
+
     expect(result).toBe('category2 (((id2))) <<<pt-BR>>>')
   })
 
-  test('get name for subcategory in query with many facets', async () => {
+  it('get name for subcategory in query with many facets', async () => {
     const payload = {
       queryUnit: 'category2',
       mapUnit: 'c',
@@ -123,11 +135,13 @@ describe('tests related to the name resolver', () => {
       products: {},
       metadataMap: {},
     }
+
     const result = await resolvers.SearchBreadcrumb.name(payload as any, {}, mockContext as any)
+
     expect(result).toBe('category/category2 (((1))) <<<pt-BR>>>')
   })
 
-  test('get name for subcategory in query with many facets in metadata map', async () => {
+  it('get name for subcategory in query with many facets in metadata map', async () => {
     const payload = {
       queryUnit: 'category2',
       mapUnit: 'c',
@@ -138,16 +152,18 @@ describe('tests related to the name resolver', () => {
       categoriesSearched: ['category', 'category2'],
       products: {},
       metadataMap: {
-        ['category-c']: { name: 'category', id: 'id' },
-        ['category2-c']: { name: 'category2', id: 'id2' },
-        ['brand-b']: { name: 'brand', id: 'id' }
+        'category-c': { name: 'category', id: 'id' },
+        'category2-c': { name: 'category2', id: 'id2' },
+        'brand-b': { name: 'brand', id: 'id' }
       },
     }
+
     const result = await resolvers.SearchBreadcrumb.name(payload as any, {}, mockContext as any)
+
     expect(result).toBe('category2 (((id2))) <<<pt-BR>>>')
   })
 
-  test('get name for filter', async () => {
+  it('get name for filter', async () => {
     const payload = {
       queryUnit: 'filter',
       mapUnit: 'specificationFilter_100',
@@ -159,11 +175,13 @@ describe('tests related to the name resolver', () => {
       products: {},
       metadataMap: {},
     }
+
     const result = await resolvers.SearchBreadcrumb.name(payload as any, {}, mockContext as any)
+
     expect(result).toBe('Filter')
   })
 
-  test('get name for brand as filter', async () => {
+  it('get name for brand as filter', async () => {
     const payload = {
       queryUnit: 'brand',
       mapUnit: 'b',
@@ -175,11 +193,13 @@ describe('tests related to the name resolver', () => {
       products: {},
       metadataMap: {},
     }
+
     const result = await resolvers.SearchBreadcrumb.name(payload as any, {}, mockContext as any)
+
     expect(result).toBe('brand (((1))) <<<pt-BR>>>')
   })
 
-  test('get name for productClusterIds as filter', async () => {
+  it('get name for productClusterIds as filter', async () => {
     const product = getProduct({
       productClusters: {
         '140': 'Cool Cluster',
@@ -197,11 +217,13 @@ describe('tests related to the name resolver', () => {
       products: [product],
       metadataMap: {},
     }
+
     const result = await resolvers.SearchBreadcrumb.name(payload as any, {}, mockContext as any)
+
     expect(result).toBe('Cool Cluster (((140))) <<<pt-BR>>>')
   })
 
-  test('if productsClusterIds not found, fail gracefully', async () => {
+  it('if productsClusterIds not found, fail gracefully', async () => {
     const product = getProduct({
       productClusters: {
         '141': 'Cool Cluster',
@@ -219,11 +241,13 @@ describe('tests related to the name resolver', () => {
       products: [product],
       metadataMap: {},
     }
+
     const result = await resolvers.SearchBreadcrumb.name(payload as any, {}, mockContext as any)
+
     expect(result).toBe(payload.queryUnit)
   })
 
-  test('get name for sellerIds as filter', async () => {
+  it('get name for sellerIds as filter', async () => {
     const product = getProduct({
       productClusters: {
         '140': 'Cool Cluster',
@@ -241,7 +265,9 @@ describe('tests related to the name resolver', () => {
       products: [product],
       metadataMap: {},
     }
+
     const result = await resolvers.SearchBreadcrumb.name(payload as any, {}, mockContext as any)
+
     expect(result).toBe('VTEX')
   })
 })
@@ -252,7 +278,7 @@ describe('tests related to the href resolver', () => {
     resetContext()
   })
 
-  test('get href for department', () => {
+  it('get href for department', () => {
     const payload = {
       queryUnit: 'category',
       mapUnit: 'c',
@@ -264,11 +290,13 @@ describe('tests related to the href resolver', () => {
       products: {},
       metadataMap: {},
     }
+
     const result = resolvers.SearchBreadcrumb.href(payload as any)
+
     expect(result).toBe('/category')
   })
 
-  test('get href for category', () => {
+  it('get href for category', () => {
     const payload = {
       queryUnit: 'category2',
       mapUnit: 'c',
@@ -280,11 +308,13 @@ describe('tests related to the href resolver', () => {
       products: {},
       metadataMap: {},
     }
+
     const result = resolvers.SearchBreadcrumb.href(payload as any)
+
     expect(result).toBe('/category/category2')
   })
 
-  test('get href for brand', () => {
+  it('get href for brand', () => {
     const payload = {
       queryUnit: 'brand',
       mapUnit: 'b',
@@ -296,11 +326,13 @@ describe('tests related to the href resolver', () => {
       products: {},
       metadataMap: {},
     }
+
     const result = resolvers.SearchBreadcrumb.href(payload as any)
+
     expect(result).toBe('/brand')
   })
 
-  test('get href for category with brand', () => {
+  it('get href for category with brand', () => {
     const payload = {
       queryUnit: 'brand',
       mapUnit: 'b',
@@ -312,11 +344,13 @@ describe('tests related to the href resolver', () => {
       products: {},
       metadataMap: {},
     }
+
     const result = resolvers.SearchBreadcrumb.href(payload as any)
+
     expect(result).toBe('/category/brand?map=c,b')
   })
 
-  test('get href for category and other filters', () => {
+  it('get href for category and other filters', () => {
     const payload = {
       queryUnit: 'filter',
       mapUnit: 'specificationFilter_100',
@@ -328,11 +362,13 @@ describe('tests related to the href resolver', () => {
       products: {},
       metadataMap: {},
     }
+
     const result = resolvers.SearchBreadcrumb.href(payload as any)
+
     expect(result).toBe('/category/category2/brand/filter?map=c,c,b,specificationFilter_100')
   })
 
-  test('index arg will be respected always', () => {
+  it('index arg will be respected always', () => {
     const payload = {
       queryUnit: 'brand',
       mapUnit: 'b',
@@ -344,11 +380,13 @@ describe('tests related to the href resolver', () => {
       products: {},
       metadataMap: {},
     }
+
     const result = resolvers.SearchBreadcrumb.href(payload as any)
+
     expect(result).toBe('/category/category2/brand?map=c,c,b')
   })
 
-  test('use hrefs args if available - department', () => {
+  it('use hrefs args if available - department', () => {
     const payload = {
       queryUnit: 'category',
       mapUnit: 'c',
@@ -361,10 +399,12 @@ describe('tests related to the href resolver', () => {
       metadataMap: {},
       hrefs: ['/category', '/category/category2', 'category/category2/brand', 'category/category2/brand/filter']
     }
+
     const result = resolvers.SearchBreadcrumb.href(payload as any)
+
     expect(result).toBe(payload.hrefs[0])
   })
-  test('use hrefs args if available - category', () => {
+  it('use hrefs args if available - category', () => {
     const payload = {
       queryUnit: 'category2',
       mapUnit: 'c',
@@ -377,11 +417,13 @@ describe('tests related to the href resolver', () => {
       metadataMap: {},
       hrefs: ['/category', '/category/category2', 'category/category2/brand', 'category/category2/brand/filter']
     }
+
     const result = resolvers.SearchBreadcrumb.href(payload as any)
+
     expect(result).toBe(payload.hrefs[1])
   })
 
-  test('use hrefs args if available - full href', () => {
+  it('use hrefs args if available - full href', () => {
     const payload = {
       queryUnit: 'filter',
       mapUnit: 'specificationFilter_100',
@@ -394,11 +436,13 @@ describe('tests related to the href resolver', () => {
       metadataMap: {},
       hrefs: ['/category', '/category/category2', 'category/category2/brand', 'category/category2/brand/filter']
     }
+
     const result = resolvers.SearchBreadcrumb.href(payload as any)
-    expect(result).toBe(payload.hrefs[3] + '?map=c,c,b,specificationFilter_100')
+
+    expect(result).toBe(`${payload.hrefs[3]  }?map=c,c,b,specificationFilter_100`)
   })
 
-  test('use hrefs args if available - brand', () => {
+  it('use hrefs args if available - brand', () => {
     const payload = {
       queryUnit: 'brand',
       mapUnit: 'b',
@@ -411,7 +455,9 @@ describe('tests related to the href resolver', () => {
       metadataMap: {},
       hrefs: ['brand', 'brand/filter']
     }
+
     const result = resolvers.SearchBreadcrumb.href(payload as any)
+
     expect(result).toBe(payload.hrefs[0])
   })
 })

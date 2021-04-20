@@ -1,14 +1,16 @@
-import {
-  AppClient,
+import type {
   InstanceOptions,
   IOContext,
   RequestConfig,
-  SegmentData,
+  SegmentData} from '@vtex/api';
+import {
+  AppClient,
   CacheType,
 } from '@vtex/api'
 import { stringify } from 'qs'
 
-import { searchEncodeURI, SearchCrossSellingTypes } from '../resolvers/search/utils'
+import type { SearchCrossSellingTypes } from '../resolvers/search/utils';
+import { searchEncodeURI } from '../resolvers/search/utils'
 
 interface AutocompleteArgs {
   maxRows: number | string
@@ -22,10 +24,10 @@ enum SimulationBehavior {
 
 const inflightKey = ({ baseURL, url, params, headers }: RequestConfig) => {
   return (
-    baseURL! +
+    `${baseURL! +
     url! +
-    stringify(params, { arrayFormat: 'repeat', addQueryPrefix: true }) +
-    `&segmentToken=${headers['x-vtex-segment']}`
+    stringify(params, { arrayFormat: 'repeat', addQueryPrefix: true })
+    }&segmentToken=${headers['x-vtex-segment']}`
   )
 }
 
@@ -69,14 +71,14 @@ export class Search extends AppClient {
     return vtexSegment ? {"x-vtex-segment": vtexSegment} : {}
   }
 
-  public constructor(ctx: IOContext, opts?: InstanceOptions) {
+  constructor(ctx: IOContext, opts?: InstanceOptions) {
     super('vtex.catalog-api-proxy@0.x', ctx, opts)
 
     this.basePath = ctx.sessionToken ? '/proxy/authenticated/catalog' : '/proxy/catalog'
     this.searchEncodeURI = searchEncodeURI(ctx.account)
   }
 
-  public pageType = (path: string, query: string = '') => {
+  public pageType = (path: string, query = '') => {
     const pageTypePath = path.startsWith('/') ? path.substr(1) : path
 
     const pageTypeQuery = !query || query.startsWith('?') ? query : `?${query}`
@@ -119,12 +121,13 @@ export class Search extends AppClient {
     },
     )
 
-  public productById = (id: string, vtexSegment?: string, salesChannel?: string | number | null, cacheable: boolean = true) => {
+  public productById = (id: string, vtexSegment?: string, salesChannel?: string | number | null, cacheable = true) => {
     const isVtex = this.context.platform === 'vtex'
     const url = isVtex
       ? this.addCompleteSpecifications(
         this.addSalesChannel(`/pub/products/search?fq=productId:${id}`, salesChannel))
       : `/products/${id}`
+
     return this.get<SearchProduct[]>(url, {
       metric: 'search-productById',
       headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
@@ -207,7 +210,9 @@ export class Search extends AppClient {
     const {
       headers: { resources },
     } = await this.getRaw(this.productSearchUrl(args))
+
     const quantity = resources.split('/')[1]
+
     return parseInt(quantity, 10)
   }
 
@@ -227,11 +232,12 @@ export class Search extends AppClient {
       metric: 'search-category-children'
     })
 
-  public facets = (facets: string = '') => {
+  public facets = (facets = '') => {
     const [path, options] = decodeURI(facets).split('?')
+
     return this.get<SearchFacets>(
       `/pub/facets/search/${encodeURI(this.searchEncodeURI(
-        `${path.trim()}${options ? '?' + options : ''}`
+        `${path.trim()}${options ? `?${  options}` : ''}`
       ))}`,
       { metric: 'search-facets' }
     )
@@ -263,6 +269,7 @@ export class Search extends AppClient {
   private get = <T = any>(url: string, config: RequestConfig = {}) => {
     const segmentData: SegmentData | undefined = (this
       .context! as CustomIOContext).segment
+
     const { channel: salesChannel = '' } = segmentData || {}
 
     config.params = {
@@ -294,6 +301,7 @@ export class Search extends AppClient {
   private getRaw = <T = any>(url: string, config: RequestConfig = {}) => {
     const segmentData: SegmentData | undefined = (this
       .context! as CustomIOContext).segment
+
     const { channel: salesChannel = '' } = segmentData || {}
 
     config.params = {
@@ -332,44 +340,59 @@ export class Search extends AppClient {
     const sanitizedQuery = encodeURIComponent(
       this.searchEncodeURI(decodeURIComponent(query || '').trim())
     )
+
     if (hideUnavailableItems) {
       const segmentData = (this.context as CustomIOContext).segment
+
       salesChannel = (segmentData && segmentData.channel.toString()) || ''
     }
+
     let url = `/pub/products/search/${sanitizedQuery}?`
+
     if (category && !query) {
       url += `&fq=C:/${category}/`
     }
+
     if (specificationFilters && specificationFilters.length > 0) {
       url += specificationFilters.map(filter => `&fq=${filter}`)
     }
+
     if (priceRange) {
       url += `&fq=P:[${priceRange}]`
     }
+
     if (collection) {
       url += `&fq=productClusterIds:${collection}`
     }
+
     if (salesChannel) {
       url += `&fq=isAvailablePerSalesChannel_${salesChannel}:1`
     }
+
     if (orderBy) {
       url += `&O=${orderBy}`
     }
+
     if (map) {
       url += `&map=${map}`
     }
+
     if (from != null && from > -1) {
       url += `&_from=${from}`
     }
+
     if (to != null && to > -1) {
       url += `&_to=${to}`
     }
+
     if (simulationBehavior === SimulationBehavior.SKIP) {
       url += `&simulation=false`
     }
+
     if (completeSpecifications) {
       url = this.addCompleteSpecifications(url)
     }
+
     return url
   }
 }

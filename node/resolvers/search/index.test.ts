@@ -7,7 +7,7 @@ beforeEach(() => {
 })
 
 describe('product recommendations query tests', () => {
-  test('test if productRecommendations products have correct custom cacheId', async () => {
+  it('if productRecommendations products have correct custom cacheId', async () => {
     const product1 = getProduct()
     const product2 = getProduct()
 
@@ -25,12 +25,13 @@ describe('product recommendations query tests', () => {
       { identifier: { field: 'id', value: '1' }, type: 'similars' as any },
       mockContext as any
     )
+
     expect(results.every(p => Boolean(p.cacheId))).toBeTruthy()
     expect(results[0].cacheId).toBe('classic-shoes-1')
     expect(results[1].cacheId).toBe('classic-shoes-2')
   })
 
-  test('ensure correct types call the correct APIs', async () => {
+  it('ensure correct types call the correct APIs', async () => {
     mockContext.clients.search.crossSelling.mockImplementation(() => [])
     await queries.productRecommendations(
       {},
