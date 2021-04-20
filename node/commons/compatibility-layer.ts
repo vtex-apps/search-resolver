@@ -583,7 +583,7 @@ export const buildAttributePath = (selectedFacets: SelectedFacet[]) => {
       }
 
       return facet.key !== 'ft'
-        ? `${attributePath}${facet.key}/${removeDiacriticsFromURL(facet.value).replace(/ |%20/, '-')}/`
+        ? `${attributePath}${encodeURI(facet.key)}/${removeDiacriticsFromURL(facet.value).replace(/ |%20/, '-')}/`
         : attributePath
     }, '')
     : ''
