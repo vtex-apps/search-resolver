@@ -237,8 +237,6 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
       seller.commertialOffer.Teasers = getTeasersFromRatesAndBenefitsData(orderFormItem.ratesAndBenefitsData)
       seller.commertialOffer.DiscountHighLight = getDiscountHighLightsFromRatesAndBenefitsData(orderFormItem.ratesAndBenefitsData)
 
-    //   Teasers: getTeasersFromRatesAndBenefitsData(orderFormItem.ratesAndBenefitsData),
-    // DiscountHighLight: getDiscountHighLightsFromRatesAndBenefitsData(orderFormItem.ratesAndBenefitsData)
 
       const installmentOptions = orderFormItem?.paymentData?.installmentOptions || []
 
