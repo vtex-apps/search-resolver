@@ -44,6 +44,9 @@
         "path": "/api/segments/*"
       },
       "name": "outbound-access"
+    },
+    {
+      "name": "vtex.messages:graphql-translate-messages"
     }
   ],
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
