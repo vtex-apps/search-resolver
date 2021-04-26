@@ -48,6 +48,9 @@
         "host": "search.biggylabs.com.br",
         "path": "/*"
       }
+    },
+    {
+      "name": "vtex.messages:graphql-translate-messages"
     }
   ],
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
