@@ -574,6 +574,8 @@ export const buildBreadcrumb = (
   return breadcrumb
 }
 
+const encodeSafeURI = (uri: string) => encodeURI(decodeURI(uri))
+
 export const buildAttributePath = (selectedFacets: SelectedFacet[]) => {
   return selectedFacets
     ? selectedFacets.reduce((attributePath, facet) => {
@@ -583,7 +585,7 @@ export const buildAttributePath = (selectedFacets: SelectedFacet[]) => {
       }
 
       return facet.key !== 'ft'
-        ? `${attributePath}${encodeURI(facet.key)}/${removeDiacriticsFromURL(encodeURI(facet.value)).replace(/ |%20/, '-')}/`
+        ? `${attributePath}${encodeSafeURI(facet.key)}/${removeDiacriticsFromURL(encodeSafeURI(facet.value)).replace(/ |%20/, '-')}/`
         : attributePath
     }, '')
     : ''
