@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.16.9] - 2021-04-26
+
 ### Added
 - `messages` policy to the `manifest.json`.
 

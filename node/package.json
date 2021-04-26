@@ -58,5 +58,5 @@
     "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.38.0/public/@types/vtex.search-graphql",
     "vtex.search-resolver": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-resolver@0.6.3-hkignore.1/public/_types/react"
   },
-  "version": "0.16.8"
+  "version": "0.16.9"
 }
