@@ -229,8 +229,31 @@ interface OrderForm {
 }
 
 interface RatesAndBenefitsData {
-  rateAndBenefitsIdentifiers: any[]
-  teaser: any[]
+  rateAndBenefitsIdentifiers: {
+    id: string
+    name: string
+    featured: boolean
+    description: string
+  }[]
+  teaser: {
+    featured: boolean
+    id: string
+    name: string
+    conditions: {
+      parameters: {
+        name: string
+        value: string
+      }[]
+      minimumQuantity: number
+    }
+    effects: {
+      parameters: {
+        name: string
+        value: string
+      }[]
+    }
+    teaserType: string
+  }[]
 }
 
 interface PayloadItem {

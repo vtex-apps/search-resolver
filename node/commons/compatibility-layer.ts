@@ -234,8 +234,8 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
       seller.commertialOffer.PriceValidUntil = priceValidUntil
       seller.commertialOffer.ListPrice = listPrice / 100
       seller.commertialOffer.PriceWithoutDiscount = price / 100
-      seller.commertialOffer.Teasers = getTeasersFromRatesAndBenefitsData(orderFormItem.ratesAndBenefitsData)
-      seller.commertialOffer.DiscountHighLight = getDiscountHighLightsFromRatesAndBenefitsData(orderFormItem.ratesAndBenefitsData)
+      seller.commertialOffer.Teasers = getTeasers(orderFormItem.ratesAndBenefitsData)
+      seller.commertialOffer.DiscountHighLight = getDiscountHighLights(orderFormItem.ratesAndBenefitsData)
 
 
       const installmentOptions = orderFormItem?.paymentData?.installmentOptions || []
@@ -596,21 +596,21 @@ export const buildAttributePath = (selectedFacets: SelectedFacet[]) => {
     : ''
 }
 
-const getTeasersFromRatesAndBenefitsData = (ratesAndBenefitsData: RatesAndBenefitsData) => {
+const getTeasers = (ratesAndBenefitsData: RatesAndBenefitsData) => {
   if (!ratesAndBenefitsData) {
     return []
   }
 
   return ratesAndBenefitsData.teaser
-    .filter((teaser: any) => ALLOWED_TEASER_TYPES.includes(teaser.teaserType))
+    .filter(teaser => ALLOWED_TEASER_TYPES.includes(teaser.teaserType))
 }
 
 
-const getDiscountHighLightsFromRatesAndBenefitsData = (ratesAndBenefitsData: RatesAndBenefitsData) => {
+const getDiscountHighLights = (ratesAndBenefitsData: RatesAndBenefitsData) => {
   if (!ratesAndBenefitsData) {
     return []
   }
 
   return ratesAndBenefitsData.rateAndBenefitsIdentifiers
-    .filter((rateAndBenefitsIdentifier: any) => rateAndBenefitsIdentifier.featured)
+    .filter(rateAndBenefitsIdentifier => rateAndBenefitsIdentifier.featured)
 }
