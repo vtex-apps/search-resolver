@@ -223,12 +223,37 @@ interface OrderForm {
     items: MetadataItem[]
   }
   hooksData: any | null
-  ratesAndBenefitsData: {
-    rateAndBenefitsIdentifiers: any[]
-    teaser: any[]
-  }
+  ratesAndBenefitsData: RatesAndBenefitsData
   subscriptionData: any | null
   itemsOrdination: any | null
+}
+
+interface RatesAndBenefitsData {
+  rateAndBenefitsIdentifiers: {
+    id: string
+    name: string
+    featured: boolean
+    description: string
+  }[]
+  teaser: {
+    featured: boolean
+    id: string
+    name: string
+    conditions: {
+      parameters: {
+        name: string
+        value: string
+      }[]
+      minimumQuantity: number
+    }
+    effects: {
+      parameters: {
+        name: string
+        value: string
+      }[]
+    }
+    teaserType: string
+  }[]
 }
 
 interface PayloadItem {
