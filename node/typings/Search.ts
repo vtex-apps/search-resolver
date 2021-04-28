@@ -57,7 +57,7 @@ interface SuggestionProductsArgs {
   productOriginVtex: boolean
   simulationBehavior: 'skip' | 'default' | null
   sellers?: RegionSeller[]
-  hideUnavailableItems?: boolean | null,
+  hideUnavailableItems?: boolean | null
   regionId?: string
 }
 
@@ -174,6 +174,7 @@ interface BiggyProductExtraData {
 interface BiggySearchSKU {
   name: string
   nameComplete: string
+  complementName?: string
   id: string
   ean?: string
   reference: string

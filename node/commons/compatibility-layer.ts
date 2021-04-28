@@ -444,7 +444,7 @@ const convertSKU = (
     itemId: sku.id,
     name: sku.name,
     nameComplete: sku.nameComplete,
-    complementName: product.name,
+    complementName: sku.complementName ?? '',
     referenceId: [
       {
         Key: 'RefId',
