@@ -634,6 +634,7 @@ export const queries = {
       searchState,
       simulationBehavior,
       hideUnavailableItems,
+      hideItemsWithBetterScope,
     } = args
     let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
 
@@ -657,6 +658,7 @@ export const queries = {
       sort: convertOrderBy(args.orderBy),
       sellers,
       hideUnavailableItems,
+      hideItemsWithBetterScope,
     }
 
     const result = await biggySearch.productSearch(biggyArgs)

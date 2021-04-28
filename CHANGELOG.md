@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- `hideItemsWithBetterScope` prop to `productSearch` and `productSuggestions`.
+- `regionalizationv2` query string.
+
 ## [1.38.2] - 2021-04-27
 
 ### Fixed
