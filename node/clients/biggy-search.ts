@@ -56,8 +56,8 @@ const buildPathFromArgs = (args: SearchResultArgs) => {
   return path.join(attributePath.split('%20').join('-'), policyAttr)
 }
 
-const buildBSearchFilterCookie = (sellers?: RegionSeller[], hideItemsWithBetterScope?: boolean | null) => {
-  if (!sellers || sellers.length === 0) {
+const buildBSearchFilterCookie = (sellers?: RegionSeller[], hideItemsWithBetterScope?: boolean | null, disableRegionalization?: boolean) => {
+  if (!sellers || sellers.length === 0 || disableRegionalization) {
     return ''
   }
 
@@ -121,6 +121,7 @@ export class BiggySearchClient extends ExternalClient {
       sellers,
       hideUnavailableItems = false,
       hideItemsWithBetterScope = false,
+      disableRegionalization,
     } = args
     const attributes: { key: string; value: string }[] = []
 
@@ -152,7 +153,7 @@ export class BiggySearchClient extends ExternalClient {
           regionalizationv2: true,
         },
         headers: {
-          Cookie: buildBSearchFilterCookie(sellers, hideItemsWithBetterScope),
+          Cookie: buildBSearchFilterCookie(sellers, hideItemsWithBetterScope, disableRegionalization),
           "X-VTEX-IS-ID": `${this.store}`,
         },
       }
@@ -211,7 +212,9 @@ export class BiggySearchClient extends ExternalClient {
       leap,
       searchState,
       sellers,
-      hideUnavailableItems
+      hideUnavailableItems,
+      hideItemsWithBetterScope,
+      disableRegionalization,
     } = args
 
     const url = `${this.store}/api/split/attribute_search/${buildPathFromArgs(
@@ -234,7 +237,7 @@ export class BiggySearchClient extends ExternalClient {
       },
       metric: 'search-result',
       headers: {
-        Cookie: buildBSearchFilterCookie(sellers),
+        Cookie: buildBSearchFilterCookie(sellers, hideItemsWithBetterScope, disableRegionalization),
         "X-VTEX-IS-ID": `${this.store}`,
       },
     })
@@ -254,7 +257,8 @@ export class BiggySearchClient extends ExternalClient {
       searchState,
       sellers,
       hideUnavailableItems,
-      hideItemsWithBetterScope
+      hideItemsWithBetterScope,
+      disableRegionalization,
     } = args
 
     const url = `${this.store}/api/split/product_search/${buildPathFromArgs(
@@ -277,7 +281,7 @@ export class BiggySearchClient extends ExternalClient {
           bgy_leap: leap ? true : undefined,
           ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
           ...parseState(searchState),
-          cookie: buildBSearchFilterCookie(sellers, hideItemsWithBetterScope)
+          cookie: buildBSearchFilterCookie(sellers, hideItemsWithBetterScope, disableRegionalization)
         }
       })
     }
@@ -298,7 +302,7 @@ export class BiggySearchClient extends ExternalClient {
       },
       metric: 'search-result',
       headers: {
-        Cookie: buildBSearchFilterCookie(sellers, hideItemsWithBetterScope),
+        Cookie: buildBSearchFilterCookie(sellers, hideItemsWithBetterScope, disableRegionalization),
         "X-VTEX-IS-ID": `${this.store}`,
       },
     })

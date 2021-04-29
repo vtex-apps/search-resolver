@@ -8,8 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
-- `hideItemsWithBetterScope` prop to `productSearch` and `productSuggestions`.
+- `hideItemsWithBetterScope` prop to `productSearch`, `productSuggestions` and `facets`.
 - `regionalizationv2` query string.
+- `disableRegionalization` prop to `productSearch`, `productSuggestions` and `facets`.
 
 ## [1.38.2] - 2021-04-27
 
