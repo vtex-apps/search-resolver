@@ -78,6 +78,7 @@ export class BiggySearchClient extends ExternalClient {
   public async topSearches(): Promise<any> {
     const result = await this.http.get(`${this.store}/api/top_searches`, {
       metric: 'top-searches',
+      forceMaxAge: 3600,
       params: {
         locale: this.locale,
       }

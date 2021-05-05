@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Revert caching changes made on `1.37.9`.
+- Force `top-searches` maxAge to `3600`.
 
 ## [1.38.4] - 2021-04-28
 ### Added
