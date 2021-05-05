@@ -23,8 +23,8 @@ export const convertBiggyProduct = async (
   product: BiggySearchProduct,
   checkout: Checkout,
   simulationBehavior: 'skip' | 'default' | null,
+  segment?: SegmentData,
   tradePolicy?: string,
-  priceTable?: string,
   regionId?: string | null,
   indexingType?: IndexingType,
 ) => {
@@ -155,9 +155,13 @@ export const convertBiggyProduct = async (
 
     const simulationPayloads: SimulationPayload[] = payloadItems.map((item) => {
       return {
-        priceTables: priceTable ? [priceTable] : undefined,
+        priceTables: segment?.priceTables ? [segment?.priceTables] : undefined,
         items: [item],
-        shippingData: { logisticsInfo: [{ regionId }] }
+        shippingData: { logisticsInfo: [{ regionId }] },
+        marketingData: segment ? {
+          utmCampaign: segment?.utm_campaign,
+          utmSource: segment?.utm_source,
+        } : undefined
       }
     })
 
