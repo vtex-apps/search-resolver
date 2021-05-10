@@ -195,7 +195,8 @@ export const convertBiggyProduct = async (
   if (product.textAttributes) {
     allSpecifications.forEach((specification) => {
       if(!convertedProduct[specification]){
-        const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == specification)
+        const attributes = product.textAttributes.filter((attribute) => attribute.joinedKey.split('@@@')[4] == specification)
+
         convertedProduct[specification] = attributes.map((attribute) => {
           return attribute.labelValue
         })
