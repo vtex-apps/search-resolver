@@ -158,10 +158,7 @@ export const convertBiggyProduct = async (
         priceTables: segment?.priceTables ? [segment?.priceTables] : undefined,
         items: [item],
         shippingData: { logisticsInfo: [{ regionId }] },
-        marketingData: segment ? {
-          utmCampaign: segment?.utm_campaign,
-          utmSource: segment?.utm_source,
-        } : undefined
+        marketingData: getMarketingData(segment)
       }
     })
 
@@ -341,6 +338,17 @@ const buildCommertialOffer = (
     PriceValidUntil: '',
     GetInfoErrorMessage: null,
     CacheVersionUsedToCallCheckout: '',
+  }
+}
+
+const getMarketingData = (segment?: SegmentData) => {
+  if (!segment || !segment.utm_campaign || !segment.utm_source) {
+    return
+  }
+
+  return {
+    utmCampaign: segment.utm_campaign,
+    utmSource: segment.utm_source,
   }
 }
 
