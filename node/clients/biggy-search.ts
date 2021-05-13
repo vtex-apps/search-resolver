@@ -81,6 +81,7 @@ export class BiggySearchClient extends ExternalClient {
       forceMaxAge: 3600,
       params: {
         locale: this.locale,
+        enableCache: true,
       }
     })
 
@@ -221,6 +222,7 @@ export class BiggySearchClient extends ExternalClient {
         bgy_leap: leap ? true : undefined,
         ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
         ...parseState(searchState),
+        enableCache: true,
       },
       metric: 'search-result',
       headers: {
@@ -265,6 +267,7 @@ export class BiggySearchClient extends ExternalClient {
           bgy_leap: leap ? true : undefined,
           ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
           ...parseState(searchState),
+          enableCache: true,
           cookie: buildBSearchFilterCookie(sellers)
         }
       })
@@ -281,6 +284,7 @@ export class BiggySearchClient extends ExternalClient {
         locale: this.locale,
         bgy_leap: leap ? true : undefined,
         ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
+        enableCache: true,
         ...parseState(searchState),
       },
       metric: 'search-result',
