@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- utm info to the simulation call.
+
 ## [1.39.0] - 2021-05-05
 ### Changed
 - Revert caching changes made on `1.37.9`.

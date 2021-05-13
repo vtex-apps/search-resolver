@@ -17,7 +17,7 @@ export const productsBiggy = async ({ searchResult, ctx, simulationBehavior = 'd
 
   searchResult.products.forEach((product: any) => {
     try {
-      products.push(convertBiggyProduct(product, checkout, simulationBehavior, tradePolicy ?? segment?.channel, segment?.priceTables, regionId))
+      products.push(convertBiggyProduct(product, checkout, simulationBehavior, segment, tradePolicy ?? segment?.channel, regionId))
     } catch (err) {
       console.error(err)
     }
