@@ -45,6 +45,7 @@ import {
 import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
 import { Checkout } from '../../clients/checkout'
 import setFilterVisibility from '../../utils/setFilterVisibility'
+import { convertProducts } from '../../utils/compatibility-layer'
 
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -675,10 +676,9 @@ export const queries = {
       ctx.vtex.tenant.locale = result.locale
     }
 
-    const productResolver = args.productOriginVtex
-      ? productsCatalog
-      : productsBiggy
-    const convertedProducts = await productResolver({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })
+    const convertedProducts = args.productOriginVtex ?
+      await productsCatalog(({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })) :
+      await Promise.all(convertProducts(result.products, ctx))
 
     // Add prefix to the cacheId to avoid conflicts. Repeated cacheIds in the same page are causing strange behavior.
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
