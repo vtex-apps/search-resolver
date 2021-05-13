@@ -211,7 +211,8 @@ export class BiggySearchClient extends ExternalClient {
       leap,
       searchState,
       sellers,
-      hideUnavailableItems
+      hideUnavailableItems,
+      hideItemsWithBetterScope,
     } = args
 
     const url = `${this.store}/api/split/attribute_search/${buildPathFromArgs(
@@ -234,7 +235,7 @@ export class BiggySearchClient extends ExternalClient {
       },
       metric: 'search-result',
       headers: {
-        Cookie: buildBSearchFilterCookie(sellers),
+        Cookie: buildBSearchFilterCookie(sellers, hideItemsWithBetterScope),
         "X-VTEX-IS-ID": `${this.store}`,
       },
     })
@@ -254,7 +255,7 @@ export class BiggySearchClient extends ExternalClient {
       searchState,
       sellers,
       hideUnavailableItems,
-      hideItemsWithBetterScope
+      hideItemsWithBetterScope,
     } = args
 
     const url = `${this.store}/api/split/product_search/${buildPathFromArgs(

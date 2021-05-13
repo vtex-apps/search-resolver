@@ -80,6 +80,7 @@ interface FacetsInput {
   searchState?: string
   removeHiddenFacets: boolean
   hideUnavailableItems: boolean
+  hideItemsWithBetterScope?: boolean
 }
 
 interface ProductSearchInput {

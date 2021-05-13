@@ -407,7 +407,7 @@ export const queries = {
       args
     )) as FacetsInput
 
-    let { fullText, searchState } = args
+    let { fullText, searchState, hideItemsWithBetterScope } = args
 
     if (fullText) {
       fullText = await translateToStoreDefaultLanguage(ctx, args.fullText!)
@@ -431,6 +431,7 @@ export const queries = {
       tradePolicy,
       sellers,
       hideUnavailableItems: args.hideUnavailableItems,
+      hideItemsWithBetterScope,
     }
 
     const result = await biggySearch.facets(biggyArgs)
