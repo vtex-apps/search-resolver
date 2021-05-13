@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.39.1] - 2021-05-13
+
 ### Added
 - utm info to the simulation call.
 
