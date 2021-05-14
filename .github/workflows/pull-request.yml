@@ -1,0 +1,26 @@
+name: PR actions
+on:
+  pull_request:
+    branches:
+      - v1.x
+jobs:
+  e2e-tests:
+    name: E2E test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: |
+          yarn global add vtex
+          echo "$(yarn global bin)" >> $GITHUB_PATH
+          vtex
+      - uses: actions/checkout@v2
+        with:
+          path: ioapp
+      - uses: actions/checkout@v2
+        with:
+          repository: hiagolcm/search-tests-temp
+          path: search-tests
+      - run: node ci/createSession.js --appkey=${{ secrets.APP_KEY }} --apptoken=${{ secrets.APP_TOKEN }}
+      - run: vtex workspace create ${{ github.event.head_commit.id }}
