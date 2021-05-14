@@ -22,5 +22,14 @@ jobs:
         with:
           repository: hiagolcm/search-tests-temp
           path: search-tests
+      - run: yarn
+        working-directory: search-tests
       - run: node ci/createSession.js --appkey=${{ secrets.APP_KEY }} --apptoken=${{ secrets.APP_TOKEN }}
-      - run: vtex workspace create ${{ github.event.head_commit.id }}
+        working-directory: search-tests
+      - run: |
+          vtex workspace create test${{ github.sha }}
+          vtex workspace use test${{ github.sha }}
+      - run: vtex link --no-watch
+        working-directory: ioapp
+      - run: yarn e2e:run
+        working-directory: search-tests
