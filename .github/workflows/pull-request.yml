@@ -31,5 +31,28 @@ jobs:
           vtex workspace use test${{ github.sha }}
       - run: vtex link --no-watch
         working-directory: ioapp
-      - run: yarn e2e:run
-        working-directory: search-tests
+      - uses: cypress-io/github-action@v2
+        with:
+          config-file: cypress.json
+          working-directory: search-tests
+          record: true
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.RECORD_KEY }}
+          VTEX_WORKSPACE: test${{ github.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMIT_INFO_BRANCH: ${{ github.base_ref }}
+          COMMIT_INFO_SHA: ${{ github.sha }}
+          COMMIT_INFO_REMOTE: ${{ github.repository }}
+          COMMIT_INFO_MESSAGE: \"${{ github.event.head_commit.message }}\"
+          COMMIT_INFO_AUTHOR: \"${{ github.actor }}\"
+      - uses: actions/github-script@v3
+        if: failure()
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'E2E tests failed. Go to https://dashboard.cypress.io/projects/qvjzx1 to check the recordings.'
+            })
