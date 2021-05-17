@@ -8,6 +8,9 @@ jobs:
     name: E2E test
     runs-on: ubuntu-latest
     steps:
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          delete: true
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
@@ -45,15 +48,10 @@ jobs:
           COMMIT_INFO_REMOTE: ${{ github.repository }}
           COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
           COMMIT_INFO_AUTHOR: ${{ github.actor }}
-      - uses: actions/github-script@v3
+      - uses: marocchino/sticky-pull-request-comment@v2
         if: failure()
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: 'E2E tests failed. Go to https://dashboard.cypress.io/projects/qvjzx1 to check the recordings.'
-            })
-      - run: vtex workspace delete test${{ github.sha }}
+          message: E2E tests failed. Go to https://dashboard.cypress.io/projects/qvjzx1 to check the recordings.
+      - run: |
+          vtex workspace use master
+          vtex workspace delete test${{ github.sha }}

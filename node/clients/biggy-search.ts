@@ -250,6 +250,8 @@ export class BiggySearchClient extends ExternalClient {
       args
     )}`
 
+    throw new Error('this is a test')
+
     if (isLinked) {
       // eslint-disable-next-line no-console
       console.log({
