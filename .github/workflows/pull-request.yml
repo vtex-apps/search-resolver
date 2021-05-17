@@ -7,6 +7,8 @@ jobs:
   e2e-tests:
     name: E2E test
     runs-on: ubuntu-latest
+    env:
+      commitmsg: ${{ github.event.head_commit.message }}
     steps:
       - uses: actions/setup-node@v2
         with:
@@ -17,11 +19,11 @@ jobs:
       - run: vtex
       - uses: actions/checkout@v2
         with:
-          path: ioapp
-      - uses: actions/checkout@v2
-        with:
           repository: hiagolcm/search-tests-temp
           path: search-tests
+      - uses: actions/checkout@v2
+        with:
+          path: ioapp
       - run: yarn
         working-directory: search-tests
       - run: node ci/createSession.js --appkey=${{ secrets.APP_KEY }} --apptoken=${{ secrets.APP_TOKEN }}
@@ -43,7 +45,7 @@ jobs:
           COMMIT_INFO_BRANCH: ${{ github.ref }}
           COMMIT_INFO_SHA: ${{ github.sha }}
           COMMIT_INFO_REMOTE: ${{ github.repository }}
-          COMMIT_INFO_MESSAGE: ${{ github.event.head_commit.message }}
+          COMMIT_INFO_MESSAGE: ${{ env.commitmsg }}
           COMMIT_INFO_AUTHOR: ${{ github.actor }}
       - uses: actions/github-script@v3
         if: failure()
