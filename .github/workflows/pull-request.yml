@@ -8,13 +8,15 @@ jobs:
     name: E2E test
     runs-on: ubuntu-latest
     steps:
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - name: Delete previous comment
+        uses: marocchino/sticky-pull-request-comment@v2
         with:
           delete: true
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
-      - run: |
+      - name: Install toolbelt
+        run: |
           yarn global add vtex
           echo "$(yarn global bin)" >> $GITHUB_PATH
       - run: vtex
@@ -27,12 +29,15 @@ jobs:
           path: ioapp
       - run: yarn
         working-directory: search-tests
-      - run: node ci/createSession.js --appkey=${{ secrets.APP_KEY }} --apptoken=${{ secrets.APP_TOKEN }}
+      - name: Create session
+        run: node ci/createSession.js --appkey=${{ secrets.APP_KEY }} --apptoken=${{ secrets.APP_TOKEN }}
         working-directory: search-tests
-      - run: |
-          vtex workspace create test${{ github.sha }}
-          vtex workspace use test${{ github.sha }}
-      - run: vtex link --no-watch
+      - name: create workspace
+        run: |
+          vtex workspace create e2e${{ github.sha }}
+          vtex workspace use e2e${{ github.sha }}
+      - name: Link app
+        run: vtex link --no-watch
         working-directory: ioapp
       - uses: cypress-io/github-action@v2
         with:
@@ -41,17 +46,19 @@ jobs:
           record: true
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.RECORD_KEY }}
-          CYPRESS_VTEX_WORKSPACE: test${{ github.sha }}
+          CYPRESS_VTEX_WORKSPACE: e2e${{ github.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COMMIT_INFO_BRANCH: ${{ github.head_ref }}
           COMMIT_INFO_SHA: ${{ github.sha }}
           COMMIT_INFO_REMOTE: ${{ github.repository }}
           COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
           COMMIT_INFO_AUTHOR: ${{ github.actor }}
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - name: Add comment
+        uses: marocchino/sticky-pull-request-comment@v2
         if: failure()
         with:
           message: E2E tests failed. Go to https://dashboard.cypress.io/projects/qvjzx1 to check the recordings.
-      - run: |
+      - name: Delete workspace
+        run: |
           vtex workspace use master
-          vtex workspace delete test${{ github.sha }}
+          vtex workspace delete e2e${{ github.sha }}
