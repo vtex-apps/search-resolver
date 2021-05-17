@@ -40,7 +40,7 @@ jobs:
           CYPRESS_RECORD_KEY: ${{ secrets.RECORD_KEY }}
           VTEX_WORKSPACE: test${{ github.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COMMIT_INFO_BRANCH: ${{ github.base_ref }}
+          COMMIT_INFO_BRANCH: ${{ github.ref }}
           COMMIT_INFO_SHA: ${{ github.sha }}
           COMMIT_INFO_REMOTE: ${{ github.repository }}
           COMMIT_INFO_MESSAGE: ${{ github.event.head_commit.message }}
