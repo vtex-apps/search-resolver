@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.39.2] - 2021-05-17
+
 ### Fixed
 - Missing specification values when it is a multi-language account.
 
