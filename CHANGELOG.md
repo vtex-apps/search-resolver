@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.40.0] - 2021-05-18
+
 ### Changed
 - Use the locale returned by the search queries.
 
