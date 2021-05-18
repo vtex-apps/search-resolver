@@ -124,7 +124,7 @@ export const convertBiggyProduct = async (
     productId: product.id,
     cacheId: `sp-${product.id}`,
     productName: product.name,
-    productReference: product.reference || product.product || product.id,
+    productReference: product.reference,
     linkText: product.link,
     brand: product.brand || '',
     brandId,
