@@ -669,7 +669,7 @@ export const queries = {
 
     const result = await biggySearch.productSearch(biggyArgs)
 
-    if (ctx.vtex.tenant) {
+    if (ctx.vtex.tenant && !args.productOriginVtex) {
       ctx.vtex.tenant.locale = result.locale
     }
 
@@ -788,7 +788,7 @@ export const queries = {
       sellers
     })
 
-    if (ctx.vtex.tenant) {
+    if (ctx.vtex.tenant && !args.productOriginVtex) {
       ctx.vtex.tenant.locale = result.locale
     }
 
