@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.42.0] - 2021-05-19
+
 ### Added
 
 - Enable API cache to `facets`, `productSearch` and `topSearches`.
