@@ -59,6 +59,7 @@ interface SuggestionProductsArgs {
   sellers?: RegionSeller[]
   hideUnavailableItems?: boolean | null
   regionId?: string
+  segmentFacets?: SelectedFacet[]
 }
 
 interface SuggestionSearchesArgs {

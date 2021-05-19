@@ -121,6 +121,7 @@ export class BiggySearchClient extends ExternalClient {
       indexingType,
       sellers,
       hideUnavailableItems = false,
+      segmentFacets = [],
     } = args
     const attributes: { key: string; value: string }[] = []
 
@@ -142,7 +143,7 @@ export class BiggySearchClient extends ExternalClient {
       `${this.store}/api/suggestion_products`,
       {
         term: decodeURIComponent(term),
-        attributes,
+        attributes: [...attributes, ...segmentFacets],
       },
       {
         metric: 'suggestion-products',

@@ -418,7 +418,9 @@ export const queries = {
       vtex: { segment },
     } = ctx
 
-    const [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
+    const [regionId, selectedFacetsInput] = getRegionIdFromSelectedFacets(args.selectedFacets)
+    const segmentFacets = segment?.selectedFacets ? JSON.parse(segment.selectedFacets) : []
+    const selectedFacets = [...selectedFacetsInput, ...segmentFacets ]
 
     const tradePolicy = getTradePolicyFromSelectedFacets(selectedFacets) || segment?.channel
 
@@ -643,7 +645,9 @@ export const queries = {
       simulationBehavior,
       hideUnavailableItems,
     } = args
-    let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
+    let [regionId, selectedFacetsInput] = getRegionIdFromSelectedFacets(args.selectedFacets)
+    const segmentFacets = segment?.selectedFacets ? JSON.parse(segment.selectedFacets) : []
+    const selectedFacets = [...selectedFacetsInput, ...segmentFacets ]
 
     regionId = regionId || segment?.regionId
 
@@ -785,7 +789,8 @@ export const queries = {
     const result = await biggySearch.suggestionProducts({
       ...args,
       salesChannel: tradePolicy,
-      sellers
+      sellers,
+      segmentFacets: segment?.selectedFacets ? JSON.parse(segment.selectedFacets) : []
     })
 
     if (ctx.vtex.tenant && !args.productOriginVtex) {
