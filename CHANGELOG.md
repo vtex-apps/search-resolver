@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.41.0] - 2021-05-19
+
 ### Added
 
 - Cache to `productSearch` and `facets` queries on navigation pages.
