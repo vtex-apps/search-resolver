@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Revert `v1.40.0`. Shelves were not being translated properly.
+
 ## [1.40.0] - 2021-05-18
 
 ### Changed
