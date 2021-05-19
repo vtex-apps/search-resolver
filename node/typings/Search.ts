@@ -178,6 +178,7 @@ interface BiggyProductExtraData {
 interface BiggySearchSKU {
   name: string
   nameComplete: string
+  complementName?: string
   id: string
   ean?: string
   reference: string

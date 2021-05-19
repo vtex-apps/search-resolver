@@ -11,6 +11,35 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `hideItemsWithBetterScope` prop to `productSearch`, `productSuggestions` and `facets`.
 - `regionalizationv2` query string.
 
+## [1.40.0] - 2021-05-18
+
+### Changed
+- Use the locale returned by the search queries.
+
+## [1.39.2] - 2021-05-17
+
+### Fixed
+- Missing specification values when it is a multi-language account.
+
+## [1.39.1] - 2021-05-13
+
+### Added
+- utm info to the simulation call.
+
+## [1.39.0] - 2021-05-05
+### Changed
+- Revert caching changes made on `1.37.9`.
+- Force `top-searches` maxAge to `3600`.
+
+## [1.38.4] - 2021-04-28
+### Added
+- `items.complementName` to compatibility layer.
+
+## [1.38.3] - 2021-04-28
+
+### Added
+- `teasers` and `discountHighlights` from the simulation call.
+
 ## [1.38.2] - 2021-04-27
 
 ### Fixed

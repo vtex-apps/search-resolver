@@ -436,6 +436,10 @@ export const queries = {
 
     const result = await biggySearch.facets(biggyArgs)
 
+    if (ctx.vtex.tenant) {
+      ctx.vtex.tenant.locale = result.locale
+    }
+
     // FIXME: This is used to sort values based on catalog API.
     // Remove it when it is not necessary anymore
     if (result && result.attributes) {
@@ -567,6 +571,10 @@ export const queries = {
 
     const products = await biggySearch.productSearch(biggyArgs)
 
+    if (ctx.vtex.tenant) {
+      ctx.vtex.tenant.locale = products.locale
+    }
+
     const regionId = segment?.regionId
     const convertedProducts = await productsBiggy({ ctx, simulationBehavior, searchResult: products, regionId })
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
@@ -663,6 +671,10 @@ export const queries = {
     }
 
     const result = await biggySearch.productSearch(biggyArgs)
+
+    if (ctx.vtex.tenant && !args.productOriginVtex) {
+      ctx.vtex.tenant.locale = result.locale
+    }
 
     const productResolver = args.productOriginVtex
       ? productsCatalog
@@ -778,6 +790,10 @@ export const queries = {
       salesChannel: tradePolicy,
       sellers
     })
+
+    if (ctx.vtex.tenant && !args.productOriginVtex) {
+      ctx.vtex.tenant.locale = result.locale
+    }
 
     const productResolver = args.productOriginVtex
       ? productsCatalog

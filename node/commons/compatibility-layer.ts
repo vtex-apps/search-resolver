@@ -4,6 +4,8 @@ import { Checkout } from '../clients/checkout'
 import { groupBy, prop, indexBy, mergeAll } from 'ramda'
 import { removeDiacriticsFromURL } from '../utils/string'
 
+const ALLOWED_TEASER_TYPES = ["Catalog", "Profiler", "ConditionalPrice"]
+
 export enum IndexingType {
   API = 'API',
   XML = 'XML',
@@ -14,15 +16,15 @@ interface OrderFormItemBySellerById {
 }
 
 interface OrderFormItemBySeller {
-  [sellerId: string]: OrderFormItem & { paymentData: PaymentData }
+  [sellerId: string]: OrderFormItem & { paymentData: PaymentData, ratesAndBenefitsData: RatesAndBenefitsData }
 }
 
 export const convertBiggyProduct = async (
   product: BiggySearchProduct,
   checkout: Checkout,
   simulationBehavior: 'skip' | 'default' | null,
+  segment?: SegmentData,
   tradePolicy?: string,
-  priceTable?: string,
   regionId?: string | null,
   indexingType?: IndexingType,
 ) => {
@@ -153,9 +155,10 @@ export const convertBiggyProduct = async (
 
     const simulationPayloads: SimulationPayload[] = payloadItems.map((item) => {
       return {
-        priceTables: priceTable ? [priceTable] : undefined,
+        priceTables: segment?.priceTables ? [segment?.priceTables] : undefined,
         items: [item],
-        shippingData: { logisticsInfo: [{ regionId }] }
+        shippingData: { logisticsInfo: [{ regionId }] },
+        marketingData: getMarketingData(segment)
       }
     })
 
@@ -166,7 +169,7 @@ export const convertBiggyProduct = async (
     const simulationItems = (await Promise.all(simulationPromises.map(promise => promise.catch(() => undefined)))).filter((x) => x != undefined).map((x) => {
      const orderForm = x as OrderForm
 
-     return orderForm.items.map(item => ({ ...item, paymentData: orderForm.paymentData }))
+     return orderForm.items.map(item => ({ ...item, paymentData: orderForm.paymentData, ratesAndBenefitsData: orderForm.ratesAndBenefitsData }))
     }).reduce((acc, val) => acc.concat(val), [])
 
     const groupedBySkuId = groupBy(prop("id"), simulationItems)
@@ -192,7 +195,8 @@ export const convertBiggyProduct = async (
   if (product.textAttributes) {
     allSpecifications.forEach((specification) => {
       if(!convertedProduct[specification]){
-        const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == specification)
+        const attributes = product.textAttributes.filter((attribute) => attribute.joinedKey.split('@@@')[4] == specification)
+
         convertedProduct[specification] = attributes.map((attribute) => {
           return attribute.labelValue
         })
@@ -232,6 +236,9 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
       seller.commertialOffer.PriceValidUntil = priceValidUntil
       seller.commertialOffer.ListPrice = listPrice / 100
       seller.commertialOffer.PriceWithoutDiscount = price / 100
+      seller.commertialOffer.Teasers = getTeasers(orderFormItem.ratesAndBenefitsData)
+      seller.commertialOffer.DiscountHighLight = getDiscountHighLights(orderFormItem.ratesAndBenefitsData)
+
 
       const installmentOptions = orderFormItem?.paymentData?.installmentOptions || []
 
@@ -332,6 +339,17 @@ const buildCommertialOffer = (
     PriceValidUntil: '',
     GetInfoErrorMessage: null,
     CacheVersionUsedToCallCheckout: '',
+  }
+}
+
+const getMarketingData = (segment?: SegmentData) => {
+  if (!segment || !segment.utm_campaign || !segment.utm_source) {
+    return
+  }
+
+  return {
+    utmCampaign: segment.utm_campaign,
+    utmSource: segment.utm_source,
   }
 }
 
@@ -439,7 +457,7 @@ const convertSKU = (
     itemId: sku.id,
     name: sku.name,
     nameComplete: sku.nameComplete,
-    complementName: product.name,
+    complementName: sku.complementName ?? '',
     referenceId: [
       {
         Key: 'RefId',
@@ -589,4 +607,23 @@ export const buildAttributePath = (selectedFacets: SelectedFacet[]) => {
         : attributePath
     }, '')
     : ''
+}
+
+const getTeasers = (ratesAndBenefitsData: RatesAndBenefitsData) => {
+  if (!ratesAndBenefitsData) {
+    return []
+  }
+
+  return ratesAndBenefitsData.teaser
+    .filter(teaser => ALLOWED_TEASER_TYPES.includes(teaser.teaserType))
+}
+
+
+const getDiscountHighLights = (ratesAndBenefitsData: RatesAndBenefitsData) => {
+  if (!ratesAndBenefitsData) {
+    return []
+  }
+
+  return ratesAndBenefitsData.rateAndBenefitsIdentifiers
+    .filter(rateAndBenefitsIdentifier => rateAndBenefitsIdentifier.featured)
 }
