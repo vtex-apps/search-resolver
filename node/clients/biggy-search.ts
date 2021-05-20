@@ -295,7 +295,7 @@ export class BiggySearchClient extends ExternalClient {
       ...cache
     })
 
-    if (result.data?.total) {
+    if (!result.data?.total) {
       this.context.logger.warn({
         message: 'Empty search',
         url,
