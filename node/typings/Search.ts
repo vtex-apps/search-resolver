@@ -39,7 +39,6 @@ interface SearchResultArgs {
   searchState?: string
   sellers?: RegionSeller[]
   hideUnavailableItems?: boolean | null
-  hideItemsWithBetterScope?: boolean | null
   removeHiddenFacets?: boolean | null
 }
 
@@ -60,7 +59,6 @@ interface SuggestionProductsArgs {
   sellers?: RegionSeller[]
   hideUnavailableItems?: boolean | null
   regionId?: string
-  hideItemsWithBetterScope?: boolean
 }
 
 interface SuggestionSearchesArgs {
@@ -80,7 +78,6 @@ interface FacetsInput {
   searchState?: string
   removeHiddenFacets: boolean
   hideUnavailableItems: boolean
-  hideItemsWithBetterScope?: boolean
 }
 
 interface ProductSearchInput {
@@ -96,7 +93,6 @@ interface ProductSearchInput {
   searchState?: string
   simulationBehavior: 'skip' | 'default' | null
   hideUnavailableItems: boolean
-  hideItemsWithBetterScope?: boolean
   map?: string
 }
 
