@@ -260,21 +260,25 @@ export class BiggySearchClient extends ExternalClient {
       args
     )}`
 
+    const params = {
+      query: decodeURIComponent(query ?? ''),
+      page,
+      count,
+      sort,
+      operator,
+      fuzzy,
+      locale: this.locale,
+      bgy_leap: leap ? true : undefined,
+      ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
+      ...parseState(searchState),
+    }
+
     if (isLinked) {
       // eslint-disable-next-line no-console
       console.log({
         productSearch: {
           url,
-          query: decodeURIComponent(query ?? ''),
-          page,
-          count,
-          sort,
-          operator,
-          fuzzy,
-          locale: this.locale,
-          bgy_leap: leap ? true : undefined,
-          ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
-          ...parseState(searchState),
+          ...params,
           cookie: buildBSearchFilterCookie(sellers),
           ...cache,
         }
@@ -282,18 +286,7 @@ export class BiggySearchClient extends ExternalClient {
     }
 
     const result = await this.http.getRaw(url, {
-      params: {
-        query: decodeURIComponent(query ?? ''),
-        page,
-        count,
-        sort,
-        operator,
-        fuzzy,
-        locale: this.locale,
-        bgy_leap: leap ? true : undefined,
-        ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
-        ...parseState(searchState),
-      },
+      params,
       metric: 'search-result',
       headers: {
         Cookie: buildBSearchFilterCookie(sellers),
@@ -301,6 +294,14 @@ export class BiggySearchClient extends ExternalClient {
       },
       ...cache
     })
+
+    if (result.data?.total) {
+      this.context.logger.warn({
+        message: 'Empty search',
+        url,
+        params,
+      })
+    }
 
     return sortProducts(result.data, query)
   }
