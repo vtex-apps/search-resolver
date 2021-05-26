@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.43.0] - 2021-05-26
+
 ### Changed
 - Removed fallback ids from product reference id
 
