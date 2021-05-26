@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Uses `query` param from `selectedFacets` in `searchMetadata` query if no `query` was passed
 
 ## [1.43.1] - 2021-05-26
 
