@@ -10,6 +10,29 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Removed fallback ids from product reference id
 
+## [1.42.1] - 2021-05-20
+
+### Changed
+
+- Yanked `v1.42.0` changes.
+
+## [1.42.0] - 2021-05-19 [YANKED]
+
+### Added
+
+- Enable API cache to `facets`, `productSearch` and `topSearches`.
+
+## [1.41.0] - 2021-05-19
+
+### Added
+
+- Cache to `productSearch` and `facets` queries on navigation pages.
+
+## [1.40.0] - 2021-05-18
+
+### Changed
+- Use the locale returned by the search queries.
+
 ## [1.39.2] - 2021-05-17
 
 ### Fixed

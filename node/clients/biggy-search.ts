@@ -29,6 +29,13 @@ const countingSort = (products: {id: string}[], order: string[]) => {
   return sortedProducts
 }
 
+const validNavigationPage = (attributePath: string, query?: string) => {
+  if (query) {
+    return false
+  }
+  return attributePath.split('/').filter(value => value).length % 2 === 0
+}
+
 const isProductQuery = /^product:(([0-9])+;)+([0-9])+$/g
 const sortProducts = (search: { total: number, products: {id: string}[]}, query: string | undefined) => {
   if (typeof query === 'string' && isProductQuery.test(query) && search.total > 0) {
@@ -205,6 +212,7 @@ export class BiggySearchClient extends ExternalClient {
       hideUnavailableItems
     } = args
 
+    const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
     const url = `${this.store}/api/split/attribute_search/${buildPathFromArgs(
       args
     )}`
@@ -227,6 +235,7 @@ export class BiggySearchClient extends ExternalClient {
         Cookie: buildBSearchFilterCookie(sellers),
         "X-VTEX-IS-ID": `${this.store}`,
       },
+      ...cache,
     })
 
     return result.data
@@ -246,6 +255,7 @@ export class BiggySearchClient extends ExternalClient {
       hideUnavailableItems
     } = args
 
+    const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
     const url = `${this.store}/api/split/product_search/${buildPathFromArgs(
       args
     )}`
@@ -265,7 +275,8 @@ export class BiggySearchClient extends ExternalClient {
           bgy_leap: leap ? true : undefined,
           ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
           ...parseState(searchState),
-          cookie: buildBSearchFilterCookie(sellers)
+          cookie: buildBSearchFilterCookie(sellers),
+          ...cache,
         }
       })
     }
@@ -288,6 +299,7 @@ export class BiggySearchClient extends ExternalClient {
         Cookie: buildBSearchFilterCookie(sellers),
         "X-VTEX-IS-ID": `${this.store}`,
       },
+      ...cache
     })
 
     return sortProducts(result.data, query)
