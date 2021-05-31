@@ -55,7 +55,8 @@ export const convertBiggyProduct = async (
 
   const specificationAttributes = product.textAttributes?.filter(attribute => attribute.isSku) ?? []
 
-  const allSpecifications = specificationAttributes.map(specification => specification.labelKey)
+  const allSpecifications = (product.productSpecifications ?? [])
+    .concat(specificationAttributes.map(specification => specification.labelKey))
 
   const specificationsByKey = specificationAttributes.reduce((specsByKey: {[key: string]: BiggyTextAttribute[]}, spec) => {
     // the joinedKey has the format text@@@key@@@labelKey@@@originalKey@@@originalLabelKey
