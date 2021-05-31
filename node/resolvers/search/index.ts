@@ -733,8 +733,22 @@ export const queries = {
     }
 
     if (args.selectedFacets) {
-      const [map] = getMapAndPriceRangeFromSelectedFacets(args.selectedFacets)
+      const { maps, queries } = args.selectedFacets.reduce(
+        (acc, { key, value }) => {
+          if (key !== 'region-id') {
+            acc.maps.push(key)
+            acc.queries.push(value)
+          }
+
+          return acc
+        },
+        { maps: [] as string[], queries: [] as string[]}
+      )
+      const map = maps.join(',')
+      const query = queries.join('/')
+
       args.map = map
+      args.query = args.query || query || undefined
     }
 
     const query = await getTranslatedSearchTerm(
