@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+- `allSpecifications` does not have `productSpecifications`.
+
+### Fixed
+
 - Use `textAttributes` to build the `allSpecifications` object.
 
 ## [1.43.0] - 2021-05-26
