@@ -733,11 +733,8 @@ export const queries = {
     }
 
     if (args.selectedFacets) {
-      const map = args.selectedFacets.map(x => x.key).join(',')
-      const query = args.selectedFacets.map(x => x.value).join('/')
-
+      const [map] = getMapAndPriceRangeFromSelectedFacets(args.selectedFacets)
       args.map = map
-      args.query = args.query || query
     }
 
     const query = await getTranslatedSearchTerm(
