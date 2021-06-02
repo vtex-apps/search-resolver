@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.43.4] - 2021-06-02
+
 ## [1.43.3] - 2021-05-31
 ### Fixed
 - Uses `query` param from `selectedFacets` in `searchMetadata` query if no `query` was passed
