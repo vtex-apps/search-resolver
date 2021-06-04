@@ -645,7 +645,7 @@ export const queries = {
       allowRedirect
     } = args
     let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
-    console.log(allowRedirect)
+
     regionId = regionId || segment?.regionId
 
     const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets) || segment?.channel
