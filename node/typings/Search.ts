@@ -40,6 +40,7 @@ interface SearchResultArgs {
   sellers?: RegionSeller[]
   hideUnavailableItems?: boolean | null
   removeHiddenFacets?: boolean | null
+  allowRedirect?: boolean
 }
 
 interface RegionSeller {
@@ -94,6 +95,7 @@ interface ProductSearchInput {
   simulationBehavior: 'skip' | 'default' | null
   hideUnavailableItems: boolean
   map?: string
+  allowRedirect: boolean
 }
 
 interface ElasticAttribute {

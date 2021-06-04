@@ -642,9 +642,10 @@ export const queries = {
       searchState,
       simulationBehavior,
       hideUnavailableItems,
+      allowRedirect
     } = args
     let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
-
+    console.log(allowRedirect)
     regionId = regionId || segment?.regionId
 
     const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets) || segment?.channel
@@ -665,6 +666,7 @@ export const queries = {
       sort: convertOrderBy(args.orderBy),
       sellers,
       hideUnavailableItems,
+      allowRedirect,
     }
 
     const result = await biggySearch.productSearch(biggyArgs)
