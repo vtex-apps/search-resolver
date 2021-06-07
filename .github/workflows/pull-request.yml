@@ -22,7 +22,7 @@ jobs:
       - run: vtex
       - uses: actions/checkout@v2
         with:
-          repository: vtex-apps/search-tests
+          repository: vtex/search-tests
           path: search-tests
       - uses: actions/checkout@v2
         with:
