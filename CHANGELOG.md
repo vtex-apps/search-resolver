@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.43.6] - 2021-06-07
+
 ## [1.43.5] - 2021-06-02
 ### Fixed
 - Removes `region-id` before sending to search.
