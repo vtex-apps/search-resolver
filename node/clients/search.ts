@@ -8,7 +8,10 @@ import {
 } from '@vtex/api'
 import { stringify } from 'qs'
 
-import { searchEncodeURI, SearchCrossSellingTypes } from '../resolvers/search/utils'
+import {
+  searchEncodeURI,
+  SearchCrossSellingTypes,
+} from '../resolvers/search/utils'
 
 interface AutocompleteArgs {
   maxRows: number | string
@@ -17,7 +20,7 @@ interface AutocompleteArgs {
 
 enum SimulationBehavior {
   SKIP = 'skip',
-  DEFAULT = 'default'
+  DEFAULT = 'default',
 }
 
 const inflightKey = ({ baseURL, url, params, headers }: RequestConfig) => {
@@ -45,7 +48,10 @@ export class Search extends AppClient {
   private searchEncodeURI: (x: string) => string
   private basePath: string
 
-  private addSalesChannel = (url: string, salesChannel?: string | number | null) => {
+  private addSalesChannel = (
+    url: string,
+    salesChannel?: string | number | null
+  ) => {
     if (!salesChannel) {
       return url
     }
@@ -66,18 +72,20 @@ export class Search extends AppClient {
   }
 
   private getVtexSegmentCookieAsHeader = (vtexSegment?: string) => {
-    return vtexSegment ? {"x-vtex-segment": vtexSegment} : {}
+    return vtexSegment ? { 'x-vtex-segment': vtexSegment } : {}
   }
 
   public constructor(ctx: IOContext, opts?: InstanceOptions) {
     super('vtex.catalog-api-proxy@0.x', ctx, opts)
 
-    this.basePath = ctx.sessionToken ? '/proxy/authenticated/catalog' : '/proxy/catalog'
+    this.basePath = ctx.sessionToken
+      ? '/proxy/authenticated/catalog'
+      : '/proxy/catalog'
     this.searchEncodeURI = searchEncodeURI(ctx.account)
   }
 
   public pageType = (path: string, query: string = '') => {
-    const pageTypePath = path.startsWith('/') ? path.substr(1) : path
+    const pageTypePath = encodeURI(path.startsWith('/') ? path.substr(1) : path)
 
     const pageTypeQuery = !query || query.startsWith('?') ? query : `?${query}`
 
@@ -87,107 +95,179 @@ export class Search extends AppClient {
     )
   }
 
-  public product = (slug: string, vtexSegment?: string,  salesChannel?: string | number | null) =>
+  public product = (
+    slug: string,
+    vtexSegment?: string,
+    salesChannel?: string | number | null
+  ) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
-        this.addSalesChannel(`/pub/products/search/${this.searchEncodeURI(slug && slug.toLowerCase())}/p`, salesChannel)),
+        this.addSalesChannel(
+          `/pub/products/search/${this.searchEncodeURI(
+            slug && slug.toLowerCase()
+          )}/p`,
+          salesChannel
+        )
+      ),
       {
         metric: 'search-product',
         headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
       }
     )
 
-  public productByEan = (id: string, vtexSegment?: string,  salesChannel?: string | number | null) =>
+  public productByEan = (
+    id: string,
+    vtexSegment?: string,
+    salesChannel?: string | number | null
+  ) =>
     this.get<SearchProduct[]>(
-      this.addCompleteSpecifications(this.addSalesChannel(`/pub/products/search?fq=alternateIds_Ean:${id}`, salesChannel)),
+      this.addCompleteSpecifications(
+        this.addSalesChannel(
+          `/pub/products/search?fq=alternateIds_Ean:${id}`,
+          salesChannel
+        )
+      ),
       {
         metric: 'search-productByEan',
         headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
       }
     )
 
-  public productsByEan = (ids: string[], vtexSegment?: string, salesChannel?: string | number | null) =>
+  public productsByEan = (
+    ids: string[],
+    vtexSegment?: string,
+    salesChannel?: string | number | null
+  ) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
-        this.addSalesChannel(`/pub/products/search?${ids
-          .map(id => `fq=alternateIds_Ean:${id}`)
-          .join('&')}`, salesChannel)
+        this.addSalesChannel(
+          `/pub/products/search?${ids
+            .map(id => `fq=alternateIds_Ean:${id}`)
+            .join('&')}`,
+          salesChannel
+        )
       ),
       {
         metric: 'search-productByEan',
-        headers: this.getVtexSegmentCookieAsHeader(vtexSegment)
-    },
+        headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
+      }
     )
 
-  public productById = (id: string, vtexSegment?: string, salesChannel?: string | number | null, cacheable: boolean = true) => {
+  public productById = (
+    id: string,
+    vtexSegment?: string,
+    salesChannel?: string | number | null,
+    cacheable: boolean = true
+  ) => {
     const isVtex = this.context.platform === 'vtex'
     const url = isVtex
       ? this.addCompleteSpecifications(
-        this.addSalesChannel(`/pub/products/search?fq=productId:${id}`, salesChannel))
+          this.addSalesChannel(
+            `/pub/products/search?fq=productId:${id}`,
+            salesChannel
+          )
+        )
       : `/products/${id}`
     return this.get<SearchProduct[]>(url, {
       metric: 'search-productById',
       headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
-      ...(cacheable ? {} : { cacheable: CacheType.None })
+      ...(cacheable ? {} : { cacheable: CacheType.None }),
     })
   }
 
-  public productsById = (ids: string[], vtexSegment?: string, salesChannel?: string | number | null) =>
+  public productsById = (
+    ids: string[],
+    vtexSegment?: string,
+    salesChannel?: string | number | null
+  ) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
-        this.addSalesChannel(`/pub/products/search?${ids
-          .map(id => `fq=productId:${id}`)
-          .join('&')}`, salesChannel)
+        this.addSalesChannel(
+          `/pub/products/search?${ids
+            .map(id => `fq=productId:${id}`)
+            .join('&')}`,
+          salesChannel
+        )
       ),
       {
         metric: 'search-productById',
-        headers: this.getVtexSegmentCookieAsHeader(vtexSegment)
+        headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
       }
     )
 
-  public productByReference = (id: string, vtexSegment?: string, salesChannel?: string | number | null) =>
+  public productByReference = (
+    id: string,
+    vtexSegment?: string,
+    salesChannel?: string | number | null
+  ) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
-        this.addSalesChannel(`/pub/products/search?fq=alternateIds_RefId:${id}`,salesChannel)),
-      {
-        metric: 'search-productByReference',
-        headers: this.getVtexSegmentCookieAsHeader(vtexSegment)
-      }
-    )
-
-  public productsByReference = (ids: string[], vtexSegment?: string, salesChannel?: string | number | null) =>
-    this.get<SearchProduct[]>(
-      this.addCompleteSpecifications(
-        this.addSalesChannel(`/pub/products/search?${ids
-          .map(id => `fq=alternateIds_RefId:${id}`)
-          .join('&')}`, salesChannel)
+        this.addSalesChannel(
+          `/pub/products/search?fq=alternateIds_RefId:${id}`,
+          salesChannel
+        )
       ),
       {
         metric: 'search-productByReference',
-        headers: this.getVtexSegmentCookieAsHeader(vtexSegment)
+        headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
       }
     )
 
-  public productBySku = (skuId: string, vtexSegment?: string, salesChannel?: string | number | null) =>
+  public productsByReference = (
+    ids: string[],
+    vtexSegment?: string,
+    salesChannel?: string | number | null
+  ) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
-        this.addSalesChannel(`/pub/products/search?fq=skuId:${skuId}`, salesChannel)),
+        this.addSalesChannel(
+          `/pub/products/search?${ids
+            .map(id => `fq=alternateIds_RefId:${id}`)
+            .join('&')}`,
+          salesChannel
+        )
+      ),
+      {
+        metric: 'search-productByReference',
+        headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
+      }
+    )
+
+  public productBySku = (
+    skuId: string,
+    vtexSegment?: string,
+    salesChannel?: string | number | null
+  ) =>
+    this.get<SearchProduct[]>(
+      this.addCompleteSpecifications(
+        this.addSalesChannel(
+          `/pub/products/search?fq=skuId:${skuId}`,
+          salesChannel
+        )
+      ),
       {
         metric: 'search-productBySku',
-        headers: this.getVtexSegmentCookieAsHeader(vtexSegment)
+        headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
       }
     )
 
-  public productsBySku = (skuIds: string[], vtexSegment?: string, salesChannel?: string | number | null) =>
+  public productsBySku = (
+    skuIds: string[],
+    vtexSegment?: string,
+    salesChannel?: string | number | null
+  ) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
-        this.addSalesChannel(`/pub/products/search?${skuIds
-          .map(skuId => `fq=skuId:${skuId}`)
-          .join('&')}`, salesChannel)
+        this.addSalesChannel(
+          `/pub/products/search?${skuIds
+            .map(skuId => `fq=skuId:${skuId}`)
+            .join('&')}`,
+          salesChannel
+        )
       ),
       {
         metric: 'search-productsBySku',
-        headers: this.getVtexSegmentCookieAsHeader(vtexSegment)
+        headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
       }
     )
 
@@ -223,16 +303,19 @@ export class Search extends AppClient {
     })
 
   public getCategoryChildren = (id: number) =>
-    this.get<Record<string, string>>(`/pub/category/categories/children?id=${id}`, {
-      metric: 'search-category-children'
-    })
+    this.get<Record<string, string>>(
+      `/pub/category/categories/children?id=${id}`,
+      {
+        metric: 'search-category-children',
+      }
+    )
 
   public facets = (facets: string = '') => {
     const [path, options] = decodeURI(facets).split('?')
     return this.get<SearchFacets>(
-      `/pub/facets/search/${encodeURI(this.searchEncodeURI(
-        `${path.trim()}${options ? '?' + options : ''}`
-      ))}`,
+      `/pub/facets/search/${encodeURI(
+        this.searchEncodeURI(`${path.trim()}${options ? '?' + options : ''}`)
+      )}`,
       { metric: 'search-facets' }
     )
   }
@@ -243,20 +326,26 @@ export class Search extends AppClient {
     })
 
   public crossSelling = (id: string, type: SearchCrossSellingTypes) =>
-    this.get<SearchProduct[]>(`/pub/products/crossselling/${type}/${id}?groupByProduct=true`, {
-      metric: 'search-crossSelling',
-    })
+    this.get<SearchProduct[]>(
+      `/pub/products/crossselling/${type}/${id}?groupByProduct=true`,
+      {
+        metric: 'search-crossSelling',
+      }
+    )
 
   public filtersInCategoryFromId = (id: string | number) =>
-    this.get<FilterListTreeCategoryById[]>(`/pub/specification/field/listTreeByCategoryId/${id}`, {
-      metric: 'search-listTreeByCategoryId'
-    })
+    this.get<FilterListTreeCategoryById[]>(
+      `/pub/specification/field/listTreeByCategoryId/${id}`,
+      {
+        metric: 'search-listTreeByCategoryId',
+      }
+    )
 
   public autocomplete = ({ maxRows, searchTerm }: AutocompleteArgs) =>
     this.get<{ itemsReturned: SearchAutocompleteUnit[] }>(
-      `/buscaautocomplete?maxRows=${maxRows}&productNameContains=${
-      encodeURIComponent(this.searchEncodeURI(searchTerm))
-      }`,
+      `/buscaautocomplete?maxRows=${maxRows}&productNameContains=${encodeURIComponent(
+        this.searchEncodeURI(searchTerm)
+      )}`,
       { metric: 'search-autocomplete' }
     )
 
@@ -275,21 +364,22 @@ export class Search extends AppClient {
   }
 
   public getField = (id: number) =>
-    this.get<FieldResponseAPI>(
-      `/pub/specification/fieldGet/${id}`,
-      { metric: 'catalog-get-field-by-id' }
-    )
+    this.get<FieldResponseAPI>(`/pub/specification/fieldGet/${id}`, {
+      metric: 'catalog-get-field-by-id',
+    })
 
   public getFieldValues = (id: number) => {
     try {
-      return this.get<FieldValuesResponseAPI>(`/pub/specification/fieldvalue/${id}`, {
-        metric: 'catalog-get-field-value-by-id',
-      })
+      return this.get<FieldValuesResponseAPI>(
+        `/pub/specification/fieldvalue/${id}`,
+        {
+          metric: 'catalog-get-field-value-by-id',
+        }
+      )
     } catch {
       return []
     }
   }
-
 
   private getRaw = <T = any>(url: string, config: RequestConfig = {}) => {
     const segmentData: SegmentData | undefined = (this
