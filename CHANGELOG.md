@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- Splunk log for empty searches.
+
 ## [1.43.6] - 2021-06-07
 
 ## [1.43.5] - 2021-06-02
