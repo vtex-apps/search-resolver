@@ -10,6 +10,59 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - `regionalizationv2` query string.
 
+## [1.44.0] - 2021-06-08
+
+### Added
+
+- Splunk log for empty searches.
+
+## [1.43.6] - 2021-06-07
+
+## [1.43.5] - 2021-06-02
+### Fixed
+- Removes `region-id` before sending to search.
+
+## [1.43.4] - 2021-06-02
+
+## [1.43.3] - 2021-05-31
+### Fixed
+- Uses `query` param from `selectedFacets` in `searchMetadata` query if no `query` was passed
+
+## [1.43.2] - 2021-05-31
+
+## [1.43.1] - 2021-05-26
+
+### Fixed
+
+- `allSpecifications` does not have `productSpecifications`.
+
+### Fixed
+
+- Use `textAttributes` to build the `allSpecifications` object.
+
+## [1.43.0] - 2021-05-26
+
+### Changed
+- Removed fallback ids from product reference id
+
+## [1.42.1] - 2021-05-20
+
+### Changed
+
+- Yanked `v1.42.0` changes.
+
+## [1.42.0] - 2021-05-19 [YANKED]
+
+### Added
+
+- Enable API cache to `facets`, `productSearch` and `topSearches`.
+
+## [1.41.0] - 2021-05-19
+
+### Added
+
+- Cache to `productSearch` and `facets` queries on navigation pages.
+
 ## [1.40.0] - 2021-05-18
 
 ### Changed

@@ -40,8 +40,6 @@ export const convertBiggyProduct = async (
     convertSKU(product, indexingType, tradePolicy)
   )
 
-  const allSpecifications = (product.productSpecifications ?? []).concat(getSKUSpecifications(product))
-
   const specificationGroups = product.specificationGroups ? JSON.parse(product.specificationGroups) : {}
 
   const allSpecificationsGroups = [...Object.keys(specificationGroups)]
@@ -56,6 +54,9 @@ export const convertBiggyProduct = async (
   ]
 
   const specificationAttributes = product.textAttributes?.filter(attribute => attribute.isSku) ?? []
+
+  const allSpecifications = (product.productSpecifications ?? [])
+    .concat(specificationAttributes.map(specification => specification.labelKey))
 
   const specificationsByKey = specificationAttributes.reduce((specsByKey: {[key: string]: BiggyTextAttribute[]}, spec) => {
     // the joinedKey has the format text@@@key@@@labelKey@@@originalKey@@@originalLabelKey
@@ -124,7 +125,7 @@ export const convertBiggyProduct = async (
     productId: product.id,
     cacheId: `sp-${product.id}`,
     productName: product.name,
-    productReference: product.reference || product.product || product.id,
+    productReference: product.reference,
     linkText: product.link,
     brand: product.brand || '',
     brandId,
@@ -195,7 +196,7 @@ export const convertBiggyProduct = async (
   if (product.textAttributes) {
     allSpecifications.forEach((specification) => {
       if(!convertedProduct[specification]){
-        const attributes = product.textAttributes.filter((attribute) => attribute.joinedKey.split('@@@')[4] == specification)
+        const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == specification)
 
         convertedProduct[specification] = attributes.map((attribute) => {
           return attribute.labelValue
@@ -295,10 +296,6 @@ const getSimulationPayloads = (product: SearchProduct) => {
 
 const getVariations = (sku: BiggySearchSKU): string[] => {
   return sku.attributes.map((attribute) => attribute.key)
-}
-
-const getSKUSpecifications = (product: BiggySearchProduct): string[] => {
-  return product.skus.map((sku) => sku.attributes.map((attribute) => attribute.key)).reduce((acc, val) => acc.concat(val), []).filter(distinct)
 }
 
 const buildCommertialOffer = (

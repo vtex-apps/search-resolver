@@ -29,6 +29,13 @@ const countingSort = (products: {id: string}[], order: string[]) => {
   return sortedProducts
 }
 
+const validNavigationPage = (attributePath: string, query?: string) => {
+  if (query) {
+    return false
+  }
+  return attributePath.split('/').filter(value => value).length % 2 === 0
+}
+
 const isProductQuery = /^product:(([0-9])+;)+([0-9])+$/g
 const sortProducts = (search: { total: number, products: {id: string}[]}, query: string | undefined) => {
   if (typeof query === 'string' && isProductQuery.test(query) && search.total > 0) {
@@ -214,6 +221,7 @@ export class BiggySearchClient extends ExternalClient {
       hideUnavailableItems,
     } = args
 
+    const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
     const url = `${this.store}/api/split/attribute_search/${buildPathFromArgs(
       args
     )}`
@@ -237,6 +245,7 @@ export class BiggySearchClient extends ExternalClient {
         Cookie: buildBSearchFilterCookie(sellers),
         "X-VTEX-IS-ID": `${this.store}`,
       },
+      ...cache,
     })
 
     return result.data
@@ -256,51 +265,54 @@ export class BiggySearchClient extends ExternalClient {
       hideUnavailableItems,
     } = args
 
+    const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
     const url = `${this.store}/api/split/product_search/${buildPathFromArgs(
       args
     )}`
+
+    const params = {
+      query: decodeURIComponent(query ?? ''),
+      page,
+      count,
+      sort,
+      operator,
+      fuzzy,
+      locale: this.locale,
+      bgy_leap: leap ? true : undefined,
+      regionalizationv2: true,
+      ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
+      ...parseState(searchState),
+    }
 
     if (isLinked) {
       // eslint-disable-next-line no-console
       console.log({
         productSearch: {
           url,
-          query: decodeURIComponent(query ?? ''),
-          page,
-          count,
-          sort,
-          operator,
-          fuzzy,
-          locale: this.locale,
-          regionalizationv2: true,
-          bgy_leap: leap ? true : undefined,
-          ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
-          ...parseState(searchState),
-          cookie: buildBSearchFilterCookie(sellers)
+          ...params,
+          cookie: buildBSearchFilterCookie(sellers),
+          ...cache,
         }
       })
     }
 
     const result = await this.http.getRaw(url, {
-      params: {
-        query: decodeURIComponent(query ?? ''),
-        page,
-        count,
-        sort,
-        operator,
-        fuzzy,
-        locale: this.locale,
-        regionalizationv2: true,
-        bgy_leap: leap ? true : undefined,
-        ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
-        ...parseState(searchState),
-      },
+      params,
       metric: 'search-result',
       headers: {
         Cookie: buildBSearchFilterCookie(sellers),
         "X-VTEX-IS-ID": `${this.store}`,
       },
+      ...cache
     })
+
+    if (!result.data?.total) {
+      this.context.logger.warn({
+        message: 'Empty search',
+        url,
+        params,
+      })
+    }
 
     return sortProducts(result.data, query)
   }
