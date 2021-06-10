@@ -71,6 +71,10 @@ interface SelectedFacet {
   key: string
 }
 
+interface Options {
+  allowRedirect?: boolean
+}
+
 interface FacetsInput {
   map: string
   selectedFacets: SelectedFacet[]
@@ -95,7 +99,7 @@ interface ProductSearchInput {
   simulationBehavior: 'skip' | 'default' | null
   hideUnavailableItems: boolean
   map?: string
-  allowRedirect: boolean
+  options?: Options
 }
 
 interface ElasticAttribute {

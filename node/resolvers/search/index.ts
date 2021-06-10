@@ -642,7 +642,7 @@ export const queries = {
       searchState,
       simulationBehavior,
       hideUnavailableItems,
-      allowRedirect
+      options
     } = args
     let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
 
@@ -653,6 +653,8 @@ export const queries = {
     const sellers = await getSellers(vbase, checkout, tradePolicy, regionId)
 
     const [count, page] = getProductsCountAndPage(from, to)
+
+    const allowRedirect = options?.allowRedirect
 
     const biggyArgs = {
       page,
