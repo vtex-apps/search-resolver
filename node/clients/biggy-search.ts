@@ -253,7 +253,7 @@ export class BiggySearchClient extends ExternalClient {
       searchState,
       sellers,
       hideUnavailableItems,
-      allowRedirect
+      options
     } = args
 
     const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
@@ -270,7 +270,7 @@ export class BiggySearchClient extends ExternalClient {
       fuzzy,
       locale: this.locale,
       bgy_leap: leap ? true : undefined,
-      allowRedirect:  allowRedirect == null ? true : allowRedirect,
+      allowRedirect:  options?.allowRedirect == undefined ? true : options?.allowRedirect ,
       ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
       ...parseState(searchState),
     }

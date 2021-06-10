@@ -654,8 +654,6 @@ export const queries = {
 
     const [count, page] = getProductsCountAndPage(from, to)
 
-    const allowRedirect = options?.allowRedirect
-
     const biggyArgs = {
       page,
       count,
@@ -668,7 +666,7 @@ export const queries = {
       sort: convertOrderBy(args.orderBy),
       sellers,
       hideUnavailableItems,
-      allowRedirect,
+      options,
     }
 
     const result = await biggySearch.productSearch(biggyArgs)
