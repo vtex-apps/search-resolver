@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Use `itemId` instead of `productId` on benefit calls.
+
 ## [1.44.0] - 2021-06-08
 
 ### Added
