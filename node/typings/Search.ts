@@ -40,6 +40,7 @@ interface SearchResultArgs {
   sellers?: RegionSeller[]
   hideUnavailableItems?: boolean | null
   removeHiddenFacets?: boolean | null
+  options?: Options
 }
 
 interface RegionSeller {
@@ -70,6 +71,10 @@ interface SelectedFacet {
   key: string
 }
 
+interface Options {
+  allowRedirect?: boolean
+}
+
 interface FacetsInput {
   map: string
   selectedFacets: SelectedFacet[]
@@ -94,6 +99,7 @@ interface ProductSearchInput {
   simulationBehavior: 'skip' | 'default' | null
   hideUnavailableItems: boolean
   map?: string
+  options?: Options
 }
 
 interface ElasticAttribute {
