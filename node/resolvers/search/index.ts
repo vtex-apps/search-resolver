@@ -460,7 +460,7 @@ export const queries = {
 
     const breadcrumb = buildBreadcrumb(
       result.attributes || [],
-      decodeURIComponent(args.fullText),
+      args.fullText,
       args.selectedFacets
     )
 
