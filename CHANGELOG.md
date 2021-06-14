@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.44.1] - 2021-06-14
+
 ### Fixed
 
 - Breadcrumb and filters with encoded values.
