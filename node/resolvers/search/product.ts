@@ -1,4 +1,4 @@
-import { compose, last, omit, pathOr, split } from 'ramda'
+import { compose, last, omit, pathOr, split, flatten } from 'ramda'
 
 import {
   addContextToTranslatableString,
@@ -160,8 +160,8 @@ export const resolvers = {
       'brandId'
     ),
 
-    benefits: ({ productId }: SearchProduct, _: any, ctx: Context) =>
-      getBenefits(productId, ctx),
+    benefits: async ({ items }: SearchProduct, _: any, ctx: Context) =>
+      flatten(await Promise.all(items?.map(item => getBenefits(item.itemId, ctx)))),
 
     categoryTree: productCategoriesToCategoryTree,
 
