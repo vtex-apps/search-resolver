@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Use `itemId` instead of `productId` on benefit calls.
 
+## [1.45.0] - 2021-06-14
+
+### Added 
+
+- `Options` object with `allowRedirect` flag to `ProductSearch` query.
+
+## [1.44.1] - 2021-06-14
+
+### Fixed
+
+- Breadcrumb and filters with encoded values.
+
 ## [1.44.0] - 2021-06-08
 
 ### Added
