@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.45.2] - 2021-06-16
+
 ### Fixed
 
 - Unicode characters not being properly encoded when calling `pageType` API.
