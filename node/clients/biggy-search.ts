@@ -156,7 +156,6 @@ export class BiggySearchClient extends ExternalClient {
         params: {
           locale: this.locale,
           ['hide-unavailable-items']: hideUnavailableItems ?? false,
-          regionalizationv2: true,
         },
         headers: {
           Cookie: buildBSearchFilterCookie(sellers),
@@ -235,7 +234,6 @@ export class BiggySearchClient extends ExternalClient {
         operator,
         fuzzy,
         locale: this.locale,
-        regionalizationv2: true,
         bgy_leap: leap ? true : undefined,
         ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
         ...parseState(searchState),
@@ -280,7 +278,6 @@ export class BiggySearchClient extends ExternalClient {
       fuzzy,
       locale: this.locale,
       bgy_leap: leap ? true : undefined,
-      regionalizationv2: true,
       allowRedirect: options?.allowRedirect === false ? false : true,
       ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
       ...parseState(searchState),

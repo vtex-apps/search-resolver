@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed
+- `regionalizationv2` query string.
+
 ## [1.46.0] - 2021-06-17
 
 ### Added
