@@ -56,7 +56,7 @@ export const fieldResolvers = {
 export const getBenefits = async (
   itemId: string,
   { clients: { checkout } }: Context
-) => {
+): Promise<unknown[]> => {
   const requestBody = {
     items: [
       {

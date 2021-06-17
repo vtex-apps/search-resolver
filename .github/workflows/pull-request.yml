@@ -1,0 +1,64 @@
+name: PR actions
+on:
+  pull_request:
+    branches:
+      - v1.x
+jobs:
+  e2e-tests:
+    name: E2E test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete previous comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          delete: true
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Install toolbelt
+        run: |
+          yarn global add vtex
+          echo "$(yarn global bin)" >> $GITHUB_PATH
+      - run: vtex
+      - uses: actions/checkout@v2
+        with:
+          repository: vtex/search-tests
+          path: search-tests
+      - uses: actions/checkout@v2
+        with:
+          path: ioapp
+      - run: yarn
+        working-directory: search-tests
+      - name: Create session
+        run: node ci/createSession.js --appkey=${{ secrets.APP_KEY }} --apptoken=${{ secrets.APP_TOKEN }}
+        working-directory: search-tests
+      - name: create workspace
+        run: |
+          vtex workspace create e2e${{ github.sha }}
+          vtex workspace use e2e${{ github.sha }}
+      - name: Link app
+        run: vtex link --no-watch
+        working-directory: ioapp
+      - uses: cypress-io/github-action@v2
+        with:
+          config-file: cypress.json
+          working-directory: search-tests
+          record: true
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.RECORD_KEY }}
+          CYPRESS_VTEX_WORKSPACE: e2e${{ github.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMIT_INFO_BRANCH: ${{ github.head_ref }}
+          COMMIT_INFO_SHA: ${{ github.sha }}
+          COMMIT_INFO_REMOTE: ${{ github.repository }}
+          COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
+          COMMIT_INFO_AUTHOR: ${{ github.actor }}
+      - name: Add comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: failure()
+        with:
+          message: E2E tests failed. Go to https://dashboard.cypress.io/projects/qvjzx1 to check the recordings.
+      - name: Delete workspace
+        run: |
+          vtex workspace use master
+          vtex workspace delete e2e${{ github.sha }}

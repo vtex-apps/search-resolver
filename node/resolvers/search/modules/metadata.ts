@@ -39,10 +39,19 @@ const categoriesOnlyQuery = compose<
 )
 
 const getAndParsePagetype = async (path: string, ctx: Context) => {
-  const pagetype = await ctx.clients.search.pageType(path).catch(() => null)
+  const pagetype = await ctx.clients.search.pageType(path).catch((e) => {
+    ctx.vtex.logger.error({
+      message: 'Failed to call the pageType API.',
+      data: e
+    })
+
+    return null
+  })
+
   if (!pagetype) {
     return emptyTitleTag
   }
+
   return {
     titleTag: pagetype.title || pagetype.name,
     metaTagDescription: pagetype.metaTagDescription,
