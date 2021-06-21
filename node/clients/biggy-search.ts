@@ -63,20 +63,12 @@ const buildPathFromArgs = (args: SearchResultArgs) => {
   return path.join(attributePath.split('%20').join('-'), policyAttr)
 }
 
-const buildBSearchFilterCookie = (sellers?: RegionSeller[]) => {
-  if (!sellers || sellers.length === 0) {
-    return ''
-  }
-
-  const sellersWithBetterScope =
-    !sellers?.find(seller => seller.id === '1')
-      ? sellers?.concat({ id: "1", name: ""})
-      : sellers
-
-  return sellersWithBetterScope.reduce((cookie: string, seller: RegionSeller, idx: number) => {
-      return `${cookie}${idx > 0 ? '/' : ''}${seller.id}`
-    }, 'bsearch-filter=private-seller#')
-}
+const buildBSearchFilterCookie = (sellers?: RegionSeller[]) =>
+  !sellers || sellers.length === 0
+    ? ''
+    : sellers.reduce((cookie: string, seller: RegionSeller, idx: number) => {
+        return `${cookie}${idx > 0 ? '/' : ''}${seller.id}`
+      }, 'bsearch-filter=private-seller#')
 
 export class BiggySearchClient extends ExternalClient {
   private store: string
@@ -156,7 +148,6 @@ export class BiggySearchClient extends ExternalClient {
         params: {
           locale: this.locale,
           ['hide-unavailable-items']: hideUnavailableItems ?? false,
-          regionalizationv2: true,
         },
         headers: {
           Cookie: buildBSearchFilterCookie(sellers),
@@ -218,7 +209,7 @@ export class BiggySearchClient extends ExternalClient {
       leap,
       searchState,
       sellers,
-      hideUnavailableItems,
+      hideUnavailableItems
     } = args
 
     const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
@@ -235,7 +226,6 @@ export class BiggySearchClient extends ExternalClient {
         operator,
         fuzzy,
         locale: this.locale,
-        regionalizationv2: true,
         bgy_leap: leap ? true : undefined,
         ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
         ...parseState(searchState),
@@ -280,7 +270,6 @@ export class BiggySearchClient extends ExternalClient {
       fuzzy,
       locale: this.locale,
       bgy_leap: leap ? true : undefined,
-      regionalizationv2: true,
       allowRedirect: options?.allowRedirect === false ? false : true,
       ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
       ...parseState(searchState),
