@@ -29,14 +29,20 @@ const fillProductWithSimulation = async (
   )
 }
 
-export const convertProducts = (products: BiggySearchProduct[], ctx: Context) => {
+export const convertProducts = async (products: BiggySearchProduct[], ctx: Context, simulationBehavior: 'skip' | 'default' | null) => {
   const {
     vtex: { segment },
     clients: { store },
   } = ctx
   const tradePolicy = segment?.channel?.toString()
 
-  return products
+  let convertedProducts =  products
     .map(product => convertISProduct(product, tradePolicy))
-    .map(product => fillProductWithSimulation(product as SearchProduct, store))
+
+  if (simulationBehavior === 'default') {
+    const simulationPromises = convertedProducts.map(product => fillProductWithSimulation(product as SearchProduct, store))
+    convertedProducts = (await Promise.all(simulationPromises)) as SearchProduct[]
+  }
+
+  return convertedProducts
 }
