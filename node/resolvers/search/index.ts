@@ -599,13 +599,13 @@ export const queries = {
       biggyArgs["page"] = page
     }
 
-    const products = await biggySearch.productSearch(biggyArgs)
+    const result = await biggySearch.productSearch(biggyArgs)
 
     if (ctx.vtex.tenant) {
-      ctx.vtex.tenant.locale = products.locale
+      ctx.vtex.tenant.locale = result.locale
     }
 
-    const convertedProducts = await convertProducts(products, ctx, simulationBehavior)
+    const convertedProducts = await convertProducts(result.products, ctx, simulationBehavior)
 
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
 
