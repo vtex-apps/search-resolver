@@ -1,7 +1,7 @@
 import {
   convertISProduct,
   mergeProductWithItems,
-} from 'vtexis-compatibility-layer'
+} from '@vtex/vtexis-compatibility-layer'
 import { Store } from '../clients/store'
 
 const fillProductWithSimulation = async (
