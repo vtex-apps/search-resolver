@@ -163,6 +163,7 @@ export const convertBiggyProduct = async (
       }
     })
 
+
     const simulationPromises = simulationPayloads.map((payload) => {
       return checkout.simulation(payload, tradePolicy)
     })
@@ -340,14 +341,32 @@ const buildCommertialOffer = (
 }
 
 const getMarketingData = (segment?: SegmentData) => {
-  if (!segment || !segment.utm_campaign || !segment.utm_source) {
+  if(!segment?.utm_campaign && !segment?.utm_source && !segment?.utmi_campaign) {
     return
   }
 
-  return {
-    utmCampaign: segment.utm_campaign,
-    utmSource: segment.utm_source,
+  let marketingData = {}
+  if(segment?.utm_campaign) {
+    marketingData = {
+      utmCampaign: segment?.utm_campaign
+    }
   }
+
+  if(segment?.utm_source) {
+    marketingData = {
+      ...marketingData,
+      utmSource: segment?.utm_source
+    }
+  }
+
+  if(segment?.utmi_campaign) {
+    marketingData = {
+      ...marketingData,
+      utmiCampaign: segment?.utmi_campaign
+    }
+  }
+
+  return marketingData
 }
 
 const getSellersIndexedByApi = (
