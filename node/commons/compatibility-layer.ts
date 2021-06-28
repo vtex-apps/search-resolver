@@ -341,11 +341,32 @@ const buildCommertialOffer = (
 }
 
 const getMarketingData = (segment?: SegmentData) => {
-  return {
-    utmCampaign: segment?.utm_campaign || "",
-    utmSource: segment?.utm_source || "",
-    utmiCampaign: segment?.utmi_campaign || ""
+  if(!segment?.utm_campaign && !segment?.utm_source && !segment?.utmi_campaign) {
+    return
   }
+
+  let marketingData = {}
+  if(segment?.utm_campaign) {
+    marketingData = {
+      utmCampaign: segment?.utm_campaign
+    }
+  }
+
+  if(segment?.utm_source) {
+    marketingData = {
+      ...marketingData,
+      utmSource: segment?.utm_source
+    }
+  }
+
+  if(segment?.utmi_campaign) {
+    marketingData = {
+      ...marketingData,
+      utmiCampaign: segment?.utmi_campaign
+    }
+  }
+
+  return marketingData
 }
 
 const getSellersIndexedByApi = (
