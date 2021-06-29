@@ -263,7 +263,8 @@ export class BiggySearchClient extends ExternalClient {
       searchState,
       sellers,
       hideUnavailableItems,
-      options
+      options,
+      workspaceSearchParams
     } = args
 
     const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
@@ -283,7 +284,10 @@ export class BiggySearchClient extends ExternalClient {
       allowRedirect: options?.allowRedirect === false ? false : true,
       ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
       ...parseState(searchState),
+      ...workspaceSearchParams, // important that this be last so that it can override master settings above
     }
+
+    console.log("supdude", workspaceSearchParams)
 
     if (isLinked) {
       // eslint-disable-next-line no-console

@@ -42,6 +42,7 @@ interface SearchResultArgs {
   removeHiddenFacets?: boolean | null
   options?: Options
   initialAttributes?: string
+  workspaceSearchParams?: object
 }
 
 interface RegionSeller {
