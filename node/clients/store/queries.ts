@@ -8,6 +8,7 @@ query itemsWithSimulation($items: [ItemInput]) {
         Price
         ListPrice
         PriceValidUntil
+        PriceWithoutDiscount
         discountHighlights {
           name
         }

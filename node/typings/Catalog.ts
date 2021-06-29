@@ -78,6 +78,7 @@ enum FacetsBehavior {
 }
 
 interface SearchProduct {
+  origin?: string
   productId: string
   productName: string
   brand: string

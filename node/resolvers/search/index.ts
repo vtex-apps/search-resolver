@@ -607,7 +607,7 @@ export const queries = {
 
     const convertedProducts = await convertProducts(result.products, ctx, simulationBehavior)
 
-    convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
+    convertedProducts.forEach(product => product.origin = 'intelligent-search')
 
     return convertedProducts
   },
@@ -714,8 +714,7 @@ export const queries = {
       await productsCatalog(({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })) :
       await convertProducts(result.products, ctx, simulationBehavior)
 
-    // Add prefix to the cacheId to avoid conflicts. Repeated cacheIds in the same page are causing strange behavior.
-    convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
+    convertedProducts.forEach(product => product.origin = 'intelligent-search')
 
     return {
       searchState,
@@ -848,6 +847,8 @@ export const queries = {
     const convertedProducts = args.productOriginVtex ?
       await productsCatalog(({ ctx, simulationBehavior: args.simulationBehavior, searchResult: result, tradePolicy: String(tradePolicy), regionId })) :
       await convertProducts(result.products, ctx, args.simulationBehavior)
+
+      convertedProducts.forEach(product => product.origin = 'intelligent-search')
 
     const {
       count,
