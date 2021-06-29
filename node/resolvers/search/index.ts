@@ -37,7 +37,7 @@ import {
   convertOrderBy,
   buildBreadcrumb,
 } from '../../commons/compatibility-layer'
-import { productsCatalog, productsBiggy } from '../../commons/products'
+import { productsCatalog } from '../../commons/products'
 import {
   attributesToFilters,
   sortAttributeValuesByCatalog,
@@ -45,6 +45,7 @@ import {
 import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
 import { Checkout } from '../../clients/checkout'
 import setFilterVisibility from '../../utils/setFilterVisibility'
+import { convertProducts } from '../../utils/compatibility-layer'
 
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -568,15 +569,15 @@ export const queries = {
       biggyArgs["page"] = page
     }
 
-    const products = await biggySearch.productSearch(biggyArgs)
+    const result = await biggySearch.productSearch(biggyArgs)
 
     if (ctx.vtex.tenant) {
-      ctx.vtex.tenant.locale = products.locale
+      ctx.vtex.tenant.locale = result.locale
     }
 
-    const regionId = segment?.regionId
-    const convertedProducts = await productsBiggy({ ctx, simulationBehavior, searchResult: products, regionId })
-    convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
+    const convertedProducts = await convertProducts(result.products, ctx, simulationBehavior)
+
+    convertedProducts.forEach(product => product.origin = 'intelligent-search')
 
     return convertedProducts
   },
@@ -675,13 +676,11 @@ export const queries = {
       ctx.vtex.tenant.locale = result.locale
     }
 
-    const productResolver = args.productOriginVtex
-      ? productsCatalog
-      : productsBiggy
-    const convertedProducts = await productResolver({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })
+    const convertedProducts = args.productOriginVtex ?
+      await productsCatalog(({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })) :
+      await convertProducts(result.products, ctx, simulationBehavior)
 
-    // Add prefix to the cacheId to avoid conflicts. Repeated cacheIds in the same page are causing strange behavior.
-    convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
+    convertedProducts.forEach(product => product.origin = 'intelligent-search')
 
     return {
       searchState,
@@ -808,19 +807,11 @@ export const queries = {
       ctx.vtex.tenant.locale = result.locale
     }
 
-    const productResolver = args.productOriginVtex
-      ? productsCatalog
-      : productsBiggy
+    const convertedProducts = args.productOriginVtex ?
+      await productsCatalog(({ ctx, simulationBehavior: args.simulationBehavior, searchResult: result, tradePolicy: String(tradePolicy), regionId })) :
+      await convertProducts(result.products, ctx, args.simulationBehavior)
 
-    const convertedProducts = productResolver(
-      {
-        ctx,
-        searchResult: result,
-        simulationBehavior: args.simulationBehavior,
-        tradePolicy: String(tradePolicy),
-        regionId
-      }
-    )
+      convertedProducts.forEach(product => product.origin = 'intelligent-search')
 
     const {
       count,
