@@ -430,7 +430,7 @@ const elasticImageToSearchImage = (image: ElasticImage, imageId: string): Search
     imageId,
     imageTag: "",
     imageLabel: image.name,
-    imageText: image.name,
+    imageText: image.name ?? 'product image',
     imageUrl: image.value,
   }
 }
