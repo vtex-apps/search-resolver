@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Searches with percentage.
+
 ## [1.47.2] - 2021-06-29
 ### Fixed
 - Adds fallback image label
