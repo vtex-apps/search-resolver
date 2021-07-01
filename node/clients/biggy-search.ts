@@ -36,6 +36,14 @@ const validNavigationPage = (attributePath: string, query?: string) => {
   return attributePath.split('/').filter(value => value).length % 2 === 0
 }
 
+const decodeQuery = (query: string) => {
+  try {
+    return decodeURIComponent(query)
+  } catch (e) {
+    return query
+  }
+}
+
 const isProductQuery = /^product:(([0-9])+;)+([0-9])+$/g
 const sortProducts = (search: { total: number, products: {id: string}[]}, query: string | undefined) => {
   if (typeof query === 'string' && isProductQuery.test(query) && search.total > 0) {
@@ -219,7 +227,7 @@ export class BiggySearchClient extends ExternalClient {
 
     const result = await this.http.getRaw(url, {
       params: {
-        query: decodeURIComponent(query ?? ''),
+        query: decodeQuery(query ?? ''),
         page,
         count,
         sort,
@@ -262,7 +270,7 @@ export class BiggySearchClient extends ExternalClient {
     )}`
 
     const params = {
-      query: decodeURIComponent(query ?? ''),
+      query: decodeQuery(query ?? ''),
       page,
       count,
       sort,
