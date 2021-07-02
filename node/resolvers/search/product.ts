@@ -328,5 +328,7 @@ export const resolvers = {
   },
   OnlyProduct: {
     categoryTree: productCategoriesToCategoryTree,
+    productClusters: ({ productClusters }: any) => productClusters ?? [],
+    clusterHighlights: ({ clusterHighlights }: any) => clusterHighlights ?? [],
   },
 }
