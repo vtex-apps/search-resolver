@@ -62,6 +62,7 @@ interface SuggestionProductsArgs {
   sellers?: RegionSeller[]
   hideUnavailableItems?: boolean | null
   regionId?: string
+  workspaceSearchParams?: object
 }
 
 interface SuggestionSearchesArgs {
