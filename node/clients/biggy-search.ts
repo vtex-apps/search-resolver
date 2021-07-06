@@ -128,6 +128,7 @@ export class BiggySearchClient extends ExternalClient {
       indexingType,
       sellers,
       hideUnavailableItems = false,
+      workspaceSearchParams
     } = args
     const attributes: { key: string; value: string }[] = []
 
@@ -156,6 +157,7 @@ export class BiggySearchClient extends ExternalClient {
         params: {
           locale: this.locale,
           ['hide-unavailable-items']: hideUnavailableItems ?? false,
+          ...workspaceSearchParams
         },
         headers: {
           Cookie: buildBSearchFilterCookie(sellers),
@@ -286,8 +288,6 @@ export class BiggySearchClient extends ExternalClient {
       ...parseState(searchState),
       ...workspaceSearchParams, // important that this be last so that it can override master settings above
     }
-
-    console.log("supdude", workspaceSearchParams)
 
     if (isLinked) {
       // eslint-disable-next-line no-console

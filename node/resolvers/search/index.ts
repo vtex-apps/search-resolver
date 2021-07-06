@@ -577,7 +577,6 @@ export const queries = {
     const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
 
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
-    console.log("supsude1", workspaceSearchParams)
 
     const biggyArgs: SearchResultArgs = {
       fullText: query,
@@ -683,7 +682,6 @@ export const queries = {
     const [count, page] = getProductsCountAndPage(from, to)
 
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
-    console.log("supsude1", workspaceSearchParams)
 
     const biggyArgs : SearchResultArgs = {
       page,
@@ -831,10 +829,13 @@ export const queries = {
 
     const sellers = await getSellers(vbase, checkout, tradePolicy, regionId)
 
+    const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+
     const result = await biggySearch.suggestionProducts({
       ...args,
       salesChannel: tradePolicy,
-      sellers
+      sellers,
+      workspaceSearchParams
     })
 
     if (ctx.vtex.tenant && !args.productOriginVtex) {
