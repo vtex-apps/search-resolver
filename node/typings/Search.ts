@@ -41,6 +41,7 @@ interface SearchResultArgs {
   hideUnavailableItems?: boolean | null
   removeHiddenFacets?: boolean | null
   options?: Options
+  initialAttributes?: string
 }
 
 interface RegionSeller {
@@ -83,6 +84,7 @@ interface FacetsInput {
   searchState?: string
   removeHiddenFacets: boolean
   hideUnavailableItems: boolean
+  initialAttributes?: string
 }
 
 interface ProductSearchInput {

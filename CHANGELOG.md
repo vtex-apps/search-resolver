@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- `initialAttributes` to `facets` query.
+
 ## [1.47.4] - 2021-07-05
 
 ## [1.47.3] - 2021-07-05

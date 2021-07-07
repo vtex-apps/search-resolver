@@ -407,7 +407,7 @@ export const queries = {
       args
     )) as FacetsInput
 
-    let { fullText, searchState } = args
+    let { fullText, searchState, initialAttributes } = args
 
     if (fullText) {
       fullText = await translateToStoreDefaultLanguage(ctx, args.fullText!)
@@ -431,6 +431,7 @@ export const queries = {
       tradePolicy,
       sellers,
       hideUnavailableItems: args.hideUnavailableItems,
+      initialAttributes,
     }
 
     const result = await biggySearch.facets(biggyArgs)
@@ -642,7 +643,7 @@ export const queries = {
       searchState,
       simulationBehavior,
       hideUnavailableItems,
-      options
+      options,
     } = args
     let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
 

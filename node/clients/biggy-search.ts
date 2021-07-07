@@ -217,7 +217,8 @@ export class BiggySearchClient extends ExternalClient {
       leap,
       searchState,
       sellers,
-      hideUnavailableItems
+      hideUnavailableItems,
+      initialAttributes
     } = args
 
     const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
@@ -235,6 +236,7 @@ export class BiggySearchClient extends ExternalClient {
         fuzzy,
         locale: this.locale,
         bgy_leap: leap ? true : undefined,
+        initialAttributes,
         ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
         ...parseState(searchState),
       },
