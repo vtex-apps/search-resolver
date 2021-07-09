@@ -61,4 +61,4 @@ jobs:
       - name: Delete workspace
         run: |
           vtex workspace use master
-          vtex workspace delete e2e${{ github.sha }}
+          yes | vtex workspace delete e2e${{ github.sha }}
