@@ -7,6 +7,9 @@ jobs:
   e2e-tests:
     name: E2E test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        containers: [1, 2, 3, 4]
     steps:
       - name: Delete previous comment
         uses: marocchino/sticky-pull-request-comment@v2
@@ -43,6 +46,7 @@ jobs:
           config-file: cypress.json
           working-directory: search-tests
           record: true
+          parallel: true
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.RECORD_KEY }}
           CYPRESS_VTEX_WORKSPACE: e2e${{ github.sha }}
