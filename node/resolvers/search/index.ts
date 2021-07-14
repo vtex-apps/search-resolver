@@ -437,7 +437,8 @@ export const queries = {
     const facetPromises = [biggySearch.facets(biggyArgs)]
 
     const showCategoryTree = args.categoryTreeBehavior === 'show';
-    const categorySelectedFacets = args.selectedFacets.filter(facet => facet.key === 'c')
+    const categoryRegex = /category-[0-9]+/
+    const categorySelectedFacets = args.selectedFacets.filter(facet => facet.key === 'c' || categoryRegex.test(facet.key))
 
     if (!fullText && showCategoryTree && categorySelectedFacets.length > 0) {
       const solrQuery = categorySelectedFacets.map(facet => facet.value).join('/')
@@ -455,7 +456,7 @@ export const queries = {
     const [intelligentSearchFacets, solrFacets] = await Promise.all(facetPromises)
 
     if (ctx.vtex.tenant) {
-      ctx.vtex.tenant.locale = result.locale
+      ctx.vtex.tenant.locale = intelligentSearchFacets.locale
     }
 
     // FIXME: This is used to sort values based on catalog API.
