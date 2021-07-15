@@ -1,11 +1,13 @@
 import './globals'
 
-import { Cached, LRUCache, RecorderState, Service } from '@vtex/api'
+import { Cached, LRUCache, RecorderState, Service, method } from '@vtex/api'
 import schema from 'vtex.search-graphql/graphql'
 
 import { Clients } from './clients'
 import { schemaDirectives } from './directives'
 import { resolvers } from './resolvers'
+import { setWorkspaceSearchParams, getWorkspaceSearchParams } from './routes/workspaceSearchParams'
+
 
 const TWO_SECONDS_MS = 2 * 1000
 const THREE_SECONDS_MS = 3 * 1000
@@ -65,5 +67,13 @@ export default new Service<Clients, RecorderState, CustomContext>({
     resolvers,
     schema,
     schemaDirectives,
+  },
+  routes: {
+    setWorkspaceSearchParams: method({
+      GET: setWorkspaceSearchParams
+    }),
+    getWorkspaceSearchParams: method({
+      GET: getWorkspaceSearchParams
+    }),
   },
 })

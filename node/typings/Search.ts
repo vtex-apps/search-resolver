@@ -42,6 +42,7 @@ interface SearchResultArgs {
   removeHiddenFacets?: boolean | null
   options?: Options
   initialAttributes?: string
+  workspaceSearchParams?: object
 }
 
 interface RegionSeller {
@@ -61,6 +62,7 @@ interface SuggestionProductsArgs {
   sellers?: RegionSeller[]
   hideUnavailableItems?: boolean | null
   regionId?: string
+  workspaceSearchParams?: object
 }
 
 interface SuggestionSearchesArgs {

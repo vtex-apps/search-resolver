@@ -45,6 +45,7 @@ import {
 import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
 import { Checkout } from '../../clients/checkout'
 import setFilterVisibility from '../../utils/setFilterVisibility'
+import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
 
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -575,6 +576,8 @@ export const queries = {
 
     const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
 
+    const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+
     const biggyArgs: SearchResultArgs = {
       fullText: query,
       attributePath: buildAttributePath(selectedFacets),
@@ -583,6 +586,7 @@ export const queries = {
       sellers: sellers,
       sort: convertOrderBy(orderBy),
       hideUnavailableItems,
+      workspaceSearchParams,
     }
 
     if (to !== null && from !== null) {
@@ -677,7 +681,9 @@ export const queries = {
 
     const [count, page] = getProductsCountAndPage(from, to)
 
-    const biggyArgs = {
+    const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+
+    const biggyArgs : SearchResultArgs = {
       page,
       count,
       fuzzy,
@@ -685,11 +691,13 @@ export const queries = {
       searchState,
       attributePath: buildAttributePath(selectedFacets),
       query: fullText,
+      fullText,
       tradePolicy,
       sort: convertOrderBy(args.orderBy),
       sellers,
       hideUnavailableItems,
       options,
+      workspaceSearchParams,
     }
 
     const result = await biggySearch.productSearch(biggyArgs)
@@ -821,10 +829,13 @@ export const queries = {
 
     const sellers = await getSellers(vbase, checkout, tradePolicy, regionId)
 
+    const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+
     const result = await biggySearch.suggestionProducts({
       ...args,
       salesChannel: tradePolicy,
-      sellers
+      sellers,
+      workspaceSearchParams
     })
 
     if (ctx.vtex.tenant && !args.productOriginVtex) {
