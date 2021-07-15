@@ -30,7 +30,7 @@ import {
   validMapAndQuery,
 } from './utils'
 import { toCompatibilityArgs } from './newURLs'
-import { PATH_SEPARATOR, MAP_VALUES_SEP, SELLERS_BUCKET } from './constants'
+import { PATH_SEPARATOR, MAP_VALUES_SEP, SELLERS_BUCKET, FACETS_BUCKET } from './constants'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import {
   buildAttributePath,
@@ -434,17 +434,36 @@ export const queries = {
       initialAttributes,
     }
 
-    const result = await biggySearch.facets(biggyArgs)
+    const facetPromises = [biggySearch.facets(biggyArgs)]
+
+    const showCategoryTree = args.categoryTreeBehavior === 'show';
+    const categoryRegex = /category-[0-9]+/
+    const categorySelectedFacets = args.selectedFacets.filter(facet => facet.key === 'c' || categoryRegex.test(facet.key))
+
+    if (!fullText && showCategoryTree && categorySelectedFacets.length > 0) {
+      const solrQuery = categorySelectedFacets.map(facet => facet.value).join('/')
+      const solrMap = categorySelectedFacets.map(facet => facet.key).join(',')
+      const assembledQuery = `${solrQuery}?map=${solrMap}`
+      facetPromises.push(staleFromVBaseWhileRevalidate(
+        vbase,
+        FACETS_BUCKET,
+        assembledQuery,
+        search.facets,
+        assembledQuery
+      ))
+    }
+
+    const [intelligentSearchFacets, solrFacets] = await Promise.all(facetPromises)
 
     if (ctx.vtex.tenant) {
-      ctx.vtex.tenant.locale = result.locale
+      ctx.vtex.tenant.locale = intelligentSearchFacets.locale
     }
 
     // FIXME: This is used to sort values based on catalog API.
     // Remove it when it is not necessary anymore
-    if (result && result.attributes) {
-      result.attributes = await Promise.all(
-        result.attributes.map(async (attribute: any) => {
+    if (intelligentSearchFacets && intelligentSearchFacets.attributes) {
+      intelligentSearchFacets.attributes = await Promise.all(
+        intelligentSearchFacets.attributes.map(async (attribute: any) => {
           if (
             attribute.type === 'text' &&
             attribute.ids &&
@@ -460,18 +479,21 @@ export const queries = {
     }
 
     const breadcrumb = buildBreadcrumb(
-      result.attributes || [],
+      intelligentSearchFacets.attributes || [],
       args.fullText,
       args.selectedFacets
     )
 
-    const attributesWithVisibilitySet = await setFilterVisibility(vbase, search, result.attributes ?? [])
+    const attributesWithVisibilitySet = await setFilterVisibility(vbase, search, intelligentSearchFacets.attributes ?? [])
 
     const response = attributesToFilters({
       breadcrumb,
-      total: result.total,
+      solrFacets,
+      total: intelligentSearchFacets.total,
       attributes: attributesWithVisibilitySet,
+      selectedFacets: args.selectedFacets,
       removeHiddenFacets: args.removeHiddenFacets,
+      showCategoryTree: showCategoryTree && !fullText && categorySelectedFacets.length > 0,
     })
 
     return {

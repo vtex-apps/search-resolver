@@ -85,6 +85,7 @@ interface FacetsInput {
   removeHiddenFacets: boolean
   hideUnavailableItems: boolean
   initialAttributes?: string
+  categoryTreeBehavior: 'default' | 'show' | 'hide'
 }
 
 interface ProductSearchInput {
