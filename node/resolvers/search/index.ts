@@ -498,6 +498,7 @@ export const queries = {
 
     return {
       facets: response,
+      sampling: intelligentSearchFacets.sampling,
       queryArgs: {
         map: args.map,
         query: args.query,
