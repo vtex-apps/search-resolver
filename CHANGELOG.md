@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- `productId` that was different from the catalog ID.
+
 ## [1.51.0] - 2021-07-29
 
 ### Feature

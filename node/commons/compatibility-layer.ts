@@ -123,7 +123,7 @@ export const convertBiggyProduct = async (
   const convertedProduct: SearchProduct & { cacheId?: string, [key: string]: any } = {
     categories,
     categoriesIds,
-    productId: product.id,
+    productId: product.product,
     cacheId: `sp-${product.id}`,
     productName: product.name,
     productReference: product.reference,
