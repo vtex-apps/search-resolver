@@ -4631,7 +4631,7 @@ static-extend@^0.1.1:
     define-property "^0.2.5"
     object-copy "^0.1.0"
 
-"stats-lite@github:vtex/node-stats-lite#dist":
+stats-lite@vtex/node-stats-lite#dist:
   version "2.2.0"
   resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/1b0d39cc41ef7aaecfd541191f877887a2044797"
   dependencies:
@@ -5183,25 +5183,17 @@ verror@1.10.0:
   version "0.0.0"
   resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.10.1/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
 
-"vtex.messages@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.61.0/public/@types/vtex.messages":
-  version "1.61.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.61.0/public/@types/vtex.messages#9f539aa5e98ad8024b2b92e7218c2ae5a1a59a94"
+"vtex.messages@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.64.0/public/@types/vtex.messages":
+  version "1.64.0"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.64.0/public/@types/vtex.messages#f57bcc82a2420c15eb7a388543ee1925a005fe96"
 
-"vtex.rewriter@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.53.0/public/@types/vtex.rewriter":
-  version "1.53.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.53.0/public/@types/vtex.rewriter#90aa934f19138cf65adb554117183d2dbf5103ef"
+"vtex.rewriter@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.53.4/public/@types/vtex.rewriter":
+  version "1.53.4"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.53.4/public/@types/vtex.rewriter#6348993efde4106196bca60fd40dba00b3a354b6"
 
-"vtex.sae-analytics@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.sae-analytics@2.4.0/public/@types/vtex.sae-analytics":
-  version "2.4.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.sae-analytics@2.4.0/public/@types/vtex.sae-analytics#6577d7d735b5bf0e05cceb0357080cf4f733703e"
-
-"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.44.0/public":
+"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.46.0/public":
   version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.44.0/public#8c561ed263a4e3fa061f34de8a946c2c565f5a33"
-
-"vtex.search-resolver@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-resolver@1.32.2/public/_types/react":
-  version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-resolver@1.32.2/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.46.0/public#9ebc3c5137c43b94205c6e8a9b7b0262fc7c0eff"
 
 w3c-hr-time@^1.0.1:
   version "1.0.1"
