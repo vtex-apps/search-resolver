@@ -128,6 +128,7 @@ export class BiggySearchClient extends ExternalClient {
       indexingType,
       sellers,
       hideUnavailableItems = false,
+      workspaceSearchParams
     } = args
     const attributes: { key: string; value: string }[] = []
 
@@ -156,6 +157,7 @@ export class BiggySearchClient extends ExternalClient {
         params: {
           locale: this.locale,
           ['hide-unavailable-items']: hideUnavailableItems ?? false,
+          ...workspaceSearchParams
         },
         headers: {
           Cookie: buildBSearchFilterCookie(sellers),
@@ -263,7 +265,8 @@ export class BiggySearchClient extends ExternalClient {
       searchState,
       sellers,
       hideUnavailableItems,
-      options
+      options,
+      workspaceSearchParams
     } = args
 
     const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
@@ -283,6 +286,7 @@ export class BiggySearchClient extends ExternalClient {
       allowRedirect: options?.allowRedirect === false ? false : true,
       ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
       ...parseState(searchState),
+      ...workspaceSearchParams, // important that this be last so that it can override master settings above
     }
 
     if (isLinked) {
