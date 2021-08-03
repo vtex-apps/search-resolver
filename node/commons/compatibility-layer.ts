@@ -220,12 +220,27 @@ export const convertBiggyProduct = async (
   return convertedProduct
 }
 
-const getSellerDefault = (sellers: Seller[]) => {
+const getDefaultSeller = (sellers: Seller[]) => {
   const sellersWithStock = sellers
     .filter(seller => seller.commertialOffer.AvailableQuantity !== 0)
 
   return sellersWithStock?.sort((a, b) => a.commertialOffer.Price - b.commertialOffer.Price)
     .map(seller => seller.sellerId)[0]
+}
+
+const updatedSellersAccordingToAvailability = (sellers: Seller[]) => {
+  const sellerDefault = getDefaultSeller(sellers)
+
+  if (!sellerDefault || sellers.find(seller => seller.sellerDefault)?.sellerId === sellerDefault) {
+    return sellers
+  }
+
+  return sellers.map(seller => {
+    return {
+      ...seller,
+      sellerDefault: seller.sellerId === sellerDefault ? true : false
+    }
+  })
 }
 
 const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: OrderFormItemBySeller) => {
@@ -288,15 +303,7 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
       }]
     })
 
-    const sellerDefault = getSellerDefault(searchItem.sellers)
-    if (sellerDefault && searchItem.sellers.find(seller => seller.sellerDefault)?.sellerId !== sellerDefault) {
-      searchItem.sellers = searchItem.sellers.map(seller => {
-        return {
-          ...seller,
-          sellerDefault: seller.sellerId === sellerDefault ? true : false
-        }
-      })
-    }
+    searchItem.sellers = updatedSellersAccordingToAvailability(searchItem.sellers)
   }
 
   return searchItem
