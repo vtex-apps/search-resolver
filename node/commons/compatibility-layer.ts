@@ -59,7 +59,7 @@ export const convertBiggyProduct = async (
   const allSpecifications = (product.productSpecifications ?? [])
     .concat(specificationAttributes.map(specification => specification.labelKey))
 
-  const specificationsByKey = specificationAttributes.reduce((specsByKey: {[key: string]: BiggyTextAttribute[]}, spec) => {
+  const specificationsByKey = specificationAttributes.reduce((specsByKey: { [key: string]: BiggyTextAttribute[] }, spec) => {
     // the joinedKey has the format text@@@key@@@labelKey@@@originalKey@@@originalLabelKey
     const value = spec.joinedKey.split('@@@')[3]
     specsByKey[value] = (specsByKey[value] || []).concat(spec)
@@ -88,7 +88,7 @@ export const convertBiggyProduct = async (
 
   const numberAttributes = product.numberAttributes ?? []
 
-  const numberSpecificationsByKey = numberAttributes.reduce((specsByKey: {[key: string]: BiggyTextAttribute[]}, spec) => {
+  const numberSpecificationsByKey = numberAttributes.reduce((specsByKey: { [key: string]: BiggyTextAttribute[] }, spec) => {
     const value = spec.labelKey
     specsByKey[value] = (specsByKey[value] || []).concat(spec)
 
@@ -170,9 +170,9 @@ export const convertBiggyProduct = async (
     })
 
     const simulationItems = (await Promise.all(simulationPromises.map(promise => promise.catch(() => undefined)))).filter((x) => x != undefined).map((x) => {
-     const orderForm = x as OrderForm
+      const orderForm = x as OrderForm
 
-     return orderForm.items.map(item => ({ ...item, paymentData: orderForm.paymentData, ratesAndBenefitsData: orderForm.ratesAndBenefitsData }))
+      return orderForm.items.map(item => ({ ...item, paymentData: orderForm.paymentData, ratesAndBenefitsData: orderForm.ratesAndBenefitsData }))
     }).reduce((acc, val) => acc.concat(val), [])
 
     const groupedBySkuId = groupBy(prop("id"), simulationItems)
@@ -197,7 +197,7 @@ export const convertBiggyProduct = async (
 
   if (product.textAttributes) {
     allSpecifications.forEach((specification) => {
-      if(!convertedProduct[specification]){
+      if (!convertedProduct[specification]) {
         const attributes = product.textAttributes.filter((attribute) => attribute.labelKey == specification)
 
         convertedProduct[specification] = attributes.map((attribute) => {
@@ -218,6 +218,29 @@ export const convertBiggyProduct = async (
   })
 
   return convertedProduct
+}
+
+const getDefaultSeller = (sellers: Seller[]) => {
+  const sellersWithStock = sellers
+    .filter(seller => seller.commertialOffer.AvailableQuantity !== 0)
+
+  return sellersWithStock?.sort((a, b) => a.commertialOffer.Price - b.commertialOffer.Price)
+    .map(seller => seller.sellerId)[0]
+}
+
+const updatedSellersAccordingToAvailability = (sellers: Seller[]) => {
+  const sellerDefault = getDefaultSeller(sellers)
+
+  if (!sellerDefault || sellers.find(seller => seller.sellerDefault)?.sellerId === sellerDefault) {
+    return sellers
+  }
+
+  return sellers.map(seller => {
+    return {
+      ...seller,
+      sellerDefault: seller.sellerId === sellerDefault ? true : false
+    }
+  })
 }
 
 const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: OrderFormItemBySeller) => {
@@ -279,6 +302,8 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
         PaymentSystemGroupName: '',
       }]
     })
+
+    searchItem.sellers = updatedSellersAccordingToAvailability(searchItem.sellers)
   }
 
   return searchItem
@@ -342,25 +367,25 @@ const buildCommertialOffer = (
 }
 
 const getMarketingData = (segment?: SegmentData) => {
-  if(!segment?.utm_campaign && !segment?.utm_source && !segment?.utmi_campaign) {
+  if (!segment?.utm_campaign && !segment?.utm_source && !segment?.utmi_campaign) {
     return
   }
 
   let marketingData = {}
-  if(segment?.utm_campaign) {
+  if (segment?.utm_campaign) {
     marketingData = {
       utmCampaign: segment?.utm_campaign
     }
   }
 
-  if(segment?.utm_source) {
+  if (segment?.utm_source) {
     marketingData = {
       ...marketingData,
       utmSource: segment?.utm_source
     }
   }
 
-  if(segment?.utmi_campaign) {
+  if (segment?.utmi_campaign) {
     marketingData = {
       ...marketingData,
       utmiCampaign: segment?.utmi_campaign
@@ -646,7 +671,7 @@ const getDiscountHighLights = (ratesAndBenefitsData: RatesAndBenefitsData) => {
 }
 
 export const buildCategoryTreeBasedOnIntelligentSearch = (solrTree: SearchFacetCategory[], intelligentSearchTree: Attribute[]): any => {
-  const removeInvalidChildren = (tree: {Children: SearchFacetCategory[]}, intelligentSearchTree: Attribute[], currentDepth = 0): any => {
+  const removeInvalidChildren = (tree: { Children: SearchFacetCategory[] }, intelligentSearchTree: Attribute[], currentDepth = 0): any => {
     if (currentDepth >= intelligentSearchTree.length) {
       return
     }
