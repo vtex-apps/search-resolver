@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Update default seller after the simulation call.
+
 ## [1.51.1] - 2021-07-29
 
 ### Fixed
