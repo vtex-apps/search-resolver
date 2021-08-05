@@ -23,6 +23,7 @@ import { resolvers as skuSpecificationResolver } from './skuSpecification'
 import { resolvers as skuSpecificationFieldResolver } from './skuSpecificationField'
 import { resolvers as skuSpecificationValueResolver } from './skuSpecificationValue'
 import { resolvers as productPriceRangeResolvers } from './productPriceRange'
+import { resolvers as searchBreadcrumbResolvers } from './searchBreadcrumb'
 import { getSearchMetaData } from './modules/metadata'
 import {
   SearchCrossSellingTypes,
@@ -250,6 +251,7 @@ export const fieldResolvers = {
   ...skuSpecificationValueResolver,
   ...assemblyOptionResolvers,
   ...productPriceRangeResolvers,
+  ...searchBreadcrumbResolvers,
 }
 
 export const getCompatibilityArgs = async <T extends QueryArgs>(

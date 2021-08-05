@@ -6,7 +6,9 @@ import {
   shouldTranslateToBinding,
   shouldTranslateToUserLocale,
 } from '../../utils/i18n'
+import { Slugify } from '../../utils/slug'
 import { getBenefits } from '../benefits'
+import { APP_NAME } from './constants'
 import { buildCategoryMap } from './utils'
 
 type DynamicKey<T> = Record<string, T>
@@ -233,13 +235,15 @@ export const resolvers = {
     ),
 
     linkText: async ({ productId, linkText }: SearchProduct, _: unknown, ctx: Context) => {
-      const { clients: { rewriter }, vtex: { binding } } = ctx
+      const { clients: { rewriter, apps }, vtex: { binding } } = ctx
+      const settings: AppSettings = await apps.getAppSettings(APP_NAME)
 
       if (!shouldTranslateToBinding(ctx)) {
-        return linkText
+        return settings.slugifyLinks ? Slugify(linkText) : linkText
       }
       const route = await rewriter.getRoute(productId, 'product', binding!.id!)
-      return urlToSlug(route) ?? linkText
+      const pathname = urlToSlug(route) ?? linkText
+      return settings.slugifyLinks ? Slugify(pathname) : pathname
     },
 
     specificationGroups: async (product: SearchProduct, _: unknown, ctx: Context) => {

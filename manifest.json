@@ -16,6 +16,16 @@
     "vtex.rewriter": "1.x",
     "vtex.sae-analytics": "2.x"
   },
+  "settingsSchema": {
+    "type": "object",
+    "properties": {
+      "slugifyLinks": {
+        "title": "Set to slugify links. Uses default catalog slug instead",
+        "type": "boolean",
+        "default": false
+      }
+    }
+  },
   "policies": [
     {
       "name": "vtex.messages:translate-messages"

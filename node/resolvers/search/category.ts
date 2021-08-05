@@ -2,6 +2,8 @@ import { compose, last, prop, split } from 'ramda'
 
 import { getCategoryInfo } from './utils'
 import { formatTranslatableProp, shouldTranslateToBinding } from '../../utils/i18n'
+import { Slugify } from '../../utils/slug'
+import { APP_NAME } from './constants'
 
 const lastSegment = compose<string, string[], string>(
   last,
@@ -28,13 +30,17 @@ export const resolvers = {
     cacheId: prop('id'),
 
     href: async ({ url, id }: SafeCategory, _: unknown, ctx: Context) => {
+      const settings: AppSettings = await ctx.clients.apps.getAppSettings(APP_NAME)
+
       if (shouldTranslateToBinding(ctx)) {
         const rewriterUrl = await ctx.clients.rewriter.getRoute(id.toString(), 'anyCategoryEntity', ctx.vtex.binding!.id!)
         if (rewriterUrl) {
           url = rewriterUrl
         }
       }
-      return cleanUrl(url)
+      const pathname = cleanUrl(url)
+
+      return settings.slugifyLinks ? Slugify(pathname) : pathname
     },
 
     metaTagDescription: formatTranslatableProp<SafeCategory, 'MetaTagDescription', 'id'>(
