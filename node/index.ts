@@ -19,6 +19,7 @@ const segmentCache = new LRUCache<string, Cached>({ max: MAX_SEGMENT_CACHE })
 const searchCache = new LRUCache<string, Cached>({ max: 3000 })
 const messagesCache = new LRUCache<string, Cached>({ max: 3000 })
 const vbaseCache = new LRUCache<string, Cached>({ max: 3000 })
+const appsCache = new LRUCache<string, Cached>({ max: 3000 })
 
 const biggySearchCache = new LRUCache<string, Cached>({ max: 300 })
 
@@ -35,6 +36,12 @@ export default new Service<Clients, RecorderState, CustomContext>({
       default: {
         retries: 2,
         timeout: THREE_SECONDS_MS,
+      },
+      apps: {
+        retries: 2,
+        concurrency: 5,
+        memoryCache: appsCache,
+        timeout: TWO_SECONDS_MS,
       },
       messagesGraphQL: {
         concurrency: 10,

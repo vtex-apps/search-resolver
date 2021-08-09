@@ -1,7 +1,7 @@
 {
   "vendor": "vtex",
   "name": "search-resolver",
-  "version": "1.51.2",
+  "version": "1.52.0-beta.0",
   "title": "GraphQL resolver for the VTEX store APIs",
   "description": "GraphQL resolvers for the VTEX API for the catalog and orders.",
   "credentialType": "absolute",
@@ -15,6 +15,16 @@
     "vtex.search-graphql": "0.x",
     "vtex.rewriter": "1.x",
     "vtex.sae-analytics": "2.x"
+  },
+  "settingsSchema": {
+    "type": "object",
+    "properties": {
+      "slugifyLinks": {
+        "title": "Set to slugify links. Uses default catalog slug instead",
+        "type": "boolean",
+        "default": false
+      }
+    }
   },
   "policies": [
     {

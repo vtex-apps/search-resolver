@@ -53,4 +53,8 @@ declare global {
     Key: string
     Value: string
   }
+
+  interface AppSettings {
+    slugifyLinks: boolean
+  }
 }
