@@ -114,6 +114,49 @@ interface PaymentData {
   availableTokens: any[]
 }
 
+interface LogisticsInfo {
+    itemIndex: number
+    selectedSla: string
+    selectedDeliveryChannel: string
+    addressId: string
+    stockBalance: string
+    slas: {
+      id: string
+      deliveryChannel: string
+      name: string
+      deliveryIds: {
+        courierId: string
+        warehouseId: string
+        dockId: string
+        courierName: string
+        quantity: number
+      }[]
+      shippingEstimate: string
+      shippingEstimateDate: string | null
+      lockTTL: string | null
+      availableDeliveryWindows: any[]
+      deliveryWindow: string | null
+      price: number
+      listPrice: number
+      tax: number
+      pickupStoreInfo: {
+        isPickupStore: boolean
+        friendlyName: string | null
+
+        address: CheckoutAddress | null
+        additionalInfo: any | null
+        dockId: string | null
+      }
+      pickupPointId: string | null
+      pickupDistance: number
+      polygonName: string | null
+    }
+    shipsTo: string[]
+    itemId: string
+    deliveryChannels: { id: string }[]
+
+}
+
 interface OrderForm {
   orderFormId: string
   salesChannel: string
@@ -131,48 +174,9 @@ interface OrderForm {
   items: OrderFormItem[]
   selectableGifts: any[]
   totalizers: { id: string; name: string; value: number }[]
+  logisticsInfo: LogisticsInfo[]
   shippingData: {
     address: CheckoutAddress
-    logisticsInfo: {
-      itemIndex: number
-      selectedSla: string
-      selectedDeliveryChannel: string
-      addressId: string
-      slas: {
-        id: string
-        deliveryChannel: string
-        name: string
-        deliveryIds: {
-          courierId: string
-          warehouseId: string
-          dockId: string
-          courierName: string
-          quantity: number
-        }[]
-        shippingEstimate: string
-        shippingEstimateDate: string | null
-        lockTTL: string | null
-        availableDeliveryWindows: any[]
-        deliveryWindow: string | null
-        price: number
-        listPrice: number
-        tax: number
-        pickupStoreInfo: {
-          isPickupStore: boolean
-          friendlyName: string | null
-
-          address: CheckoutAddress | null
-          additionalInfo: any | null
-          dockId: string | null
-        }
-        pickupPointId: string | null
-        pickupDistance: number
-        polygonName: string | null
-      }[]
-      shipsTo: string[]
-      itemId: string
-      deliveryChannels: { id: string }[]
-    }[]
     selectedAddresses: CheckoutAddress[]
     availableAddresses: CheckoutAddress[]
     pickupPoints: {

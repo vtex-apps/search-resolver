@@ -17,7 +17,7 @@ interface OrderFormItemBySellerById {
 }
 
 interface OrderFormItemBySeller {
-  [sellerId: string]: OrderFormItem & { paymentData: PaymentData, ratesAndBenefitsData: RatesAndBenefitsData }
+  [sellerId: string]: OrderFormItem & { paymentData: PaymentData, ratesAndBenefitsData: RatesAndBenefitsData, stockBalance?: string }
 }
 
 export const convertBiggyProduct = async (
@@ -171,8 +171,8 @@ export const convertBiggyProduct = async (
 
     const simulationItems = (await Promise.all(simulationPromises.map(promise => promise.catch(() => undefined)))).filter((x) => x != undefined).map((x) => {
       const orderForm = x as OrderForm
-
-      return orderForm.items.map(item => ({ ...item, paymentData: orderForm.paymentData, ratesAndBenefitsData: orderForm.ratesAndBenefitsData }))
+      const stockBalance = orderForm?.logisticsInfo[0].stockBalance
+      return orderForm.items.map(item => ({ ...item, paymentData: orderForm.paymentData, ratesAndBenefitsData: orderForm.ratesAndBenefitsData, stockBalance }))
     }).reduce((acc, val) => acc.concat(val), [])
 
     const groupedBySkuId = groupBy(prop("id"), simulationItems)
@@ -182,7 +182,6 @@ export const convertBiggyProduct = async (
 
       return { [id]: groupedBySeller }
     }))
-
     convertedProduct.items.map((item) => {
       fillSearchItemWithSimulation(item, orderItemsBySellerById[item.itemId])
     })
@@ -254,8 +253,7 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
       }
       const unitMultiplier = orderFormItem.unitMultiplier ? orderFormItem.unitMultiplier : 1
       const { listPrice, price, priceValidUntil, sellingPrice } = orderFormItem
-
-      seller.commertialOffer.AvailableQuantity = orderFormItem?.availability === 'available' ? 10000 : 0
+      seller.commertialOffer.AvailableQuantity = orderFormItem.stockBalance && orderFormItem.stockBalance > '0' && orderFormItem?.availability === 'available' ? 10000 : 0
       seller.commertialOffer.Price = sellingPrice
         ? Number((sellingPrice / (unitMultiplier * 100)).toFixed(2))
         : price / 100

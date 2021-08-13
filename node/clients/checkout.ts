@@ -13,6 +13,7 @@ export class Checkout extends JanusClient {
       ...options,
       headers: {
         ...(options && options.headers),
+        vtexIdclientAutCookie: ctx.authToken
       },
     })
   }
@@ -43,12 +44,12 @@ export class Checkout extends JanusClient {
   }
 
   private get routes() {
-    const base = '/api/checkout/pub'
+    const base = '/api/checkout'
     return {
       simulation: (queryString: string) =>
-        `${base}/orderForms/simulation${queryString}`,
+        `${base}/pvt/orderForms/simulation${queryString}`,
       regions: (regionId: string, channel?: number) =>
-        `${base}/regions/${regionId}${channel ? `?sc=${channel}` : ''}`,
+        `${base}/pub/regions/${regionId}${channel ? `?sc=${channel}` : ''}`,
     }
   }
 }
