@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed 
+
+- Simulation API to use the private route. 
+- Seller availability to also use stock balance. 
+
 ## [1.52.0] - 2021-08-09
 ### Added
 - Slugify link setting. Slugifies links using sindresorhus's slugify function instead of defaut catalog slug
