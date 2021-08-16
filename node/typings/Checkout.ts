@@ -119,7 +119,7 @@ interface LogisticsInfo {
     selectedSla: string
     selectedDeliveryChannel: string
     addressId: string
-    stockBalance: string
+    stockBalance: number
     slas: {
       id: string
       deliveryChannel: string
