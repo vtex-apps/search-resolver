@@ -253,7 +253,7 @@ const fillSearchItemWithSimulation = (searchItem: SearchItem, orderFormItems: Or
       }
       const unitMultiplier = orderFormItem.unitMultiplier ? orderFormItem.unitMultiplier : 1
       const { listPrice, price, priceValidUntil, sellingPrice } = orderFormItem
-      seller.commertialOffer.AvailableQuantity = orderFormItem.stockBalance && orderFormItem.stockBalance > 0 && orderFormItem?.availability === 'available' ? 10000 : 0
+      seller.commertialOffer.AvailableQuantity = orderFormItem.stockBalance && orderFormItem?.availability === 'available' ? 10000 : 0
       seller.commertialOffer.Price = sellingPrice
         ? Number((sellingPrice / (unitMultiplier * 100)).toFixed(2))
         : price / 100
