@@ -7,7 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [1.52.1] - 2021-08-19
+### Fixed
+- Error when `logisticsInfo` is empty.
+
+## [1.52.1] - 2021-08-19 [YANKED]
 
 ### Changed 
 

@@ -171,7 +171,7 @@ export const convertBiggyProduct = async (
 
     const simulationItems = (await Promise.all(simulationPromises.map(promise => promise.catch(() => undefined)))).filter((x) => x != undefined).map((x) => {
       const orderForm = x as OrderForm
-      const stockBalance = orderForm?.logisticsInfo[0].stockBalance
+      const stockBalance = orderForm?.logisticsInfo[0]?.stockBalance
       return orderForm.items.map(item => ({ ...item, paymentData: orderForm.paymentData, ratesAndBenefitsData: orderForm.ratesAndBenefitsData, stockBalance }))
     }).reduce((acc, val) => acc.concat(val), [])
 
