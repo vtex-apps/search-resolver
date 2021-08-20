@@ -31,6 +31,7 @@ export const convertBiggyProduct = async (
 ) => {
   const categories: string[] = []
   const categoriesIds: string[] = []
+  console.log(product)
 
   product.categoryTrees?.forEach((categoryTree) => {
     categories.push(`/${categoryTree.categoryNames.join('/')}/`)
@@ -150,6 +151,7 @@ export const convertBiggyProduct = async (
     skuSpecifications: allSkuSpecification,
     // This field is only maintained for backwards compatibility reasons, it shouldn't exist.
     skus: skus.find(sku => sku.sellers && sku.sellers.length > 0),
+    account: product.account
   }
 
   if (simulationBehavior === 'default') {

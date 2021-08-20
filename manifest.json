@@ -60,6 +60,13 @@
       }
     },
     {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "ullayne--biggy.myvtex.com",
+        "path": "/*"
+      }
+    },
+    {
       "name": "vtex.messages:graphql-translate-messages"
     }
   ],

@@ -270,9 +270,11 @@ export class BiggySearchClient extends ExternalClient {
     } = args
 
     const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
-    const url = `${this.store}/api/split/product_search/${buildPathFromArgs(
+
+    const url = `http://ullayne--${this.store}.myvtex.com/_v/multi-tenant-search/${this.store}/api/split/product_search/${buildPathFromArgs(
       args
     )}`
+    console.log(url)
 
     const params = {
       query: decodeQuery(query ?? ''),
@@ -301,7 +303,7 @@ export class BiggySearchClient extends ExternalClient {
       })
     }
 
-    const result = await this.http.getRaw(url, {
+    const result = await this.http.getRaw(`http://ullayne--${this.store}.myvtex.com/_v/multi-tenant-search`, {
       params,
       metric: 'search-result',
       headers: {
@@ -310,6 +312,8 @@ export class BiggySearchClient extends ExternalClient {
       },
       ...cache
     })
+
+    console.log(result)
 
     if (!result.data?.total) {
       this.context.logger.warn({

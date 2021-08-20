@@ -165,6 +165,7 @@ interface BiggySearchProduct {
   split: BiggySplit
   categoryTrees: BiggyCategoryTree[]
   clusterHighlights: Record<string, string>
+  account?: string
 }
 
 interface BiggySplit {
