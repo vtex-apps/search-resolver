@@ -3,10 +3,11 @@ import { AppGraphQLClient, IOContext, InstanceOptions } from '@vtex/api'
 import { itemsWithSimulation } from './queries'
 
 interface ItemsWithSimulationPayload {
-  items: Array<{
+  items: {
     itemId: string
-    sellers: Array<{ sellerId: string }>
-  }>
+    sellers: { sellerId: string }[]
+  }[],
+  regionId?: string
 }
 
 export class Store extends AppGraphQLClient {

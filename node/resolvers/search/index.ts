@@ -104,8 +104,8 @@ const getTradePolicyFromSelectedFacets = (selectedFacets: SelectedFacet[] = []):
   return tradePolicy.length > 0 ? tradePolicy[0].value : null
 }
 
-const getRegionIdFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): [(string | null), SelectedFacet[]] => {
-  let regionId = null
+const getRegionIdFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): [(string | undefined), SelectedFacet[]] => {
+  let regionId = undefined
 
   const regionIdIndex = selectedFacets.findIndex(selectedFacet => selectedFacet.key === "region-id")
 
@@ -677,7 +677,7 @@ export const queries = {
     } = args
     let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
 
-    regionId = regionId || segment?.regionId
+    regionId = regionId ?? segment?.regionId
 
     const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets) || segment?.channel
 
@@ -712,7 +712,7 @@ export const queries = {
 
     const convertedProducts = args.productOriginVtex ?
       await productsCatalog(({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })) :
-      await convertProducts(result.products, ctx, simulationBehavior)
+      await convertProducts(result.products, ctx, simulationBehavior, tradePolicy, regionId)
 
     convertedProducts.forEach(product => product.origin = 'intelligent-search')
 
@@ -827,15 +827,16 @@ export const queries = {
 
     const regionId = args.regionId || segment?.regionId
 
-    const tradePolicy = args.salesChannel || segment?.channel
+    const salesChannel = args.salesChannel || segment?.channel
+    const tradePolicy = salesChannel ? String(salesChannel) : undefined
 
-    const sellers = await getSellers(vbase, checkout, tradePolicy, regionId)
+    const sellers = await getSellers(vbase, checkout, salesChannel, regionId)
 
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
     const result = await biggySearch.suggestionProducts({
       ...args,
-      salesChannel: tradePolicy,
+      salesChannel,
       sellers,
       workspaceSearchParams
     })
@@ -846,7 +847,7 @@ export const queries = {
 
     const convertedProducts = args.productOriginVtex ?
       await productsCatalog(({ ctx, simulationBehavior: args.simulationBehavior, searchResult: result, tradePolicy: String(tradePolicy), regionId })) :
-      await convertProducts(result.products, ctx, args.simulationBehavior)
+      await convertProducts(result.products, ctx, args.simulationBehavior, tradePolicy, regionId)
 
       convertedProducts.forEach(product => product.origin = 'intelligent-search')
 
