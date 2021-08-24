@@ -849,7 +849,7 @@ export const queries = {
       ? productsCatalog
       : productsBiggy
 
-    const convertedProducts = productResolver(
+    const convertedProducts = await productResolver(
       {
         ctx,
         searchResult: result,

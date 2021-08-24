@@ -4,6 +4,7 @@ import { Checkout } from '../clients/checkout'
 import { groupBy, prop, indexBy, mergeAll, clone } from 'ramda'
 import { removeDiacriticsFromURL } from '../utils/string'
 import { FilterValue, Attribute } from '../utils/attributes'
+import getFirstNonNullable from '../utils/getFirstNonNull'
 
 const ALLOWED_TEASER_TYPES = ["Catalog", "Profiler", "ConditionalPrice"]
 
@@ -407,12 +408,21 @@ const getSellersIndexedByApi = (
   const biggySellers = (selectedPolicy && selectedPolicy.sellers) || []
 
   return biggySellers.map((seller: BiggySeller): Seller => {
-    const price = seller.price || sku.price || product.price
-    const oldPrice = seller.oldPrice || sku.oldPrice || product.oldPrice
+    const price = getFirstNonNullable<number>([seller.price, sku.price, product.price])!
+    const oldPrice = getFirstNonNullable<number>([seller.oldPrice, sku.oldPrice, product.oldPrice])!
     const installment = seller.installment || product.installment
 
-    const stock = seller.stock || sku.stock || product.stock
+    const stock = getFirstNonNullable<number>([seller.stock, sku.stock, product.stock])!
     const teasers = seller.teasers ?? [];
+
+    if (price === 1359.95) {
+      console.log({
+        stock,
+        selelr: seller.stock,
+        sku: sku.stock,
+        product: product.stock
+      })
+    }
 
     const commertialOffer = buildCommertialOffer(price, oldPrice, stock, teasers, installment, seller.tax)
 
