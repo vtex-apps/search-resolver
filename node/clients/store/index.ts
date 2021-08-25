@@ -30,7 +30,7 @@ export class Store extends AppGraphQLClient {
         variables,
       },
       {
-        metric: 'recommendation-items-with-simulation',
+        metric: 'search-items-with-simulation',
       }
     )
   }

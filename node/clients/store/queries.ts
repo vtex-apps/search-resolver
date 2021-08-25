@@ -7,6 +7,7 @@ query itemsWithSimulation($items: [ItemInput], $regionId: String) {
         AvailableQuantity
         Price
         ListPrice
+        spotPrice
         PriceValidUntil
         PriceWithoutDiscount
         discountHighlights {
@@ -14,6 +15,19 @@ query itemsWithSimulation($items: [ItemInput], $regionId: String) {
         }
         teasers {
           name
+          conditions {
+            minimumQuantity
+            parameters {
+              name
+              value
+            }
+          }
+          effects {
+            parameters {
+              name
+              value
+            }
+          }
         }
         Installments {
         	Value
