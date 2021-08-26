@@ -3,6 +3,7 @@ query itemsWithSimulation($items: [ItemInput], $regionId: String) {
   itemsWithSimulation(items: $items, regionId: $regionId) {
     itemId
     sellers {
+      sellerId
       commertialOffer {
         AvailableQuantity
         Price
