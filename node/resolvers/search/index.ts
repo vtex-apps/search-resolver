@@ -47,6 +47,7 @@ import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
 import { Checkout } from '../../clients/checkout'
 import setFilterVisibility from '../../utils/setFilterVisibility'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
+import { flags } from '../../featureFlags'
 
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -217,20 +218,29 @@ const getProductsCountAndPage = (from: number, to: number): [number, number] => 
 const noop = () => { }
 
 // Does prefetching and warms up cache for up to the 10 first elements of a search, so if user clicks on product page
-const searchFirstElements = (
+const searchFirstElements = async (
   products: SearchProduct[],
   from: number | null = 0,
-  search: Context['clients']['search']
+  search: Context['clients']['search'],
+  paralelize?: boolean,
 ) => {
   if (from !== 0 || from == null) {
     // We do not want this for pages other than the first
     return
   }
-  products
-    .slice(0, Math.min(10, products.length))
-    .forEach(product =>
-      search.productById(product.productId, undefined, undefined, false).catch(noop)
-    )
+  if (paralelize) {
+    const ids = products
+      .slice(0, Math.min(10, products.length))
+      .map(product => product.productId)
+    await Promise.all(ids.map(id =>
+      async () => search.productById(id, undefined, undefined, false).catch(noop)))
+  } else {
+    products
+      .slice(0, Math.min(10, products.length))
+      .forEach(product =>
+        search.productById(product.productId, undefined, undefined, false).catch(noop)
+      )
+  }
 }
 
 export const fieldResolvers = {
@@ -709,10 +719,13 @@ export const queries = {
       ctx.vtex.tenant.locale = result.locale
     }
 
+    const startTime = process.hrtime();
     const productResolver = args.productOriginVtex
       ? productsCatalog
       : productsBiggy
     const convertedProducts = await productResolver({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })
+    const resolverName = args.productOriginVtex ? 'productsCatalog' : 'productsBiggy'
+    ctx.metrics[`productSearch-${resolverName}`] = process.hrtime(startTime)
 
     // Add prefix to the cacheId to avoid conflicts. Repeated cacheIds in the same page are causing strange behavior.
     convertedProducts.forEach(product => product.cacheId = `sae-productSearch-${product.cacheId || product.linkText}`)
@@ -748,7 +761,13 @@ export const queries = {
       searchType
     )
 
-    searchFirstElements(products, 0, ctx.clients.search)
+    {
+      const startTime = process.hrtime();
+      const paralelize = Math.random() < (flags.VTEX_PARALLELIZED_PRODUCT_RECOMMENDATION_RATIO || 0.0)
+      await searchFirstElements(products, 0, ctx.clients.search, paralelize)
+      ctx.metrics[`productRecommendations-searchFirstElements-paralelized-${paralelize}`] = process.hrtime(startTime)
+    }
+
     // We add a custom cacheId because these products are not exactly like the other products from search apis.
     // Each product is basically a SKU and you may have two products in response with same ID but each one representing a SKU.
     return products.map(product => {
