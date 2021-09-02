@@ -170,12 +170,7 @@ export const resolvers = {
     cacheId: ({ linkText, cacheId }: SearchProductWithCache) =>
       cacheId || linkText,
 
-    clusterHighlights: ({origin, clusterHighlights = {} }: SearchProduct) => {
-      if (origin === 'intelligent-search') {
-        return clusterHighlights
-      }
-
-
+    clusterHighlights: ({clusterHighlights = {} }: SearchProduct) => {
       return objToNameValue('id', 'name', clusterHighlights)
     },
 
@@ -191,11 +186,7 @@ export const resolvers = {
       return JSON.stringify(specificationsMap)
     },
 
-    productClusters: ({ origin, productClusters = {} }: SearchProduct) => {
-      if (origin === 'intelligent-search') {
-        return productClusters
-      }
-
+    productClusters: ({ productClusters = {} }: SearchProduct) => {
       return objToNameValue('id', 'name', productClusters)
     },
 
