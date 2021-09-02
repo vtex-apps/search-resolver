@@ -59,6 +59,7 @@ export default new Service<Clients, RecorderState, CustomContext>({
         timeout: SIX_SECONDS_MS,
       },
       biggySearch: {
+        retries: 0,
         concurrency: 10,
         memoryCache: biggySearchCache,
         timeout: SIX_SECONDS_MS,
