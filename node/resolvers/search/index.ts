@@ -849,7 +849,7 @@ export const queries = {
       ? productsCatalog
       : productsBiggy
 
-    const convertedProducts = await productResolver(
+    const convertedProductsPromises = await productResolver(
       {
         ctx,
         searchResult: result,
@@ -864,6 +864,12 @@ export const queries = {
       operator,
       correction: { misspelled },
     } = result
+
+    const convertedProducts = await Promise.all(convertedProductsPromises)
+
+    convertedProducts.forEach(product => {
+      product.cacheId = `sae-productSearch-autocomplete-${product.productId}`
+    })
 
     return { count, operator, misspelled, products: convertedProducts }
   },
