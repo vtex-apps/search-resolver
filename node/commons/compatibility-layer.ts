@@ -415,15 +415,6 @@ const getSellersIndexedByApi = (
     const stock = getFirstNonNullable<number>([seller.stock, sku.stock, product.stock])!
     const teasers = seller.teasers ?? [];
 
-    if (price === 1359.95) {
-      console.log({
-        stock,
-        selelr: seller.stock,
-        sku: sku.stock,
-        product: product.stock
-      })
-    }
-
     const commertialOffer = buildCommertialOffer(price, oldPrice, stock, teasers, installment, seller.tax)
 
     return {
