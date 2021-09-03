@@ -58,7 +58,7 @@ interface SuggestionProductsArgs {
   segment?: SegmentData
   indexingType?: IndexingType
   productOriginVtex: boolean
-  simulationBehavior: 'skip' | 'default' | null
+  simulationBehavior: 'skip' | 'default' | 'only1P' | null
   sellers?: RegionSeller[]
   hideUnavailableItems?: boolean | null
   regionId?: string
