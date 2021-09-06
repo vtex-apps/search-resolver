@@ -845,17 +845,23 @@ export const queries = {
       ctx.vtex.tenant.locale = result.locale
     }
 
-    const convertedProducts = args.productOriginVtex ?
+    const convertedProductsPromises = args.productOriginVtex ?
       await productsCatalog(({ ctx, simulationBehavior: args.simulationBehavior, searchResult: result, tradePolicy: String(tradePolicy), regionId })) :
       await convertProducts(result.products, ctx, args.simulationBehavior, tradePolicy, regionId)
 
-      convertedProducts.forEach(product => product.origin = 'intelligent-search')
+    const convertedProducts = await Promise.all(convertedProductsPromises)
+
+    convertedProducts.forEach(product => product.origin = 'intelligent-search')
 
     const {
       count,
       operator,
       correction: { misspelled },
     } = result
+
+    convertedProducts.forEach(product => {
+      product.cacheId = `sae-productSearch-autocomplete-${product.productId}`
+    })
 
     return { count, operator, misspelled, products: convertedProducts }
   },

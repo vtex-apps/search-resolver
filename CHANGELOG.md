@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [1.53.0] - 2021-09-02
 
+### Fixed
+- Use the `getFirstNonNullable` to select the correct price
+- Use a exclusive `cacheId` in the `productSuggestion` products. This avoids conflicts when the same product appears twice, on search-result and on autocomplete.
+
 ### Changed
 - Use `vtexis-compatibility-layer` to convert the product and `itemsWithSimulation` to call the simulation API.
 
