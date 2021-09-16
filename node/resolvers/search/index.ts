@@ -714,7 +714,7 @@ export const queries = {
       await productsCatalog(({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })) :
       await convertProducts(result.products, ctx, simulationBehavior, tradePolicy, regionId)
 
-    convertedProducts.forEach(product => product.origin = 'intelligent-search')
+    convertedProducts.forEach(product => product.origin =  args.productOriginVtex ? 'catalog' : 'intelligent-search')
 
     return {
       searchState,
@@ -849,7 +849,7 @@ export const queries = {
       await productsCatalog(({ ctx, simulationBehavior: args.simulationBehavior, searchResult: result, tradePolicy: String(tradePolicy), regionId })) :
       await convertProducts(result.products, ctx, args.simulationBehavior, tradePolicy, regionId)
 
-      convertedProducts.forEach(product => product.origin = 'intelligent-search')
+      convertedProducts.forEach(product => product.origin =  args.productOriginVtex ? 'catalog' : 'intelligent-search')
 
     const {
       count,
