@@ -7,17 +7,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Use `vtexis-compatibility-layer` to convert the product and `itemsWithSimulation` to call the simulation API.
+
 ## [1.53.2] - 2021-09-17
 
 ### Fixed
 - Revert `v1.53.1` and `v1.53.0`
 
-## [1.53.1] - 2021-09-14
+## [1.53.1] - 2021-09-14 [YANKED]
 
 ### Fixed
 - Fix `clusterHighlights` type.
 
-## [1.53.0] - 2021-09-02
+## [1.53.0] - 2021-09-02 [YANKED]
 
 ### Changed
 - Use `vtexis-compatibility-layer` to convert the product and `itemsWithSimulation` to call the simulation API.
