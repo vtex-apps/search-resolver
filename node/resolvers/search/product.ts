@@ -170,8 +170,9 @@ export const resolvers = {
     cacheId: ({ linkText, cacheId }: SearchProductWithCache) =>
       cacheId || linkText,
 
-    clusterHighlights: ({ clusterHighlights = {} }: SearchProduct) =>
-      objToNameValue('id', 'name', clusterHighlights),
+    clusterHighlights: ({clusterHighlights = {} }: SearchProduct) => {
+      return objToNameValue('id', 'name', clusterHighlights)
+    },
 
     jsonSpecifications: (product: SearchProduct) => {
       const { Specifications = [] } = product
@@ -185,8 +186,9 @@ export const resolvers = {
       return JSON.stringify(specificationsMap)
     },
 
-    productClusters: ({ productClusters = {} }: SearchProduct) =>
-      objToNameValue('id', 'name', productClusters),
+    productClusters: ({ productClusters = {} }: SearchProduct) => {
+      return objToNameValue('id', 'name', productClusters)
+    },
 
     properties: async (product: SearchProduct, _: unknown, ctx: Context) => {
       const valuesUntranslated = (product.allSpecifications ?? []).map((name: string) => {

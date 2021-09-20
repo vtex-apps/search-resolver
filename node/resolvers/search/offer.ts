@@ -74,7 +74,9 @@ export const resolvers = {
       )
       return [value]
     },
-    teasers: propOr([], 'Teasers'),
+    teasers: (offer: CommertialOffer) => {
+      return offer.teasers ?? offer.Teasers ?? []
+    },
     giftSkuIds: propOr([], 'GiftSkuIds'),
     gifts: async ({ GiftSkuIds }: CommertialOffer, _: any, ctx: Context) => {
       if (GiftSkuIds.length === 0) {
@@ -127,6 +129,9 @@ export const resolvers = {
     },
     discountHighlights: propOr([], 'DiscountHighLight'),
     spotPrice: (offer: CommertialOffer) => {
+      if (offer.spotPrice) {
+        return offer.spotPrice
+      }
       const sellingPrice = offer.Price
       const spotPrice: number | undefined = offer.Installments.find(({NumberOfInstallments, Value}) => {
         return (NumberOfInstallments === 1 && Value < sellingPrice)

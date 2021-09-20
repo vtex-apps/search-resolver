@@ -777,10 +777,10 @@
     lodash.unescape "4.0.1"
     semver "5.5.0"
 
-"@vtex/api@6.45.4":
-  version "6.45.4"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.45.4.tgz#58be7497c0c0f91a388fabd42149e48cb95e271d"
-  integrity sha512-DVAJr5BkSjXupjn2h5Z1In8C3Li9kZwCXPwRQbpIgyS7s9dN2ZEFQc6nQlJm6ZoDCoyYBg62LgD7Kurvz9jc3w==
+"@vtex/api@6.45.3":
+  version "6.45.3"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.45.3.tgz#fe7d08adb4eab1fda5e34143cc6302a4c5aa5f52"
+  integrity sha512-kiD7We1TCKDyBdpYoh2Se3An+jTJRUzXGNpKifoDZylWQ1PyIx+3oL5ZAif9InlY3uJkfEisSAI6nxoKTgvPfw==
   dependencies:
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"
@@ -838,6 +838,13 @@
     "@types/graphql" "^14.5.0"
     "@types/jest" "^24.0.18"
     "@types/node" "^12.7.2"
+
+"@vtex/vtexis-compatibility-layer@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@vtex/vtexis-compatibility-layer/-/vtexis-compatibility-layer-0.1.0.tgz#ed3156d4b189f9fdadc178136925cd6b1bc6448d"
+  integrity sha512-YWFtOW/sv/JQTjC+IO/bOYE+QYH9whKUU5QUW26+W1AlG282zFXQtRuPNE79xlJs0BiS/g47bGo3z9i0GQKB4A==
+  dependencies:
+    ramda "^0.27.1"
 
 "@wry/equality@^0.1.2", "@wry/equality@^0.1.9":
   version "0.1.9"
@@ -4148,6 +4155,11 @@ ramda@^0.26.0, ramda@^0.26.1:
   version "0.26.1"
   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.26.1.tgz#8d41351eb8111c55353617fc3bbffad8e4d35d06"
   integrity sha512-hLWjpy7EnsDBb0p+Z3B7rPi3GDeRG5ZtiI33kJhTt+ORCd38AbAIjB/9zRIUoeTbE/AVX5ZkU7m6bznsvrf8eQ==
+
+ramda@^0.27.1:
+  version "0.27.1"
+  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.1.tgz#66fc2df3ef873874ffc2da6aa8984658abacf5c9"
+  integrity sha512-PgIdVpn5y5Yns8vqb8FzBUEYn98V3xcPgawAkkgj0YJ0qDsnHCiNmZYfOGMgOvoB0eWFLpYbhxUR3mxfDIMvpw==
 
 raw-body@^2.3.3:
   version "2.4.1"
