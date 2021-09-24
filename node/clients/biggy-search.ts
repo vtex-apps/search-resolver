@@ -223,7 +223,8 @@ export class BiggySearchClient extends ExternalClient {
       initialAttributes
     } = args
 
-    const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
+    const cache = validNavigationPage(args.attributePath, query) && sellers?.length === 0 ? { forceMaxAge: 3600 } : {}
+
     const url = `${this.store}/api/split/attribute_search/${buildPathFromArgs(
       args
     )}`
@@ -239,6 +240,7 @@ export class BiggySearchClient extends ExternalClient {
         locale: this.locale,
         bgy_leap: leap ? true : undefined,
         initialAttributes,
+        isRegionalized: sellers ? sellers.length > 0 : false,
         ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
         ...parseState(searchState),
       },
@@ -268,8 +270,7 @@ export class BiggySearchClient extends ExternalClient {
       options,
       workspaceSearchParams
     } = args
-
-    const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
+    const cache = validNavigationPage(args.attributePath, query) && sellers?.length === 0 ? { forceMaxAge: 3600 } : {}
     const url = `${this.store}/api/split/product_search/${buildPathFromArgs(
       args
     )}`
@@ -284,6 +285,7 @@ export class BiggySearchClient extends ExternalClient {
       locale: this.locale,
       bgy_leap: leap ? true : undefined,
       allowRedirect: options?.allowRedirect === false ? false : true,
+      isRegionalized: sellers ? sellers.length > 0 : false,
       ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
       ...parseState(searchState),
       ...workspaceSearchParams, // important that this be last so that it can override master settings above
