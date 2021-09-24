@@ -78,7 +78,6 @@ enum FacetsBehavior {
 }
 
 interface SearchProduct {
-  origin?: string
   productId: string
   productName: string
   brand: string
@@ -195,12 +194,10 @@ interface CommertialOffer {
   DiscountHighLight: any[]
   GiftSkuIds: string[]
   Teasers: object[]
-  teasers?: object[]
   BuyTogether: any[]
   ItemMetadataAttachment: any[]
   Price: number
   ListPrice: number
-  spotPrice?: number
   PriceWithoutDiscount: number
   RewardValue: number
   PriceValidUntil: string
