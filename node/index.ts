@@ -6,12 +6,15 @@ import schema from 'vtex.search-graphql/graphql'
 import { Clients } from './clients'
 import { schemaDirectives } from './directives'
 import { resolvers } from './resolvers'
-import { setWorkspaceSearchParams, getWorkspaceSearchParams } from './routes/workspaceSearchParams'
-
+import {
+  setWorkspaceSearchParams,
+  getWorkspaceSearchParams,
+} from './routes/workspaceSearchParams'
 
 const TWO_SECONDS_MS = 2 * 1000
 const THREE_SECONDS_MS = 3 * 1000
 const SIX_SECONDS_MS = 6 * 1000
+const NINE_SECONDS_MS = 9 * 1000
 
 // Segments are small and immutable.
 const MAX_SEGMENT_CACHE = 10000
@@ -69,6 +72,10 @@ export default new Service<Clients, RecorderState, CustomContext>({
         memoryCache: vbaseCache,
         timeout: TWO_SECONDS_MS,
       },
+      store: {
+        retries: 0,
+        timeout: NINE_SECONDS_MS,
+      },
     },
   },
   graphql: {
@@ -78,10 +85,10 @@ export default new Service<Clients, RecorderState, CustomContext>({
   },
   routes: {
     setWorkspaceSearchParams: method({
-      GET: setWorkspaceSearchParams
+      GET: setWorkspaceSearchParams,
     }),
     getWorkspaceSearchParams: method({
-      GET: getWorkspaceSearchParams
+      GET: getWorkspaceSearchParams,
     }),
   },
 })

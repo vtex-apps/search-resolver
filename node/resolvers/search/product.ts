@@ -170,8 +170,13 @@ export const resolvers = {
     cacheId: ({ linkText, cacheId }: SearchProductWithCache) =>
       cacheId || linkText,
 
-    clusterHighlights: ({ clusterHighlights = {} }: SearchProduct) =>
-      objToNameValue('id', 'name', clusterHighlights),
+    clusterHighlights: ({origin, clusterHighlights }: SearchProduct) => {
+      if (origin === 'intelligent-search') {
+        return clusterHighlights
+      }
+
+      return objToNameValue('id', 'name', clusterHighlights)
+    },
 
     jsonSpecifications: (product: SearchProduct) => {
       const { Specifications = [] } = product
@@ -185,8 +190,13 @@ export const resolvers = {
       return JSON.stringify(specificationsMap)
     },
 
-    productClusters: ({ productClusters = {} }: SearchProduct) =>
-      objToNameValue('id', 'name', productClusters),
+    productClusters: ({origin, productClusters }: SearchProduct) => {
+      if (origin === 'intelligent-search') {
+        return productClusters
+      }
+
+      return objToNameValue('id', 'name', productClusters)
+    },
 
     properties: async (product: SearchProduct, _: unknown, ctx: Context) => {
       const valuesUntranslated = (product.allSpecifications ?? []).map((name: string) => {
