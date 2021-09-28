@@ -7,11 +7,8 @@ import { Store } from '../clients/store'
 const fillProductWithSimulation = async (
   product: SearchProduct,
   store: Store,
-  ctx: Context,
   regionId?: string,
 ) => {
-  const { vtex: { logger } } = ctx
-
   const payload = {
     items: product.items.map(item => ({
       itemId: item.itemId,
@@ -34,10 +31,10 @@ const fillProductWithSimulation = async (
       itemsWithSimulation.data.itemsWithSimulation
     )
   } catch(error) {
-    logger.error({
-      message: error.message,
-      error,
-    })
+    // TODO: PER-2503 - Improve error observability
+    if (process.env.VTEX_APP_LINK) {
+      console.error(error)
+    }
 
     return product
   }
@@ -54,7 +51,7 @@ export const convertProducts = async (products: BiggySearchProduct[], ctx: Conte
     .map(product => convertISProduct(product, salesChannel))
 
   if (simulationBehavior === 'default') {
-    const simulationPromises = convertedProducts.map(product => fillProductWithSimulation(product as SearchProduct, store, ctx, regionId))
+    const simulationPromises = convertedProducts.map(product => fillProductWithSimulation(product as SearchProduct, store, regionId))
     convertedProducts = (await Promise.all(simulationPromises)) as SearchProduct[]
   }
 
