@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Remove splunk log from simulation errors.
+
 ## [1.54.2] - 2021-09-27
 
 ## [1.54.1] - 2021-09-24
