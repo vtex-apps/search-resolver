@@ -839,10 +839,10 @@
     "@types/jest" "^24.0.18"
     "@types/node" "^12.7.2"
 
-"@vtex/vtexis-compatibility-layer@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@vtex/vtexis-compatibility-layer/-/vtexis-compatibility-layer-0.1.0.tgz#ed3156d4b189f9fdadc178136925cd6b1bc6448d"
-  integrity sha512-YWFtOW/sv/JQTjC+IO/bOYE+QYH9whKUU5QUW26+W1AlG282zFXQtRuPNE79xlJs0BiS/g47bGo3z9i0GQKB4A==
+"@vtex/vtexis-compatibility-layer@0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@vtex/vtexis-compatibility-layer/-/vtexis-compatibility-layer-0.2.2.tgz#1d96d8dbf0448dc6db51c3eb1eebbc8d518889a1"
+  integrity sha512-+S+CZFrNJshIsLn1hux1d9mhGbeUbM/hT+mdMJzXYmrGRvljBk/TBzEu+r4iGqBMn/5slE9WFOCJqLOkbL7ETQ==
   dependencies:
     ramda "^0.27.1"
 

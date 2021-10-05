@@ -7,12 +7,13 @@ import { Store } from '../clients/store'
 const fillProductWithSimulation = async (
   product: SearchProduct,
   store: Store,
+  simulationBehavior: 'default' | 'only1P',
   regionId?: string,
 ) => {
   const payload = {
     items: product.items.map(item => ({
       itemId: item.itemId,
-      sellers: item.sellers.map(seller => ({
+      sellers: simulationBehavior === 'only1P' ? [{sellerId: "1"}] : item.sellers.map(seller => ({
         sellerId: seller.sellerId,
       })),
     })),
@@ -28,7 +29,8 @@ const fillProductWithSimulation = async (
 
     return mergeProductWithItems(
       product,
-      itemsWithSimulation.data.itemsWithSimulation
+      itemsWithSimulation.data.itemsWithSimulation,
+      simulationBehavior
     )
   } catch(error) {
     // TODO: PER-2503 - Improve error observability
@@ -40,7 +42,7 @@ const fillProductWithSimulation = async (
   }
 }
 
-export const convertProducts = async (products: BiggySearchProduct[], ctx: Context, simulationBehavior: 'skip' | 'default' | null, channel?: string, regionId?: string) => {
+export const convertProducts = async (products: BiggySearchProduct[], ctx: Context, simulationBehavior: 'skip' | 'default' | 'only1P' | null, channel?: string, regionId?: string) => {
   const {
     vtex: { segment },
     clients: { store },
@@ -50,8 +52,8 @@ export const convertProducts = async (products: BiggySearchProduct[], ctx: Conte
   let convertedProducts =  products
     .map(product => convertISProduct(product, salesChannel))
 
-  if (simulationBehavior === 'default') {
-    const simulationPromises = convertedProducts.map(product => fillProductWithSimulation(product as SearchProduct, store, regionId))
+  if (simulationBehavior === 'default' || simulationBehavior === 'only1P') {
+    const simulationPromises = convertedProducts.map(product => fillProductWithSimulation(product as SearchProduct, store, simulationBehavior, regionId))
     convertedProducts = (await Promise.all(simulationPromises)) as SearchProduct[]
   }
 
