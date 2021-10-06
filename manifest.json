@@ -1,7 +1,7 @@
 {
   "vendor": "vtex",
   "name": "search-resolver",
-  "version": "1.55.0-hkignore.0",
+  "version": "1.55.0",
   "title": "GraphQL resolver for the VTEX store APIs",
   "description": "GraphQL resolvers for the VTEX API for the catalog and orders.",
   "credentialType": "absolute",
@@ -14,7 +14,8 @@
     "vtex.catalog-api-proxy": "0.x",
     "vtex.search-graphql": "0.x",
     "vtex.rewriter": "1.x",
-    "vtex.sae-analytics": "2.x"
+    "vtex.sae-analytics": "2.x",
+    "vtex.store-graphql": "2.x"
   },
   "settingsSchema": {
     "type": "object",
@@ -61,6 +62,9 @@
     },
     {
       "name": "vtex.messages:graphql-translate-messages"
+    },
+    {
+      "name": "vtex.store-graphql:resolve-graphql"
     }
   ],
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"

@@ -5,7 +5,7 @@ import { queries } from '../resolvers/search'
 interface ConvertProductInput {
   searchResult: any
   ctx: any
-  simulationBehavior?: 'skip' | 'default' | null
+  simulationBehavior?: 'skip' | 'only1P' | 'default' | null
   tradePolicy?: string | null
   regionId?: string | null
 }

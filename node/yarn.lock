@@ -839,6 +839,13 @@
     "@types/jest" "^24.0.18"
     "@types/node" "^12.7.2"
 
+"@vtex/vtexis-compatibility-layer@0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@vtex/vtexis-compatibility-layer/-/vtexis-compatibility-layer-0.2.2.tgz#1d96d8dbf0448dc6db51c3eb1eebbc8d518889a1"
+  integrity sha512-+S+CZFrNJshIsLn1hux1d9mhGbeUbM/hT+mdMJzXYmrGRvljBk/TBzEu+r4iGqBMn/5slE9WFOCJqLOkbL7ETQ==
+  dependencies:
+    ramda "^0.27.1"
+
 "@wry/equality@^0.1.2", "@wry/equality@^0.1.9":
   version "0.1.9"
   resolved "https://registry.yarnpkg.com/@wry/equality/-/equality-0.1.9.tgz#b13e18b7a8053c6858aa6c85b54911fb31e3a909"
@@ -4148,6 +4155,11 @@ ramda@^0.26.0, ramda@^0.26.1:
   version "0.26.1"
   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.26.1.tgz#8d41351eb8111c55353617fc3bbffad8e4d35d06"
   integrity sha512-hLWjpy7EnsDBb0p+Z3B7rPi3GDeRG5ZtiI33kJhTt+ORCd38AbAIjB/9zRIUoeTbE/AVX5ZkU7m6bznsvrf8eQ==
+
+ramda@^0.27.1:
+  version "0.27.1"
+  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.1.tgz#66fc2df3ef873874ffc2da6aa8984658abacf5c9"
+  integrity sha512-PgIdVpn5y5Yns8vqb8FzBUEYn98V3xcPgawAkkgj0YJ0qDsnHCiNmZYfOGMgOvoB0eWFLpYbhxUR3mxfDIMvpw==
 
 raw-body@^2.3.3:
   version "2.4.1"

@@ -23,7 +23,7 @@ interface OrderFormItemBySeller {
 export const convertBiggyProduct = async (
   product: BiggySearchProduct,
   checkout: Checkout,
-  simulationBehavior: 'skip' | 'default' | null,
+  simulationBehavior: 'skip' | 'only1P' | 'default' | null,
   segment?: SegmentData,
   tradePolicy?: string,
   regionId?: string | null,

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.55.0] - 2021-10-05
+
+## [1.54.3] - 2021-09-28
+
+### Fixed
+- Remove splunk log from simulation errors.
+
+## [1.54.2] - 2021-09-27
+
 ## [1.54.1] - 2021-09-24
 
 ### Fixed
@@ -17,7 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Use `vtexis-compatibility-layer` to convert the product and `itemsWithSimulation` to call the simulation API.
 
-## [1.53.2] - 2021-09-17 [YANKED]
+## [1.53.2] - 2021-09-17
 
 ### Fixed
 - Revert `v1.53.1` and `v1.53.0`
@@ -27,7 +36,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Fix `clusterHighlights` type.
 
-## [1.53.0] - 2021-09-02
+## [1.53.0] - 2021-09-02 [YANKED]
 
 ### Changed
 - Use `vtexis-compatibility-layer` to convert the product and `itemsWithSimulation` to call the simulation API.
