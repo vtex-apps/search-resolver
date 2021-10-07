@@ -1,4 +1,4 @@
-import { ExternalClient, InstanceOptions, IOContext } from '@vtex/api'
+import { InstanceOptions, IOContext, JanusClient } from '@vtex/api'
 import { IndexingType } from '../commons/compatibility-layer'
 import { parseState } from '../utils/searchState'
 import path from 'path'
@@ -78,12 +78,12 @@ const buildBSearchFilterCookie = (sellers?: RegionSeller[]) =>
         return `${cookie}${idx > 0 ? '/' : ''}${seller.id}`
       }, 'bsearch-filter=private-seller#')
 
-export class BiggySearchClient extends ExternalClient {
+export class BiggySearchClient extends JanusClient {
   private store: string
   private locale: string | undefined
 
   public constructor(context: IOContext, options?: InstanceOptions) {
-    super('http://search.biggylabs.com.br/search-api/v1/', context, {...options})
+    super(context, {...options})
 
     const { account, locale, tenant } = context
     this.store = account
@@ -91,7 +91,7 @@ export class BiggySearchClient extends ExternalClient {
   }
 
   public async topSearches(): Promise<any> {
-    const result = await this.http.get(`${this.store}/api/top_searches`, {
+    const result = await this.http.get(`/search-api/v1/${this.store}/api/top_searches`, {
       metric: 'top-searches',
       forceMaxAge: 3600,
       params: {
@@ -106,7 +106,7 @@ export class BiggySearchClient extends ExternalClient {
     const { term } = args
 
     const result = await this.http.get(
-      `${this.store}/api/suggestion_searches`,
+      `/search-api/v1/${this.store}/api/suggestion_searches`,
       {
         params: {
           term: decodeURIComponent(term),
@@ -147,7 +147,7 @@ export class BiggySearchClient extends ExternalClient {
     }
 
     const result = await this.http.post(
-      `${this.store}/api/suggestion_products`,
+      `/search-api/v1/${this.store}/api/suggestion_products`,
       {
         term: decodeURIComponent(term),
         attributes,
@@ -181,7 +181,7 @@ export class BiggySearchClient extends ExternalClient {
       searchState,
     } = args
 
-    const url = `${this.store}/api/split/metadata_search/${buildPathFromArgs(
+    const url = `/search-api/v1/${this.store}/api/split/metadata_search/${buildPathFromArgs(
       args
     )}`
 
@@ -224,7 +224,7 @@ export class BiggySearchClient extends ExternalClient {
     } = args
 
     const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
-    const url = `${this.store}/api/split/attribute_search/${buildPathFromArgs(
+    const url = `/search-api/v1/${this.store}/api/split/attribute_search/${buildPathFromArgs(
       args
     )}`
 
@@ -270,7 +270,7 @@ export class BiggySearchClient extends ExternalClient {
     } = args
 
     const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
-    const url = `${this.store}/api/split/product_search/${buildPathFromArgs(
+    const url = `/search-api/v1/${this.store}/api/split/product_search/${buildPathFromArgs(
       args
     )}`
 
@@ -325,7 +325,7 @@ export class BiggySearchClient extends ExternalClient {
   public async banners(args: SearchResultArgs): Promise<any> {
     const { fullText } = args
 
-    const url = `${this.store}/api/split/banner_search/${buildPathFromArgs(
+    const url = `/search-api/v1/${this.store}/api/split/banner_search/${buildPathFromArgs(
       args
     )}`
 
@@ -348,7 +348,7 @@ export class BiggySearchClient extends ExternalClient {
     const { fullText } = args
 
     const result = await this.http.get(
-      `${this.store}/api/suggestion_searches`,
+      `/search-api/v1/${this.store}/api/suggestion_searches`,
       {
         params: {
           term: decodeURIComponent(fullText),
@@ -364,7 +364,7 @@ export class BiggySearchClient extends ExternalClient {
   public async correction(args: { fullText: string }): Promise<any> {
     const { fullText } = args
 
-    const url = `${this.store}/api/split/correction_search/`
+    const url = `/search-api/v1/${this.store}/api/split/correction_search/`
 
     const result = await this.http.getRaw(url, {
       params: {
@@ -382,7 +382,7 @@ export class BiggySearchClient extends ExternalClient {
   public async searchSuggestions(args: { fullText: string }): Promise<any> {
     const { fullText } = args
 
-    const url = `${this.store}/api/split/suggestion_search/`
+    const url = `/search-api/v1/${this.store}/api/split/suggestion_search/`
 
     const result = await this.http.getRaw(url, {
       params: {
