@@ -468,6 +468,7 @@ export const queries = {
       sellers: sellers.concat(privateSellers),
       hideUnavailableItems: args.hideUnavailableItems,
       initialAttributes,
+      regionId: segment?.regionId
     }
 
     const facetPromises = [biggySearch.facets(biggyArgs)]
@@ -737,6 +738,7 @@ export const queries = {
       hideUnavailableItems,
       options,
       workspaceSearchParams,
+      regionId,
     }
 
     const result = await biggySearch.productSearch(biggyArgs)

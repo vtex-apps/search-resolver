@@ -43,6 +43,7 @@ interface SearchResultArgs {
   options?: Options
   initialAttributes?: string
   workspaceSearchParams?: object
+  regionId?: string | null
 }
 
 interface RegionSeller {
