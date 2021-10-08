@@ -27,7 +27,7 @@ metrics.trackCache('segment', segmentCache)
 metrics.trackCache('search', searchCache)
 metrics.trackCache('messages', messagesCache)
 metrics.trackCache('vbase', vbaseCache)
-metrics.trackCache('biggySearch', biggySearchCache)
+metrics.trackCache('biggySearchNoCache', biggySearchCache)
 
 export default new Service<Clients, RecorderState, CustomContext>({
   clients: {
