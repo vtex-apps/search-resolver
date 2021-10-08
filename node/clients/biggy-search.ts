@@ -119,7 +119,7 @@ export class BiggySearchClient extends JanusClient {
     return result
   }
 
-  public async suggestionProducts(args: SuggestionProductsArgs): Promise<any> {
+  public async suggestionProducts(args: SuggestionProductsArgs & { sellers: RegionSeller[] }): Promise<any> {
     const {
       fullText: term,
       facetKey: attributeKey,

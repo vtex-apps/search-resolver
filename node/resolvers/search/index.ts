@@ -105,6 +105,34 @@ const getTradePolicyFromSelectedFacets = (selectedFacets: SelectedFacet[] = []):
   return tradePolicy.length > 0 ? tradePolicy[0].value : null
 }
 
+const isSellerInSellers = (sellers: RegionSeller[], sellerId: string) =>
+  sellers.find(seller => seller.id === sellerId)
+
+const getPrivateSellerFromSelectedFacets = (
+  selectedFacets: SelectedFacet[] = [],
+  sellers: RegionSeller[]
+): RegionSeller[] => {
+  let indexes = []
+  let privateSellers: RegionSeller[] = []
+
+  for (let i = 0; i < selectedFacets.length; i++) {
+    if (selectedFacets[i].key === 'private-seller') {
+      indexes.push(i)
+
+      // If the private seller is already inside sellers, we don't need to use it again
+      if (!isSellerInSellers(sellers, selectedFacets[i].value)) {
+        privateSellers.push({name: selectedFacets[i].value, id: selectedFacets[i].value})
+      }
+    }
+  }
+
+  for (let j = indexes.length - 1; j >= 0; j--) {
+    selectedFacets.splice(indexes[j], 1)
+  }
+
+  return privateSellers
+}
+
 const getRegionIdFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): [(string | undefined), SelectedFacet[]] => {
   let regionId = undefined
 
@@ -430,13 +458,14 @@ export const queries = {
     const tradePolicy = getTradePolicyFromSelectedFacets(selectedFacets) || segment?.channel
 
     const sellers = await getSellers(vbase, checkout, tradePolicy, regionId || segment?.regionId)
+    const privateSellers = getPrivateSellerFromSelectedFacets(selectedFacets, sellers)
 
     const biggyArgs = {
       searchState,
       query: fullText,
       attributePath: buildAttributePath(selectedFacetsWithSegment),
       tradePolicy,
-      sellers,
+      sellers: sellers.concat(privateSellers),
       hideUnavailableItems: args.hideUnavailableItems,
       initialAttributes,
     }
@@ -590,7 +619,7 @@ export const queries = {
       attributePath: buildAttributePath(selectedFacets),
       tradePolicy: segment && segment.channel,
       query: query,
-      sellers: sellers,
+      sellers,
       sort: convertOrderBy(orderBy),
       hideUnavailableItems,
       workspaceSearchParams,
@@ -687,6 +716,7 @@ export const queries = {
     const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets) || segment?.channel
 
     const sellers = await getSellers(vbase, checkout, tradePolicy, regionId)
+    const privateSellers = getPrivateSellerFromSelectedFacets(selectedFacets, sellers)
 
     const [count, page] = getProductsCountAndPage(from, to)
 
@@ -703,7 +733,7 @@ export const queries = {
       fullText,
       tradePolicy,
       sort: convertOrderBy(args.orderBy),
-      sellers,
+      sellers: sellers.concat(privateSellers),
       hideUnavailableItems,
       options,
       workspaceSearchParams,

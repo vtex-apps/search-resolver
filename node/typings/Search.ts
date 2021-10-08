@@ -59,7 +59,6 @@ interface SuggestionProductsArgs {
   indexingType?: IndexingType
   productOriginVtex: boolean
   simulationBehavior: 'skip' | 'default' | 'only1P' | null
-  sellers?: RegionSeller[]
   hideUnavailableItems?: boolean | null
   regionId?: string
   workspaceSearchParams?: object
