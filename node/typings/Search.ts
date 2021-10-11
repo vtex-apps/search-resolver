@@ -63,6 +63,7 @@ interface SuggestionProductsArgs {
   hideUnavailableItems?: boolean | null
   regionId?: string
   workspaceSearchParams?: object
+  segmentedFacets?: SelectedFacet[]
 }
 
 interface SuggestionSearchesArgs {

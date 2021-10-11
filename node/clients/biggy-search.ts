@@ -128,7 +128,8 @@ export class BiggySearchClient extends JanusClient {
       indexingType,
       sellers,
       hideUnavailableItems = false,
-      workspaceSearchParams
+      workspaceSearchParams,
+      segmentedFacets,
     } = args
     const attributes: { key: string; value: string }[] = []
 
@@ -136,6 +137,15 @@ export class BiggySearchClient extends JanusClient {
       attributes.push({
         key: attributeKey,
         value: attributeValue,
+      })
+    }
+
+    if (segmentedFacets) {
+      segmentedFacets.forEach(({key, value}) => {
+        attributes.push({
+          key,
+          value,
+        })
       })
     }
 

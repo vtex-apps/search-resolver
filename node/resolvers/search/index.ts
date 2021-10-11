@@ -48,6 +48,7 @@ import { Checkout } from '../../clients/checkout'
 import setFilterVisibility from '../../utils/setFilterVisibility'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
 import { convertProducts } from '../../utils/compatibility-layer'
+import parseFacetsFromSegment from '../../utils/parseFacetsFromSegment'
 
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -424,6 +425,8 @@ export const queries = {
 
     const [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
 
+    const selectedFacetsWithSegment = selectedFacets.concat(parseFacetsFromSegment(segment?.facets))
+
     const tradePolicy = getTradePolicyFromSelectedFacets(selectedFacets) || segment?.channel
 
     const sellers = await getSellers(vbase, checkout, tradePolicy, regionId || segment?.regionId)
@@ -431,7 +434,7 @@ export const queries = {
     const biggyArgs = {
       searchState,
       query: fullText,
-      attributePath: buildAttributePath(selectedFacets),
+      attributePath: buildAttributePath(selectedFacetsWithSegment),
       tradePolicy,
       sellers,
       hideUnavailableItems: args.hideUnavailableItems,
@@ -677,6 +680,8 @@ export const queries = {
     } = args
     let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
 
+    const selectedFacetsWithSegment = selectedFacets.concat(parseFacetsFromSegment(segment?.facets))
+
     regionId = regionId ?? segment?.regionId
 
     const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets) || segment?.channel
@@ -693,7 +698,7 @@ export const queries = {
       fuzzy,
       operator,
       searchState,
-      attributePath: buildAttributePath(selectedFacets),
+      attributePath: buildAttributePath(selectedFacetsWithSegment),
       query: fullText,
       fullText,
       tradePolicy,
@@ -834,11 +839,14 @@ export const queries = {
 
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
+    const segmentedFacets = parseFacetsFromSegment(segment?.facets)
+
     const result = await biggySearch.suggestionProducts({
       ...args,
       salesChannel,
       sellers,
-      workspaceSearchParams
+      workspaceSearchParams,
+      segmentedFacets
     })
 
     if (ctx.vtex.tenant && !args.productOriginVtex) {
