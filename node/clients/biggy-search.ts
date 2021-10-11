@@ -234,7 +234,7 @@ export class BiggySearchClient extends JanusClient {
       regionId,
     } = args
 
-    const cache = validNavigationPage(args.attributePath, query) && sellers?.length === 0 ? { forceMaxAge: 3600 } : {}
+    const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
     const url = `/search-api/v1/${this.store}/api/split/attribute_search/${buildPathFromArgs(
       args
     )}`
@@ -282,7 +282,7 @@ export class BiggySearchClient extends JanusClient {
       regionId,
     } = args
 
-    const cache = validNavigationPage(args.attributePath, query) && sellers?.length === 0 ? { forceMaxAge: 3600 } : {}
+    const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
     const url = `/search-api/v1/${this.store}/api/split/product_search/${buildPathFromArgs(
       args
     )}`
