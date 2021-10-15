@@ -9,6 +9,7 @@ const fillProductWithSimulation = async (
   store: Store,
   simulationBehavior: 'default' | 'only1P',
   regionId?: string,
+  salesChannel?: string,
 ) => {
   const payload = {
     items: product.items.map(item => ({
@@ -18,6 +19,7 @@ const fillProductWithSimulation = async (
       })),
     })),
     regionId,
+    salesChannel,
   }
 
   try {
@@ -42,7 +44,13 @@ const fillProductWithSimulation = async (
   }
 }
 
-export const convertProducts = async (products: BiggySearchProduct[], ctx: Context, simulationBehavior: 'skip' | 'default' | 'only1P' | null, channel?: string, regionId?: string) => {
+export const convertProducts = async (
+  products: BiggySearchProduct[], 
+  ctx: Context, 
+  simulationBehavior: 'skip' | 'default' | 'only1P' | null, 
+  channel?: string, 
+  regionId?: string
+) => {
   const {
     vtex: { segment },
     clients: { store },
@@ -53,7 +61,15 @@ export const convertProducts = async (products: BiggySearchProduct[], ctx: Conte
     .map(product => convertISProduct(product, salesChannel))
 
   if (simulationBehavior === 'default' || simulationBehavior === 'only1P') {
-    const simulationPromises = convertedProducts.map(product => fillProductWithSimulation(product as SearchProduct, store, simulationBehavior, regionId))
+    const simulationPromises = convertedProducts.map(product => 
+      fillProductWithSimulation(
+        product as SearchProduct,
+        store,
+        simulationBehavior,
+        regionId,
+        salesChannel
+      )
+    )
     convertedProducts = (await Promise.all(simulationPromises)) as SearchProduct[]
   }
 
