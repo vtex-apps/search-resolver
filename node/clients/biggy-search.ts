@@ -230,7 +230,8 @@ export class BiggySearchClient extends JanusClient {
       searchState,
       sellers,
       hideUnavailableItems,
-      initialAttributes
+      initialAttributes,
+      regionId,
     } = args
 
     const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
@@ -249,6 +250,7 @@ export class BiggySearchClient extends JanusClient {
         locale: this.locale,
         bgy_leap: leap ? true : undefined,
         initialAttributes,
+        regionId,
         ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
         ...parseState(searchState),
       },
@@ -276,7 +278,8 @@ export class BiggySearchClient extends JanusClient {
       sellers,
       hideUnavailableItems,
       options,
-      workspaceSearchParams
+      workspaceSearchParams,
+      regionId,
     } = args
 
     const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
@@ -294,6 +297,7 @@ export class BiggySearchClient extends JanusClient {
       locale: this.locale,
       bgy_leap: leap ? true : undefined,
       allowRedirect: options?.allowRedirect === false ? false : true,
+      regionId,
       ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
       ...parseState(searchState),
       ...workspaceSearchParams, // important that this be last so that it can override master settings above

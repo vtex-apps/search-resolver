@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Add regionId to the cache key.
+
 ## [1.58.2] - 2021-10-18
 
 ### Fixed
