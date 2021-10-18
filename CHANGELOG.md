@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- `itemsWithSimulation` that was not considering `salesChannel` argument.
+
 ## [1.58.1] - 2021-10-13
 
 ### Changed

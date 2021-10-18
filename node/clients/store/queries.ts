@@ -1,6 +1,6 @@
 export const itemsWithSimulation = `
-query itemsWithSimulation($items: [ItemInput], $regionId: String) {
-  itemsWithSimulation(items: $items, regionId: $regionId) {
+query itemsWithSimulation($items: [ItemInput], $regionId: String, $salesChannel: String) {
+  itemsWithSimulation(items: $items, regionId: $regionId, salesChannel: $salesChannel) {
     itemId
     sellers {
       sellerId

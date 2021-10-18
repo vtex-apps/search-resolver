@@ -8,9 +8,11 @@ interface ItemsWithSimulationPayload {
     sellers: { sellerId: string }[]
   }[],
   regionId?: string
+  salesChannel?: string
 }
 
 export class Store extends AppGraphQLClient {
+  // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
   constructor(context: IOContext, options?: InstanceOptions) {
     super('vtex.store-graphql@2.x', context, {
       ...options,
