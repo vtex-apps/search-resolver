@@ -248,7 +248,7 @@ export const resolvers = {
       const { clients: { rewriter, apps }, vtex: { binding } } = ctx
       const settings: AppSettings = await apps.getAppSettings(APP_NAME)
 
-      if (!shouldTranslateToBinding(ctx)) {
+      if (!shouldTranslateToBinding(ctx, true)) {
         return settings.slugifyLinks ? Slugify(linkText) : linkText
       }
       const route = await rewriter.getRoute(productId, 'product', binding!.id!)

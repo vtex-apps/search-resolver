@@ -74,8 +74,8 @@ export const translateManyToCurrentLanguage = (messages: Message[], ctx: Context
 
 export const shouldTranslateToUserLocale = ({ vtex: { tenant, locale } }: Context) => tenant?.locale !== locale
 
-export const shouldTranslateToBinding = ({ vtex: { binding, tenant } }: Context) =>
-  Boolean(tenant?.locale && binding?.locale && tenant.locale !== binding.locale)
+export const shouldTranslateToBinding = ({ translated }: Context, ignoreIndexedTranslation?: boolean) =>
+  !translated || ignoreIndexedTranslation
 
-  export const shouldTranslateToTenantLocale = ({ vtex: { locale, tenant } }: Context) =>
+export const shouldTranslateToTenantLocale = ({ vtex: { locale, tenant } }: Context) =>
   Boolean(tenant?.locale && locale && tenant.locale !== locale)

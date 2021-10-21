@@ -32,6 +32,7 @@ declare global {
     cookie: string
     originalPath: string
     vtex: CustomIOContext
+    translated?: boolean
   }
 
   interface CustomIOContext extends IOContext {
