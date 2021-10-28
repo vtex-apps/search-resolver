@@ -554,6 +554,14 @@ export const convertOrderBy = (orderBy?: string | null): string => {
   }
 }
 
+const canCleanMap = (attributeKey: string, map: string[]) => {
+  const categoryKeys = ['category-1', 'category-2']
+  if (map.length > 2) {
+    return false
+  }
+  return categoryKeys.includes(attributeKey) || (attributeKey === 'brand' && map.length === 1)
+}
+
 export const buildBreadcrumb = (
   attributes: ElasticAttribute[],
   fullText: string,
@@ -623,10 +631,17 @@ export const buildBreadcrumb = (
       return
     }
 
-    breadcrumb.push({
-      name: unescape(value.label),
-      href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
-    })
+    if (canCleanMap(value.attributeKey, pivotMap)) {
+      breadcrumb.push({
+        name: unescape(value.label),
+        href: `/${pivotValue.join('/')}`,
+      })
+    } else {
+      breadcrumb.push({
+        name: unescape(value.label),
+        href: `/${pivotValue.join('/')}?map=${pivotMap.join(',')}`,
+      })
+    }
   })
 
   return breadcrumb

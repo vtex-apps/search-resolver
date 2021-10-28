@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Clean breadcrumb link for department, category, or brand.
+
 ## [1.58.5] - 2021-11-08
 
 ## [1.58.4] - 2021-11-08
