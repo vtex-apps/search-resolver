@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Category ID in `categoriesTree`.
+
 ## [1.59.1] - 2021-11-24
 
 ### Changed
