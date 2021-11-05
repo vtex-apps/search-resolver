@@ -611,13 +611,15 @@ export const queries = {
 
     const selectedFacets: SelectedFacet[] = buildSelectedFacets(args)
 
+    const selectedFacetsWithSegment = selectedFacets.concat(parseFacetsFromSegment(segment?.facets))
+
     const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
 
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
     const biggyArgs: SearchResultArgs = {
       fullText: query,
-      attributePath: buildAttributePath(selectedFacets),
+      attributePath: buildAttributePath(selectedFacetsWithSegment),
       tradePolicy: segment && segment.channel,
       query: query,
       sellers,
