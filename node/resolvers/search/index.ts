@@ -493,7 +493,7 @@ export const queries = {
     const [intelligentSearchFacets, solrFacets] = await Promise.all(facetPromises)
 
     if (ctx.vtex.tenant) {
-      ctx.vtex.tenant.locale = intelligentSearchFacets.locale
+      ctx.translated = intelligentSearchFacets.translated
     }
 
     // FIXME: This is used to sort values based on catalog API.
@@ -635,7 +635,7 @@ export const queries = {
     const result = await biggySearch.productSearch(biggyArgs)
 
     if (ctx.vtex.tenant) {
-      ctx.vtex.tenant.locale = result.locale
+      ctx.translated = result.translated
     }
 
     const convertedProducts = await convertProducts(result.products, ctx, simulationBehavior)
@@ -744,7 +744,7 @@ export const queries = {
     const result = await biggySearch.productSearch(biggyArgs)
 
     if (ctx.vtex.tenant && !args.productOriginVtex) {
-      ctx.vtex.tenant.locale = result.locale
+      ctx.translated = result.translated
     }
 
     const convertedProducts = args.productOriginVtex ?
@@ -882,7 +882,7 @@ export const queries = {
     })
 
     if (ctx.vtex.tenant && !args.productOriginVtex) {
-      ctx.vtex.tenant.locale = result.locale
+      ctx.translated = result.translated
     }
 
     const convertedProducts = args.productOriginVtex ?
