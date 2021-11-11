@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.58.7] - 2021-11-11
+
 ### Fixed
 - Use API `linkText` when binding and tenant locales are the same.
 
