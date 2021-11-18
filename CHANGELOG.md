@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.59.0] - 2021-11-18
+
 ### Changed
 - API route to use private seller filter as a header instead of a cookie.
 
