@@ -71,12 +71,12 @@ const buildPathFromArgs = (args: SearchResultArgs) => {
   return path.join(attributePath.split('%20').join('-'), policyAttr)
 }
 
-const buildBSearchFilterCookie = (sellers?: RegionSeller[]) =>
+const buildBSearchFilterHeader = (sellers?: RegionSeller[]) =>
   !sellers || sellers.length === 0
     ? ''
     : sellers.reduce((cookie: string, seller: RegionSeller, idx: number) => {
         return `${cookie}${idx > 0 ? '/' : ''}${seller.id}`
-      }, 'bsearch-filter=private-seller#')
+      }, 'private-seller#')
 
 export class BiggySearchClient extends JanusClient {
   private store: string
@@ -170,7 +170,7 @@ export class BiggySearchClient extends JanusClient {
           ...workspaceSearchParams
         },
         headers: {
-          Cookie: buildBSearchFilterCookie(sellers),
+          "X-VTEX-IS-Filter": buildBSearchFilterHeader(sellers),
           "X-VTEX-IS-ID": `${this.store}`,
         },
       }
@@ -191,7 +191,7 @@ export class BiggySearchClient extends JanusClient {
       searchState,
     } = args
 
-    const url = `/search-api/v1/${this.store}/api/split/metadata_search/${buildPathFromArgs(
+    const url = `/search-api/v1/${this.store}/api/io/split/metadata_search/${buildPathFromArgs(
       args
     )}`
 
@@ -235,7 +235,7 @@ export class BiggySearchClient extends JanusClient {
     } = args
 
     const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
-    const url = `/search-api/v1/${this.store}/api/split/attribute_search/${buildPathFromArgs(
+    const url = `/search-api/v1/${this.store}/api/io/split/attribute_search/${buildPathFromArgs(
       args
     )}`
 
@@ -256,7 +256,7 @@ export class BiggySearchClient extends JanusClient {
       },
       metric: 'search-result',
       headers: {
-        Cookie: buildBSearchFilterCookie(sellers),
+        "X-VTEX-IS-Filter": buildBSearchFilterHeader(sellers),
         "X-VTEX-IS-ID": `${this.store}`,
       },
       ...cache,
@@ -283,7 +283,7 @@ export class BiggySearchClient extends JanusClient {
     } = args
 
     const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
-    const url = `/search-api/v1/${this.store}/api/split/product_search/${buildPathFromArgs(
+    const url = `/search-api/v1/${this.store}/api/io/split/product_search/${buildPathFromArgs(
       args
     )}`
 
@@ -309,7 +309,7 @@ export class BiggySearchClient extends JanusClient {
         productSearch: {
           url,
           ...params,
-          cookie: buildBSearchFilterCookie(sellers),
+          "X-VTEX-IS-Filter": buildBSearchFilterHeader(sellers),
           ...cache,
         }
       })
@@ -319,7 +319,7 @@ export class BiggySearchClient extends JanusClient {
       params,
       metric: 'search-result',
       headers: {
-        Cookie: buildBSearchFilterCookie(sellers),
+        "X-VTEX-IS-Filter": buildBSearchFilterHeader(sellers),
         "X-VTEX-IS-ID": `${this.store}`,
       },
       ...cache
@@ -339,7 +339,7 @@ export class BiggySearchClient extends JanusClient {
   public async banners(args: SearchResultArgs): Promise<any> {
     const { fullText } = args
 
-    const url = `/search-api/v1/${this.store}/api/split/banner_search/${buildPathFromArgs(
+    const url = `/search-api/v1/${this.store}/api/io/split/banner_search/${buildPathFromArgs(
       args
     )}`
 
@@ -378,7 +378,7 @@ export class BiggySearchClient extends JanusClient {
   public async correction(args: { fullText: string }): Promise<any> {
     const { fullText } = args
 
-    const url = `/search-api/v1/${this.store}/api/split/correction_search/`
+    const url = `/search-api/v1/${this.store}/api/io/split/correction_search/`
 
     const result = await this.http.getRaw(url, {
       params: {
@@ -396,7 +396,7 @@ export class BiggySearchClient extends JanusClient {
   public async searchSuggestions(args: { fullText: string }): Promise<any> {
     const { fullText } = args
 
-    const url = `/search-api/v1/${this.store}/api/split/suggestion_search/`
+    const url = `/search-api/v1/${this.store}/api/io/split/suggestion_search/`
 
     const result = await this.http.getRaw(url, {
       params: {
