@@ -1,0 +1,15 @@
+versão: 2
+atualizações:
+
+  # Manter dependências para npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "master"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "v1.x"
