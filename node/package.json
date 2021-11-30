@@ -41,7 +41,7 @@
     "@types/graphql": "^14.5.0",
     "@types/jest": "^25.1.4",
     "@types/koa": "^2.0.46",
-    "@types/node": "^12.0.0",
+    "@types/node": "^16.11.11",
     "@types/qs": "^6.5.1",
     "@types/ramda": "^0.26.21",
     "@vtex/api": "6.41.0",
