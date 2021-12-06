@@ -714,6 +714,7 @@ export const convertSolrTree = (node: SearchFacetCategory, selectedFaces: Select
   )
 
   return {
+    id: node.Id?.toString(),
     quantity: node.Quantity,
     name: node.Name,
     key: node.Map,

@@ -56,6 +56,7 @@ export interface FilterValue {
     to: number
   },
   children?: FilterValue[]
+  id?: string
 }
 
 interface CatalogAttributeValues {
