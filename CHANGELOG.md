@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Feature
+- Add segment to the `products` query.
+
 ## [1.59.3] - 2021-12-07
 
 ### Changed
