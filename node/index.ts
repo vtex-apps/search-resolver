@@ -67,6 +67,9 @@ export default new Service<Clients, RecorderState, CustomContext>({
         memoryCache: biggySearchCache,
         timeout: SIX_SECONDS_MS,
       },
+      rewriter: {
+        timeout: SIX_SECONDS_MS,
+      },
       vbase: {
         concurrency: 2,
         memoryCache: vbaseCache,
