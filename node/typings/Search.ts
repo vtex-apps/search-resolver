@@ -46,6 +46,18 @@ interface SearchResultArgs {
   regionId?: string | null
 }
 
+interface ProductsByIdentifierArgs {
+  field: string;
+  values: string[];
+  attributePath: string
+  indexingType?: IndexingType
+  tradePolicy?: number
+  segment?: SegmentData
+  sellers?: RegionSeller[]
+  workspaceSearchParams?: object
+  regionId?: string | null
+}
+
 interface RegionSeller {
   id: string
   name: string

@@ -547,7 +547,7 @@ export const queries = {
 
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
     const {
-      clients: { search },
+      clients: { search, biggySearch, vbase, checkout },
     } = ctx
 
     const args =
@@ -567,11 +567,24 @@ export const queries = {
 
     let products = [] as SearchProduct[]
 
-    const vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
+    const vtexSegment: any = ctx.vtex.segment
+    const sellers = await getSellers(vbase, checkout, salesChannel, vtexSegment?.regionId)
+    const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+
+    console.log(args.identifier)
 
     switch (field) {
       case 'id':
-        products = await search.productById(value, vtexSegment, salesChannel)
+        products = await biggySearch.productsByIdentifier({
+          attributePath: buildAttributePath(parseFacetsFromSegment(vtexSegment?.facets)),
+          field: 'id',
+          values: [value],
+          tradePolicy: salesChannel,
+          sellers,
+          segment: vtexSegment,
+          regionId: vtexSegment?.regionId,
+          workspaceSearchParams
+        })
         break
       case 'slug':
         products = await search.product(value, vtexSegment, salesChannel)
@@ -586,6 +599,8 @@ export const queries = {
         products = await search.productBySku(value, vtexSegment, salesChannel)
         break
     }
+
+    products = await convertProducts(products as any, ctx, 'default')
 
     if (products.length > 0) {
       return head(products)
@@ -653,7 +668,7 @@ export const queries = {
     ctx: Context
   ) => {
     const {
-      clients: { search },
+      clients: { search, biggySearch },
     } = ctx
 
     let products = [] as SearchProduct[]
@@ -663,7 +678,11 @@ export const queries = {
 
     switch (field) {
       case 'id':
-        products = await search.productsById(values, vtexSegment, salesChannel)
+        products = await biggySearch.productsByIdentifier({
+          attributePath: buildAttributePath(parseFacetsFromSegment(ctx.vtex.segment?.facets)),
+          field: 'id',
+          values
+        })
         break
       case 'ean':
         products = await search.productsByEan(values, vtexSegment, salesChannel)
