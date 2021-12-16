@@ -618,10 +618,9 @@ export const queries = {
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
     const biggyArgs: SearchResultArgs = {
-      fullText: query,
       attributePath: buildAttributePath(selectedFacetsWithSegment),
       tradePolicy: segment && segment.channel,
-      query: query,
+      query,
       sellers,
       sort: convertOrderBy(orderBy),
       hideUnavailableItems,
@@ -733,7 +732,6 @@ export const queries = {
       searchState,
       attributePath: buildAttributePath(selectedFacetsWithSegment),
       query: fullText,
-      fullText,
       tradePolicy,
       sort: convertOrderBy(args.orderBy),
       sellers: sellers.concat(privateSellers),

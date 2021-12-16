@@ -57,7 +57,11 @@ const sortProducts = (search: { total: number, products: {id: string}[]}, query:
   return search
 }
 
-const buildPathFromArgs = (args: SearchResultArgs) => {
+const buildPathFromArgs = (args: {
+  attributePath: string,
+  tradePolicy?: number,
+  indexingType?: IndexingType,
+}) => {
   const { attributePath, tradePolicy, indexingType } = args
 
   // On headless stores, the trade-policy is already present in the selectedFacets, so there is no need to add it again.
@@ -336,7 +340,7 @@ export class BiggySearchClient extends JanusClient {
     return sortProducts(result.data, query)
   }
 
-  public async banners(args: SearchResultArgs): Promise<any> {
+  public async banners(args: BannersArgs): Promise<any> {
     const { fullText } = args
 
     const url = `/search-api/v1/${this.store}/api/io/split/banner_search/${buildPathFromArgs(
