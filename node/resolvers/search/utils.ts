@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+
 import { compose, last, split, toLower, zip } from 'ramda'
 import { Functions } from '@gocommerce/utils'
 
@@ -29,8 +30,9 @@ const lastSegment = compose<string, string[], string>(
 )
 
 export const zipQueryAndMap = (query?: string | null, map?: string | null) => {
-  const cleanQuery = query || ''
-  const cleanMap = map || ''
+  const cleanQuery = query ?? ''
+  const cleanMap = map ?? ''
+
   return zip(
     cleanQuery
       .toLowerCase()
@@ -42,6 +44,7 @@ export const zipQueryAndMap = (query?: string | null, map?: string | null) => {
 
 export function hashMD5(text: string) {
   const hash = crypto.createHash('md5')
+
   return hash.update(text).digest('hex')
 }
 
@@ -52,13 +55,16 @@ export function findCategoryInTree(
 ): CategoryTreeResponse | null {
   for (const node of tree) {
     const slug = lastSegment(node.url)
+
     if (slug.toUpperCase() === values[index].toUpperCase()) {
       if (index === values.length - 1) {
         return node
       }
+
       return findCategoryInTree(node.children, values, index + 1)
     }
   }
+
   return null
 }
 
@@ -67,6 +73,7 @@ export const getBrandFromSlug = async (
   search: Context['clients']['search']
 ) => {
   const brands = await search.brands()
+
   return brands.find(
     brand =>
       brand.isActive &&
@@ -124,22 +131,29 @@ export const searchEncodeURI = (account: string) => (str: string) => {
       switch (c) {
         case '%':
           return '@perc@'
+
         case '"':
           return '@quo@'
+
         case "'":
           return '@squo@'
+
         case '.':
           return '@dot@'
+
         case '(':
           return '@lpar@'
+
         case ')':
           return '@rpar@'
+
         default: {
           return c
         }
       }
     })
   }
+
   return str
 }
 
@@ -148,18 +162,25 @@ export const searchDecodeURI = (str: string) => {
     switch (c) {
       case '@perc@':
         return '%'
+
       case '@quo@':
         return "\""
+
       case '@squo@':
         return "\'"
+
       case '@dot@':
         return "."
+
       case '@lpar@':
         return "("
+
       case '@rpar@':
         return ")"
+
       case '@slash@':
         return "/"
+
       default: {
         return c
       }
@@ -173,6 +194,7 @@ export const getMapAndPriceRangeFromSelectedFacets = (
   const priceRangeIndex = selectedFacets.findIndex(
     facet => facet.key === 'priceRange'
   )
+
   const priceRange =
     priceRangeIndex > -1
       ? selectedFacets.splice(priceRangeIndex, 1)[0].value
@@ -190,5 +212,6 @@ export const breadcrumbMapKey = (queryUnit: string, mapUnit: string) => {
 export const validMapAndQuery = (query?: string, map?: string) => {
   const values = query?.split('/').filter(value => value)
   const facets = map?.split(',').filter(facetKey => facetKey)
+
   return values?.length === facets?.length
 }

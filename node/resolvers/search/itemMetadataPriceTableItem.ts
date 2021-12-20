@@ -1,4 +1,5 @@
 import { isEmpty, path } from 'ramda'
+
 import { getItemChoiceType, CHOICE_TYPES } from '../../utils/attachments'
 
 interface Params {
@@ -18,6 +19,7 @@ const getSimulationPayloadItemsForSingleFromTree = (
   childId: string,
   seller: string,
   parentAssemblyBinding: string
+// eslint-disable-next-line max-params
 ) => {
   return [
     { id: parent.id, quantity: 1, seller: parent.seller },
@@ -38,12 +40,14 @@ const getSimulationPayloadItemsForToggleFromTree = (
   seller: string,
   assemblyOption: AssemblyOption,
   parentBasicTree: PayloadItem[]
+// eslint-disable-next-line max-params
 ) => {
   const parentPayloadItem = {
     id: parent.id,
     quantity: 1,
     seller: parent.seller,
   }
+
   const basicChildItem = {
     id: childId,
     seller,
@@ -51,10 +55,13 @@ const getSimulationPayloadItemsForToggleFromTree = (
     parentItemIndex: 0,
     parentAssemblyBinding: assemblyOption.id,
   }
+
   const siblings = parentBasicTree.filter(
     ({ parentAssemblyBinding }) => parentAssemblyBinding === assemblyOption.id
   )
+
   const siblingCount = siblings.length
+
   // See if we can add this item, considering the group max quantity
   if (siblingCount < assemblyOption.composition!.maxQuantity) {
     return [parentPayloadItem, basicChildItem]
@@ -65,16 +72,20 @@ const getSimulationPayloadItemsForToggleFromTree = (
     const brotherComposition = assemblyOption.composition!.items.find(
       comp => comp.id === item.id
     )
+
     return brotherComposition!.minQuantity === 0
   })
+
   if (!brotherToBeRemoved) {
     return []
   }
+
   const withoutBrother = parentBasicTree.filter(
     ({ id, parentAssemblyBinding }) =>
       id !== brotherToBeRemoved.id &&
       parentAssemblyBinding !== brotherToBeRemoved.parentAssemblyBinding
   )
+
   return [parentPayloadItem, ...withoutBrother, basicChildItem]
 }
 
@@ -84,6 +95,7 @@ const getSimulationPayloadItemsForMultipleFromTree = (
   assemblyOption: AssemblyOption,
   parentBasicTree: PayloadItem[],
   childCompositionItem: CompositionItem
+// eslint-disable-next-line max-params
 ) => {
   const parentPayloadItem = {
     id: parent.id,
@@ -116,21 +128,26 @@ const getSimulationPayloadItemsForMultipleFromTree = (
 
   const siblingCount = siblings.reduce((sum, sib) => sum + sib.quantity, 0)
   const siblingsAllowed = assemblyOption.composition!.maxQuantity - siblingCount
+
   if (basicItemQuantity <= siblingsAllowed) {
     return [parentPayloadItem, ...siblings, basicChildItem]
   }
 
   let currentSiblingCount = siblingCount
+
   // We will iterate through the childs siblings and remove the minimum we should
   for (const brother of siblings) {
     const brotherComposition = assemblyOption.composition!.items.find(
       comp => comp.id === brother.id
     )
+
     const oldBrotherQuantity = brother.quantity
+
     brother.quantity = brotherComposition!.minQuantity
     currentSiblingCount -= oldBrotherQuantity - brotherComposition!.minQuantity
     const currentSiblingsAllowed =
       assemblyOption.composition!.maxQuantity - currentSiblingCount
+
     if (currentSiblingsAllowed >= basicItemQuantity) {
       // We can now break because we can add out chuld item safely
       break
@@ -138,6 +155,7 @@ const getSimulationPayloadItemsForMultipleFromTree = (
   }
 
   const nonEmptySiblings = siblings.filter(({ quantity }) => quantity > 0)
+
   return [parentPayloadItem, ...nonEmptySiblings, basicChildItem]
 }
 
@@ -146,11 +164,13 @@ const simulateAndGetPrice = async (
   checkout: Context['clients']['checkout'],
   itemId: string,
   assemblyId: string
+// eslint-disable-next-line max-params
 ) => {
   const simulation = await checkout.simulation(payload)
   const childInTree = simulation.items.find(
     item => itemId === item.id && assemblyId === item.parentAssemblyBinding
   )
+
   return childInTree ? childInTree.sellingPrice : 0
 }
 
@@ -159,6 +179,7 @@ const getSimulationPayloadItems = (
   compositionItem: CompositionItem,
   parent: SearchMetadataItem,
   fatherBasicTree: PayloadItem[]
+// eslint-disable-next-line max-params
 ) => {
   const assemblyType = getItemChoiceType(assemblyOption)
 
@@ -170,6 +191,7 @@ const getSimulationPayloadItems = (
       assemblyOption.id
     )
   }
+
   if (assemblyType === CHOICE_TYPES.TOGGLE) {
     return getSimulationPayloadItemsForToggleFromTree(
       parent,
@@ -179,6 +201,7 @@ const getSimulationPayloadItems = (
       fatherBasicTree
     )
   }
+
   return getSimulationPayloadItemsForMultipleFromTree(
     parent,
     assemblyOption,
@@ -211,18 +234,22 @@ export const resolvers = {
 
       for (const fatherAssemblyOption of parent.assemblyOptions) {
         const assemblyId = fatherAssemblyOption.id
+
         if (!fatherAssemblyOption.composition) {
           continue
         }
+
         const groupMinimum = fatherAssemblyOption.composition!.minQuantity
         const itemsInitialsSum = fatherAssemblyOption.composition!.items.reduce(
           (sum, item) => sum + item.initialQuantity,
           0
         )
+
         // The basic tree will not contain children of this group
         if (groupMinimum !== itemsInitialsSum) {
           continue
         }
+
         for (const compItem of fatherAssemblyOption.composition!.items) {
           if (compItem.initialQuantity > 0) {
             parentBasicTree.push({
@@ -240,6 +267,7 @@ export const resolvers = {
         item =>
           id === item.id && assemblyOption.id === item.parentAssemblyBinding
       )
+
       // If item is already in tree, just simulate and return the price
       if (itemInTree) {
         return simulateAndGetPrice(
@@ -257,6 +285,7 @@ export const resolvers = {
         parent,
         parentBasicTree
       )
+
       return simulateAndGetPrice(
         { ...payload, items: newSimulationPayloadItems },
         checkout,

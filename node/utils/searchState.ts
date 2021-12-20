@@ -18,6 +18,7 @@ export const parseState = (state?: string): { [key: string]: string } => {
 
   try {
     const parsed = JSON.parse(decodeURI(state))
+
     if (typeof parsed === 'object') {
       return parsed
     }

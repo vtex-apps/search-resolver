@@ -1,6 +1,8 @@
 import * as TypeMoq from 'typemoq'
+import type { IOContext } from "@vtex/api"
+import { VBase } from "@vtex/api"
+
 import { CategoryTreeSegmentsFinder } from "./CategoryTreeSegmentsFinder"
-import { VBase, IOContext } from "@vtex/api"
 import { Search } from "../clients/search"
 
 /*  CategoryTree 
@@ -39,6 +41,7 @@ const clients = {vbase: new vbaseMock.object(context.object), search: new search
 const toPair = (categories: any[]) => 
   categories.map(c => {
     const [key, value] = c && Object.entries(c)[0] || []
+
     return key? { id: value, name: key }: null
   })
 
@@ -51,6 +54,7 @@ describe('Category Tree Search tests', () => {
 
     protected lazyFetchChildren = async (id: number) => {
       const children = childrenTree[id.toString()]
+
       return children
     }
 
@@ -63,10 +67,12 @@ describe('Category Tree Search tests', () => {
       return this.categoryTreeRoot as any
     }
   }
+
   test('It should find a complete tree of categories', async () => {
     const segments = 'c0/c1/c4'.split('/')
     const treeFinder = new finder(segments)
     const result = await treeFinder.find()
+
     expect(result).toStrictEqual(toPair([c0, c1, c4]))
   })
 
@@ -74,6 +80,7 @@ describe('Category Tree Search tests', () => {
     const segments = 'c0/c1/c2'.split('/')
     const treeFinder = new finder(segments)
     const result = await treeFinder.find()
+
     expect(result).toStrictEqual(toPair([c0, c1, null]))
   })
 
@@ -81,6 +88,7 @@ describe('Category Tree Search tests', () => {
     const segments = 'x/c1/c4'.split('/')
     const treeFinder = new finder(segments)
     const result = await treeFinder.find()
+
     expect(result).toStrictEqual([])
   })
 })

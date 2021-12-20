@@ -13,6 +13,7 @@ describe('tests related to the searchMetadata query', () => {
     const args = { query: 'Department/Category', map: 'c,c' }
 
     const result = await queries.searchMetadata({}, args, mockContext as any)
+
     expect(result.titleTag).toBe('department/category-title')
     expect(result.metaTagDescription).toBe(
       'department/category-metaTagDescription (((1))) <<<pt-BR>>>'
@@ -24,6 +25,7 @@ describe('tests related to the searchMetadata query', () => {
     const args = { query: 'Brand', map: 'b' }
 
     const result = await queries.searchMetadata({}, args, mockContext as any)
+
     expect(result.titleTag).toBe('Brand-title')
     expect(result.metaTagDescription).toBe('Brand-metaTagDescription (((1))) <<<pt-BR>>>')
     expect(mockContext.clients.search.pageType).toBeCalledTimes(1)
@@ -33,6 +35,7 @@ describe('tests related to the searchMetadata query', () => {
     const args = { query: 'Shoes', map: 'ft' }
 
     const result = await queries.searchMetadata({}, args, mockContext as any)
+
     expect(result.titleTag).toBe('Shoes')
     expect(result.metaTagDescription).toBe(null)
     expect(mockContext.clients.search.pageType).toBeCalledTimes(0)
@@ -42,6 +45,7 @@ describe('tests related to the searchMetadata query', () => {
     const args = { query: 'Large', map: 'specificationFilter_10' }
 
     const result = await queries.searchMetadata({}, args, mockContext as any)
+
     expect(result.titleTag).toBe('Large')
     expect(result.metaTagDescription).toBe(null)
     expect(mockContext.clients.search.pageType).toBeCalledTimes(0)
@@ -51,6 +55,7 @@ describe('tests related to the searchMetadata query', () => {
     const args = { query: 'Department/Category/Brand', map: 'c,c,b' }
 
     const result = await queries.searchMetadata({}, args, mockContext as any)
+
     expect(result.titleTag).toBe('brand - department/category-title')
     expect(result.metaTagDescription).toBe(
       'department/category-metaTagDescription (((1))) <<<pt-BR>>>'
@@ -62,6 +67,7 @@ describe('tests related to the searchMetadata query', () => {
     const args = { query: 'Brand/Department/Category', map: 'b,c,c' }
 
     const result = await queries.searchMetadata({}, args, mockContext as any)
+
     expect(result.titleTag).toBe('department/category - Brand-title')
     expect(result.metaTagDescription).toBe('Brand-metaTagDescription (((1))) <<<pt-BR>>>')
     expect(mockContext.clients.search.pageType).toBeCalledTimes(2)
@@ -74,6 +80,7 @@ describe('tests related to the searchMetadata query', () => {
     }
 
     const result = await queries.searchMetadata({}, args, mockContext as any)
+
     expect(result.titleTag).toBe('Large - brand - department/category-title')
     expect(result.metaTagDescription).toBe(
       'department/category-metaTagDescription (((1))) <<<pt-BR>>>'
@@ -88,6 +95,7 @@ describe('tests related to the searchMetadata query', () => {
     }
 
     const result = await queries.searchMetadata({}, args, mockContext as any)
+
     expect(result.titleTag).toBe(
       'brand - department/category/subcategory-title'
     )
@@ -104,6 +112,7 @@ describe('tests related to the searchMetadata query', () => {
     }
 
     const result = await queries.searchMetadata({}, args, mockContext as any)
+
     expect(result.titleTag).toBe('department/category - Shoes')
     expect(result.metaTagDescription).toBe(null)
     expect(mockContext.clients.search.pageType).toBeCalledTimes(1)
@@ -116,6 +125,7 @@ describe('tests related to the searchMetadata query', () => {
     }
 
     const result = await queries.searchMetadata({}, args, mockContext as any)
+
     expect(result.titleTag).toBe('brand - Shoes')
     expect(result.metaTagDescription).toBe(null)
     expect(mockContext.clients.search.pageType).toBeCalledTimes(1)
@@ -128,16 +138,19 @@ describe('tests related to the searchMetadata query', () => {
     }
 
     const result = await queries.searchMetadata({}, args, mockContext as any)
+
     expect(result.titleTag).toBe('Large - Shoes')
     expect(result.metaTagDescription).toBe(null)
     expect(mockContext.clients.search.pageType).toBeCalledTimes(0)
   })
   test('get search metadata from pageType for category with correct locale variables', async () => {
     const args = { query: 'Department/Category', map: 'c,c' }
+
     mockContext.vtex.locale = 'es-ES'
     mockContext.vtex.tenant.locale = 'fr-FR'
 
     const result = await queries.searchMetadata({}, args, mockContext as any)
+
     expect(result.titleTag).toBe('department/category-title-es-ES')
     expect(result.metaTagDescription).toBe(
       'department/category-metaTagDescription (((1))) <<<fr-FR>>>'
@@ -161,9 +174,12 @@ describe('tests for breadcrumb resolver', () => {
       },
       productsRaw: { data: products }
     }
+
     const result = await resolvers.ProductSearch.breadcrumb(args as any, {}, mockContext as any)
+
     expect(result.length).toBe(1)
     const head = result[0]
+
     expect(head.queryUnit).toBe('category')
     expect(head.mapUnit).toBe('c')
     expect(head.categories.length).toBe(0)
@@ -187,10 +203,12 @@ describe('tests for breadcrumb resolver', () => {
     }
 
     const result = await resolvers.ProductSearch.breadcrumb(args as any, {}, mockContext as any)
+
     expect(result.length).toBe(2)
     const head = result[0]
     const expectedQueryArray = ['category', 'category2']
     const expectedMapArray = ['c', 'c']
+
     expect(head.queryUnit).toBe('category')
     expect(head.mapUnit).toBe('c')
     expect(head.categories.length).toBe(0)
@@ -201,6 +219,7 @@ describe('tests for breadcrumb resolver', () => {
     expect(head.queryArray).toMatchObject(expectedQueryArray)
     expect(head.mapArray).toMatchObject(expectedMapArray)
     const tail = result[1]
+
     expect(tail.queryUnit).toBe('category2')
     expect(tail.mapUnit).toBe('c')
     expect(tail.categories.length).toBe(0)
@@ -222,13 +241,16 @@ describe('tests for breadcrumb resolver', () => {
       },
       productsRaw: { data: products }
     }
+
     mockContext.vtex.binding.locale = 'es-ES'
 
     const result = await resolvers.ProductSearch.breadcrumb(args as any, {}, mockContext as any)
+
     expect(result.length).toBe(2)
     const head = result[0]
     const expectedQueryArray = ['category', 'category2']
     const expectedMapArray = ['c', 'c']
+
     expect(head.queryUnit).toBe('category')
     expect(head.mapUnit).toBe('c')
     expect(head.categories.length).toBe(0)
@@ -242,6 +264,7 @@ describe('tests for breadcrumb resolver', () => {
       'category2-c': { name: 'category/category2', id: '1' }
     })
     const tail = result[1]
+
     expect(tail.queryUnit).toBe('category2')
     expect(tail.mapUnit).toBe('c')
     expect(tail.categories.length).toBe(0)
@@ -271,6 +294,7 @@ describe('tests related to the productSearch query', () => {
     }
   
     const result = await queries.productSearch({}, args as any, mockContext as any, {})
+
     expect(result.translatedArgs).toMatchObject({ query: 'shoes/sneakers', map: 'c,c' })
   })
 
@@ -281,6 +305,7 @@ describe('tests related to the productSearch query', () => {
     }
   
     const result = await queries.productSearch({}, args as any, mockContext as any, {})
+
     expect(result.translatedArgs).toMatchObject({ query: 'tenis/shoes/sneakers', map: 'ft,c,c' })
   })
 
@@ -292,6 +317,7 @@ describe('tests related to the productSearch query', () => {
     }
   
     const result = await queries.productSearch({}, args as any, mockContext as any, {})
+
     expect(result.translatedArgs).toMatchObject({ query: 'tenis-pt-BR/shoes/sneakers', map: 'ft,c,c' })
   })
 })

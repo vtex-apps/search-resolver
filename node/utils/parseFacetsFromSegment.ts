@@ -6,6 +6,7 @@ const parseFacetsFromSegment = (facetsString: string): SelectedFacet[] => {
   // "Remove ";" if it is the last character
   return facetsString.split(';').filter(facet => facet).map(facet => {
     const [key, value] = facet.split('=')
+
     return {
       key,
       value,

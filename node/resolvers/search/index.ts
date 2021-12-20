@@ -1,8 +1,8 @@
+import type { VBase } from '@vtex/api'
 import {
   NotFoundError,
   UserInputError,
-  createMessagesLoader,
-  VBase
+  createMessagesLoader
 } from '@vtex/api'
 import { head, isEmpty, isNil, test, pathOr } from 'ramda'
 
@@ -44,7 +44,7 @@ import {
   sortAttributeValuesByCatalog,
 } from '../../utils/attributes'
 import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
-import { Checkout } from '../../clients/checkout'
+import type { Checkout } from '../../clients/checkout'
 import setFilterVisibility from '../../utils/setFilterVisibility'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
 import { convertProducts } from '../../utils/compatibility-layer'
@@ -85,10 +85,10 @@ interface ProductsByIdentifierArgs {
 
 interface Region {
   id: string
-  sellers: {
+  sellers: Array<{
     id: string
     name: string
-  }[]
+  }>
 }
 
 const inputToSearchCrossSelling = {
@@ -102,6 +102,7 @@ const inputToSearchCrossSelling = {
 
 const getTradePolicyFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): string | null => {
   const tradePolicy = selectedFacets.filter(selectedFacet => selectedFacet.key === "trade-policy")
+
   return tradePolicy.length > 0 ? tradePolicy[0].value : null
 }
 
@@ -109,11 +110,11 @@ const isSellerInSellers = (sellers: RegionSeller[], sellerId: string) =>
   sellers.find(seller => seller.id === sellerId)
 
 const getPrivateSellerFromSelectedFacets = (
-  selectedFacets: SelectedFacet[] = [],
+  selectedFacets: SelectedFacet[],
   sellers: RegionSeller[]
 ): RegionSeller[] => {
-  let indexes = []
-  let privateSellers: RegionSeller[] = []
+  const indexes = []
+  const privateSellers: RegionSeller[] = []
 
   for (let i = 0; i < selectedFacets.length; i++) {
     if (selectedFacets[i].key === 'private-seller') {
@@ -134,7 +135,7 @@ const getPrivateSellerFromSelectedFacets = (
 }
 
 const getRegionIdFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): [(string | undefined), SelectedFacet[]] => {
-  let regionId = undefined
+  let regionId
 
   const regionIdIndex = selectedFacets.findIndex(selectedFacet => selectedFacet.key === "region-id")
 
@@ -149,16 +150,17 @@ const getRegionIdFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): [(
 
 const buildVtexSegment = (vtexSegment?: SegmentData, tradePolicy?: number, regionId?: string | null): string => {
     const cookie = {
-      regionId: regionId,
+      regionId,
       channel: tradePolicy,
-      utm_campaign: vtexSegment?.utm_campaign || "",
-      utm_source: vtexSegment?.utm_source || "",
-      utmi_campaign: vtexSegment?.utmi_campaign || "",
-      currencyCode: vtexSegment?.currencyCode || "",
-      currencySymbol: vtexSegment?.currencySymbol || "",
-      countryCode: vtexSegment?.countryCode || "",
-      cultureInfo: vtexSegment?.cultureInfo || "",
+      utm_campaign: vtexSegment?.utm_campaign ?? "",
+      utm_source: vtexSegment?.utm_source ?? "",
+      utmi_campaign: vtexSegment?.utmi_campaign ?? "",
+      currencyCode: vtexSegment?.currencyCode ?? "",
+      currencySymbol: vtexSegment?.currencySymbol ?? "",
+      countryCode: vtexSegment?.countryCode ?? "",
+      cultureInfo: vtexSegment?.cultureInfo ?? "",
     }
+
     return new Buffer(JSON.stringify(cookie)).toString('base64');
 }
 
@@ -195,9 +197,9 @@ const getCompatibilityArgsFromSelectedFacets = async (
   const mapSegments = compatibilityArgs.map!.split(MAP_VALUES_SEP)
   const querySegments = compatibilityArgs.query!.split(PATH_SEPARATOR)
 
-  args.selectedFacets = mapSegments.map((map, index) => {
+  args.selectedFacets = mapSegments.map((mapSegment, index) => {
     return {
-      key: map,
+      key: mapSegment,
       value: querySegments[index],
     }
   })
@@ -221,6 +223,7 @@ const translateToStoreDefaultLanguage = async (
     state,
     vtex: { locale: from, tenant },
   } = ctx
+
   const { locale: to } = tenant!
 
   if (!shouldTranslateToTenantLocale(ctx)) {
@@ -241,6 +244,7 @@ const translateToStoreDefaultLanguage = async (
 const getProductsCountAndPage = (from: number, to: number): [number, number] => {
   const count = to - from + 1
   const page = Math.round((to + 1) / count)
+
   return [count, page]
 }
 
@@ -256,6 +260,7 @@ const searchFirstElements = (
     // We do not want this for pages other than the first
     return
   }
+
   products
     .slice(0, Math.min(10, products.length))
     .forEach(product =>
@@ -291,6 +296,7 @@ export const getCompatibilityArgs = async <T extends QueryArgs>(
   const {
     clients: { vbase, search },
   } = ctx
+
   const compatArgs = isLegacySearchFormat(args)
     ? args
     : await toCompatibilityArgs(vbase, search, args)
@@ -318,6 +324,7 @@ const isLegacySearchFormat = ({
   if (!map) {
     return false
   }
+
   return map.split(MAP_VALUES_SEP).length === query.split(PATH_SEPARATOR).length
 }
 
@@ -332,10 +339,13 @@ const getTranslatedSearchTerm = async (
   if (!query || !map || !shouldTranslateToTenantLocale(ctx)) {
     return query
   }
+
   const ftSearchIndex = map.split(',').findIndex(m => m === 'ft')
+
   if (ftSearchIndex === -1) {
     return query
   }
+
   const queryArray = query.split('/')
   const queryUnit = queryArray[ftSearchIndex]
   const translated = await translateToStoreDefaultLanguage(ctx, queryUnit)
@@ -344,6 +354,7 @@ const getTranslatedSearchTerm = async (
     translated,
     ...queryArray.slice(ftSearchIndex + 1),
   ]
+
   return queryTranslated.join('/')
 }
 
@@ -352,6 +363,7 @@ const getSellers = async (
   checkout: Checkout,
   channel?: number,
   regionId?: string | null,
+// eslint-disable-next-line max-params
 ) => {
   if (!regionId) {
     return []
@@ -374,12 +386,14 @@ const getSellers = async (
 const buildSpecificationFiltersAsFacets = (specificationFilters: string[]): SelectedFacet[] => {
   return specificationFilters.map((specificationFilter: string) => {
     const [key, value] = specificationFilter.split(":")
+
     return { key, value }
   })
 }
 
 const buildCategoriesAndSubcategoriesAsFacets = (categories: string): SelectedFacet[] => {
-  const categoriesAndSubcategories = categories.split("/");
+  const categoriesAndSubcategories = categories.split("/")
+
   return categoriesAndSubcategories.map((c: string) => {
     return { key: "c", value: c }
   })
@@ -425,10 +439,12 @@ export const queries = {
       ctx,
       args.searchTerm
     )
+
     const { itemsReturned } = await search.autocomplete({
       maxRows: args.maxRows,
       searchTerm: translatedTerm,
     })
+
     return {
       cacheId: args.searchTerm,
       itemsReturned,
@@ -481,6 +497,7 @@ export const queries = {
       const solrQuery = categorySelectedFacets.map(facet => facet.value).join('/')
       const solrMap = categorySelectedFacets.map(facet => facet.key).join(',')
       const assembledQuery = `${solrQuery}?map=${solrMap}`
+
       facetPromises.push(staleFromVBaseWhileRevalidate(
         vbase,
         FACETS_BUCKET,
@@ -498,7 +515,7 @@ export const queries = {
 
     // FIXME: This is used to sort values based on catalog API.
     // Remove it when it is not necessary anymore
-    if (intelligentSearchFacets && intelligentSearchFacets.attributes) {
+    if (intelligentSearchFacets?.attributes) {
       intelligentSearchFacets.attributes = await Promise.all(
         intelligentSearchFacets.attributes.map(async (attribute: any) => {
           if (
@@ -507,6 +524,7 @@ export const queries = {
             attribute.ids.length
           ) {
             const catalogValues = await search.getFieldValues(attribute.ids[0])
+
             sortAttributeValuesByCatalog(attribute, catalogValues)
           }
 
@@ -559,9 +577,9 @@ export const queries = {
       throw new UserInputError('No product identifier provided')
     }
 
-    let cookie: SegmentData | undefined = ctx.vtex.segment
+    const cookie: SegmentData | undefined = ctx.vtex.segment
 
-    const salesChannel = rawArgs.salesChannel || cookie?.channel || 1
+    const salesChannel = (rawArgs.salesChannel ?? cookie?.channel) ?? 1
 
     const { field, value } = args.identifier
 
@@ -569,19 +587,24 @@ export const queries = {
 
     const vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
 
+    // eslint-disable-next-line default-case
     switch (field) {
       case 'id':
         products = await search.productById(value, vtexSegment, salesChannel)
         break
+
       case 'slug':
         products = await search.product(value, vtexSegment, salesChannel)
         break
+
       case 'ean':
         products = await search.productByEan(value, vtexSegment, salesChannel)
         break
+
       case 'reference':
         products = await search.productByReference(value, vtexSegment, salesChannel)
         break
+
       case 'sku':
         products = await search.productBySku(value, vtexSegment, salesChannel)
         break
@@ -601,6 +624,7 @@ export const queries = {
       clients: { biggySearch, vbase, checkout },
       vtex: { segment }
     } = ctx
+
     const { query, to, from, orderBy, simulationBehavior, hideUnavailableItems } = args
 
     if (to && to > 2500) {
@@ -620,8 +644,8 @@ export const queries = {
     const biggyArgs: SearchResultArgs = {
       fullText: query,
       attributePath: buildAttributePath(selectedFacetsWithSegment),
-      tradePolicy: segment && segment.channel,
-      query: query,
+      tradePolicy: segment?.channel,
+      query,
       sellers,
       sort: convertOrderBy(orderBy),
       hideUnavailableItems,
@@ -630,8 +654,9 @@ export const queries = {
 
     if (to !== null && from !== null) {
       const [count, page] = getProductsCountAndPage(from, to)
-      biggyArgs["count"] = count
-      biggyArgs["page"] = page
+
+      biggyArgs.count = count
+      biggyArgs.page = page
     }
 
     const result = await biggySearch.productSearch(biggyArgs)
@@ -642,7 +667,9 @@ export const queries = {
 
     const convertedProducts = await convertProducts(result.products, ctx, simulationBehavior)
 
-    convertedProducts.forEach(product => product.origin = 'intelligent-search')
+    convertedProducts.forEach(product => {
+      product.origin = 'intelligent-search'
+    })
 
     return convertedProducts
   },
@@ -661,16 +688,20 @@ export const queries = {
 
     const vtexSegment =  (!ctx.vtex.segment || (!ctx.vtex.segment?.regionId && args.regionId)) ? buildVtexSegment(ctx.vtex.segment, Number(args.salesChannel), args.regionId) : ctx.vtex.segmentToken
 
+    // eslint-disable-next-line default-case
     switch (field) {
       case 'id':
         products = await search.productsById(values, vtexSegment, salesChannel)
         break
+
       case 'ean':
         products = await search.productsByEan(values, vtexSegment, salesChannel)
         break
+
       case 'reference':
         products = await search.productsByReference(values, vtexSegment, salesChannel)
         break
+
       case 'sku':
         products = await search.productsBySku(values, vtexSegment, salesChannel)
         break
@@ -710,6 +741,7 @@ export const queries = {
       hideUnavailableItems,
       options,
     } = args
+
     let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
 
     const selectedFacetsWithSegment = selectedFacets.concat(parseFacetsFromSegment(segment?.facets))
@@ -753,7 +785,9 @@ export const queries = {
       await productsCatalog(({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })) :
       await convertProducts(result.products, ctx, simulationBehavior, tradePolicy, regionId)
 
-    convertedProducts.forEach(product => product.origin =  args.productOriginVtex ? 'catalog' : 'intelligent-search')
+    convertedProducts.forEach(product => {
+      product.origin = args.productOriginVtex ? 'catalog' : 'intelligent-search'
+    })
 
     return {
       searchState,
@@ -774,10 +808,13 @@ export const queries = {
     if (identifier == null || type == null) {
       throw new UserInputError('Wrong input provided')
     }
+
     const searchType = inputToSearchCrossSelling[type]
     let productId = identifier.value
+
     if (identifier.field !== 'id') {
       const product = await queries.product(_, { identifier }, ctx)
+
       productId = product!.productId
     }
 
@@ -787,10 +824,12 @@ export const queries = {
     )
 
     searchFirstElements(products, 0, ctx.clients.search)
+
     // We add a custom cacheId because these products are not exactly like the other products from search apis.
     // Each product is basically a SKU and you may have two products in response with same ID but each one representing a SKU.
     return products.map(product => {
       const skuId = pathOr('', ['items', '0', 'itemId'], product)
+
       return {
         ...product,
         cacheId: `${product.linkText}-${skuId}`,
@@ -800,6 +839,7 @@ export const queries = {
 
   searchMetadata: async (_: any, args: SearchMetadataArgs, ctx: Context) => {
     const queryTerm = args.query
+
     if (queryTerm == null || test(/[?&[\]=]/, queryTerm)) {
       throw new UserInputError(
         `The query term contains invalid characters. query=${queryTerm}`
@@ -818,6 +858,7 @@ export const queries = {
         },
         { maps: [] as string[], queries: [] as string[]}
       )
+
       const map = maps.join(',')
       const query = queries.join('/')
 
@@ -830,20 +871,23 @@ export const queries = {
       args.map ?? '',
       ctx
     )
+
     const translatedArgs = {
       ...args,
       query,
     }
+
     const compatibilityArgs = await getCompatibilityArgs<SearchArgs>(
       ctx,
       translatedArgs as SearchArgs
     )
+
     return getSearchMetaData(_, compatibilityArgs, ctx)
   },
   topSearches: async (_: any, __: any, ctx: Context) => {
     const { biggySearch } = ctx.clients
 
-    return await biggySearch.topSearches()
+    return biggySearch.topSearches()
   },
   autocompleteSearchSuggestions: (
     _: any,
@@ -864,9 +908,9 @@ export const queries = {
       vtex: { segment },
     } = ctx
 
-    const regionId = args.regionId || segment?.regionId
+    const regionId = args.regionId ?? segment?.regionId
 
-    const salesChannel = args.salesChannel || segment?.channel
+    const salesChannel = args.salesChannel ?? segment?.channel
     const tradePolicy = salesChannel ? String(salesChannel) : undefined
 
     const sellers = await getSellers(vbase, checkout, salesChannel, regionId)
@@ -891,7 +935,9 @@ export const queries = {
       await productsCatalog(({ ctx, simulationBehavior: args.simulationBehavior, searchResult: result, tradePolicy: String(tradePolicy), regionId })) :
       await convertProducts(result.products, ctx, args.simulationBehavior, tradePolicy, regionId)
 
-      convertedProducts.forEach(product => product.origin =  args.productOriginVtex ? 'catalog' : 'intelligent-search')
+      convertedProducts.forEach(product => {
+        product.origin = args.productOriginVtex ? 'catalog' : 'intelligent-search'
+      })
 
     const {
       count,

@@ -1,8 +1,9 @@
+import { clone } from 'ramda'
+
 import { resolvers } from './product'
 import { resolvers as productPriceResolvers } from './productPriceRange'
 import { mockContext } from '../../__mocks__/helpers'
 import { productPriceRange } from '../../__mocks__/productPriceRange'
-import { clone } from 'ramda'
 
 describe('tests related to ProductPriceRange type', () => {
   beforeEach(() => {
@@ -18,6 +19,7 @@ describe('tests related to ProductPriceRange type', () => {
     const sellingPrice = productPriceResolvers.ProductPriceRange.sellingPrice({
       offers,
     })
+
     expect(sellingPrice).toMatchObject({ highPrice: 100, lowPrice: 20 })
 
     const listPrice = productPriceResolvers.ProductPriceRange.listPrice({
@@ -28,6 +30,7 @@ describe('tests related to ProductPriceRange type', () => {
   })
   test('works for products with many sellers', () => {
     const cloneProduct = clone(productPriceRange)
+
     cloneProduct.items[0].sellers.push({
       sellerId: '99',
       commertialOffer: {
@@ -40,9 +43,11 @@ describe('tests related to ProductPriceRange type', () => {
     const { offers } = resolvers.Product.priceRange(cloneProduct as any) as {
       offers: CommertialOffer[]
     }
+
     const sellingPrice = productPriceResolvers.ProductPriceRange.sellingPrice({
       offers,
     })
+
     expect(sellingPrice).toMatchObject({ highPrice: 100, lowPrice: 10 })
 
     const listPrice = productPriceResolvers.ProductPriceRange.listPrice({
@@ -54,6 +59,7 @@ describe('tests related to ProductPriceRange type', () => {
 
   test('ignores sellers with no availability', () => {
     const cloneProduct = clone(productPriceRange)
+
     cloneProduct.items[0].sellers.push({
       sellerId: '99',
       commertialOffer: {
@@ -66,9 +72,11 @@ describe('tests related to ProductPriceRange type', () => {
     const { offers } = resolvers.Product.priceRange(cloneProduct as any) as {
       offers: CommertialOffer[]
     }
+
     const sellingPrice = productPriceResolvers.ProductPriceRange.sellingPrice({
       offers,
     })
+
     expect(sellingPrice).toMatchObject({ highPrice: 100, lowPrice: 20 })
 
     const listPrice = productPriceResolvers.ProductPriceRange.listPrice({

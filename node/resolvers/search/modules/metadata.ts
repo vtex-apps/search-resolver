@@ -17,7 +17,8 @@ import { Functions } from '@gocommerce/utils'
 
 import { zipQueryAndMap, findCategoryInTree, getBrandFromSlug, searchDecodeURI } from '../utils'
 import { toTitleCase } from '../../../utils/string'
-import { formatTranslatableProp, translateManyToCurrentLanguage, Message, shouldTranslateToUserLocale } from '../../../utils/i18n'
+import type { Message } from '../../../utils/i18n';
+import { formatTranslatableProp, translateManyToCurrentLanguage, shouldTranslateToUserLocale } from '../../../utils/i18n'
 
 type TupleString = [string, string]
 
@@ -67,6 +68,7 @@ const getCategoryMetadata = async (
     vtex: { account },
     clients: { search },
   } = ctx
+
   const queryAndMap = zipQueryAndMap(query, map)
   const cleanQuery = categoriesOnlyQuery(queryAndMap)
 
@@ -77,6 +79,7 @@ const getCategoryMetadata = async (
         await search.categories(cleanQuery.split('/').length),
         cleanQuery.split('/')
       )
+
     return {
       id: null,
       metaTagDescription: category?.MetaTagDescription,
@@ -95,16 +98,19 @@ const getBrandMetadata = async (
     vtex: { account },
     clients: { search },
   } = ctx
+
   const cleanQuery = head(split('/', query || '')) || ''
 
   if (Functions.isGoCommerceAcc(account)) {
     const brand = await getBrandFromSlug(toLower(cleanQuery), search)
+
     return {
       id: null,
       metaTagDescription: brand?.metaTagDescription,
       titleTag: brand?.title ?? brand?.name,
     }
   }
+
   return getAndParsePagetype(cleanQuery, ctx)
 }
 
@@ -142,7 +148,8 @@ const getClusterMetadata = async (
   const productWithCluster = products?.find(
     ({ productClusters }) => !!productClusters[clusterId]
   )
-  const clusterName = (productWithCluster && productWithCluster.productClusters[clusterId]) || ""
+
+  const clusterName = (productWithCluster?.productClusters[clusterId]) ?? ""
 
   try {
     return {
@@ -163,42 +170,51 @@ const getPrimaryMetadata = (
 ): Promise<SearchMetadata> | SearchMetadata => {
   const map = args.map || ''
   const firstMap = head(map.split(','))
+
   if (categoryKeys.includes(firstMap)) {
     return getCategoryMetadata(args, ctx)
   }
+
   if (firstMap === 'b' || firstMap === 'brand') {
     return getBrandMetadata(args.query, ctx)
   }
+
   if (firstMap === 'productClusterIds') {
     return getClusterMetadata(args, ctx)
   }
-  if (firstMap && firstMap.includes('specificationFilter')) {
+
+  if (firstMap?.includes('specificationFilter')) {
     const cleanQuery = args.query || ''
     const name = head(cleanQuery.split('/')) || ''
+
     return {
       titleTag: getSpecificationFilterName(name),
       metaTagDescription: null,
     }
   }
+
   if (firstMap === 'ft') {
-    const cleanQuery = args.query || ''
+    const cleanQuery = args.query ?? ''
     const term = head(cleanQuery.split('/')) || ''
+
     return {
       titleTag: decodeURI(term),
       metaTagDescription: null,
     }
   }
+
   return emptyTitleTag
 }
 
 const getNameForRemainingMaps = async (
-  remainingTuples: [string, string][],
+  remainingTuples: Array<[string, string]>,
   ctx: Context
 ) => {
   const {
     vtex: { account },
     clients: { search },
   } = ctx
+
   const lastCategoryIndex = getLastCategoryIndex(remainingTuples)
   const isGC = Functions.isGoCommerceAcc(account)
   const names = await Promise.all(
@@ -206,22 +222,28 @@ const getNameForRemainingMaps = async (
       if (map === 'c' && index === lastCategoryIndex && !isGC) {
         const cleanQuery = categoriesOnlyQuery(remainingTuples)
         const pagetype = await search.pageType(cleanQuery).catch(() => null)
+
         if (pagetype) {
           return pagetype.name
         }
       }
+
       if ((map === 'b' || map === 'brand') && !isGC) {
         const brand = await search.pageType(decodeURI(query), 'map=b').catch(() => null)
+
         if (brand) {
           return brand.name
         }
       }
+
       if (map.includes('specificationFilter')) {
         return getSpecificationFilterName(query)
       }
+
       return null
     })
   )
+
   return names
 }
 
@@ -232,7 +254,7 @@ export const emptyTitleTag = {
 
 type StringNull = string | null | undefined
 
-const removeNulls = <T>(array: (T | null | undefined)[]): T[] => array.filter(Boolean) as T[]
+const removeNulls = <T>(array: Array<T | null | undefined>): T[] => array.filter(Boolean) as T[]
 
 const isNotNil = complement(isNil)
 const joinNames = compose<StringNull[], string[], string[], string>(
@@ -241,12 +263,15 @@ const joinNames = compose<StringNull[], string[], string[], string>(
   filter(isNotNil) as any
 )
 
-const translateTitles = (metadata: SearchMetadata, otherNames: (string | null)[], ctx: Context) => {
+const translateTitles = (metadata: SearchMetadata, otherNames: Array<string | null>, ctx: Context) => {
   const messages: Message[] = []
+
   if (metadata.titleTag) {
     messages.push({ content: metadata.titleTag, context: metadata.id ?? undefined })
   }
+
   messages.push(...removeNulls(otherNames).map(name => ({ content: name })))
+
   return translateManyToCurrentLanguage(messages, ctx)
 }
 
@@ -263,6 +288,7 @@ export const getSearchMetaData = async (
   ctx: Context
 ) => {
   const queryAndMap = zipQueryAndMap(args.query, args.map)
+
   if (queryAndMap.length === 0) {
     return emptyTitleTag
   }
@@ -277,6 +303,7 @@ export const getSearchMetaData = async (
       m.includes('specificationFilter') ||
       (m === 'c' && !isFirstCategory)
   )
+
   const [metadata, otherNames] = await Promise.all([
     getPrimaryMetadata(args, ctx),
     getNameForRemainingMaps(validTuples, ctx),
@@ -286,6 +313,7 @@ export const getSearchMetaData = async (
     shouldTranslateToUserLocale(ctx) ?
       (await translateTitles(metadata, otherNames, ctx))
       : [metadata.titleTag, ...otherNames]
+
   return {
     titleTag: joinNames(titleTagNames),
     metaTagDescription: formatTranslatableProp<SearchMetadata, 'metaTagDescription', 'id'>('metaTagDescription', 'id')(metadata, {}, ctx),

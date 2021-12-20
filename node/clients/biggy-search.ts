@@ -1,16 +1,20 @@
-import { InstanceOptions, IOContext, JanusClient } from '@vtex/api'
+import path from 'path'
+
+import type { InstanceOptions, IOContext } from '@vtex/api'
+import { JanusClient } from '@vtex/api'
+
 import { IndexingType } from '../commons/compatibility-layer'
 import { parseState } from '../utils/searchState'
-import path from 'path'
 
 const isLinked = process.env.VTEX_APP_LINK
 
 // O(n) product sort
-const countingSort = (products: {id: string}[], order: string[]) => {
+const countingSort = (products: Array<{id: string}>, order: string[]) => {
   const sortedProducts = new Array(order.length)
   const orderMap = order.reduce(
     (acc, id, index) => {
       acc.set(id, index)
+
       return acc
     },
     new Map<string, number>()
@@ -33,6 +37,7 @@ const validNavigationPage = (attributePath: string, query?: string) => {
   if (query) {
     return false
   }
+
   return attributePath.split('/').filter(value => value).length % 2 === 0
 }
 
@@ -45,7 +50,7 @@ const decodeQuery = (query: string) => {
 }
 
 const isProductQuery = /^product:(([0-9])+;)+([0-9])+$/g
-const sortProducts = (search: { total: number, products: {id: string}[]}, query: string | undefined) => {
+const sortProducts = (search: { total: number, products: Array<{id: string}>}, query: string | undefined) => {
   if (typeof query === 'string' && isProductQuery.test(query) && search.total > 0) {
     const order = query.replace('product:', '').split(';')
 
@@ -82,10 +87,11 @@ export class BiggySearchClient extends JanusClient {
   private store: string
   private locale: string | undefined
 
-  public constructor(context: IOContext, options?: InstanceOptions) {
+  constructor(context: IOContext, options?: InstanceOptions) {
     super(context, {...options})
 
     const { account, locale, tenant } = context
+
     this.store = account
     this.locale = locale ?? tenant?.locale
   }
@@ -131,7 +137,8 @@ export class BiggySearchClient extends JanusClient {
       workspaceSearchParams,
       segmentedFacets,
     } = args
-    const attributes: { key: string; value: string }[] = []
+
+    const attributes: Array<{ key: string; value: string }> = []
 
     if (attributeKey && attributeValue) {
       attributes.push({
@@ -166,7 +173,7 @@ export class BiggySearchClient extends JanusClient {
         metric: 'suggestion-products',
         params: {
           locale: this.locale,
-          ['hide-unavailable-items']: hideUnavailableItems ?? false,
+          'hide-unavailable-items': hideUnavailableItems ?? false,
           ...workspaceSearchParams
         },
         headers: {
@@ -251,7 +258,7 @@ export class BiggySearchClient extends JanusClient {
         bgy_leap: leap ? true : undefined,
         initialAttributes,
         regionId,
-        ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
+        'hide-unavailable-items': hideUnavailableItems ? 'true' : 'false',
         ...parseState(searchState),
       },
       metric: 'search-result',
@@ -296,9 +303,9 @@ export class BiggySearchClient extends JanusClient {
       fuzzy,
       locale: this.locale,
       bgy_leap: leap ? true : undefined,
-      allowRedirect: options?.allowRedirect === false ? false : true,
+      allowRedirect: options?.allowRedirect !== false,
       regionId,
-      ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
+      'hide-unavailable-items': hideUnavailableItems ? 'true' : 'false',
       ...parseState(searchState),
       ...workspaceSearchParams, // important that this be last so that it can override master settings above
     }

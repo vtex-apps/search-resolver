@@ -24,6 +24,7 @@ export const fieldResolvers = {
               const skuIds: string[] = conditionsParameter.value.split(
                 SKU_SEPARATOR
               )
+
               const discount = effectsParameters[index].value
               const products = await search.productsBySku(skuIds)
 
@@ -46,8 +47,10 @@ export const fieldResolvers = {
             }
           )
         )
+
         return flatten(items)
       }
+
       return
     },
   },
@@ -66,6 +69,8 @@ export const getBenefits = async (
       },
     ],
   }
+
   const benefitsData = await checkout.simulation(requestBody)
-  return path(['ratesAndBenefitsData', 'teaser'], benefitsData) || []
+
+  return path(['ratesAndBenefitsData', 'teaser'], benefitsData) ?? []
 }

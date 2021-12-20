@@ -3,6 +3,7 @@ import { searchSlugify } from "./slug"
 
 export const categoryTreeSearch = (categoryTree: CategoryTreeResponse[], query: string) => {
   const querySegments = query.startsWith('/')? query.split('/').slice(1): query.split('/')
+
   return bfsCategory(categoryTree, querySegments, 0)
 }
 
@@ -18,5 +19,6 @@ const bfsCategory = (categoryTree: CategoryTreeResponse[], segments: string[], d
   }
 
   segments.shift()
+
   return []
 }

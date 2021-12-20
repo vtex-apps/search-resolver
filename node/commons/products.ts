@@ -1,5 +1,5 @@
-import { convertBiggyProduct } from './compatibility-layer'
 import { map, prop, isEmpty, sort, indexOf } from 'ramda'
+
 import { queries } from '../resolvers/search'
 
 interface ConvertProductInput {
@@ -8,22 +8,6 @@ interface ConvertProductInput {
   simulationBehavior?: 'skip' | 'only1P' | 'default' | null
   tradePolicy?: string | null
   regionId?: string | null
-}
-
-export const productsBiggy = async ({ searchResult, ctx, simulationBehavior = 'default', tradePolicy, regionId }: ConvertProductInput) => {
-  const { segment } = ctx.vtex
-  const checkout = ctx.clients.checkout
-  const products: any[] = []
-
-  searchResult.products.forEach((product: any) => {
-    try {
-      products.push(convertBiggyProduct(product, checkout, simulationBehavior, segment, tradePolicy ?? segment?.channel, regionId))
-    } catch (err) {
-      console.error(err)
-    }
-  })
-
-  return products
 }
 
 export const productsCatalog = async ({ searchResult, ctx, tradePolicy, regionId }: ConvertProductInput) => {
@@ -54,7 +38,7 @@ export const productsCatalog = async ({ searchResult, ctx, tradePolicy, regionId
       // This will help to sort the products
       product.biggyIndex = idx
 
-      if (biggyProduct.extraData && biggyProduct.extraData.length) {
+      if (biggyProduct.extraData?.length) {
         product.allSpecifications = product.allSpecifications || []
 
         biggyProduct.extraData.forEach(({ key, value }: BiggyProductExtraData) => {

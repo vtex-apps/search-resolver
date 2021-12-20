@@ -72,6 +72,7 @@ export const resolvers = {
             : acc,
         filteredInstallments[0]
       )
+
       return [value]
     },
     teasers: (offer: CommertialOffer) => {
@@ -95,21 +96,25 @@ export const resolvers = {
 
         for (const currGiftProduct of catalogGiftProducts) {
           const currGiftSku = currGiftProduct.items.find(item => item.itemId === skuId)
+
           if (currGiftSku) {
             giftSku = currGiftSku
             giftProduct = currGiftProduct
             break
           }
         }
+
         if (!giftProduct || !giftSku) {
           return null
         }
+
         const {
           productName,
           brand,
           linkText,
           description,
         } = giftProduct
+
         return {
           productName,
           brand,
@@ -123,6 +128,7 @@ export const resolvers = {
           })) ?? [],
         }
       })
+
       const filteredGiftProducts = giftProducts.filter(Boolean)
 
       return filteredGiftProducts
@@ -132,11 +138,13 @@ export const resolvers = {
       if (offer.spotPrice) {
         return offer.spotPrice
       }
+
       const sellingPrice = offer.Price
       const spotPrice: number | undefined = offer.Installments.find(({NumberOfInstallments, Value}) => {
         return (NumberOfInstallments === 1 && Value < sellingPrice)
       })?.Value;
-      return spotPrice || sellingPrice
+
+      return spotPrice ?? sellingPrice
     },
     taxPercentage: (offer: CommertialOffer) => {
       return offer.Tax / offer.Price

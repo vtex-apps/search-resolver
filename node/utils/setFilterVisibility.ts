@@ -1,11 +1,12 @@
-import { VBase } from '@vtex/api'
+import type { VBase } from '@vtex/api'
 import { clone, flatten } from 'ramda'
-import { Search } from '../clients/search'
+
+import type { Search } from '../clients/search'
 import {
   LIST_SPECIFICATIONS_BY_CATEGORY_ID,
   SPECIFICATION_BUCKET,
 } from '../resolvers/search/constants'
-import { Attribute, TextAttribute } from './attributes'
+import type { Attribute, TextAttribute } from './attributes'
 import { staleFromVBaseWhileRevalidate } from './vbase'
 
 const getSpecificationsByCategoryId = (
