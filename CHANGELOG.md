@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.59.5] - 2021-12-21
+
 ### Fixed
 - Dependabot PRs.
 
