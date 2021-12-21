@@ -19,7 +19,7 @@
     ]
   },
   "dependencies": {
-    "@gocommerce/utils": "^0.6.11",
+    "@gocommerce/utils": "^0.7.3",
     "atob": "^2.1.2",
     "axios": "^0.21.2",
     "camelcase": "^5.0.0",
