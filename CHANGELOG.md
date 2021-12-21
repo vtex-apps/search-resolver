@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Dependabot PRs.
+
 ## [0.16.10] - 2021-08-16
 ### Changed
 - Increase CPU request
