@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Remove unnecessary `translateToStoreDefaultLanguage` from the `facets` query.
+
 ## [1.59.6] - 2021-12-23
 
 ### Removed
