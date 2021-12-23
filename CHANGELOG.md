@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.59.6] - 2021-12-23
+
 ### Removed
 - Unused param `fullText` from `SearchResultArgs`.
 
