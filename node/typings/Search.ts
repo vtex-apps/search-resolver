@@ -35,7 +35,6 @@ interface SearchResultArgs {
   tradePolicy?: number
   segment?: SegmentData
   indexingType?: IndexingType
-  fullText: string
   searchState?: string
   sellers?: RegionSeller[]
   hideUnavailableItems?: boolean | null
@@ -44,6 +43,11 @@ interface SearchResultArgs {
   initialAttributes?: string
   workspaceSearchParams?: object
   regionId?: string | null
+}
+
+interface BannersArgs {
+  fullText: string
+  attributePath: string 
 }
 
 interface RegionSeller {
