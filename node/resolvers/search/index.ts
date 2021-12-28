@@ -442,10 +442,6 @@ export const queries = {
 
     let { fullText, searchState, initialAttributes } = args
 
-    if (fullText) {
-      fullText = await translateToStoreDefaultLanguage(ctx, args.fullText!)
-    }
-
     const {
       clients: { biggySearch, search, checkout, vbase },
       vtex: { segment },
