@@ -688,10 +688,10 @@
     "@types/keygrip" "*"
     "@types/node" "*"
 
-"@types/es6-shim@^0.31.32":
-  version "0.31.39"
-  resolved "https://registry.yarnpkg.com/@types/es6-shim/-/es6-shim-0.31.39.tgz#61de60fac180f967177bcde598a62072a39ea04b"
-  integrity sha512-z2JtmHE1wg75JTdT1qWGvW4eDOk6DUW1Exdzrs+8QTPFttkdTr4pKVzLLCCAOUC8i/KiG+QtkSEteQ5hDxwbpg==
+"@types/es6-shim@^0.31.42":
+  version "0.31.42"
+  resolved "https://registry.yarnpkg.com/@types/es6-shim/-/es6-shim-0.31.42.tgz#710e4c48d2ebbf2517498c3307b41beed63fe1ef"
+  integrity sha512-GS3EuEgiGv/TP7bwPLOlkSiTfdSL4XHOj0jJuvz4/UbR89QrC4Py3lYlMlH/7w0dKfJ8fIori0rVIl2gQ7lb5A==
 
 "@types/eslint-visitor-keys@^1.0.0":
   version "1.0.0"
