@@ -46,7 +46,7 @@
     "@types/ramda": "^0.26.21",
     "@vtex/api": "6.45.6",
     "@vtex/tsconfig": "^0.6.0",
-    "eslint": "^5.15.3",
+    "eslint": "^8.6.0",
     "eslint-config-vtex": "^10.1.0",
     "jest": "^25.5.4",
     "prettier": "^1.19.1",
