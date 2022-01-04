@@ -319,25 +319,33 @@ export class BiggySearchClient extends JanusClient {
       })
     }
 
-    const result = await this.http.getRaw(url, {
-      params,
-      metric: 'search-result',
-      headers: {
-        "X-VTEX-IS-Filter": buildBSearchFilterHeader(sellers),
-        "X-VTEX-IS-ID": `${this.store}`,
-      },
-      ...cache
-    })
-
-    if (!result.data?.total) {
-      this.context.logger.warn({
-        message: 'Empty search',
-        url,
+    try {
+      const result = await this.http.getRaw(url, {
         params,
+        metric: 'search-result',
+        headers: {
+          "X-VTEX-IS-Filter": buildBSearchFilterHeader(sellers),
+          "X-VTEX-IS-ID": `${this.store}`,
+        },
+        ...cache
       })
-    }
 
-    return sortProducts(result.data, query)
+      if (!result.data?.total) {
+        this.context.logger.warn({
+          message: 'Empty search',
+          url,
+          params,
+        })
+      }
+
+      return sortProducts(result.data, query)
+    } catch (error) {
+      this.context.logger.error({
+        message: 'Error from search-api',
+        error,
+      })
+      throw error
+    }
   }
 
   public async banners(args: BannersArgs): Promise<any> {
