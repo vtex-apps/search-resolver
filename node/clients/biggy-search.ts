@@ -340,10 +340,7 @@ export class BiggySearchClient extends JanusClient {
 
       return sortProducts(result.data, query)
     } catch (error) {
-      this.context.logger.error({
-        message: 'Error from search-api',
-        error,
-      })
+      error.errorOrigin = 'search-api'
       throw error
     }
   }
