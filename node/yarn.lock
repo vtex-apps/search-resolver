@@ -773,18 +773,6 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
-"@types/jest-diff@*":
-  version "20.0.1"
-  resolved "https://registry.yarnpkg.com/@types/jest-diff/-/jest-diff-20.0.1.tgz#35cc15b9c4f30a18ef21852e255fdb02f6d59b89"
-  integrity sha512-yALhelO3i0hqZwhjtcr6dYyaLoCHbAMshwtj6cGxTvHZAKXHsYGdff6E8EPw3xLKY0ELUTQ69Q1rQiJENnccMA==
-
-"@types/jest@^24.0.18":
-  version "24.0.18"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-24.0.18.tgz#9c7858d450c59e2164a8a9df0905fc5091944498"
-  integrity sha512-jcDDXdjTcrQzdN06+TSVsPPqxvsZA/5QkYfIZlq1JMw7FdP5AZylbOc+6B/cuDurctRe+MziUMtQ3xQdrbjqyQ==
-  dependencies:
-    "@types/jest-diff" "*"
-
 "@types/jest@^27.4.0":
   version "27.4.0"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-27.4.0.tgz#037ab8b872067cae842a320841693080f9cb84ed"
@@ -984,14 +972,10 @@
   dependencies:
     is-stream "^2.0.0"
 
-"@vtex/tsconfig@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@vtex/tsconfig/-/tsconfig-0.2.0.tgz#b4bc6492bb9a0fade8a2950b3d0073cfe24950b3"
-  integrity sha512-Aluq/DbAS/pRHVMqRF7EFOTRG1oNZJO/3naS7LrZzdhOJCA6MT1k7GD0DgKHyZnnkGlm42BysT9C1VpQc0QhyA==
-  dependencies:
-    "@types/graphql" "^14.5.0"
-    "@types/jest" "^24.0.18"
-    "@types/node" "^12.7.2"
+"@vtex/tsconfig@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@vtex/tsconfig/-/tsconfig-0.6.0.tgz#c9dfffc95d2ef55195237411f9c15269ca30b2a5"
+  integrity sha512-SVQBxaSdEVdpJFja1aVTIiZBgpQKePyYOUWGzcYq6LYkSWqSbz2LoC7TuLUsmfweYmVkv8+4eVuxcDpQVEpq1A==
 
 "@wry/equality@^0.1.2", "@wry/equality@^0.1.9":
   version "0.1.9"
