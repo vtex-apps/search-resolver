@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@types/atob": "^2.1.2",
-    "@types/camelcase": "^4.1.0",
+    "@types/camelcase": "^5.2.0",
     "@types/cookie": "^0.4.1",
     "@types/es6-shim": "^0.31.42",
     "@types/graphql": "^14.5.0",

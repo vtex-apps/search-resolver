@@ -656,10 +656,12 @@
     "@types/connect" "*"
     "@types/node" "*"
 
-"@types/camelcase@^4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@types/camelcase/-/camelcase-4.1.0.tgz#e054f7986f31658d49936261b5cd4588ef29d1ee"
-  integrity sha512-nsaprOtNLvUrLyFX5+mRpE9h2Q0d5YzQRr+Lav3fxdYtc1/E/U7G+Ld861NWBDDtWY3MnwKoUOhCrE1nrVxUQA==
+"@types/camelcase@^5.2.0":
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/@types/camelcase/-/camelcase-5.2.0.tgz#5c139f8618a126827129587cce9ee904f9a79863"
+  integrity sha512-zhHaryYYUUsJ1h6Rq4hisPkljY7c2bkC5PFYQbom5fyKloGJEDK+wdsw2L4hnBwXr4plGjW6D/UVJBbNbOzVpQ==
+  dependencies:
+    camelcase "*"
 
 "@types/color-name@^1.1.1":
   version "1.1.1"
@@ -1561,6 +1563,11 @@ callsites@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/callsites/-/callsites-3.1.0.tgz#b3630abd8943432f54b3f0519238e33cd7df2f73"
   integrity sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==
+
+camelcase@*:
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-6.3.0.tgz#5685b95eb209ac9c0c177467778c9c84df58ba9a"
+  integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 camelcase@^5.0.0, camelcase@^5.3.1:
   version "5.3.1"
