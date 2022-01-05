@@ -34,8 +34,7 @@ jobs:
         working-directory: search-tests
       - name: create workspace
         run: |
-          vtex workspace create e2e${{ github.sha }}
-          vtex workspace use e2e${{ github.sha }}
+          yes | vtex workspace use e2e${{ github.sha }}
       - name: Link app
         run: vtex link --no-watch
         working-directory: ioapp
