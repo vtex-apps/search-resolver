@@ -844,9 +844,12 @@ export const queries = {
     args: { fullText: string },
     ctx: Context
   ) => {
-    const { biggySearch } = ctx.clients
+    const { intelligentSearchApi } = ctx.clients
 
-    return biggySearch.autocompleteSearchSuggestions(args)
+    return intelligentSearchApi.autocompleteSearchSuggestions({
+      query: args.fullText,
+      ...args
+    })
   },
   productSuggestions: async (
     _: any,
@@ -916,8 +919,8 @@ export const queries = {
     })
   },
   searchSuggestions: (_: any, args: { fullText: string }, ctx: Context) => {
-    const { biggySearch } = ctx.clients
+    const { intelligentSearchApi } = ctx.clients
 
-    return biggySearch.searchSuggestions(args)
+    return intelligentSearchApi.searchSuggestions({query: args.fullText})
   },
 }

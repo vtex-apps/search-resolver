@@ -1,9 +1,17 @@
 import { ExternalClient, InstanceOptions, IOContext } from "@vtex/api";
 
-export interface CorrectionParams {
+interface CorrectionParams {
   query: string
-  locale?: string
 }
+
+interface SearchSuggestionsParams {
+  query: string
+}
+
+interface AutocompleteSearchSuggestionsParams {
+  query: string
+}
+
 
 export class IntelligentSearchApi extends ExternalClient {
   private locale: string | undefined
@@ -30,5 +38,13 @@ export class IntelligentSearchApi extends ExternalClient {
 
   public async correction(params: CorrectionParams) {
     return this.http.get('/correction_search', {params: {...params, locale: this.locale}})
+  }
+
+  public async searchSuggestions(params: SearchSuggestionsParams) {
+    return this.http.get('/search_suggestions', {params: {...params, locale: this.locale}})
+  }
+
+  public async autocompleteSearchSuggestions(params: AutocompleteSearchSuggestionsParams) {
+    return this.http.get('/autocomplete_suggestions', {params: {...params, locale: this.locale}})
   }
 }
