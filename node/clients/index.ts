@@ -5,6 +5,7 @@ import { Checkout } from './checkout'
 import { Rewriter } from './rewriter'
 import { BiggySearchClient } from './biggy-search'
 import { Store } from './store'
+import { IntelligentSearchApi } from './intelligent-search-api'
 
 export class Clients extends IOClients {
   public get search() {
@@ -18,6 +19,9 @@ export class Clients extends IOClients {
   }
   public get biggySearch() {
     return this.getOrSet('biggySearch', BiggySearchClient)
+  }
+  public get intelligentSearchApi() {
+    return this.getOrSet('intelligentSearchApi', IntelligentSearchApi)
   }
   public get store() {
     return this.getOrSet('store', Store)
