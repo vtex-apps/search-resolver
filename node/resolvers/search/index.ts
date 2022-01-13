@@ -11,7 +11,6 @@ import { resolvers as autocompleteResolvers } from './autocomplete'
 import { resolvers as brandResolvers } from './brand'
 import { resolvers as categoryResolvers } from './category'
 import { resolvers as discountResolvers } from './discount'
-import { resolvers as facetsResolvers } from './facets'
 import { resolvers as itemMetadataResolvers } from './itemMetadata'
 import { resolvers as itemMetadataPriceTableItemResolvers } from './itemMetadataPriceTableItem'
 import { resolvers as itemMetadataUnitResolvers } from './itemMetadataUnit'
@@ -31,21 +30,15 @@ import {
   validMapAndQuery,
 } from './utils'
 import { toCompatibilityArgs } from './newURLs'
-import { PATH_SEPARATOR, MAP_VALUES_SEP, SELLERS_BUCKET, FACETS_BUCKET } from './constants'
+import { PATH_SEPARATOR, MAP_VALUES_SEP, SELLERS_BUCKET } from './constants'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import {
   buildAttributePath,
   convertOrderBy,
-  buildBreadcrumb,
 } from '../../commons/compatibility-layer'
 import { productsCatalog } from '../../commons/products'
-import {
-  attributesToFilters,
-  sortAttributeValuesByCatalog,
-} from '../../utils/attributes'
 import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
 import { Checkout } from '../../clients/checkout'
-import setFilterVisibility from '../../utils/setFilterVisibility'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
 import { convertProducts } from '../../utils/compatibility-layer'
 import parseFacetsFromSegment from '../../utils/parseFacetsFromSegment'
@@ -272,7 +265,6 @@ export const fieldResolvers = {
   ...itemMetadataPriceTableItemResolvers,
   ...offerResolvers,
   ...discountResolvers,
-  ...facetsResolvers,
   ...productResolvers,
   ...recommendationResolvers,
   ...skuResolvers,
@@ -440,105 +432,13 @@ export const queries = {
       args
     )) as FacetsInput
 
-    let { fullText, searchState, initialAttributes } = args
+    let { selectedFacets } = args
 
     const {
-      clients: { biggySearch, search, checkout, vbase },
-      vtex: { segment },
+      clients: { intelligentSearchApi },
     } = ctx
 
-    const [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
-
-    const selectedFacetsWithSegment = selectedFacets.concat(parseFacetsFromSegment(segment?.facets))
-
-    const tradePolicy = getTradePolicyFromSelectedFacets(selectedFacets) || segment?.channel
-
-    const sellers = await getSellers(vbase, checkout, tradePolicy, regionId || segment?.regionId)
-    const privateSellers = getPrivateSellerFromSelectedFacets(selectedFacets, sellers)
-
-    const biggyArgs = {
-      searchState,
-      query: fullText,
-      attributePath: buildAttributePath(selectedFacetsWithSegment),
-      tradePolicy,
-      sellers: sellers.concat(privateSellers),
-      hideUnavailableItems: args.hideUnavailableItems,
-      initialAttributes,
-      regionId: segment?.regionId
-    }
-
-    const facetPromises = [biggySearch.facets(biggyArgs)]
-
-    const showCategoryTree = args.categoryTreeBehavior === 'show';
-    const categoryRegex = /category-[0-9]+/
-    const categorySelectedFacets = args.selectedFacets.filter(facet => facet.key === 'c' || categoryRegex.test(facet.key))
-
-    if (!fullText && showCategoryTree && categorySelectedFacets.length > 0) {
-      const solrQuery = categorySelectedFacets.map(facet => facet.value).join('/')
-      const solrMap = categorySelectedFacets.map(facet => facet.key).join(',')
-      const assembledQuery = `${solrQuery}?map=${solrMap}`
-      facetPromises.push(staleFromVBaseWhileRevalidate(
-        vbase,
-        FACETS_BUCKET,
-        assembledQuery,
-        search.facets,
-        assembledQuery
-      ))
-    }
-
-    const [intelligentSearchFacets, solrFacets] = await Promise.all(facetPromises)
-
-    if (ctx.vtex.tenant) {
-      ctx.translated = intelligentSearchFacets.translated
-    }
-
-    // FIXME: This is used to sort values based on catalog API.
-    // Remove it when it is not necessary anymore
-    if (intelligentSearchFacets && intelligentSearchFacets.attributes) {
-      intelligentSearchFacets.attributes = await Promise.all(
-        intelligentSearchFacets.attributes.map(async (attribute: any) => {
-          if (
-            attribute.type === 'text' &&
-            attribute.ids &&
-            attribute.ids.length
-          ) {
-            const catalogValues = await search.getFieldValues(attribute.ids[0])
-            sortAttributeValuesByCatalog(attribute, catalogValues)
-          }
-
-          return attribute
-        })
-      )
-    }
-
-    const breadcrumb = buildBreadcrumb(
-      intelligentSearchFacets.attributes || [],
-      args.fullText,
-      args.selectedFacets
-    )
-
-    const attributesWithVisibilitySet = await setFilterVisibility(vbase, search, intelligentSearchFacets.attributes ?? [])
-
-    const response = attributesToFilters({
-      breadcrumb,
-      solrFacets,
-      total: intelligentSearchFacets.total,
-      attributes: attributesWithVisibilitySet,
-      selectedFacets: args.selectedFacets,
-      removeHiddenFacets: args.removeHiddenFacets,
-      showCategoryTree: showCategoryTree && !fullText && categorySelectedFacets.length > 0,
-    })
-
-    return {
-      facets: response,
-      sampling: intelligentSearchFacets.sampling,
-      queryArgs: {
-        map: args.map,
-        query: args.query,
-        selectedFacets: args.selectedFacets,
-      },
-      breadcrumb,
-    }
+    return intelligentSearchApi.facets({...args, query: args.fullText}, buildAttributePath(selectedFacets))
   },
 
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
