@@ -835,9 +835,9 @@ export const queries = {
     return getSearchMetaData(_, compatibilityArgs, ctx)
   },
   topSearches: async (_: any, __: any, ctx: Context) => {
-    const { biggySearch } = ctx.clients
+    const { intelligentSearchApi } = ctx.clients
 
-    return await biggySearch.topSearches()
+    return await intelligentSearchApi.topSearches()
   },
   autocompleteSearchSuggestions: (
     _: any,
@@ -908,9 +908,12 @@ export const queries = {
     })
   },
   correction: (_: any, args: { fullText: string }, ctx: Context) => {
-    const { biggySearch } = ctx.clients
+    const { intelligentSearchApi } = ctx.clients
 
-    return biggySearch.correction(args)
+    return intelligentSearchApi.correction({
+      query: args.fullText,
+      ...args
+    })
   },
   searchSuggestions: (_: any, args: { fullText: string }, ctx: Context) => {
     const { biggySearch } = ctx.clients
