@@ -32,20 +32,32 @@ jobs:
       - name: Create session
         run: node ci/createSession.js --appkey=${{ secrets.APP_KEY }} --apptoken=${{ secrets.APP_TOKEN }}
         working-directory: search-tests
-      - name: create workspace
+      - name: Create workspace
         run: |
           yes | vtex workspace use e2e${{ github.sha }}
       - name: Link app
         run: vtex link --no-watch
         working-directory: ioapp
+      - uses: actions/cache@v2
+        id: cache-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}
   e2e-tests:
     name: E2E tests
     runs-on: ubuntu-latest
     needs: create-workspace
     strategy:
+      fail-fast: false
       matrix:
         containers: [1, 2, 3, 4]
     steps:
+      - name: Restore cache
+        uses: actions/cache@v2
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}
       - name: Get committer email
         working-directory: ioapp
         run: |
@@ -71,10 +83,24 @@ jobs:
         with:
           message: E2E tests failed. Go to https://dashboard.cypress.io/projects/qvjzx1 to check the recordings.
   delete-workspace:
+    name: Delete workspace
     runs-on: ubuntu-latest
     if: ${{ always() }}
     needs: e2e-tests
     steps:
+      - name: Restore cache
+        uses: actions/cache@v2
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+      - name: Install toolbelt
+        run: |
+          yarn global add vtex
+          echo "$(yarn global bin)" >> $GITHUB_PATH
+      - name: Create session
+        run: node ci/createSession.js --appkey=${{ secrets.APP_KEY }} --apptoken=${{ secrets.APP_TOKEN }}
+        working-directory: search-tests
       - name: Delete workspace
         run: |
           vtex workspace use master
