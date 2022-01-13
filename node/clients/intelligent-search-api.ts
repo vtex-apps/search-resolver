@@ -12,6 +12,10 @@ interface AutocompleteSearchSuggestionsParams {
   query: string
 }
 
+interface BannersArgs {
+  query: string
+}
+
 
 export class IntelligentSearchApi extends ExternalClient {
   private locale: string | undefined
@@ -46,5 +50,9 @@ export class IntelligentSearchApi extends ExternalClient {
 
   public async autocompleteSearchSuggestions(params: AutocompleteSearchSuggestionsParams) {
     return this.http.get('/autocomplete_suggestions', {params: {...params, locale: this.locale}})
+  }
+
+  public async banners(params: BannersArgs, path: string) {
+    return this.http.get(`/banners/${path}`, {params: {query: params.query, locale: this.locale}})
   }
 }

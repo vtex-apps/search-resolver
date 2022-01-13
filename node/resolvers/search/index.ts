@@ -903,12 +903,11 @@ export const queries = {
     args: { fullText: string; selectedFacets: SelectedFacet[] },
     ctx: Context
   ) => {
-    const { biggySearch } = ctx.clients
+    const { intelligentSearchApi } = ctx.clients
 
-    return biggySearch.banners({
-      attributePath: buildAttributePath(args.selectedFacets),
-      fullText: args.fullText,
-    })
+    return intelligentSearchApi.banners({
+      query: args.fullText,
+    }, buildAttributePath(args.selectedFacets))
   },
   correction: (_: any, args: { fullText: string }, ctx: Context) => {
     const { intelligentSearchApi } = ctx.clients
