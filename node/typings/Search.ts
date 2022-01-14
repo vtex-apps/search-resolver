@@ -43,11 +43,13 @@ interface SearchResultArgs {
   initialAttributes?: string
   workspaceSearchParams?: object
   regionId?: string | null
+  from?: number
+  to?: number
 }
 
 interface BannersArgs {
   fullText: string
-  attributePath: string 
+  attributePath: string
 }
 
 interface RegionSeller {

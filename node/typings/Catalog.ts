@@ -77,6 +77,11 @@ enum FacetsBehavior {
   DYNAMIC = 'Dynamic',
 }
 
+interface SpecificationGroup {
+  name: string
+  originalName: string
+  specifications: { name: string; originalName: string; values: string[] }
+}
 interface SearchProduct {
   origin?: string
   productId: string
@@ -105,6 +110,8 @@ interface SearchProduct {
   allSpecificationsGroups?: string[]
   completeSpecifications?: CompleteSpecification[]
   skuSpecifications?: SkuSpecification[]
+  specificationGroups?: SpecificationGroup[]
+  properties?: { name: string; values: string[] }[]
 }
 
 interface SearchItem {
@@ -151,13 +158,13 @@ interface SearchItemExtended extends SearchItem {
 }
 
 interface SkuSpecification {
-  field: SKUSpecificationField,
+  field: SKUSpecificationField
   values: SKUSpecificationValue[]
 }
 
 interface SKUSpecificationField {
-  name: string,
-  originalName?: string,
+  name: string
+  originalName?: string
   id?: string
 }
 
