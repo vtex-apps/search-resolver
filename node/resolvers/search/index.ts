@@ -2,7 +2,6 @@ import {
   NotFoundError,
   UserInputError,
   createMessagesLoader,
-  VBase
 } from '@vtex/api'
 import { head, isEmpty, isNil, test, pathOr } from 'ramda'
 
@@ -30,18 +29,13 @@ import {
   validMapAndQuery,
 } from './utils'
 import { toCompatibilityArgs } from './newURLs'
-import { PATH_SEPARATOR, MAP_VALUES_SEP, SELLERS_BUCKET } from './constants'
+import { PATH_SEPARATOR, MAP_VALUES_SEP } from './constants'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import {
   buildAttributePath,
   convertOrderBy,
 } from '../../commons/compatibility-layer'
-import { productsCatalog } from '../../commons/products'
-import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
-import { Checkout } from '../../clients/checkout'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
-import { convertProducts } from '../../utils/compatibility-layer'
-import parseFacetsFromSegment from '../../utils/parseFacetsFromSegment'
 
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -74,14 +68,6 @@ interface ProductsByIdentifierArgs {
   values: string[]
   salesChannel?: string | null,
   regionId?: string | null
-}
-
-interface Region {
-  id: string
-  sellers: {
-    id: string
-    name: string
-  }[]
 }
 
 const inputToSearchCrossSelling = {
@@ -284,30 +270,6 @@ const getTranslatedSearchTerm = async (
     ...queryArray.slice(ftSearchIndex + 1),
   ]
   return queryTranslated.join('/')
-}
-
-const getSellers = async (
-  vbase: VBase,
-  checkout: Checkout,
-  channel?: number,
-  regionId?: string | null,
-) => {
-  if (!regionId) {
-    return []
-  }
-
-  const result = await staleFromVBaseWhileRevalidate(
-    vbase,
-    `${SELLERS_BUCKET}`,
-    regionId,
-    async (params: { regionId: string; checkout: Checkout }) => params.checkout.regions(params.regionId, channel),
-    { regionId, checkout },
-    {
-      expirationInMinutes: 10,
-    }
-  )
-
-  return result?.find((region: Region) => region.id === regionId)?.sellers
 }
 
 const buildSpecificationFiltersAsFacets = (specificationFilters: string[]): SelectedFacet[] => {
@@ -631,46 +593,24 @@ export const queries = {
     ctx: Context
   ) => {
     const {
-      clients: { biggySearch, checkout, vbase },
-      vtex: { segment },
+      clients: { intelligentSearchApi },
     } = ctx
 
-    const regionId = args.regionId || segment?.regionId
-
-    const salesChannel = args.salesChannel || segment?.channel
-    const tradePolicy = salesChannel ? String(salesChannel) : undefined
-
-    const sellers = await getSellers(vbase, checkout, salesChannel, regionId)
-
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+    const selectedFacets: SelectedFacet[] = args.facetKey && args.facetValue ? [{key: args.facetKey, value: args.facetValue}] : []
 
-    const segmentedFacets = parseFacetsFromSegment(segment?.facets)
-
-    const result = await biggySearch.suggestionProducts({
+    const result = await intelligentSearchApi.productSearch({
       ...args,
-      salesChannel,
-      sellers,
+      query: args.fullText,
+      from: 0,
+      to: 4,
       workspaceSearchParams,
-      segmentedFacets
-    })
+    }, buildAttributePath(selectedFacets))
 
-    if (ctx.vtex.tenant && !args.productOriginVtex) {
-      ctx.translated = result.translated
+    return {
+      ...result,
+      count: result.recordsFiltered
     }
-
-    const convertedProducts = args.productOriginVtex ?
-      await productsCatalog(({ ctx, simulationBehavior: args.simulationBehavior, searchResult: result, tradePolicy: String(tradePolicy), regionId })) :
-      await convertProducts(result.products, ctx, args.simulationBehavior, tradePolicy, regionId)
-
-      convertedProducts.forEach(product => product.origin =  args.productOriginVtex ? 'catalog' : 'intelligent-search')
-
-    const {
-      count,
-      operator,
-      correction: { misspelled },
-    } = result
-
-    return { count, operator, misspelled, products: convertedProducts }
   },
   banners: (
     _: any,
