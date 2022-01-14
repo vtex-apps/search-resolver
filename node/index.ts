@@ -24,13 +24,11 @@ const messagesCache = new LRUCache<string, Cached>({ max: 3000 })
 const vbaseCache = new LRUCache<string, Cached>({ max: 3000 })
 const appsCache = new LRUCache<string, Cached>({ max: 3000 })
 
-const biggySearchCache = new LRUCache<string, Cached>({ max: 300 })
 
 metrics.trackCache('segment', segmentCache)
 metrics.trackCache('search', searchCache)
 metrics.trackCache('messages', messagesCache)
 metrics.trackCache('vbase', vbaseCache)
-metrics.trackCache('biggySearch', biggySearchCache)
 
 export default new Service<Clients, RecorderState, CustomContext>({
   clients: {
@@ -61,11 +59,10 @@ export default new Service<Clients, RecorderState, CustomContext>({
         memoryCache: searchCache,
         timeout: SIX_SECONDS_MS,
       },
-      biggySearch: {
+      intelligentSearchApi: {
         retries: 0,
         concurrency: 10,
-        memoryCache: biggySearchCache,
-        timeout: SIX_SECONDS_MS,
+        timeout: NINE_SECONDS_MS,
       },
       rewriter: {
         timeout: SIX_SECONDS_MS,
