@@ -347,7 +347,13 @@ export const queries = {
       clients: { intelligentSearchApi },
     } = ctx
 
-    return intelligentSearchApi.facets({...args, query: args.fullText}, buildAttributePath(selectedFacets))
+    const result = await intelligentSearchApi.facets({...args, query: args.fullText}, buildAttributePath(selectedFacets))
+
+    if (ctx.vtex.tenant) {
+      ctx.translated = result.translated
+    }
+
+    return result
   },
 
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
@@ -425,7 +431,13 @@ export const queries = {
       workspaceSearchParams,
     }
 
-    return intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets))
+    const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets))
+
+    if (ctx.vtex.tenant) {
+      ctx.translated = result.translated
+    }
+
+    return result
   },
 
   productsByIdentifier: async (
@@ -493,7 +505,13 @@ export const queries = {
       workspaceSearchParams,
     }
 
-    return intelligentSearchApi.productSearch({...biggyArgs}, buildAttributePath(selectedFacets))
+    const result = await intelligentSearchApi.productSearch({...biggyArgs}, buildAttributePath(selectedFacets))
+
+    if (ctx.vtex.tenant && !args.productOriginVtex) {
+      ctx.translated = result.translated
+    }
+
+    return result
   },
 
   productRecommendations: async (
@@ -606,6 +624,10 @@ export const queries = {
       to: 4,
       workspaceSearchParams,
     }, buildAttributePath(selectedFacets))
+
+    if (ctx.vtex.tenant && !args.productOriginVtex) {
+      ctx.translated = result.translated
+    }
 
     return {
       ...result,
