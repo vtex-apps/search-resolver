@@ -93,53 +93,6 @@ const inputToSearchCrossSelling = {
   [CrossSellingInput.suggestions]: SearchCrossSellingTypes.suggestions,
 }
 
-const getTradePolicyFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): string | null => {
-  const tradePolicy = selectedFacets.filter(selectedFacet => selectedFacet.key === "trade-policy")
-  return tradePolicy.length > 0 ? tradePolicy[0].value : null
-}
-
-const isSellerInSellers = (sellers: RegionSeller[], sellerId: string) =>
-  sellers.find(seller => seller.id === sellerId)
-
-const getPrivateSellerFromSelectedFacets = (
-  selectedFacets: SelectedFacet[] = [],
-  sellers: RegionSeller[]
-): RegionSeller[] => {
-  let indexes = []
-  let privateSellers: RegionSeller[] = []
-
-  for (let i = 0; i < selectedFacets.length; i++) {
-    if (selectedFacets[i].key === 'private-seller') {
-      indexes.push(i)
-
-      // If the private seller is already inside sellers, we don't need to use it again
-      if (!isSellerInSellers(sellers, selectedFacets[i].value)) {
-        privateSellers.push({name: selectedFacets[i].value, id: selectedFacets[i].value})
-      }
-    }
-  }
-
-  for (let j = indexes.length - 1; j >= 0; j--) {
-    selectedFacets.splice(indexes[j], 1)
-  }
-
-  return privateSellers
-}
-
-const getRegionIdFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): [(string | undefined), SelectedFacet[]] => {
-  let regionId = undefined
-
-  const regionIdIndex = selectedFacets.findIndex(selectedFacet => selectedFacet.key === "region-id")
-
-  if(regionIdIndex > -1) {
-    regionId = selectedFacets[regionIdIndex].value
-
-    selectedFacets.splice(regionIdIndex, 1)
-  }
-
-  return [regionId, selectedFacets]
-}
-
 const buildVtexSegment = (vtexSegment?: SegmentData, tradePolicy?: number, regionId?: string | null): string => {
     const cookie = {
       regionId: regionId,
@@ -592,72 +545,22 @@ export const queries = {
       })
     }
 
-    const { biggySearch, vbase, checkout } = ctx.clients
-    const { segment } = ctx.vtex
+    const { intelligentSearchApi } = ctx.clients
     const {
-      from,
-      to,
-      fullText,
-      fuzzy,
-      operator,
-      searchState,
-      simulationBehavior,
-      hideUnavailableItems,
-      options,
+      selectedFacets,
+      fullText
     } = args
-    let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
-
-    const selectedFacetsWithSegment = selectedFacets.concat(parseFacetsFromSegment(segment?.facets))
-
-    regionId = regionId ?? segment?.regionId
-
-    const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets) || segment?.channel
-
-    const sellers = await getSellers(vbase, checkout, tradePolicy, regionId)
-    const privateSellers = getPrivateSellerFromSelectedFacets(selectedFacets, sellers)
-
-    const [count, page] = getProductsCountAndPage(from, to)
 
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
-    const biggyArgs : SearchResultArgs = {
-      page,
-      count,
-      fuzzy,
-      operator,
-      searchState,
-      attributePath: buildAttributePath(selectedFacetsWithSegment),
+    const biggyArgs = {
+      ...args,
       query: fullText,
-      tradePolicy,
       sort: convertOrderBy(args.orderBy),
-      sellers: sellers.concat(privateSellers),
-      hideUnavailableItems,
-      options,
       workspaceSearchParams,
-      regionId,
     }
 
-    const result = await biggySearch.productSearch(biggyArgs)
-
-    if (ctx.vtex.tenant && !args.productOriginVtex) {
-      ctx.translated = result.translated
-    }
-
-    const convertedProducts = args.productOriginVtex ?
-      await productsCatalog(({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })) :
-      await convertProducts(result.products, ctx, simulationBehavior, tradePolicy, regionId)
-
-    convertedProducts.forEach(product => product.origin =  args.productOriginVtex ? 'catalog' : 'intelligent-search')
-
-    return {
-      searchState,
-      products: convertedProducts,
-      recordsFiltered: result.total,
-      correction: result.correction,
-      fuzzy: result.fuzzy,
-      operator: result.operator,
-      redirect: result.redirect,
-    }
+    return intelligentSearchApi.productSearch({...biggyArgs}, buildAttributePath(selectedFacets))
   },
 
   productRecommendations: async (
