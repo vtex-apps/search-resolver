@@ -58,11 +58,15 @@ const sortProducts = (search: { total: number, products: {id: string}[]}, query:
 }
 
 const buildPathFromArgs = (args: {
-  attributePath: string,
+  attributePath?: string,
   tradePolicy?: number,
   indexingType?: IndexingType,
 }) => {
   const { attributePath, tradePolicy, indexingType } = args
+
+  if(!attributePath) {
+    return ''
+  }
 
   // On headless stores, the trade-policy is already present in the selectedFacets, so there is no need to add it again.
   const alreadyHasTradePolicy =  /(\/|^)trade-policy\//.test(attributePath)
@@ -183,92 +187,6 @@ export class BiggySearchClient extends JanusClient {
     return result
   }
 
-  public async searchMetadata(args: SearchResultArgs): Promise<any> {
-    const {
-      query,
-      page,
-      count,
-      sort,
-      operator,
-      fuzzy,
-      leap,
-      searchState,
-    } = args
-
-    const url = `/search-api/v1/${this.store}/api/io/split/metadata_search/${buildPathFromArgs(
-      args
-    )}`
-
-    const result = await this.http.getRaw(url, {
-      params: {
-        query: decodeURIComponent(query ?? ''),
-        page,
-        count,
-        sort,
-        operator,
-        fuzzy,
-        locale: this.locale,
-        bgy_leap: leap ? true : undefined,
-        ...parseState(searchState),
-      },
-      metric: 'search-result',
-    })
-
-    const { title, description: metaTagDescription } = result.data
-
-    return {
-      title,
-      metaTagDescription,
-    }
-  }
-
-  public async facets(args: SearchResultArgs): Promise<any> {
-    const {
-      query,
-      page,
-      count,
-      sort,
-      operator,
-      fuzzy,
-      leap,
-      searchState,
-      sellers,
-      hideUnavailableItems,
-      initialAttributes,
-      regionId,
-    } = args
-
-    const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
-    const url = `/search-api/v1/${this.store}/api/io/split/attribute_search/${buildPathFromArgs(
-      args
-    )}`
-
-    const result = await this.http.getRaw(url, {
-      params: {
-        query: decodeQuery(query ?? ''),
-        page,
-        count,
-        sort,
-        operator,
-        fuzzy,
-        locale: this.locale,
-        bgy_leap: leap ? true : undefined,
-        initialAttributes,
-        regionId,
-        ['hide-unavailable-items']: hideUnavailableItems ? 'true' : 'false',
-        ...parseState(searchState),
-      },
-      metric: 'search-result',
-      headers: {
-        "X-VTEX-IS-Filter": buildBSearchFilterHeader(sellers),
-        "X-VTEX-IS-ID": `${this.store}`,
-      },
-      ...cache,
-    })
-
-    return result.data
-  }
-
   public async productSearch(args: SearchResultArgs): Promise<any> {
     const {
       query,
@@ -286,7 +204,7 @@ export class BiggySearchClient extends JanusClient {
       regionId,
     } = args
 
-    const cache = validNavigationPage(args.attributePath, query) ? { forceMaxAge: 3600 } : {}
+    const cache = validNavigationPage(args.attributePath!, query) ? { forceMaxAge: 3600 } : {}
     const url = `/search-api/v1/${this.store}/api/io/split/product_search/${buildPathFromArgs(
       args
     )}`

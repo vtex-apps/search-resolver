@@ -184,12 +184,6 @@ const translateToStoreDefaultLanguage = async (
   })
 }
 
-const getProductsCountAndPage = (from: number, to: number): [number, number] => {
-  const count = to - from + 1
-  const page = Math.round((to + 1) / count)
-  return [count, page]
-}
-
 const noop = () => { }
 
 // Does prefetching and warms up cache for up to the 10 first elements of a search, so if user clicks on product page
@@ -447,10 +441,12 @@ export const queries = {
 
   products: async (_: any, args: SearchArgs, ctx: Context) => {
     const {
-      clients: { biggySearch, vbase, checkout },
-      vtex: { segment }
+      clients: { intelligentSearchApi },
     } = ctx
-    const { query, to, from, orderBy, simulationBehavior, hideUnavailableItems } = args
+    const {
+      to,
+      orderBy
+    } = args
 
     if (to && to > 2500) {
       throw new UserInputError(
@@ -459,40 +455,15 @@ export const queries = {
     }
 
     const selectedFacets: SelectedFacet[] = buildSelectedFacets(args)
-
-    const selectedFacetsWithSegment = selectedFacets.concat(parseFacetsFromSegment(segment?.facets))
-
-    const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
-
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
-    const biggyArgs: SearchResultArgs = {
-      attributePath: buildAttributePath(selectedFacetsWithSegment),
-      tradePolicy: segment && segment.channel,
-      query,
-      sellers,
+    const biggyArgs = {
+      ...args,
       sort: convertOrderBy(orderBy),
-      hideUnavailableItems,
       workspaceSearchParams,
     }
 
-    if (to !== null && from !== null) {
-      const [count, page] = getProductsCountAndPage(from, to)
-      biggyArgs["count"] = count
-      biggyArgs["page"] = page
-    }
-
-    const result = await biggySearch.productSearch(biggyArgs)
-
-    if (ctx.vtex.tenant) {
-      ctx.translated = result.translated
-    }
-
-    const convertedProducts = await convertProducts(result.products, ctx, simulationBehavior)
-
-    convertedProducts.forEach(product => product.origin = 'intelligent-search')
-
-    return convertedProducts
+    return intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets))
   },
 
   productsByIdentifier: async (
