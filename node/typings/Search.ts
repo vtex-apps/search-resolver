@@ -24,7 +24,7 @@ enum IndexingType {
 }
 
 interface SearchResultArgs {
-  attributePath: string
+  attributePath?: string
   query?: string
   page?: number
   count?: number
@@ -43,8 +43,8 @@ interface SearchResultArgs {
   initialAttributes?: string
   workspaceSearchParams?: object
   regionId?: string | null
-  from?: number
-  to?: number
+  from?: number | null
+  to?: number | null
 }
 
 interface BannersArgs {
