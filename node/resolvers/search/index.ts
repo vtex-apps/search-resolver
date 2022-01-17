@@ -623,6 +623,7 @@ export const queries = {
       from: 0,
       to: 4,
       workspaceSearchParams,
+      sort: convertOrderBy(args.orderBy),
     }, buildAttributePath(selectedFacets))
 
     if (ctx.vtex.tenant && !args.productOriginVtex) {
