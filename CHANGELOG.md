@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Migrate to the `intelligent-search-api`.
+
 ## [1.60.2] - 2022-01-18
 
 ### Changed
