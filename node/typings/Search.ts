@@ -70,6 +70,7 @@ interface SuggestionProductsArgs {
   regionId?: string
   workspaceSearchParams?: object
   segmentedFacets?: SelectedFacet[]
+  orderBy?: string
 }
 
 interface SuggestionSearchesArgs {
