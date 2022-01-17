@@ -3,7 +3,6 @@ import { IOClients } from '@vtex/api'
 import { Search } from './search'
 import { Checkout } from './checkout'
 import { Rewriter } from './rewriter'
-import { BiggySearchClient } from './biggy-search'
 import { Store } from './store'
 import { IntelligentSearchApi } from './intelligent-search-api'
 
@@ -16,9 +15,6 @@ export class Clients extends IOClients {
   }
   public get rewriter() {
     return this.getOrSet('rewriter', Rewriter)
-  }
-  public get biggySearch() {
-    return this.getOrSet('biggySearch', BiggySearchClient)
   }
   public get intelligentSearchApi() {
     return this.getOrSet('intelligentSearchApi', IntelligentSearchApi)
