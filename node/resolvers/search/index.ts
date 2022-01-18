@@ -437,7 +437,7 @@ export const queries = {
       ctx.translated = result.translated
     }
 
-    return result
+    return result.products
   },
 
   productsByIdentifier: async (
