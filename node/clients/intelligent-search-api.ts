@@ -56,7 +56,6 @@ export class IntelligentSearchApi extends ExternalClient {
     })
 
     const { locale, tenant } = context
-    // this.store = account
     this.locale = locale ?? tenant?.locale
   }
 
