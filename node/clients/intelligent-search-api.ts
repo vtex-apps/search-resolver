@@ -45,7 +45,6 @@ const decodeQuery = (query: string) => {
 
 export class IntelligentSearchApi extends ExternalClient {
   private locale: string | undefined
-  // private store: string
 
   public constructor(context: IOContext, options?: InstanceOptions) {
     super(`http://${context.workspace}--${context.account}.myvtex.com/_v/api/intelligent-search`, context, {
