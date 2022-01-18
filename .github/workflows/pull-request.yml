@@ -4,8 +4,8 @@ on:
     branches:
       - v1.x
 jobs:
-  e2e-tests:
-    name: E2E test
+  create-workspace:
+    name: Create workspace
     runs-on: ubuntu-latest
     steps:
       - name: Delete previous comment
@@ -32,17 +32,42 @@ jobs:
       - name: Create session
         run: node ci/createSession.js --appkey=${{ secrets.APP_KEY }} --apptoken=${{ secrets.APP_TOKEN }}
         working-directory: search-tests
-      - name: create workspace
+      - name: Create workspace
         run: |
           yes | vtex workspace use e2e${{ github.sha }}
       - name: Link app
         run: vtex link --no-watch
         working-directory: ioapp
+      - uses: actions/cache@v2
+        id: cache-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+  e2e-tests:
+    name: E2E tests
+    runs-on: ubuntu-latest
+    needs: create-workspace
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2, 3, 4]
+    steps:
+      - name: Restore cache
+        uses: actions/cache@v2
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+      - name: Get committer email
+        working-directory: ioapp
+        run: |
+          echo "COMMIT_INFO_EMAIL=`git log --format='%ae' HEAD^!`" >> $GITHUB_ENV
       - uses: cypress-io/github-action@v2
         with:
           config-file: cypress.json
           working-directory: search-tests
           record: true
+          parallel: true
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.RECORD_KEY }}
           CYPRESS_VTEX_WORKSPACE: e2e${{ github.sha }}
@@ -51,12 +76,31 @@ jobs:
           COMMIT_INFO_SHA: ${{ github.sha }}
           COMMIT_INFO_REMOTE: ${{ github.repository }}
           COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
-          COMMIT_INFO_AUTHOR: ${{ github.actor }}
+          COMMIT_INFO_AUTHOR: ${{ github.event.pull_request.user.login }}
       - name: Add comment
         uses: marocchino/sticky-pull-request-comment@v2
         if: failure()
         with:
           message: E2E tests failed. Go to https://dashboard.cypress.io/projects/qvjzx1 to check the recordings.
+  delete-workspace:
+    name: Delete workspace
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: e2e-tests
+    steps:
+      - name: Restore cache
+        uses: actions/cache@v2
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+      - name: Install toolbelt
+        run: |
+          yarn global add vtex
+          echo "$(yarn global bin)" >> $GITHUB_PATH
+      - name: Create session
+        run: node ci/createSession.js --appkey=${{ secrets.APP_KEY }} --apptoken=${{ secrets.APP_TOKEN }}
+        working-directory: search-tests
       - name: Delete workspace
         run: |
           vtex workspace use master
