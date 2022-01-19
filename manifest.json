@@ -1,7 +1,7 @@
 {
   "vendor": "vtex",
   "name": "search-resolver",
-  "version": "1.60.1",
+  "version": "1.61.0-beta.0",
   "title": "GraphQL resolver for the VTEX store APIs",
   "description": "GraphQL resolvers for the VTEX API for the catalog and orders.",
   "credentialType": "absolute",
