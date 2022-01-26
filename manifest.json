@@ -15,7 +15,8 @@
     "vtex.search-graphql": "0.x",
     "vtex.rewriter": "1.x",
     "vtex.sae-analytics": "2.x",
-    "vtex.store-graphql": "2.x"
+    "vtex.store-graphql": "2.x",
+    "vtex.intelligent-search-api": "0.x"
   },
   "settingsSchema": {
     "type": "object",
@@ -45,6 +46,9 @@
     },
     {
       "name": "colossus-fire-event"
+    },
+    {
+      "name": "vtex.intelligent-search-api:intelligent-search"
     },
     {
       "attrs": {

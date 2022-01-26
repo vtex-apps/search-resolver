@@ -199,6 +199,10 @@ export const resolvers = {
     },
 
     properties: async (product: SearchProduct, _: unknown, ctx: Context) => {
+      if (product.origin === 'intelligent-search') {
+        return product.properties
+      }
+
       const valuesUntranslated = (product.allSpecifications ?? []).map((name: string) => {
         const value = (product as unknown as DynamicKey<string[]>)[name]
         return { name, originalName: name, values: value }
@@ -257,6 +261,10 @@ export const resolvers = {
     },
 
     specificationGroups: async (product: SearchProduct, _: unknown, ctx: Context) => {
+      if (product.origin === 'intelligent-search') {
+        return product.specificationGroups
+      }
+
       const allSpecificationsGroups = (product.allSpecificationsGroups ?? []).concat(['allSpecifications'])
 
       const visibleSpecifications = product.completeSpecifications

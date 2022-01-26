@@ -2,7 +2,6 @@ import {
   NotFoundError,
   UserInputError,
   createMessagesLoader,
-  VBase
 } from '@vtex/api'
 import { head, isEmpty, isNil, test, pathOr } from 'ramda'
 
@@ -11,7 +10,6 @@ import { resolvers as autocompleteResolvers } from './autocomplete'
 import { resolvers as brandResolvers } from './brand'
 import { resolvers as categoryResolvers } from './category'
 import { resolvers as discountResolvers } from './discount'
-import { resolvers as facetsResolvers } from './facets'
 import { resolvers as itemMetadataResolvers } from './itemMetadata'
 import { resolvers as itemMetadataPriceTableItemResolvers } from './itemMetadataPriceTableItem'
 import { resolvers as itemMetadataUnitResolvers } from './itemMetadataUnit'
@@ -31,24 +29,13 @@ import {
   validMapAndQuery,
 } from './utils'
 import { toCompatibilityArgs } from './newURLs'
-import { PATH_SEPARATOR, MAP_VALUES_SEP, SELLERS_BUCKET, FACETS_BUCKET } from './constants'
+import { PATH_SEPARATOR, MAP_VALUES_SEP } from './constants'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import {
   buildAttributePath,
   convertOrderBy,
-  buildBreadcrumb,
 } from '../../commons/compatibility-layer'
-import { productsCatalog } from '../../commons/products'
-import {
-  attributesToFilters,
-  sortAttributeValuesByCatalog,
-} from '../../utils/attributes'
-import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
-import { Checkout } from '../../clients/checkout'
-import setFilterVisibility from '../../utils/setFilterVisibility'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
-import { convertProducts } from '../../utils/compatibility-layer'
-import parseFacetsFromSegment from '../../utils/parseFacetsFromSegment'
 
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -83,14 +70,6 @@ interface ProductsByIdentifierArgs {
   regionId?: string | null
 }
 
-interface Region {
-  id: string
-  sellers: {
-    id: string
-    name: string
-  }[]
-}
-
 const inputToSearchCrossSelling = {
   [CrossSellingInput.buy]: SearchCrossSellingTypes.whoboughtalsobought,
   [CrossSellingInput.view]: SearchCrossSellingTypes.whosawalsosaw,
@@ -98,53 +77,6 @@ const inputToSearchCrossSelling = {
   [CrossSellingInput.viewAndBought]: SearchCrossSellingTypes.whosawalsobought,
   [CrossSellingInput.accessories]: SearchCrossSellingTypes.accessories,
   [CrossSellingInput.suggestions]: SearchCrossSellingTypes.suggestions,
-}
-
-const getTradePolicyFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): string | null => {
-  const tradePolicy = selectedFacets.filter(selectedFacet => selectedFacet.key === "trade-policy")
-  return tradePolicy.length > 0 ? tradePolicy[0].value : null
-}
-
-const isSellerInSellers = (sellers: RegionSeller[], sellerId: string) =>
-  sellers.find(seller => seller.id === sellerId)
-
-const getPrivateSellerFromSelectedFacets = (
-  selectedFacets: SelectedFacet[] = [],
-  sellers: RegionSeller[]
-): RegionSeller[] => {
-  let indexes = []
-  let privateSellers: RegionSeller[] = []
-
-  for (let i = 0; i < selectedFacets.length; i++) {
-    if (selectedFacets[i].key === 'private-seller') {
-      indexes.push(i)
-
-      // If the private seller is already inside sellers, we don't need to use it again
-      if (!isSellerInSellers(sellers, selectedFacets[i].value)) {
-        privateSellers.push({name: selectedFacets[i].value, id: selectedFacets[i].value})
-      }
-    }
-  }
-
-  for (let j = indexes.length - 1; j >= 0; j--) {
-    selectedFacets.splice(indexes[j], 1)
-  }
-
-  return privateSellers
-}
-
-const getRegionIdFromSelectedFacets = (selectedFacets: SelectedFacet[] = []): [(string | undefined), SelectedFacet[]] => {
-  let regionId = undefined
-
-  const regionIdIndex = selectedFacets.findIndex(selectedFacet => selectedFacet.key === "region-id")
-
-  if(regionIdIndex > -1) {
-    regionId = selectedFacets[regionIdIndex].value
-
-    selectedFacets.splice(regionIdIndex, 1)
-  }
-
-  return [regionId, selectedFacets]
 }
 
 const buildVtexSegment = (vtexSegment?: SegmentData, tradePolicy?: number, regionId?: string | null): string => {
@@ -238,12 +170,6 @@ const translateToStoreDefaultLanguage = async (
   })
 }
 
-const getProductsCountAndPage = (from: number, to: number): [number, number] => {
-  const count = to - from + 1
-  const page = Math.round((to + 1) / count)
-  return [count, page]
-}
-
 const noop = () => { }
 
 // Does prefetching and warms up cache for up to the 10 first elements of a search, so if user clicks on product page
@@ -272,7 +198,6 @@ export const fieldResolvers = {
   ...itemMetadataPriceTableItemResolvers,
   ...offerResolvers,
   ...discountResolvers,
-  ...facetsResolvers,
   ...productResolvers,
   ...recommendationResolvers,
   ...skuResolvers,
@@ -347,30 +272,6 @@ const getTranslatedSearchTerm = async (
   return queryTranslated.join('/')
 }
 
-const getSellers = async (
-  vbase: VBase,
-  checkout: Checkout,
-  channel?: number,
-  regionId?: string | null,
-) => {
-  if (!regionId) {
-    return []
-  }
-
-  const result = await staleFromVBaseWhileRevalidate(
-    vbase,
-    `${SELLERS_BUCKET}`,
-    regionId,
-    async (params: { regionId: string; checkout: Checkout }) => params.checkout.regions(params.regionId, channel),
-    { regionId, checkout },
-    {
-      expirationInMinutes: 10,
-    }
-  )
-
-  return result?.find((region: Region) => region.id === regionId)?.sellers
-}
-
 const buildSpecificationFiltersAsFacets = (specificationFilters: string[]): SelectedFacet[] => {
   return specificationFilters.map((specificationFilter: string) => {
     const [key, value] = specificationFilter.split(":")
@@ -440,105 +341,19 @@ export const queries = {
       args
     )) as FacetsInput
 
-    let { fullText, searchState, initialAttributes } = args
+    let { selectedFacets } = args
 
     const {
-      clients: { biggySearch, search, checkout, vbase },
-      vtex: { segment },
+      clients: { intelligentSearchApi },
     } = ctx
 
-    const [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
-
-    const selectedFacetsWithSegment = selectedFacets.concat(parseFacetsFromSegment(segment?.facets))
-
-    const tradePolicy = getTradePolicyFromSelectedFacets(selectedFacets) || segment?.channel
-
-    const sellers = await getSellers(vbase, checkout, tradePolicy, regionId || segment?.regionId)
-    const privateSellers = getPrivateSellerFromSelectedFacets(selectedFacets, sellers)
-
-    const biggyArgs = {
-      searchState,
-      query: fullText,
-      attributePath: buildAttributePath(selectedFacetsWithSegment),
-      tradePolicy,
-      sellers: sellers.concat(privateSellers),
-      hideUnavailableItems: args.hideUnavailableItems,
-      initialAttributes,
-      regionId: segment?.regionId
-    }
-
-    const facetPromises = [biggySearch.facets(biggyArgs)]
-
-    const showCategoryTree = args.categoryTreeBehavior === 'show';
-    const categoryRegex = /category-[0-9]+/
-    const categorySelectedFacets = args.selectedFacets.filter(facet => facet.key === 'c' || categoryRegex.test(facet.key))
-
-    if (!fullText && showCategoryTree && categorySelectedFacets.length > 0) {
-      const solrQuery = categorySelectedFacets.map(facet => facet.value).join('/')
-      const solrMap = categorySelectedFacets.map(facet => facet.key).join(',')
-      const assembledQuery = `${solrQuery}?map=${solrMap}`
-      facetPromises.push(staleFromVBaseWhileRevalidate(
-        vbase,
-        FACETS_BUCKET,
-        assembledQuery,
-        search.facets,
-        assembledQuery
-      ))
-    }
-
-    const [intelligentSearchFacets, solrFacets] = await Promise.all(facetPromises)
+    const result = await intelligentSearchApi.facets({...args, query: args.fullText}, buildAttributePath(selectedFacets))
 
     if (ctx.vtex.tenant) {
-      ctx.translated = intelligentSearchFacets.translated
+      ctx.translated = result.translated
     }
 
-    // FIXME: This is used to sort values based on catalog API.
-    // Remove it when it is not necessary anymore
-    if (intelligentSearchFacets && intelligentSearchFacets.attributes) {
-      intelligentSearchFacets.attributes = await Promise.all(
-        intelligentSearchFacets.attributes.map(async (attribute: any) => {
-          if (
-            attribute.type === 'text' &&
-            attribute.ids &&
-            attribute.ids.length
-          ) {
-            const catalogValues = await search.getFieldValues(attribute.ids[0])
-            sortAttributeValuesByCatalog(attribute, catalogValues)
-          }
-
-          return attribute
-        })
-      )
-    }
-
-    const breadcrumb = buildBreadcrumb(
-      intelligentSearchFacets.attributes || [],
-      args.fullText,
-      args.selectedFacets
-    )
-
-    const attributesWithVisibilitySet = await setFilterVisibility(vbase, search, intelligentSearchFacets.attributes ?? [])
-
-    const response = attributesToFilters({
-      breadcrumb,
-      solrFacets,
-      total: intelligentSearchFacets.total,
-      attributes: attributesWithVisibilitySet,
-      selectedFacets: args.selectedFacets,
-      removeHiddenFacets: args.removeHiddenFacets,
-      showCategoryTree: showCategoryTree && !fullText && categorySelectedFacets.length > 0,
-    })
-
-    return {
-      facets: response,
-      sampling: intelligentSearchFacets.sampling,
-      queryArgs: {
-        map: args.map,
-        query: args.query,
-        selectedFacets: args.selectedFacets,
-      },
-      breadcrumb,
-    }
+    return result
   },
 
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
@@ -594,10 +409,12 @@ export const queries = {
 
   products: async (_: any, args: SearchArgs, ctx: Context) => {
     const {
-      clients: { biggySearch, vbase, checkout },
-      vtex: { segment }
+      clients: { intelligentSearchApi },
     } = ctx
-    const { query, to, from, orderBy, simulationBehavior, hideUnavailableItems } = args
+    const {
+      to,
+      orderBy
+    } = args
 
     if (to && to > 2500) {
       throw new UserInputError(
@@ -606,40 +423,21 @@ export const queries = {
     }
 
     const selectedFacets: SelectedFacet[] = buildSelectedFacets(args)
-
-    const selectedFacetsWithSegment = selectedFacets.concat(parseFacetsFromSegment(segment?.facets))
-
-    const sellers = await getSellers(vbase, checkout, segment?.channel, segment?.regionId)
-
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
-    const biggyArgs: SearchResultArgs = {
-      attributePath: buildAttributePath(selectedFacetsWithSegment),
-      tradePolicy: segment && segment.channel,
-      query,
-      sellers,
+    const biggyArgs = {
+      ...args,
       sort: convertOrderBy(orderBy),
-      hideUnavailableItems,
       workspaceSearchParams,
     }
 
-    if (to !== null && from !== null) {
-      const [count, page] = getProductsCountAndPage(from, to)
-      biggyArgs["count"] = count
-      biggyArgs["page"] = page
-    }
-
-    const result = await biggySearch.productSearch(biggyArgs)
+    const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets))
 
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated
     }
 
-    const convertedProducts = await convertProducts(result.products, ctx, simulationBehavior)
-
-    convertedProducts.forEach(product => product.origin = 'intelligent-search')
-
-    return convertedProducts
+    return result.products
   },
 
   productsByIdentifier: async (
@@ -692,72 +490,28 @@ export const queries = {
       })
     }
 
-    const { biggySearch, vbase, checkout } = ctx.clients
-    const { segment } = ctx.vtex
+    const { intelligentSearchApi } = ctx.clients
     const {
-      from,
-      to,
-      fullText,
-      fuzzy,
-      operator,
-      searchState,
-      simulationBehavior,
-      hideUnavailableItems,
-      options,
+      selectedFacets,
+      fullText
     } = args
-    let [regionId, selectedFacets] = getRegionIdFromSelectedFacets(args.selectedFacets)
-
-    const selectedFacetsWithSegment = selectedFacets.concat(parseFacetsFromSegment(segment?.facets))
-
-    regionId = regionId ?? segment?.regionId
-
-    const tradePolicy = getTradePolicyFromSelectedFacets(args.selectedFacets) || segment?.channel
-
-    const sellers = await getSellers(vbase, checkout, tradePolicy, regionId)
-    const privateSellers = getPrivateSellerFromSelectedFacets(selectedFacets, sellers)
-
-    const [count, page] = getProductsCountAndPage(from, to)
 
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
-    const biggyArgs : SearchResultArgs = {
-      page,
-      count,
-      fuzzy,
-      operator,
-      searchState,
-      attributePath: buildAttributePath(selectedFacetsWithSegment),
+    const biggyArgs = {
+      ...args,
       query: fullText,
-      tradePolicy,
       sort: convertOrderBy(args.orderBy),
-      sellers: sellers.concat(privateSellers),
-      hideUnavailableItems,
-      options,
       workspaceSearchParams,
-      regionId,
     }
 
-    const result = await biggySearch.productSearch(biggyArgs)
+    const result = await intelligentSearchApi.productSearch({...biggyArgs}, buildAttributePath(selectedFacets))
 
     if (ctx.vtex.tenant && !args.productOriginVtex) {
       ctx.translated = result.translated
     }
 
-    const convertedProducts = args.productOriginVtex ?
-      await productsCatalog(({ ctx, simulationBehavior, searchResult: result, tradePolicy, regionId })) :
-      await convertProducts(result.products, ctx, simulationBehavior, tradePolicy, regionId)
-
-    convertedProducts.forEach(product => product.origin =  args.productOriginVtex ? 'catalog' : 'intelligent-search')
-
-    return {
-      searchState,
-      products: convertedProducts,
-      recordsFiltered: result.total,
-      correction: result.correction,
-      fuzzy: result.fuzzy,
-      operator: result.operator,
-      redirect: result.redirect,
-    }
+    return result
   },
 
   productRecommendations: async (
@@ -835,18 +589,21 @@ export const queries = {
     return getSearchMetaData(_, compatibilityArgs, ctx)
   },
   topSearches: async (_: any, __: any, ctx: Context) => {
-    const { biggySearch } = ctx.clients
+    const { intelligentSearchApi } = ctx.clients
 
-    return await biggySearch.topSearches()
+    return await intelligentSearchApi.topSearches()
   },
   autocompleteSearchSuggestions: (
     _: any,
     args: { fullText: string },
     ctx: Context
   ) => {
-    const { biggySearch } = ctx.clients
+    const { intelligentSearchApi } = ctx.clients
 
-    return biggySearch.autocompleteSearchSuggestions(args)
+    return intelligentSearchApi.autocompleteSearchSuggestions({
+      query: args.fullText,
+      ...args
+    })
   },
   productSuggestions: async (
     _: any,
@@ -854,67 +611,52 @@ export const queries = {
     ctx: Context
   ) => {
     const {
-      clients: { biggySearch, checkout, vbase },
-      vtex: { segment },
+      clients: { intelligentSearchApi },
     } = ctx
 
-    const regionId = args.regionId || segment?.regionId
-
-    const salesChannel = args.salesChannel || segment?.channel
-    const tradePolicy = salesChannel ? String(salesChannel) : undefined
-
-    const sellers = await getSellers(vbase, checkout, salesChannel, regionId)
-
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+    const selectedFacets: SelectedFacet[] = args.facetKey && args.facetValue ? [{key: args.facetKey, value: args.facetValue}] : []
 
-    const segmentedFacets = parseFacetsFromSegment(segment?.facets)
-
-    const result = await biggySearch.suggestionProducts({
+    const result = await intelligentSearchApi.productSearch({
       ...args,
-      salesChannel,
-      sellers,
+      query: args.fullText,
+      from: 0,
+      to: 4,
       workspaceSearchParams,
-      segmentedFacets
-    })
+      sort: convertOrderBy(args.orderBy),
+    }, buildAttributePath(selectedFacets))
 
     if (ctx.vtex.tenant && !args.productOriginVtex) {
       ctx.translated = result.translated
     }
 
-    const convertedProducts = args.productOriginVtex ?
-      await productsCatalog(({ ctx, simulationBehavior: args.simulationBehavior, searchResult: result, tradePolicy: String(tradePolicy), regionId })) :
-      await convertProducts(result.products, ctx, args.simulationBehavior, tradePolicy, regionId)
-
-      convertedProducts.forEach(product => product.origin =  args.productOriginVtex ? 'catalog' : 'intelligent-search')
-
-    const {
-      count,
-      operator,
-      correction: { misspelled },
-    } = result
-
-    return { count, operator, misspelled, products: convertedProducts }
+    return {
+      ...result,
+      count: result.recordsFiltered
+    }
   },
   banners: (
     _: any,
     args: { fullText: string; selectedFacets: SelectedFacet[] },
     ctx: Context
   ) => {
-    const { biggySearch } = ctx.clients
+    const { intelligentSearchApi } = ctx.clients
 
-    return biggySearch.banners({
-      attributePath: buildAttributePath(args.selectedFacets),
-      fullText: args.fullText,
-    })
+    return intelligentSearchApi.banners({
+      query: args.fullText,
+    }, buildAttributePath(args.selectedFacets))
   },
   correction: (_: any, args: { fullText: string }, ctx: Context) => {
-    const { biggySearch } = ctx.clients
+    const { intelligentSearchApi } = ctx.clients
 
-    return biggySearch.correction(args)
+    return intelligentSearchApi.correction({
+      query: args.fullText,
+      ...args
+    })
   },
   searchSuggestions: (_: any, args: { fullText: string }, ctx: Context) => {
-    const { biggySearch } = ctx.clients
+    const { intelligentSearchApi } = ctx.clients
 
-    return biggySearch.searchSuggestions(args)
+    return intelligentSearchApi.searchSuggestions({query: args.fullText})
   },
 }
