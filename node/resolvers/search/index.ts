@@ -428,8 +428,11 @@ export const queries = {
     const biggyArgs = {
       ...args,
       sort: convertOrderBy(orderBy),
-      workspaceSearchParams,
+      ...workspaceSearchParams,
     }
+
+    // unnecessary field. It's is an object and breaks the @vtex/api cache
+    delete biggyArgs.selectedFacets
 
     const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets))
 
@@ -498,12 +501,15 @@ export const queries = {
 
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
-    const biggyArgs = {
+    const biggyArgs: {[key:string]: any} = {
       ...args,
       query: fullText,
       sort: convertOrderBy(args.orderBy),
-      workspaceSearchParams,
+      ...workspaceSearchParams,
     }
+
+    // unnecessary field. It's is an object and breaks the @vtex/api cache
+    delete biggyArgs.selectedFacets
 
     const result = await intelligentSearchApi.productSearch({...biggyArgs}, buildAttributePath(selectedFacets))
 
@@ -617,14 +623,19 @@ export const queries = {
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
     const selectedFacets: SelectedFacet[] = args.facetKey && args.facetValue ? [{key: args.facetKey, value: args.facetValue}] : []
 
-    const result = await intelligentSearchApi.productSearch({
+    const biggyArgs : {[key: string] : any} = {
       ...args,
       query: args.fullText,
       from: 0,
       to: 4,
-      workspaceSearchParams,
+      ...workspaceSearchParams,
       sort: convertOrderBy(args.orderBy),
-    }, buildAttributePath(selectedFacets))
+    }
+
+    // unnecessary field. It's is an object and breaks the @vtex/api cache
+    delete biggyArgs.selectedFacets
+
+    const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets))
 
     if (ctx.vtex.tenant && !args.productOriginVtex) {
       ctx.translated = result.translated
