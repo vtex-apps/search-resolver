@@ -95,16 +95,15 @@ export class IntelligentSearchApi extends ExternalClient {
   }
 
   public async productSearch(params: SearchResultArgs, path: string) {
-    const {query, leap, searchState, workspaceSearchParams} = params
+    const {query, leap, searchState} = params
 
     return this.http.get(`/product_search/${path}`, {
       params: {
-        ...params,
         query: query && decodeQuery(query),
         locale: this.locale,
         bgy_leap: leap ? true : undefined,
         ...parseState(searchState),
-        ...workspaceSearchParams, // important that this be last so that it can override master settings above
+        ...params,
       },
       metric: 'product-search'
     })
