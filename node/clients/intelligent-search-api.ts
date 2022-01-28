@@ -82,6 +82,7 @@ export class IntelligentSearchApi extends ExternalClient {
 
   public async facets(params: FacetsArgs, path: string) {
     const {query, leap, searchState} = params
+
     return this.http.get(`/facets/${path}`, {
       params: {
         ...params,

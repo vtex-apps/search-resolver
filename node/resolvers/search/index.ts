@@ -347,7 +347,15 @@ export const queries = {
       clients: { intelligentSearchApi },
     } = ctx
 
-    const result = await intelligentSearchApi.facets({...args, query: args.fullText}, buildAttributePath(selectedFacets))
+    const biggyArgs: {[key:string]: any}  = {
+      ...args
+    }
+
+    // unnecessary field. It's is an object and breaks the @vtex/api cache
+    delete biggyArgs.selectedFacets
+
+
+    const result = await intelligentSearchApi.facets({...biggyArgs, query: args.fullText}, buildAttributePath(selectedFacets))
 
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated

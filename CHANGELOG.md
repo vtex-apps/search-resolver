@@ -7,10 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+-  Remove `selctedFacets` object from the facets querystring to avoid cache problems.
+
 ## [1.61.1] - 2022-01-27
 
 ### Fixed
 -  Remove `selctedFacets` object from querystring to avoid cache problems.
+
 ## [1.61.0] - 2022-01-26
 
 ### Changed
