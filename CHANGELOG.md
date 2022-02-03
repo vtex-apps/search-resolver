@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.61.3] - 2022-02-03
+
 ### Fixed 
 
 - Product Search to return `searchState`. 
