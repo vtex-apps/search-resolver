@@ -106,17 +106,23 @@ const getCompatibilityArgsFromSelectedFacets = async (
   ctx: Context,
   args: QueryArgs
 ) => {
-  const { selectedFacets, query } = args
+  let { selectedFacets, query } = args
 
-  if (!selectedFacets || selectedFacets.length === 0 || !query) {
+  if(!selectedFacets || selectedFacets.length === 0) {
+    selectedFacets = []
+  }
+
+  if (!query) {
     return args
   }
 
-  const [map, priceRange] = getMapAndPriceRangeFromSelectedFacets([
+
+
+  const [mapFromSelectedFacets, priceRange] = getMapAndPriceRangeFromSelectedFacets([
     ...selectedFacets,
   ])
 
-  args.map = map
+  args.map = args.map ? `${args.map},${mapFromSelectedFacets}` : mapFromSelectedFacets
 
   if (isLegacySearchFormat({ query: args.query, map: args.map })) {
     return args
