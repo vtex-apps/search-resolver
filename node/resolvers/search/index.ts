@@ -525,7 +525,10 @@ export const queries = {
       ctx.translated = result.translated
     }
 
-    return result
+    return {
+      searchState: args.searchState,
+      ...result
+    }
   },
 
   productRecommendations: async (
