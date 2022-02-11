@@ -267,6 +267,7 @@ export class Search extends AppClient {
 
   private productSearchUrl = ({
     query = '',
+    fullText = '',
     category = '',
     specificationFilters,
     priceRange = '',
@@ -281,7 +282,7 @@ export class Search extends AppClient {
     completeSpecifications = true,
   }: SearchArgs) => {
     const sanitizedQuery = encodeURIComponent(
-      this.searchEncodeURI(decodeURIComponent(query || '').trim())
+      this.searchEncodeURI(decodeURIComponent(query || fullText || '').trim())
     )
     if (hideUnavailableItems) {
       const segmentData = (this.context as CustomIOContext).segment

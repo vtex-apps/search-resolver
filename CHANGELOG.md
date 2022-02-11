@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Use `fullText` when `query` is empty.
+
 ## [0.16.12] - 2022-01-04
 
 ### Fixed
