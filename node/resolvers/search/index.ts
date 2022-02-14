@@ -641,6 +641,7 @@ export const queries = {
       from: 0,
       to: 4,
       sort: convertOrderBy(args.orderBy),
+      allowRedirect: false, // When there is a redirect, no product is returned.
       ...workspaceSearchParams,
     }
 
