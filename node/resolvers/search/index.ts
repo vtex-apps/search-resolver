@@ -513,6 +513,7 @@ export const queries = {
       ...args,
       query: fullText,
       sort: convertOrderBy(args.orderBy),
+      ...args.options,
       ...workspaceSearchParams,
     }
 
@@ -639,8 +640,8 @@ export const queries = {
       query: args.fullText,
       from: 0,
       to: 4,
-      ...workspaceSearchParams,
       sort: convertOrderBy(args.orderBy),
+      ...workspaceSearchParams,
     }
 
     // unnecessary field. It's is an object and breaks the @vtex/api cache
