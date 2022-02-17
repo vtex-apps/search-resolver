@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.61.4] - 2022-02-17
+
 ### Fixed
 - `productSearch` query ignores the `allowRedirect` property.
 - `productSuggestions` doesn't return any result when there is a redirect set.
