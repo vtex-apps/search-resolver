@@ -356,15 +356,35 @@ export const queries = {
 
 
     const result = await intelligentSearchApi.facets({...biggyArgs, query: args.fullText}, buildAttributePath(selectedFacets))
-    console.log('facets result', result)
     result.facets.forEach((facet: any) => {
       console.log('facet', facet)
     })
-    /*const productsResult = await intelligentSearchApi.productSearch({...biggyArgs}, buildAttributePath([]))
-    console.log('productSearch products.length', productsResult.products.length)
-    const newProducts = removeGreyProducts(productsResult)
-    console.log('newProducts', newProducts)*/
+    /*const newFacets = result.facets.map((facet: any) => {
+      const newValues = facet.values.map((value: any) => {
 
+        return {
+          ...value,
+        }
+      })
+      return {...facet, values: newValues, quantity: newValues.quantity}
+    })
+    console.log('new facets', newFacets)
+    const newResult = {...result, facets: newFacets}
+    console.log('new result', newResult)*/
+
+    /*const productsResult = await intelligentSearchApi.productSearch({...biggyArgs, query: args.fullText}, buildAttributePath(selectedFacets))
+    console.log('productsResult.length', productsResult.products.length)
+    const productsId1 = productsResult.products.map((p: any) => {
+      return p.productId
+    })
+    console.log('productsId1', productsId1)
+    const newProducts = removeGreyProducts(productsResult)
+    console.log('newProducts.length', newProducts.length)
+    const productsId2 = newProducts.map((p: any) => {
+      return p.productId
+    })
+    console.log('productsId2', productsId2)
+*/
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated
     }
@@ -395,8 +415,6 @@ export const queries = {
     let products = [] as SearchProduct[]
 
     const vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
-    console.log('field', field)
-    console.log('value', value)
     switch (field) {
       case 'id':
         products = await search.productById(value, vtexSegment, salesChannel)
@@ -526,12 +544,26 @@ export const queries = {
 
     // unnecessary field. It's is an object and breaks the @vtex/api cache
     delete biggyArgs.selectedFacets
+    console.log('biggyArgs', biggyArgs)
 
     const result = await intelligentSearchApi.productSearch({...biggyArgs}, buildAttributePath(selectedFacets))
-    console.log('productSearch products.length', result.products.length)
-    const newProducts = removeGreyProducts(result)
+
+    const recordsTotal =  result.recordsFiltered
+
+    const resultToRemoveGreyTotal = await intelligentSearchApi.productSearch({...biggyArgs, from: 0, to: recordsTotal}, buildAttributePath(selectedFacets))
+    const blueProductsLength = removeGreyProducts(resultToRemoveGreyTotal).length
+    console.log('blueProductsLength', blueProductsLength)
+
+
+    const biggyArgsTo = biggyArgs.to > blueProductsLength ? blueProductsLength - 1 : biggyArgs.to
+    console.log('biggyArgsTo', biggyArgsTo)
+    const resultToRemoveGrey = await intelligentSearchApi.productSearch({...biggyArgs, to: biggyArgsTo}, buildAttributePath(selectedFacets))
+
+    const newProducts = removeGreyProducts(resultToRemoveGrey)
+    console.log('newProducts.length', newProducts.length)
+
     const resultAux = {...result,
-      recordsFiltered: newProducts.length,
+      recordsFiltered: blueProductsLength,
       products: newProducts,
     }
     //console.log('resultAux', resultAux)
@@ -707,8 +739,9 @@ export const queries = {
 }
 function removeGreyProducts(result: any) {
   const newProducts: any[] = []
+
   result?.products?.forEach((p: any) => {
-    // console.log('p', p)
+    //console.log('p', p)
     const items = p.items
     let available = false
     items.forEach((i: any) => {
@@ -718,12 +751,12 @@ function removeGreyProducts(result: any) {
         /*console.log('item', i.name)
         console.log('seller.sellerId', s.sellerId)
         console.log('seller.sellerName', s.sellerName)
-        console.log('quantity', quantity)
-        console.log('available', available)
-        console.log('-----------')*/
+        console.log('quantity', quantity)*/
         if (!available && quantity > 0) {
           available = true
         }
+        /*console.log('available', available)
+        console.log('-----------')*/
       })
     })
     if (available) {
