@@ -356,6 +356,14 @@ export const queries = {
 
 
     const result = await intelligentSearchApi.facets({...biggyArgs, query: args.fullText}, buildAttributePath(selectedFacets))
+    console.log('facets result', result)
+    result.facets.forEach((facet: any) => {
+      console.log('facet', facet)
+    })
+    /*const productsResult = await intelligentSearchApi.productSearch({...biggyArgs}, buildAttributePath([]))
+    console.log('productSearch products.length', productsResult.products.length)
+    const newProducts = removeGreyProducts(productsResult)
+    console.log('newProducts', newProducts)*/
 
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated
@@ -387,7 +395,8 @@ export const queries = {
     let products = [] as SearchProduct[]
 
     const vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
-
+    console.log('field', field)
+    console.log('value', value)
     switch (field) {
       case 'id':
         products = await search.productById(value, vtexSegment, salesChannel)
@@ -405,7 +414,6 @@ export const queries = {
         products = await search.productBySku(value, vtexSegment, salesChannel)
         break
     }
-
     if (products.length > 0) {
       return head(products)
     }
@@ -447,7 +455,7 @@ export const queries = {
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated
     }
-
+    console.log('products result', result.products)
     return result.products
   },
 
@@ -520,14 +528,20 @@ export const queries = {
     delete biggyArgs.selectedFacets
 
     const result = await intelligentSearchApi.productSearch({...biggyArgs}, buildAttributePath(selectedFacets))
-
+    console.log('productSearch products.length', result.products.length)
+    const newProducts = removeGreyProducts(result)
+    const resultAux = {...result,
+      recordsFiltered: newProducts.length,
+      products: newProducts,
+    }
+    //console.log('resultAux', resultAux)
     if (ctx.vtex.tenant && !args.productOriginVtex) {
       ctx.translated = result.translated
     }
 
     return {
       searchState: args.searchState,
-      ...result
+      ...resultAux
     }
   },
 
@@ -607,8 +621,9 @@ export const queries = {
   },
   topSearches: async (_: any, __: any, ctx: Context) => {
     const { intelligentSearchApi } = ctx.clients
-
-    return await intelligentSearchApi.topSearches()
+    const aux = await intelligentSearchApi.topSearches()
+    console.log('topSearches', aux)
+    return aux
   },
   autocompleteSearchSuggestions: (
     _: any,
@@ -647,14 +662,22 @@ export const queries = {
     delete biggyArgs.selectedFacets
 
     const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets))
-
+    console.log('productSuggestions result', result)
     if (ctx.vtex.tenant && !args.productOriginVtex) {
       ctx.translated = result.translated
     }
 
+    console.log('productSuggestions products.length', result.products.length)
+    const newProducts = removeGreyProducts(result)
+    const resultAux = {...result,
+      recordsFiltered: newProducts.length,
+      products: newProducts,
+    }
+    // console.log('resultAux', resultAux)
+
     return {
-      ...result,
-      count: result.recordsFiltered
+      ...resultAux,
+      count: resultAux.recordsFiltered
     }
   },
   banners: (
@@ -682,3 +705,31 @@ export const queries = {
     return intelligentSearchApi.searchSuggestions({query: args.fullText})
   },
 }
+function removeGreyProducts(result: any) {
+  const newProducts: any[] = []
+  result?.products?.forEach((p: any) => {
+    // console.log('p', p)
+    const items = p.items
+    let available = false
+    items.forEach((i: any) => {
+      const sellers = i.sellers
+      sellers.forEach((s: any) => {
+        const quantity = s.commertialOffer.AvailableQuantity
+        /*console.log('item', i.name)
+        console.log('seller.sellerId', s.sellerId)
+        console.log('seller.sellerName', s.sellerName)
+        console.log('quantity', quantity)
+        console.log('available', available)
+        console.log('-----------')*/
+        if (!available && quantity > 0) {
+          available = true
+        }
+      })
+    })
+    if (available) {
+      newProducts.push(p)
+    }
+  })
+  return newProducts
+}
+
