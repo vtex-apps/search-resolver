@@ -356,40 +356,44 @@ export const queries = {
 
 
     const result = await intelligentSearchApi.facets({...biggyArgs, query: args.fullText}, buildAttributePath(selectedFacets))
-    result.facets.forEach((facet: any) => {
-      console.log('facet', facet)
-    })
-    /*const newFacets = result.facets.map((facet: any) => {
-      const newValues = facet.values.map((value: any) => {
 
-        return {
-          ...value,
-        }
-      })
-      return {...facet, values: newValues, quantity: newValues.quantity}
-    })
-    console.log('new facets', newFacets)
-    const newResult = {...result, facets: newFacets}
-    console.log('new result', newResult)*/
+    const { facets } = result
 
-    /*const productsResult = await intelligentSearchApi.productSearch({...biggyArgs, query: args.fullText}, buildAttributePath(selectedFacets))
-    console.log('productsResult.length', productsResult.products.length)
-    const productsId1 = productsResult.products.map((p: any) => {
-      return p.productId
-    })
-    console.log('productsId1', productsId1)
-    const newProducts = removeGreyProducts(productsResult)
-    console.log('newProducts.length', newProducts.length)
-    const productsId2 = newProducts.map((p: any) => {
-      return p.productId
-    })
-    console.log('productsId2', productsId2)
-*/
+    const productToGetTotal = await intelligentSearchApi.productSearch({...biggyArgs, from: 0, to: 1, query: ''}, buildAttributePath(selectedFacets))
+    const recordsTotal =  productToGetTotal.recordsFiltered
+
+    const allProducts = await intelligentSearchApi.productSearch({...biggyArgs, from: 0, to: recordsTotal, query: ''}, buildAttributePath(selectedFacets))
+    const greyProducts = removeBlueProducts(allProducts)
+    console.log('allProducts.products.length', allProducts.products.length)
+    console.log('greyProducts.length', greyProducts.length)
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated
     }
+    const newFacet: any[] = []
+    facets.forEach((facet: any) => {
+      if (facet.name === 'Brand'){
+        const facetAux = facet
+        facetAux.values.forEach((value: any) => {
+          if (value.name === 'Nestle') {
+            value.quantity -= 1
+            if (value.quantity === 0) {
+              facetAux.values = facetAux.values.filter((v: any) => v.name !== 'Nestle')
+              facetAux.quantity -= 1
+            }
+          }
+        })
+        newFacet.push(facetAux)
+      }else{
+        newFacet.push(facet)
+      }
+    })
+    // console.log('newFacet', newFacet)
+    /*newFacet.forEach((facet: any) => {
+      console.log('new facet', facet)
+    })*/
 
-    return result
+    const resultAux = {...result, facets: newFacet}
+    return resultAux
   },
 
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
@@ -544,23 +548,17 @@ export const queries = {
 
     // unnecessary field. It's is an object and breaks the @vtex/api cache
     delete biggyArgs.selectedFacets
-    console.log('biggyArgs', biggyArgs)
-
     const result = await intelligentSearchApi.productSearch({...biggyArgs}, buildAttributePath(selectedFacets))
 
     const recordsTotal =  result.recordsFiltered
 
     const resultToRemoveGreyTotal = await intelligentSearchApi.productSearch({...biggyArgs, from: 0, to: recordsTotal}, buildAttributePath(selectedFacets))
     const blueProductsLength = removeGreyProducts(resultToRemoveGreyTotal).length
-    console.log('blueProductsLength', blueProductsLength)
-
 
     const biggyArgsTo = biggyArgs.to > blueProductsLength ? blueProductsLength - 1 : biggyArgs.to
-    console.log('biggyArgsTo', biggyArgsTo)
     const resultToRemoveGrey = await intelligentSearchApi.productSearch({...biggyArgs, to: biggyArgsTo}, buildAttributePath(selectedFacets))
 
     const newProducts = removeGreyProducts(resultToRemoveGrey)
-    console.log('newProducts.length', newProducts.length)
 
     const resultAux = {...result,
       recordsFiltered: blueProductsLength,
@@ -653,9 +651,7 @@ export const queries = {
   },
   topSearches: async (_: any, __: any, ctx: Context) => {
     const { intelligentSearchApi } = ctx.clients
-    const aux = await intelligentSearchApi.topSearches()
-    console.log('topSearches', aux)
-    return aux
+    return await intelligentSearchApi.topSearches()
   },
   autocompleteSearchSuggestions: (
     _: any,
@@ -766,3 +762,25 @@ function removeGreyProducts(result: any) {
   return newProducts
 }
 
+function removeBlueProducts (result: any){
+  const newProducts: any[] = []
+
+  result?.products?.forEach((p: any) => {
+    //console.log('p', p)
+    const items = p.items
+    let available = false
+    items.forEach((i: any) => {
+      const sellers = i.sellers
+      sellers.forEach((s: any) => {
+        const quantity = s.commertialOffer.AvailableQuantity
+        if (!available && quantity > 0) {
+          available = true
+        }
+      })
+    })
+    if (!available) {
+      newProducts.push(p)
+    }
+  })
+  return newProducts
+}
