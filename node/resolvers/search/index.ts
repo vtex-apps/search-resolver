@@ -335,6 +335,76 @@ export const queries = {
       itemsReturned,
     }
   },
+  /*
+  facets: async (_: any, args: FacetsInput, ctx: any) => {
+    args = (await getCompatibilityArgsFromSelectedFacets(
+      ctx,
+      args
+    )) as FacetsInput
+
+    let { selectedFacets } = args
+
+    const {
+      clients: { intelligentSearchApi },
+    } = ctx
+
+    const biggyArgs: {[key:string]: any}  = {
+      ...args
+    }
+
+    // unnecessary field. It's is an object and breaks the @vtex/api cache
+    delete biggyArgs.selectedFacets
+
+    console.log('biggyArgs', biggyArgs)
+    console.log('args.fullText', args.fullText)
+    console.log('selectedFacets', (selectedFacets))
+
+    console.log('buildAttributePath selectedFacets', buildAttributePath(selectedFacets))
+
+    const result = await intelligentSearchApi.facets({...biggyArgs, query: args.fullText}, buildAttributePath(selectedFacets))
+
+    const { facets } = result
+    facets.forEach((facet: any) => {
+      console.log(facet)
+    })
+    const productToGetTotal = await intelligentSearchApi.productSearch({...biggyArgs, from: 0, to: 1, query: ''}, buildAttributePath(selectedFacets))
+    const recordsTotal =  productToGetTotal.recordsFiltered
+
+    const allProducts = await intelligentSearchApi.productSearch({...biggyArgs, from: 0, to: recordsTotal, query: ''}, buildAttributePath(selectedFacets))
+    const greyProducts = removeBlueProducts(allProducts)
+
+    console.log('allProducts.products.length', allProducts.products.length)
+    console.log('greyProducts.length', greyProducts.length)
+    if (ctx.vtex.tenant) {
+      ctx.translated = result.translated
+    }
+
+    const newFacet: any[] = []
+    facets.forEach((facet: any) => {
+      if (facet.name === 'Brand'){
+        const facetAux = facet
+        facetAux.values.forEach((value: any) => {
+          if (value.name === 'Nestle') {
+            value.quantity -= 1
+            if (value.quantity === 0) {
+              facetAux.values = facetAux.values.filter((v: any) => v.name !== 'Nestle')
+              facetAux.quantity -= 1
+            }
+          }
+        })
+        newFacet.push(facetAux)
+      }else{
+        newFacet.push(facet)
+      }
+    })
+    // console.log('newFacet', newFacet)
+    newFacet.forEach((facet: any) => {
+      console.log('new facet', facet)
+    })
+
+    const resultAux = {...result, facets: newFacet}
+    return resultAux
+  },*/
   facets: async (_: any, args: FacetsInput, ctx: any) => {
     args = (await getCompatibilityArgsFromSelectedFacets(
       ctx,
@@ -357,45 +427,12 @@ export const queries = {
 
     const result = await intelligentSearchApi.facets({...biggyArgs, query: args.fullText}, buildAttributePath(selectedFacets))
 
-    const { facets } = result
-
-    const productToGetTotal = await intelligentSearchApi.productSearch({...biggyArgs, from: 0, to: 1, query: ''}, buildAttributePath(selectedFacets))
-    const recordsTotal =  productToGetTotal.recordsFiltered
-
-    const allProducts = await intelligentSearchApi.productSearch({...biggyArgs, from: 0, to: recordsTotal, query: ''}, buildAttributePath(selectedFacets))
-    const greyProducts = removeBlueProducts(allProducts)
-    console.log('allProducts.products.length', allProducts.products.length)
-    console.log('greyProducts.length', greyProducts.length)
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated
     }
-    const newFacet: any[] = []
-    facets.forEach((facet: any) => {
-      if (facet.name === 'Brand'){
-        const facetAux = facet
-        facetAux.values.forEach((value: any) => {
-          if (value.name === 'Nestle') {
-            value.quantity -= 1
-            if (value.quantity === 0) {
-              facetAux.values = facetAux.values.filter((v: any) => v.name !== 'Nestle')
-              facetAux.quantity -= 1
-            }
-          }
-        })
-        newFacet.push(facetAux)
-      }else{
-        newFacet.push(facet)
-      }
-    })
-    // console.log('newFacet', newFacet)
-    /*newFacet.forEach((facet: any) => {
-      console.log('new facet', facet)
-    })*/
 
-    const resultAux = {...result, facets: newFacet}
-    return resultAux
+    return result
   },
-
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
     const {
       clients: { search },
@@ -477,7 +514,6 @@ export const queries = {
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated
     }
-    console.log('products result', result.products)
     return result.products
   },
 
@@ -564,7 +600,6 @@ export const queries = {
       recordsFiltered: blueProductsLength,
       products: newProducts,
     }
-    //console.log('resultAux', resultAux)
     if (ctx.vtex.tenant && !args.productOriginVtex) {
       ctx.translated = result.translated
     }
@@ -690,18 +725,15 @@ export const queries = {
     delete biggyArgs.selectedFacets
 
     const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets))
-    console.log('productSuggestions result', result)
     if (ctx.vtex.tenant && !args.productOriginVtex) {
       ctx.translated = result.translated
     }
 
-    console.log('productSuggestions products.length', result.products.length)
     const newProducts = removeGreyProducts(result)
     const resultAux = {...result,
       recordsFiltered: newProducts.length,
       products: newProducts,
     }
-    // console.log('resultAux', resultAux)
 
     return {
       ...resultAux,
@@ -761,12 +793,11 @@ function removeGreyProducts(result: any) {
   })
   return newProducts
 }
-
+/*
 function removeBlueProducts (result: any){
   const newProducts: any[] = []
 
   result?.products?.forEach((p: any) => {
-    //console.log('p', p)
     const items = p.items
     let available = false
     items.forEach((i: any) => {
@@ -784,3 +815,4 @@ function removeBlueProducts (result: any){
   })
   return newProducts
 }
+*/
