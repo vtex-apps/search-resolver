@@ -2,6 +2,7 @@ import {
   NotFoundError,
   UserInputError,
   createMessagesLoader,
+  hrToMillis,
 } from '@vtex/api'
 import { head, isEmpty, isNil, test, pathOr } from 'ramda'
 
@@ -336,6 +337,8 @@ export const queries = {
     }
   },
   facets: async (_: any, args: FacetsInput, ctx: any) => {
+    const startFacetsQuery = process.hrtime()
+
     args = (await getCompatibilityArgsFromSelectedFacets(
       ctx,
       args
@@ -360,6 +363,8 @@ export const queries = {
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated
     }
+
+    metrics.batchMetric('facets-query', hrToMillis(process.hrtime(startFacetsQuery)))
 
     return result
   },
@@ -430,6 +435,8 @@ export const queries = {
       )
     }
 
+    const startProductsQuery = process.hrtime()
+
     const selectedFacets: SelectedFacet[] = buildSelectedFacets(args)
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
@@ -447,6 +454,8 @@ export const queries = {
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated
     }
+
+    metrics.batchMetric('products-query', hrToMillis(process.hrtime(startProductsQuery)))
 
     return result.products
   },
@@ -488,6 +497,8 @@ export const queries = {
   },
 
   productSearch: async (_: any, args: ProductSearchInput, ctx: any) => {
+    const startProductSearch = process.hrtime()
+
     args = (await getCompatibilityArgsFromSelectedFacets(
       ctx,
       args
@@ -525,6 +536,8 @@ export const queries = {
     if (ctx.vtex.tenant && !args.productOriginVtex) {
       ctx.translated = result.translated
     }
+
+    metrics.batchMetric('product-search-query', hrToMillis(process.hrtime(startProductSearch)))
 
     return {
       searchState: args.searchState,
@@ -607,27 +620,37 @@ export const queries = {
     return getSearchMetaData(_, compatibilityArgs, ctx)
   },
   topSearches: async (_: any, __: any, ctx: Context) => {
+    const startTopSearches = process.hrtime()
     const { intelligentSearchApi } = ctx.clients
 
-    return await intelligentSearchApi.topSearches()
+    const result = await intelligentSearchApi.topSearches()
+
+    metrics.batchMetric('top-searches-query', hrToMillis(process.hrtime(startTopSearches)))
+
+    return result
   },
-  autocompleteSearchSuggestions: (
+  autocompleteSearchSuggestions: async (
     _: any,
     args: { fullText: string },
     ctx: Context
   ) => {
+    const startAutocompleteSuggestions = process.hrtime()
     const { intelligentSearchApi } = ctx.clients
 
-    return intelligentSearchApi.autocompleteSearchSuggestions({
+    const result = await intelligentSearchApi.autocompleteSearchSuggestions({
       query: args.fullText,
       ...args
     })
+
+    metrics.batchMetric('autocomplete-search-suggestions-query', hrToMillis(process.hrtime(startAutocompleteSuggestions)))
+    return result
   },
   productSuggestions: async (
     _: any,
     args: SuggestionProductsArgs,
     ctx: Context
   ) => {
+    const startProductSuggestions = process.hrtime()
     const {
       clients: { intelligentSearchApi },
     } = ctx
@@ -654,33 +677,47 @@ export const queries = {
       ctx.translated = result.translated
     }
 
+    metrics.batchMetric('product-suggestions-query', hrToMillis(process.hrtime(startProductSuggestions)))
+
     return {
       ...result,
       count: result.recordsFiltered
     }
   },
-  banners: (
+  banners: async (
     _: any,
     args: { fullText: string; selectedFacets: SelectedFacet[] },
     ctx: Context
   ) => {
+    const startBannersQuery = process.hrtime()
     const { intelligentSearchApi } = ctx.clients
 
-    return intelligentSearchApi.banners({
+    const result = await intelligentSearchApi.banners({
       query: args.fullText,
     }, buildAttributePath(args.selectedFacets))
+
+    metrics.batchMetric('banners-query', hrToMillis(process.hrtime(startBannersQuery)))
+    return result
   },
-  correction: (_: any, args: { fullText: string }, ctx: Context) => {
+  correction: async (_: any, args: { fullText: string }, ctx: Context) => {
+    const startCorrectionQuery = process.hrtime()
     const { intelligentSearchApi } = ctx.clients
 
-    return intelligentSearchApi.correction({
+    const result = await intelligentSearchApi.correction({
       query: args.fullText,
       ...args
     })
+
+    metrics.batchMetric('correction-query', hrToMillis(process.hrtime(startCorrectionQuery)))
+    return result
   },
-  searchSuggestions: (_: any, args: { fullText: string }, ctx: Context) => {
+  searchSuggestions: async (_: any, args: { fullText: string }, ctx: Context) => {
+    const startSuggestionsQuery = process.hrtime()
     const { intelligentSearchApi } = ctx.clients
 
-    return intelligentSearchApi.searchSuggestions({query: args.fullText})
+    const result = await intelligentSearchApi.searchSuggestions({query: args.fullText})
+
+    metrics.batchMetric('search-suggestions-query', hrToMillis(process.hrtime(startSuggestionsQuery)))
+    return result
   },
 }
