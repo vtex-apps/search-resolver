@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Modify clients to avoid modifying the rest of the code with the objective of stop using SOLR search engine
+
+Migrate from
+https://developers.vtex.com/vtex-rest-api/reference/search-api-overview
+To
+https://developers.vtex.com/vtex-rest-api/reference/intelligent-search-api-overview
+
+All the modifications are done on this file:
+https://github.com/vtex-apps/search-resolver/blob/master/node/clients/search.ts
+
+
 
 ## [0.16.13] - 2022-02-14
 

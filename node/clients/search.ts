@@ -5,6 +5,7 @@ import {
   RequestConfig,
   SegmentData,
   CacheType,
+  JanusClient,
 } from '@vtex/api'
 import { stringify } from 'qs'
 
@@ -37,6 +38,53 @@ interface SearchPageTypeResponse {
   url: string
   title: string | null
   metaTagDescription: string | null
+}
+
+export class IntelligentSearch extends JanusClient {
+  private baseUrl = '_v/api/intelligent-search'
+
+  constructor(context: IOContext, options?: InstanceOptions) {
+    super(context, {
+      ...options,
+      headers: {
+        ...options?.headers,
+        VtexIdclientAutCookie:
+          context.adminUserAuthToken ?? context.authToken ?? '',
+        'x-vtex-user-agent': context.userAgent,
+      },
+    })
+  }
+
+  public async autocomplete(
+    query: string
+  ): Promise<string> {
+    const productSearchResponse = this.http.get(
+      `/${this.baseUrl}/product_search?query=${query}`,
+      { metric: 'intelligent-search-autocomplete' }
+    )
+
+    let normalizedProductSearchResponse = productSearchResponse
+    // do some work to transform
+    // this: https://developers.vtex.com/vtex-rest-api/reference/get_product-search-facets
+    // to this: https://developers.vtex.com/vtex-rest-api/reference/autocomplete
+    
+    return normalizedProductSearchResponse
+  }
+
+  public async productsRaw (args: SearchArgs) {
+    const productSearchResponse = this.http.get(
+      `/${this.baseUrl}/product_search?query=${(args.query || args.fullText || '').trim()}`,
+      { metric: 'intelligent-search-autocomplete' }
+    )
+    let normalizedProductSearchResponse = productSearchResponse
+    // review productSearchUrl methods and replicate the parameters to match intelligent_search facets
+
+    return normalizedProductSearchResponse
+  }
+
+  public async products (args: SearchArgs) {
+
+  }
 }
 
 /** Search API
