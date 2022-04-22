@@ -71,6 +71,42 @@ export class IntelligentSearch extends JanusClient {
     return normalizedProductSearchResponse
   }
 
+  public async product(slug: String) {
+
+  }
+
+  public async productByEan() {
+
+  }
+
+  public async productsByEan() {
+
+  }
+
+  public async productById() {
+
+  }
+
+  public async productsById() {
+
+  }
+
+  public async productByReference() {
+
+  }
+
+  public async productsByReference() {
+
+  }
+
+  public async productBySku() {
+
+  }
+
+  public async productsBySku() {
+
+  }
+
   public async productsRaw (args: SearchArgs) {
     const productSearchResponse = this.http.get(
       `/${this.baseUrl}/product_search?query=${(args.query || args.fullText || '').trim()}`,
@@ -83,7 +119,7 @@ export class IntelligentSearch extends JanusClient {
   }
 
   public async products (args: SearchArgs) {
-
+    this.productsRaw(args)
   }
 }
 
