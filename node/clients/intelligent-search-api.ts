@@ -105,6 +105,7 @@ export class IntelligentSearchApi extends ExternalClient {
         bgy_leap: leap ? true : undefined,
         ...parseState(searchState),
         ...params,
+        simulationBehavior: false,
       },
       metric: 'product-search'
     })

@@ -18,11 +18,6 @@ interface AutocompleteArgs {
   searchTerm: string
 }
 
-enum SimulationBehavior {
-  SKIP = 'skip',
-  DEFAULT = 'default',
-}
-
 const inflightKey = ({ baseURL, url, params, headers }: RequestConfig) => {
   return (
     baseURL! +
@@ -416,7 +411,6 @@ export class Search extends AppClient {
     to = 9,
     map = '',
     hideUnavailableItems = false,
-    simulationBehavior = SimulationBehavior.DEFAULT,
     completeSpecifications = true,
   }: SearchArgs) => {
     const sanitizedQuery = encodeURIComponent(
@@ -454,9 +448,9 @@ export class Search extends AppClient {
     if (to != null && to > -1) {
       url += `&_to=${to}`
     }
-    if (simulationBehavior === SimulationBehavior.SKIP) {
-      url += `&simulation=false`
-    }
+
+    url += `&simulation=false`
+
     if (completeSpecifications) {
       url = this.addCompleteSpecifications(url)
     }
