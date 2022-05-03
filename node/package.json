@@ -45,7 +45,7 @@
     "@types/koa": "^2.13.4",
     "@types/node": "^12.0.0",
     "@types/qs": "^6.5.1",
-    "@types/ramda": "^0.26.21",
+    "@types/ramda": "^0.28.12",
     "@vtex/api": "6.45.6",
     "@vtex/tsconfig": "^0.6.0",
     "eslint": "^5.15.3",
