@@ -19,6 +19,7 @@
     "vtex.intelligent-search-api": "0.x"
   },
   "settingsSchema": {
+    "title": "Intelligent Search Resolver",
     "type": "object",
     "properties": {
       "slugifyLinks": {
