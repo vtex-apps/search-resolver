@@ -780,10 +780,10 @@
     lodash.unescape "4.0.1"
     semver "5.5.0"
 
-"@vtex/api@6.45.6":
-  version "6.45.6"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.45.6.tgz#e5f08476d7c76f26baa1c040666d1364bdd6bc35"
-  integrity sha512-9pDiUxcUzq8RZa9yBex4C8dcAHXBRGAZokvHJ6sykrojq6mJxs+rUTE28TPeeQxwvvKsvrdpsfCUAYQ+UDz+zA==
+"@vtex/api@6.45.12":
+  version "6.45.12"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.45.12.tgz#b13c04398b12f576263ea823369f09c970d57479"
+  integrity sha512-SVLKo+Q/TxQy+1UKzH8GswTI3F2OCRCLfgaNQOrVAVdbM6Ci4wzTeX8j/S4Q1aEEnqBFlH/wVpHf8I6NBa+g9A==
   dependencies:
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"
@@ -1376,6 +1376,11 @@ camelcase@^5.0.0, camelcase@^5.3.1:
   version "5.3.1"
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-5.3.1.tgz#e3c9b31569e106811df242f715725a1f4c494320"
   integrity sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==
+
+camelcase@^6.3.0:
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-6.3.0.tgz#5685b95eb209ac9c0c177467778c9c84df58ba9a"
+  integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 capture-exit@^2.0.0:
   version "2.0.0"
@@ -4663,6 +4668,7 @@ static-extend@^0.1.1:
 
 stats-lite@vtex/node-stats-lite#dist:
   version "2.2.0"
+  uid "1b0d39cc41ef7aaecfd541191f877887a2044797"
   resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/1b0d39cc41ef7aaecfd541191f877887a2044797"
   dependencies:
     isnumber "~1.0.0"
