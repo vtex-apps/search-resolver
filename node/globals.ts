@@ -23,11 +23,6 @@ declare global {
     messagesBindingLanguage?: MessagesLoaderV2
   }
 
-  interface StaleRevalidateData<T>{
-    ttl: Date
-    data: T
-  }
-
   interface CustomContext extends ParamsContext {
     cookie: string
     originalPath: string

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import * as TypeMoq from 'typemoq'
-import { VBase, IOContext } from "@vtex/api"
+import { IOContext } from "@vtex/api"
 import { Search } from '../../clients/search'
 import { mountCompatibilityQuery } from './newURLs'
 import { getCompatibilityArgs } from '.'
@@ -11,35 +11,11 @@ import { Clients } from '../../clients'
 const contextMock = TypeMoq.Mock.ofType<IOContext>()
 const categoryTreeResponseMock = TypeMoq.Mock.ofType<CategoryTreeResponse>()
 const facetsMock = TypeMoq.Mock.ofType<SearchFacets>()
-const vbaseTypeMock = TypeMoq.Mock.ofInstance(VBase)
 const state = TypeMoq.Mock.ofType<State>()
 const customContext = TypeMoq.Mock.ofType<CustomContext>()
 
 describe('Search new URLs dicovery', () => {
   let context: any
-
-  class VBaseMock extends vbaseTypeMock.object {
-    private jsonData: any
-
-    public constructor() {
-      super(contextMock.object)
-      this.jsonData = {}
-    }
-
-    public getJSON = async <T>(bucket: string, file: string, nullOrUndefined?: boolean | undefined): Promise<T> => {
-      if (!this.jsonData[bucket]) {
-        return (nullOrUndefined ? null : {}) as T
-      }
-      return Promise.resolve(this.jsonData[bucket][file] as T)
-    }
-
-    public saveJSON = async <T>(bucket: string, file: string, data: T): Promise<void> => {
-      if (!this.jsonData[bucket]) {
-        this.jsonData[bucket] = {}
-      }
-      this.jsonData[bucket][file] = data
-    }
-  }
 
   const search = class SearchMock extends Search {
     private categoriesResponse: CategoryTreeResponse[]
@@ -68,11 +44,7 @@ describe('Search new URLs dicovery', () => {
 
   beforeEach(() => {
     // tslint:disable-next-line: max-classes-per-file
-    const ClientsImpl = class ClientsMock extends Clients {
-      public get vbase() {
-        return this.getOrSet('vbase', VBaseMock)
-      }
-    }
+    const ClientsImpl = class ClientsMock extends Clients {}
 
     context = {
       clients: new ClientsImpl({}, contextMock.object),
@@ -104,9 +76,8 @@ describe('Search new URLs dicovery', () => {
       ...facetsMock.object
     }
 
-    const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, {}, facets)
-    const result = await mountCompatibilityQuery({vbase: vbaseMock, search: searchMock, args})
+    const result = await mountCompatibilityQuery({search: searchMock, args})
     expect(result).toStrictEqual({query: 'category', map: 'c'})
   })
 
@@ -135,9 +106,8 @@ describe('Search new URLs dicovery', () => {
       ...facetsMock.object
     }
 
-    const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
-    const result = await mountCompatibilityQuery({vbase: vbaseMock, search: searchMock, args})
+    const result = await mountCompatibilityQuery({search: searchMock, args})
     expect(result).toStrictEqual({query: 'department/category/subcategory', map: 'c,c,c'})
   })
 
@@ -163,9 +133,8 @@ describe('Search new URLs dicovery', () => {
       ...facetsMock.object
     }
 
-    const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
-    const result = await mountCompatibilityQuery({vbase: vbaseMock, search: searchMock, args})
+    const result = await mountCompatibilityQuery({search: searchMock, args})
     expect(result).toStrictEqual({query: 'category/brand', map: 'c,b'})
   })
 
@@ -184,9 +153,8 @@ describe('Search new URLs dicovery', () => {
       ...facetsMock.object
     }
 
-    const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
-    const result = await mountCompatibilityQuery({vbase: vbaseMock, search: searchMock, args})
+    const result = await mountCompatibilityQuery({search: searchMock, args})
     expect(result).toStrictEqual({query: 'collection', map: 'productClusterIds'})
   })
 
@@ -205,9 +173,8 @@ describe('Search new URLs dicovery', () => {
       ...facetsMock.object
     }
 
-    const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
-    const result = await mountCompatibilityQuery({vbase: vbaseMock, search: searchMock, args})
+    const result = await mountCompatibilityQuery({search: searchMock, args})
     expect(result).toStrictEqual({query: 'filterxpto', map: 'specificationFilter_0'})
   })
 
@@ -255,9 +222,8 @@ describe('Search new URLs dicovery', () => {
       ...facetsMock.object
     }
 
-    const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
-    const result = await mountCompatibilityQuery({vbase: vbaseMock, search: searchMock, args})
+    const result = await mountCompatibilityQuery({search: searchMock, args})
     expect(result).toStrictEqual({query: 'department/1/2/3', map: 'c,specificationFilter_1,specificationFilter_2,specificationFilter_3'})
   })
   
@@ -291,9 +257,8 @@ describe('Search new URLs dicovery', () => {
       ...facetsMock.object
     }
 
-    const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
-    const result = await mountCompatibilityQuery({vbase: vbaseMock, search: searchMock, args})
+    const result = await mountCompatibilityQuery({search: searchMock, args})
     expect(result).toStrictEqual({query: 'department/1/brand', map: 'c,specificationFilter_1,b'})
   })
 

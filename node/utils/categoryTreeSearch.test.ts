@@ -1,6 +1,6 @@
 import * as TypeMoq from 'typemoq'
 import { CategoryTreeSegmentsFinder } from "./CategoryTreeSegmentsFinder"
-import { VBase, IOContext } from "@vtex/api"
+import { IOContext } from "@vtex/api"
 import { Search } from "../clients/search"
 
 /*  CategoryTree 
@@ -14,7 +14,6 @@ import { Search } from "../clients/search"
  */
 
 const context = TypeMoq.Mock.ofType<IOContext>()
-const vbaseMock = TypeMoq.Mock.ofInstance(VBase)
 const searchMock = TypeMoq.Mock.ofInstance(Search)
 
 const c5 = {'c5': '5'}
@@ -34,7 +33,7 @@ const childrenTree = {
   "5": {}
 } as any
 
-const clients = {vbase: new vbaseMock.object(context.object), search: new searchMock.object(context.object) }
+const clients = { search: new searchMock.object(context.object) }
 
 const toPair = (categories: any[]) => 
   categories.map(c => {
@@ -52,11 +51,6 @@ describe('Category Tree Search tests', () => {
     protected lazyFetchChildren = async (id: number) => {
       const children = childrenTree[id.toString()]
       return children
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected staleWhileRevalidate = async <T>(_: string, __: string, func: (params?: any) => Promise<T>, params?: any) => {
-      return func(params)
     }
 
     protected getCategoryTreeRoot = () => {

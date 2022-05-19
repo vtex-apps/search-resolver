@@ -1,38 +1,33 @@
 import { Search } from '../../clients/search'
-import { VBase } from '@vtex/api'
 import {
-  SEARCH_URLS_BUCKET,
   CATEGORY_SEGMENT,
-  FACETS_BUCKET,
   FULL_TEXT_SEGMENT,
 } from './constants'
 import { CategoryTreeSegmentsFinder, CategoryIdNamePair } from '../../utils/CategoryTreeSegmentsFinder'
-import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
 import { searchSlugify } from '../../utils/slug'
 import { PATH_SEPARATOR, MAP_SEPARATOR } from '../stats/constants'
 
 export const hasFacetsBadArgs = ({ query, map }: QueryArgs) => !query || !map
 
-export const toCompatibilityArgs = async (vbase:VBase, search: Search, args: QueryArgs): Promise<QueryArgs|undefined> => {
+export const toCompatibilityArgs = async (search: Search, args: QueryArgs): Promise<QueryArgs|undefined> => {
   const {query} = args
   if(!query){
     return
   }
-  const { query: compatibilityQuery, map: compatibilityMap } = await staleFromVBaseWhileRevalidate(
-    vbase, SEARCH_URLS_BUCKET, query, mountCompatibilityQuery, {vbase, search, args} )
+  const { query: compatibilityQuery, map: compatibilityMap } = await mountCompatibilityQuery({search, args})
   return { query: compatibilityQuery, map: compatibilityMap }
 }
 
-export const mountCompatibilityQuery = async (params: {vbase: VBase, search: Search, args: any}) => {
-  const {vbase, search, args} = params
+export const mountCompatibilityQuery = async (params: {search: Search, args: any}) => {
+  const {search, args} = params
   const { query, map } = args
   const querySegments = query.startsWith(PATH_SEPARATOR)? query.split(PATH_SEPARATOR).slice(1): query.split(PATH_SEPARATOR)
 
-  const categoryTreeFinder = new CategoryTreeSegmentsFinder({vbase, search}, querySegments)
+  const categoryTreeFinder = new CategoryTreeSegmentsFinder({search}, querySegments)
   const categories = await categoryTreeFinder.find()
   const facetsQuery = getFacetsQueryFromCategories(categories)
   
-  const fieldsLookup = facetsQuery? await getCategoryFilters(vbase, search, facetsQuery): {}
+  const fieldsLookup = facetsQuery? await getCategoryFilters(search, facetsQuery): {}
   const mapSegments = fillCategoriesMapSegments(categories, map)
 
   const compatMapSegments = []
@@ -81,9 +76,8 @@ const getFacetsQueryFromCategories = (categories: (CategoryIdNamePair|null)[]) =
   return !hasFacetsBadArgs(queryArgs)? `${queryArgs.query}?map=${queryArgs.map}`: null
 }
 
-const getCategoryFilters = async (vbase: VBase, search: Search, query: string) => {
-  const facets = await staleFromVBaseWhileRevalidate<SearchFacets>(
-    vbase, FACETS_BUCKET, query, search.facets, query)
+const getCategoryFilters = async (search: Search, query: string) => {
+  const facets = await search.facets(query)
   return normalizedFiltersFromFacets(facets)
 }
 

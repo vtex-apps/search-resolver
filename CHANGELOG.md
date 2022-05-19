@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed
+- VBase cache from search queries.
+
 ## [1.61.5] - 2022-05-16
 
 ### Fixed

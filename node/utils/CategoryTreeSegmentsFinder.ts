@@ -1,10 +1,6 @@
 import { searchSlugify } from './slug'
-import { VBase } from '@vtex/api'
 import { Search } from '../clients/search'
-import { CATEGORY_TREE_CHILDREN_BUCKET, CATEGORY_TREE_ROOT_BUCKET, CATEGORY_TREE_ROOT_PATH } from '../resolvers/search/constants'
-import { staleFromVBaseWhileRevalidate } from './vbase'
 interface Clients{
-  vbase: VBase
   search: Search
 }
 
@@ -49,19 +45,6 @@ export class CategoryTreeSegmentsFinder {
     return result.concat(categorySegmentsFromChildren)
   }
 
-  /**
-   * Fetches a category children from vbase or search
-   * clients: {vbase: VBase, search: Search}
-   */
-  protected lazyFetchChildren = async (id: number) => {
-    const { search } = this.clients
-    return await this.staleWhileRevalidate<Record<string, string>>(CATEGORY_TREE_CHILDREN_BUCKET, id.toString(), this.fetchChildrenFromSearch, { search, id })
-  }
-
-  protected staleWhileRevalidate = async <T>(bucket: string, path: string,validateFunction: (params?: any) => Promise<T>, params?: any) => {
-    return await staleFromVBaseWhileRevalidate<T>(this.clients.vbase, bucket, path, validateFunction, params)
-  }
-
   protected getCategoryTreeRoot = async () => {
     const categoryTree = await this.clients.search.categories(0)
     return categoryTree.reduce((acc, categoryTreeNode) => {
@@ -77,8 +60,7 @@ export class CategoryTreeSegmentsFinder {
   }
 
   private initCategoryTreeRoot = async () => {
-    this.categoryTreeRoot = await this.staleWhileRevalidate<Record<string, LazyCategoryTreeNode>>(
-      CATEGORY_TREE_ROOT_BUCKET, CATEGORY_TREE_ROOT_PATH, this.getCategoryTreeRoot)
+    this.categoryTreeRoot = await this.getCategoryTreeRoot()
   }
   
   // Returns {id: categoryId, name: categorySlug }
@@ -104,7 +86,8 @@ export class CategoryTreeSegmentsFinder {
   }
 
   private getChildren = async (id: number) => {
-    return await this.lazyFetchChildren(id)
+    const { search } = this.clients
+    return await this.fetchChildrenFromSearch({ search, id })
   }
   
   // Returns { categorySlug: categoryId }
