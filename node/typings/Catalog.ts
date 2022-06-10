@@ -219,6 +219,9 @@ interface CommertialOffer {
   }[]
   GetInfoErrorMessage: any | null
   CacheVersionUsedToCallCheckout: string
+  // Supports the Intelligent Search API which 
+  // uses the same name from the simulation
+  discountHighlights: any[]
 }
 
 interface Seller {
