@@ -127,7 +127,9 @@ export const resolvers = {
 
       return filteredGiftProducts
     },
-    discountHighlights: propOr([], 'DiscountHighLight'),
+    discountHighlights: (offer: CommertialOffer) => {
+      return offer.DiscountHighLight || offer.discountHighlights || []
+    },
     spotPrice: (offer: CommertialOffer) => {
       if (offer.spotPrice) {
         return offer.spotPrice
