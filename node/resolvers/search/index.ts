@@ -639,7 +639,7 @@ export const queries = {
       ...args,
       query: args.fullText,
       from: 0,
-      to: 4,
+      to: args.count ? args.count - 1 : 4,
       sort: convertOrderBy(args.orderBy),
       allowRedirect: false, // When there is a redirect, no product is returned.
       ...workspaceSearchParams,
