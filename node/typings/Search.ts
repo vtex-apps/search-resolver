@@ -71,6 +71,7 @@ interface SuggestionProductsArgs {
   workspaceSearchParams?: object
   segmentedFacets?: SelectedFacet[]
   orderBy?: string
+  count?: number
 }
 
 interface SuggestionSearchesArgs {
