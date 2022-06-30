@@ -13,24 +13,24 @@ export enum IndexingType {
  * @returns {string} Biggy's sort.
  */
 export const convertOrderBy = (orderBy?: string | null): string => {
-  switch (orderBy) {
-    case 'OrderByPriceDESC':
+  switch (orderBy?.toLowerCase()) {
+    case 'orderbypricedesc':
       return 'price:desc'
-    case 'OrderByPriceASC':
+    case 'orderbypriceasc':
       return 'price:asc'
-    case 'OrderByTopSaleDESC':
+    case 'orderbytopsaledesc':
       return 'orders:desc'
-    case 'OrderByReviewRateDESC':
+    case 'orderbyreviewratedesc':
       return '' // TODO: Not Supported
-    case 'OrderByNameDESC':
+    case 'orderbynamedesc':
       return 'name:desc'
-    case 'OrderByNameASC':
+    case 'orderbynameasc':
       return 'name:asc'
-    case 'OrderByReleaseDateDESC':
+    case 'orderbyreleasedatedesc':
       return 'release:desc'
-    case 'OrderByBestDiscountDESC':
+    case 'orderbybestdiscountdesc':
       return 'discount:desc'
-    case 'OrderByScoreDESC':
+    case 'orderbyscoredesc':
       return ''
     default:
       return orderBy || ''
