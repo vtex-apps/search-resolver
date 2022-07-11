@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.62.1] - 2022-07-11
+
 ### Changed
 - Support lowercase sorting options.
 
