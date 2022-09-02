@@ -15,7 +15,6 @@
     "vtex.search-graphql": "0.x",
     "vtex.rewriter": "1.x",
     "vtex.sae-analytics": "2.x",
-    "vtex.store-graphql": "2.x",
     "vtex.intelligent-search-api": "0.x"
   },
   "settingsSchema": {
@@ -67,9 +66,6 @@
     },
     {
       "name": "vtex.messages:graphql-translate-messages"
-    },
-    {
-      "name": "vtex.store-graphql:resolve-graphql"
     }
   ],
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
