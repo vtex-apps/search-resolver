@@ -142,7 +142,7 @@ export class Search extends AppClient {
       this.addCompleteSpecifications(
         this.addSalesChannel(
           `/pub/products/search?${ids
-            .map(id => `fq=alternateIds_Ean:${id}`)
+            ?.map(id => `fq=alternateIds_Ean:${id}`)
             .join('&')}`,
           salesChannel
         )
@@ -184,7 +184,7 @@ export class Search extends AppClient {
       this.addCompleteSpecifications(
         this.addSalesChannel(
           `/pub/products/search?${ids
-            .map(id => `fq=productId:${id}`)
+            ?.map(id => `fq=productId:${id}`)
             .join('&')}`,
           salesChannel
         )
@@ -222,7 +222,7 @@ export class Search extends AppClient {
       this.addCompleteSpecifications(
         this.addSalesChannel(
           `/pub/products/search?${ids
-            .map(id => `fq=alternateIds_RefId:${id}`)
+            ?.map(id => `fq=alternateIds_RefId:${id}`)
             .join('&')}`,
           salesChannel
         )
@@ -260,7 +260,7 @@ export class Search extends AppClient {
       this.addCompleteSpecifications(
         this.addSalesChannel(
           `/pub/products/search?${skuIds
-            .map(skuId => `fq=skuId:${skuId}`)
+            ?.map(skuId => `fq=skuId:${skuId}`)
             .join('&')}`,
           salesChannel
         )
@@ -271,31 +271,14 @@ export class Search extends AppClient {
       }
     )
 
-  public productsRaw = (args: SearchArgs) => {
-    return this.getRaw<SearchProduct[]>(this.productSearchUrl(args), {
-      metric: 'search-products',
-    })
-  }
-
   public products = (args: SearchArgs) => {
     return this.get<SearchProduct[]>(this.productSearchUrl(args), {
       metric: 'search-products',
     })
   }
 
-  public productsQuantity = async (args: SearchArgs) => {
-    const {
-      headers: { resources },
-    } = await this.getRaw(this.productSearchUrl(args))
-    const quantity = resources.split('/')[1]
-    return parseInt(quantity, 10)
-  }
-
   public brands = () =>
     this.get<Brand[]>('/pub/brand/list', { metric: 'search-brands' })
-
-  public brand = (id: number) =>
-    this.get<Brand[]>(`/pub/brand/${id}`, { metric: 'search-brands' })
 
   public categories = (treeLevel: number) =>
     this.get<CategoryTreeResponse[]>(`/pub/category/tree/${treeLevel}/`, {
@@ -361,47 +344,6 @@ export class Search extends AppClient {
     config.inflightKey = inflightKey
 
     return this.http.get<T>(`${this.basePath}${url}`, config)
-  }
-
-  public getField = (id: number) =>
-    this.get<FieldResponseAPI>(`/pub/specification/fieldGet/${id}`, {
-      metric: 'catalog-get-field-by-id',
-    })
-
-  public getFieldValues = (id: number) => {
-    try {
-      return this.get<FieldValuesResponseAPI>(
-        `/pub/specification/fieldvalue/${id}`,
-        {
-          metric: 'catalog-get-field-value-by-id',
-        }
-      )
-    } catch {
-      return []
-    }
-  }
-
-  private getRaw = <T = any>(url: string, config: RequestConfig = {}) => {
-    const segmentData: SegmentData | undefined = (this
-      .context! as CustomIOContext).segment
-    const { channel: salesChannel = '' } = segmentData || {}
-
-    config.params = {
-      ...config.params,
-      ...(!!salesChannel && { sc: salesChannel }),
-    }
-    config.inflightKey = inflightKey
-
-    return this.http.getRaw<T>(`${this.basePath}${url}`, config)
-  }
-
-  public specificationsByCategoryId = (categoryId: number) => {
-    return this.get<FieldTreeResponseAPI[]>(
-      `/pub/specification/field/listByCategoryId/${categoryId}`,
-      {
-        metric: 'catalog-get-field-value-by-id',
-      }
-    )
   }
 
   private productSearchUrl = ({

@@ -248,18 +248,6 @@ export const resolvers = {
       'productId'
     ),
 
-    linkText: async ({ productId, linkText }: SearchProduct, _: unknown, ctx: Context) => {
-      const { clients: { rewriter, apps }, vtex: { binding } } = ctx
-      const settings: AppSettings = await apps.getAppSettings(APP_NAME)
-
-      if (!shouldTranslateToBinding(ctx, true)) {
-        return settings.slugifyLinks ? Slugify(linkText) : linkText
-      }
-      const route = await rewriter.getRoute(productId, 'product', binding!.id!)
-      const pathname = urlToSlug(route) ?? linkText
-      return settings.slugifyLinks ? Slugify(pathname) : pathname
-    },
-
     specificationGroups: async (product: SearchProduct, _: unknown, ctx: Context) => {
       if (product.origin === 'intelligent-search') {
         return product.specificationGroups
