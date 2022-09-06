@@ -3,12 +3,9 @@ import { compose, last, omit, pathOr, split, flatten } from 'ramda'
 import {
   addContextToTranslatableString,
   formatTranslatableProp,
-  shouldTranslateToBinding,
   shouldTranslateToUserLocale,
 } from '../../utils/i18n'
-import { Slugify } from '../../utils/slug'
 import { getBenefits } from '../benefits'
-import { APP_NAME } from './constants'
 import { buildCategoryMap } from './utils'
 
 type DynamicKey<T> = Record<string, T>
@@ -136,15 +133,6 @@ const productCategoriesToCategoryTree = async (
   return mappedCategories.length ? mappedCategories : null
 }
 
-const urlToSlug = (slug: string | undefined) => {
-  if (!slug) {
-    return slug
-  }
-  const erasedSlash = slug.replace(/^\//g, '') //removing starting / char
-  const finalSlug = erasedSlash.replace(/(\/p)$/g, '') //remove ending /p chars
-  return finalSlug
-}
-
 const addTranslationParamsToSpecification = (filterIdFromNameMap: Record<string, string>, ctx: Context) => (specification: { name: string, values: string[] }) => {
   const { name, values } = specification
   const filterId = filterIdFromNameMap[name]
@@ -162,8 +150,20 @@ export const resolvers = {
       'brandId'
     ),
 
-    benefits: async ({ items }: SearchProduct, _: any, ctx: Context) =>
-      flatten(await Promise.all(items?.map(item => getBenefits(item.itemId, ctx)))),
+    benefits: async ({ items, productId }: SearchProduct, _: any, ctx: Context) => {
+      let result = flatten(await Promise.all(items?.map(item => getBenefits(item.itemId, ctx))))
+      let benefitsWithoutError = result.filter(item => item !== 'error')
+
+      if (benefitsWithoutError.length !== result.length) {
+        ctx.vtex.logger.error({
+          message: 'Degraded search',
+          service: 'Checkout simulation',
+          error: `Checkout simulation API returned an error for product ${productId}.
+            Simulation will be skipped for one or more items and the benefits list may be incomplete.`,
+        })
+      }
+      return benefitsWithoutError
+    },
 
     categoryTree: productCategoriesToCategoryTree,
 

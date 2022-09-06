@@ -232,6 +232,25 @@ interface OrderForm {
   itemsOrdination: any | null
 }
 
+interface Teaser {
+  featured: boolean
+  id: string
+  name: string
+  conditions: {
+    parameters: {
+      name: string
+      value: string
+    }[]
+    minimumQuantity: number
+  }
+  effects: {
+    parameters: {
+      name: string
+      value: string
+    }[]
+  }
+  teaserType: string
+}
 interface RatesAndBenefitsData {
   rateAndBenefitsIdentifiers: {
     id: string
@@ -239,25 +258,7 @@ interface RatesAndBenefitsData {
     featured: boolean
     description: string
   }[]
-  teaser: {
-    featured: boolean
-    id: string
-    name: string
-    conditions: {
-      parameters: {
-        name: string
-        value: string
-      }[]
-      minimumQuantity: number
-    }
-    effects: {
-      parameters: {
-        name: string
-        value: string
-      }[]
-    }
-    teaserType: string
-  }[]
+  teaser: Teaser[]
 }
 
 interface PayloadItem {

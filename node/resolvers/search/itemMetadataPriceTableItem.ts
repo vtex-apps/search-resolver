@@ -1,3 +1,4 @@
+import type { Logger } from '@vtex/api'
 import { isEmpty, path } from 'ramda'
 import { getItemChoiceType, CHOICE_TYPES } from '../../utils/attachments'
 
@@ -145,13 +146,25 @@ const simulateAndGetPrice = async (
   payload: SimulationPayload,
   checkout: Context['clients']['checkout'],
   itemId: string,
-  assemblyId: string
+  assemblyId: string,
+  logger: Logger,
 ) => {
-  const simulation = await checkout.simulation(payload)
-  const childInTree = simulation.items.find(
-    item => itemId === item.id && assemblyId === item.parentAssemblyBinding
-  )
-  return childInTree ? childInTree.sellingPrice : 0
+  try {
+    const simulation = await checkout.simulation(payload)
+    const childInTree = simulation.items.find(
+      item => itemId === item.id && assemblyId === item.parentAssemblyBinding
+    )
+    return childInTree ? childInTree.sellingPrice : 0
+  } catch (e) {
+    logger.error({
+      message: 'Degraded search',
+      service: 'Checkout simulation',
+      error: `Checkout simulation API returned an error for item ${itemId}.
+        Simulation will be skipped for this item and the price of priceTable may be incorrect.`,
+      errorStack: e,
+    })
+    return 0
+  }
 }
 
 const getSimulationPayloadItems = (
@@ -194,7 +207,7 @@ export const resolvers = {
     price: async (
       { parent, simulationPayload, assemblyOption, compositionItem }: Params,
       _: any,
-      { clients: { checkout } }: Context
+      { clients: { checkout }, vtex: { logger } }: Context
     ) => {
       const { id, priceTable } = compositionItem
       const { marketingData, countryCode } = simulationPayload
@@ -246,7 +259,8 @@ export const resolvers = {
           { ...payload, items: parentBasicTree },
           checkout,
           id,
-          assemblyOption.id
+          assemblyOption.id,
+          logger,
         )
       }
 
@@ -261,7 +275,8 @@ export const resolvers = {
         { ...payload, items: newSimulationPayloadItems },
         checkout,
         id,
-        assemblyOption.id
+        assemblyOption.id,
+        logger,
       )
     },
   },
