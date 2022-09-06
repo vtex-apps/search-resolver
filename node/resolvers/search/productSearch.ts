@@ -31,24 +31,46 @@ const getTypeForCategory = (index: number) => {
 const getRouteForQueryUnit = async (queryUnit: string, mapUnit: string, categoriesSearched: string[], index: number, ctx: Context) => {
   const bindingId = ctx.vtex.binding!.id!
   const key = `${queryUnit}-${mapUnit}`
+
   if (mapUnit === 'b') {
     const brandPageType = await ctx.clients.search.pageType(queryUnit, 'map=b')
 
     if (index === 0) {
-      // if it is a brand page, we should check if there is a route on rewriter for this brand
-      const brandFromRewriter = await ctx.clients.rewriter.getRoute(brandPageType.id, 'brand', bindingId)
-      if (brandFromRewriter) {
-        return { path: brandFromRewriter, key, name: brandPageType.name, id: brandPageType.id }
+      try {
+        // if it is a brand page, we should check if there is a route on rewriter for this brand
+        const brandFromRewriter = await ctx.clients.rewriter.getRoute(brandPageType.id, 'brand', bindingId)
+        if (brandFromRewriter) {
+          return { path: brandFromRewriter, key, name: brandPageType.name, id: brandPageType.id }
+        }
+      } catch (e) {
+        ctx.vtex.logger.error({
+          message: 'Degraded search',
+          service: 'Rewriter getRoute',
+          error: `Rewriter getRoute query returned an error for brand ${queryUnit}. Breadcrumb data may be incorrect.`,
+          errorStack: e,
+        })
       }
     }
     return { path: queryUnit, key, name: brandPageType.name, id: brandPageType.id }
   }
+
   if (mapUnit === 'c') {
     const categoryPosition = categoriesSearched.findIndex(cat => cat === queryUnit)
     const category = await ctx.clients.search.pageType(categoriesSearched.slice(0, categoryPosition + 1).join('/'))
-    const route = await ctx.clients.rewriter.getRoute(category.id, getTypeForCategory(categoryPosition), bindingId)
-    return { path: route ?? queryUnit, key, name: category.name, id: category.id }
+    try {
+      const route = await ctx.clients.rewriter.getRoute(category.id, getTypeForCategory(categoryPosition), bindingId)
+      return { path: route ?? queryUnit, key, name: category.name, id: category.id }
+    } catch (e) {
+      ctx.vtex.logger.error({
+        message: 'Degraded search',
+        service: 'Rewriter getRoute',
+        error: `Rewriter getRoute query returned an error for category ${category.id}. Breadcrumb data may be incorrect.`,
+        errorStack: e,
+      })
+      return { path: queryUnit, key, name: category.name, id: category.id }
+    }
   }
+
   return { path: queryUnit, key, name: null, id: null }
 }
 

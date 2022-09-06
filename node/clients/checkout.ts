@@ -44,7 +44,7 @@ export class Checkout extends JanusClient {
     const base = '/api/checkout'
     return {
       simulation: (queryString: string) =>
-        `${base}/pvt/orderFormsss/simulation${queryString}`,
+        `${base}/pvt/orderForms/simulation${queryString}`,
     }
   }
 }

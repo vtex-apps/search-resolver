@@ -33,9 +33,18 @@ export const resolvers = {
       const settings: AppSettings = await ctx.clients.apps.getAppSettings(APP_NAME)
 
       if (shouldTranslateToBinding(ctx)) {
-        const rewriterUrl = await ctx.clients.rewriter.getRoute(id.toString(), 'anyCategoryEntity', ctx.vtex.binding!.id!)
-        if (rewriterUrl) {
-          url = rewriterUrl
+        try {
+          const rewriterUrl = await ctx.clients.rewriter.getRoute(id.toString(), 'anyCategoryEntity', ctx.vtex.binding!.id!)
+          if (rewriterUrl) {
+            url = rewriterUrl
+          }
+        } catch (e) {
+          ctx.vtex.logger.error({
+            message: 'Degraded search',
+            service: 'Rewriter getRoute',
+            error: `Rewriter getRoute query returned an error for category ${id}. Category href may be incorrect.`,
+            errorStack: e,
+          })
         }
       }
       const pathname = cleanUrl(url)
@@ -55,9 +64,18 @@ export const resolvers = {
 
     slug: async ({ url, id }: SafeCategory, _: unknown, ctx: Context) => {
       if (shouldTranslateToBinding(ctx)) {
-        const rewriterUrl = await ctx.clients.rewriter.getRoute(id.toString(), 'anyCategoryEntity', ctx.vtex.binding!.id!)
-        if (rewriterUrl) {
-          url = rewriterUrl
+        try {
+          const rewriterUrl = await ctx.clients.rewriter.getRoute(id.toString(), 'anyCategoryEntity', ctx.vtex.binding!.id!)
+          if (rewriterUrl) {
+            url = rewriterUrl
+          }
+        } catch (e) {
+          ctx.vtex.logger.error({
+            message: 'Degraded search',
+            service: 'Rewriter getRoute',
+            error: `Rewriter getRoute query returned an error for category ${id}. Category slug may be incorrect.`,
+            errorStack: e,
+          })
         }
       }
       return url ? lastSegment(url) : null
