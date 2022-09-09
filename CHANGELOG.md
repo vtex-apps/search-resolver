@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Returns degraded search result when a service fails.
+
+### Added
+- Logs for degraded search.
+
 ## [1.62.1] - 2022-07-11
 
 ### Changed
