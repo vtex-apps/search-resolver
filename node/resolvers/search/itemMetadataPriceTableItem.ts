@@ -1,6 +1,7 @@
 import type { Logger } from '@vtex/api'
 import { isEmpty, path } from 'ramda'
 import { getItemChoiceType, CHOICE_TYPES } from '../../utils/attachments'
+import { logDegradedSearchError } from './utils'
 
 interface Params {
   compositionItem: CompositionItem
@@ -156,8 +157,7 @@ const simulateAndGetPrice = async (
     )
     return childInTree ? childInTree.sellingPrice : 0
   } catch (e) {
-    logger.error({
-      message: 'Degraded search',
+    logDegradedSearchError(logger, {
       service: 'Checkout simulation',
       error: `Checkout simulation API returned an error for item ${itemId}.
         Simulation will be skipped for this item and the price of priceTable may be incorrect.`,

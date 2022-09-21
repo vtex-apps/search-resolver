@@ -6,7 +6,7 @@ import {
   shouldTranslateToUserLocale,
 } from '../../utils/i18n'
 import { getBenefits } from '../benefits'
-import { buildCategoryMap } from './utils'
+import { buildCategoryMap, logDegradedSearchError } from './utils'
 
 type DynamicKey<T> = Record<string, T>
 
@@ -155,8 +155,7 @@ export const resolvers = {
       let benefitsWithoutError = result.filter(item => item !== 'error')
 
       if (benefitsWithoutError.length !== result.length) {
-        ctx.vtex.logger.error({
-          message: 'Degraded search',
+        logDegradedSearchError(ctx.vtex.logger, {
           service: 'Checkout simulation',
           error: `Checkout simulation API returned an error for product ${productId}.
             Simulation will be skipped for one or more items and the benefits list may be incomplete.`,

@@ -1,6 +1,6 @@
 import { compose, last, prop, split } from 'ramda'
 
-import { getCategoryInfo } from './utils'
+import { getCategoryInfo, logDegradedSearchError } from './utils'
 import { formatTranslatableProp, shouldTranslateToBinding } from '../../utils/i18n'
 import { Slugify } from '../../utils/slug'
 import { APP_NAME } from './constants'
@@ -39,8 +39,7 @@ export const resolvers = {
             url = rewriterUrl
           }
         } catch (e) {
-          ctx.vtex.logger.error({
-            message: 'Degraded search',
+          logDegradedSearchError(ctx.vtex.logger, {
             service: 'Rewriter getRoute',
             error: `Rewriter getRoute query returned an error for category ${id}. Category href may be incorrect.`,
             errorStack: e,
@@ -70,8 +69,7 @@ export const resolvers = {
             url = rewriterUrl
           }
         } catch (e) {
-          ctx.vtex.logger.error({
-            message: 'Degraded search',
+          logDegradedSearchError(ctx.vtex.logger, {
             service: 'Rewriter getRoute',
             error: `Rewriter getRoute query returned an error for category ${id}. Category slug may be incorrect.`,
             errorStack: e,

@@ -1,7 +1,7 @@
 import { path } from 'ramda'
 import { IOResponse } from '@vtex/api'
 import { Functions } from '@gocommerce/utils'
-import { zipQueryAndMap, breadcrumbMapKey } from './utils'
+import { zipQueryAndMap, breadcrumbMapKey, logDegradedSearchError } from './utils'
 import { shouldTranslateToBinding } from '../../utils/i18n'
 
 interface ProductSearchParent {
@@ -43,8 +43,7 @@ const getRouteForQueryUnit = async (queryUnit: string, mapUnit: string, categori
           return { path: brandFromRewriter, key, name: brandPageType.name, id: brandPageType.id }
         }
       } catch (e) {
-        ctx.vtex.logger.error({
-          message: 'Degraded search',
+        logDegradedSearchError(ctx.vtex.logger, {
           service: 'Rewriter getRoute',
           error: `Rewriter getRoute query returned an error for brand ${queryUnit}. Breadcrumb data may be incorrect.`,
           errorStack: e,
@@ -61,8 +60,7 @@ const getRouteForQueryUnit = async (queryUnit: string, mapUnit: string, categori
       const route = await ctx.clients.rewriter.getRoute(category.id, getTypeForCategory(categoryPosition), bindingId)
       return { path: route ?? queryUnit, key, name: category.name, id: category.id }
     } catch (e) {
-      ctx.vtex.logger.error({
-        message: 'Degraded search',
+      logDegradedSearchError(ctx.vtex.logger, {
         service: 'Rewriter getRoute',
         error: `Rewriter getRoute query returned an error for category ${category.id}. Breadcrumb data may be incorrect.`,
         errorStack: e,

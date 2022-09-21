@@ -58,4 +58,10 @@ declare global {
   interface AppSettings {
     slugifyLinks: boolean
   }
+
+  interface DegradedSearchError {
+    service: string
+    error: string
+    errorStack?: unknown
+  }
 }
