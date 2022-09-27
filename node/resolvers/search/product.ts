@@ -151,10 +151,11 @@ export const resolvers = {
     ),
 
     benefits: async ({ items, productId }: SearchProduct, _: any, ctx: Context) => {
-      let result = flatten(await Promise.all(items?.map(item => getBenefits(item.itemId, ctx))))
-      let benefitsWithoutError = result.filter(item => item !== 'error')
+      const promises = items?.map(item => getBenefits(item.itemId, ctx))
+      const promisesResult = flatten(await Promise.all(promises.map((p) => p.catch(error => error))))
+      const benefitsWithoutError = promisesResult.filter(result => !(result instanceof Error))
 
-      if (benefitsWithoutError.length !== result.length) {
+      if (benefitsWithoutError.length !== promisesResult.length) {
         logDegradedSearchError(ctx.vtex.logger, {
           service: 'Checkout simulation',
           error: `Checkout simulation API returned an error for product ${productId}.

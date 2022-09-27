@@ -56,7 +56,7 @@ export const fieldResolvers = {
 export const getBenefits = async (
   itemId: string,
   { clients: { checkout } }: Context
-): Promise<unknown[] | string> => {
+): Promise<unknown[]> => {
   const requestBody = {
     items: [
       {
@@ -66,10 +66,6 @@ export const getBenefits = async (
       },
     ],
   }
-  try {
-    const benefitsData = await checkout.simulation(requestBody)
-    return path(['ratesAndBenefitsData', 'teaser'], benefitsData) || []
-  } catch (e) {
-    return 'error'
-  }
+  const benefitsData = await checkout.simulation(requestBody)
+  return path(['ratesAndBenefitsData', 'teaser'], benefitsData) || []
 }

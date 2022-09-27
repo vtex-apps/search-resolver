@@ -198,7 +198,7 @@ export const logDegradedSearchError = (
   logger: Logger,
   error: DegradedSearchError
 ) => {
-  logger.error({
+  logger.warn({
     message: 'Degraded search',
     ...error,
   })
