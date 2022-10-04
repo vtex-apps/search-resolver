@@ -3,13 +3,10 @@ import { compose, last, omit, pathOr, split, flatten } from 'ramda'
 import {
   addContextToTranslatableString,
   formatTranslatableProp,
-  shouldTranslateToBinding,
   shouldTranslateToUserLocale,
 } from '../../utils/i18n'
-import { Slugify } from '../../utils/slug'
 import { getBenefits } from '../benefits'
-import { APP_NAME } from './constants'
-import { buildCategoryMap } from './utils'
+import { buildCategoryMap, logDegradedSearchError } from './utils'
 
 type DynamicKey<T> = Record<string, T>
 
@@ -136,15 +133,6 @@ const productCategoriesToCategoryTree = async (
   return mappedCategories.length ? mappedCategories : null
 }
 
-const urlToSlug = (slug: string | undefined) => {
-  if (!slug) {
-    return slug
-  }
-  const erasedSlash = slug.replace(/^\//g, '') //removing starting / char
-  const finalSlug = erasedSlash.replace(/(\/p)$/g, '') //remove ending /p chars
-  return finalSlug
-}
-
 const addTranslationParamsToSpecification = (filterIdFromNameMap: Record<string, string>, ctx: Context) => (specification: { name: string, values: string[] }) => {
   const { name, values } = specification
   const filterId = filterIdFromNameMap[name]
@@ -162,8 +150,20 @@ export const resolvers = {
       'brandId'
     ),
 
-    benefits: async ({ items }: SearchProduct, _: any, ctx: Context) =>
-      flatten(await Promise.all(items?.map(item => getBenefits(item.itemId, ctx)))),
+    benefits: async ({ items, productId }: SearchProduct, _: any, ctx: Context) => {
+      const promises = items?.map(item => getBenefits(item.itemId, ctx))
+      const promisesResult = flatten(await Promise.all(promises.map((p) => p.catch(error => error))))
+      const benefitsWithoutError = promisesResult.filter(result => !(result instanceof Error))
+
+      if (benefitsWithoutError.length !== promisesResult.length) {
+        logDegradedSearchError(ctx.vtex.logger, {
+          service: 'Checkout simulation',
+          error: `Checkout simulation API returned an error for product ${productId}.
+            Simulation will be skipped for one or more items and the benefits list may be incomplete.`,
+        })
+      }
+      return benefitsWithoutError
+    },
 
     categoryTree: productCategoriesToCategoryTree,
 
@@ -247,18 +247,6 @@ export const resolvers = {
       'productName',
       'productId'
     ),
-
-    linkText: async ({ productId, linkText }: SearchProduct, _: unknown, ctx: Context) => {
-      const { clients: { rewriter, apps }, vtex: { binding } } = ctx
-      const settings: AppSettings = await apps.getAppSettings(APP_NAME)
-
-      if (!shouldTranslateToBinding(ctx, true)) {
-        return settings.slugifyLinks ? Slugify(linkText) : linkText
-      }
-      const route = await rewriter.getRoute(productId, 'product', binding!.id!)
-      const pathname = urlToSlug(route) ?? linkText
-      return settings.slugifyLinks ? Slugify(pathname) : pathname
-    },
 
     specificationGroups: async (product: SearchProduct, _: unknown, ctx: Context) => {
       if (product.origin === 'intelligent-search') {

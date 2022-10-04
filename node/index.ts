@@ -72,10 +72,6 @@ export default new Service<Clients, RecorderState, CustomContext>({
         memoryCache: vbaseCache,
         timeout: TWO_SECONDS_MS,
       },
-      store: {
-        retries: 0,
-        timeout: NINE_SECONDS_MS,
-      },
     },
   },
   graphql: {

@@ -3,7 +3,6 @@ import { IOClients } from '@vtex/api'
 import { Search } from './search'
 import { Checkout } from './checkout'
 import { Rewriter } from './rewriter'
-import { Store } from './store'
 import { IntelligentSearchApi } from './intelligent-search-api'
 
 export class Clients extends IOClients {
@@ -18,8 +17,5 @@ export class Clients extends IOClients {
   }
   public get intelligentSearchApi() {
     return this.getOrSet('intelligentSearchApi', IntelligentSearchApi)
-  }
-  public get store() {
-    return this.getOrSet('store', Store)
   }
 }

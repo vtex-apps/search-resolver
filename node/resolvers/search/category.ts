@@ -1,6 +1,6 @@
 import { compose, last, prop, split } from 'ramda'
 
-import { getCategoryInfo } from './utils'
+import { getCategoryInfo, logDegradedSearchError } from './utils'
 import { formatTranslatableProp, shouldTranslateToBinding } from '../../utils/i18n'
 import { Slugify } from '../../utils/slug'
 import { APP_NAME } from './constants'
@@ -33,9 +33,17 @@ export const resolvers = {
       const settings: AppSettings = await ctx.clients.apps.getAppSettings(APP_NAME)
 
       if (shouldTranslateToBinding(ctx)) {
-        const rewriterUrl = await ctx.clients.rewriter.getRoute(id.toString(), 'anyCategoryEntity', ctx.vtex.binding!.id!)
-        if (rewriterUrl) {
-          url = rewriterUrl
+        try {
+          const rewriterUrl = await ctx.clients.rewriter.getRoute(id.toString(), 'anyCategoryEntity', ctx.vtex.binding!.id!)
+          if (rewriterUrl) {
+            url = rewriterUrl
+          }
+        } catch (e) {
+          logDegradedSearchError(ctx.vtex.logger, {
+            service: 'Rewriter getRoute',
+            error: `Rewriter getRoute query returned an error for category ${id}. Category href may be incorrect.`,
+            errorStack: e,
+          })
         }
       }
       const pathname = cleanUrl(url)
@@ -55,9 +63,17 @@ export const resolvers = {
 
     slug: async ({ url, id }: SafeCategory, _: unknown, ctx: Context) => {
       if (shouldTranslateToBinding(ctx)) {
-        const rewriterUrl = await ctx.clients.rewriter.getRoute(id.toString(), 'anyCategoryEntity', ctx.vtex.binding!.id!)
-        if (rewriterUrl) {
-          url = rewriterUrl
+        try {
+          const rewriterUrl = await ctx.clients.rewriter.getRoute(id.toString(), 'anyCategoryEntity', ctx.vtex.binding!.id!)
+          if (rewriterUrl) {
+            url = rewriterUrl
+          }
+        } catch (e) {
+          logDegradedSearchError(ctx.vtex.logger, {
+            service: 'Rewriter getRoute',
+            error: `Rewriter getRoute query returned an error for category ${id}. Category slug may be incorrect.`,
+            errorStack: e,
+          })
         }
       }
       return url ? lastSegment(url) : null

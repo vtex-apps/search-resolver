@@ -3,6 +3,7 @@ import { compose, last, split, toLower, zip } from 'ramda'
 import { Functions } from '@gocommerce/utils'
 
 import { searchSlugify, Slugify } from '../../utils/slug'
+import { Logger } from '@vtex/api'
 
 export enum SearchCrossSellingTypes {
   whoboughtalsobought = 'whoboughtalsobought',
@@ -191,4 +192,14 @@ export const validMapAndQuery = (query?: string, map?: string) => {
   const values = query?.split('/').filter(value => value)
   const facets = map?.split(',').filter(facetKey => facetKey)
   return values?.length === facets?.length
+}
+
+export const logDegradedSearchError = (
+  logger: Logger,
+  error: DegradedSearchError
+) => {
+  logger.warn({
+    message: 'Degraded search',
+    ...error,
+  })
 }

@@ -34,9 +34,6 @@ export class Checkout extends JanusClient {
       }
     )
 
-  public regions = (regionId: string, channel?: number) =>
-    this.http.get(this.routes.regions(regionId, channel))
-
   protected post = <T>(url: string, data?: any, config: RequestConfig = {}) => {
     return this.http.post<T>(url, data, config).catch(statusToError) as Promise<
       T
@@ -48,8 +45,6 @@ export class Checkout extends JanusClient {
     return {
       simulation: (queryString: string) =>
         `${base}/pvt/orderForms/simulation${queryString}`,
-      regions: (regionId: string, channel?: number) =>
-        `${base}/pub/regions/${regionId}${channel ? `?sc=${channel}` : ''}`,
     }
   }
 }
