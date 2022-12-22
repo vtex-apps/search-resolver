@@ -3,12 +3,22 @@ import { compose, last, omit, pathOr, split, flatten } from 'ramda'
 import {
   addContextToTranslatableString,
   formatTranslatableProp,
+  shouldTranslateToBinding,
   shouldTranslateToUserLocale,
 } from '../../utils/i18n'
 import { getBenefits } from '../benefits'
 import { buildCategoryMap, logDegradedSearchError } from './utils'
 
 type DynamicKey<T> = Record<string, T>
+
+const urlToSlug = (slug: string | undefined) => {
+  if (!slug) {
+    return slug
+  }
+  const erasedSlash = slug.replace(/^\//g, '') //removing starting / char
+  const finalSlug = erasedSlash.replace(/(\/p)$/g, '') //remove ending /p chars
+  return finalSlug
+}
 
 const objToNameValue = (
   keyName: string,
@@ -247,6 +257,27 @@ export const resolvers = {
       'productName',
       'productId'
     ),
+
+    linkText: async ({ productId, linkText, origin }: SearchProduct, _: unknown, ctx: Context) => {
+      const { clients: { rewriter }, vtex: { binding } } = ctx
+
+      if (origin === 'intelligent-search' || !shouldTranslateToBinding(ctx)) {
+        return linkText
+      }
+
+      try {
+        const route = await rewriter.getRoute(productId, 'product', binding!.id!)
+        return urlToSlug(route) ?? linkText
+      } catch (e) {
+        logDegradedSearchError(ctx.vtex.logger, {
+          service: 'Rewriter getRoute',
+          error: `Rewriter getRoute query returned an error for productId ${productId}. Linktext may be incorrect.`,
+          errorStack: e,
+        })
+      }
+
+      return linkText
+    },
 
     specificationGroups: async (product: SearchProduct, _: unknown, ctx: Context) => {
       if (product.origin === 'intelligent-search') {
