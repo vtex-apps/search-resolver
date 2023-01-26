@@ -95,7 +95,7 @@ export class IntelligentSearchApi extends ExternalClient {
     })
   }
 
-  public async productSearch(params: SearchResultArgs, path: string) {
+  public async productSearch(params: SearchResultArgs, path: string, shippingHeader?: string[]) {
     const {query, leap, searchState} = params
 
     return this.http.get(`/product_search/${path}`, {
@@ -106,7 +106,10 @@ export class IntelligentSearchApi extends ExternalClient {
         ...parseState(searchState),
         ...params,
       },
-      metric: 'product-search'
+      metric: 'product-search',
+      headers: {
+        'x-vtex-shipping-options': shippingHeader ?? '',
+      },
     })
   }
 }
