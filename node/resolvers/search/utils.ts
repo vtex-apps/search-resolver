@@ -206,7 +206,7 @@ export const logDegradedSearchError = (
 
 export const getShippingOptionsFromSelectedFacets = (
   selectedFacets: SelectedFacet[] = []
-): [string[] | null, SelectedFacet[]] => {
+): [string[], SelectedFacet[]] => {
   const shippingOptions: string[] = []
   const filteredFacets: SelectedFacet[] = []
 

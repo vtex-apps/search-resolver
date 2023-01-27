@@ -80,7 +80,7 @@ export class IntelligentSearchApi extends ExternalClient {
     return this.http.get(`/banners/${path}`, {params: {...params, query: params.query, locale: this.locale}, metric: 'banners'})
   }
 
-  public async facets(params: FacetsArgs, path: string) {
+  public async facets(params: FacetsArgs, path: string, shippingHeader?: string[]) {
     const {query, leap, searchState} = params
 
     return this.http.get(`/facets/${path}`, {
@@ -91,7 +91,10 @@ export class IntelligentSearchApi extends ExternalClient {
         bgy_leap: leap ? true : undefined,
         ...parseState(searchState),
       },
-      metric: 'facets'
+      metric: 'facets',
+      headers: {
+        'x-vtex-shipping-options': shippingHeader ?? '',
+      },
     })
   }
 
