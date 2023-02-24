@@ -72,6 +72,7 @@ interface SuggestionProductsArgs {
   segmentedFacets?: SelectedFacet[]
   orderBy?: string
   count?: number
+  shippingOptions?: string[]
 }
 
 interface SuggestionSearchesArgs {
