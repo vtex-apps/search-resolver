@@ -27,6 +27,7 @@ import {
   SearchCrossSellingTypes,
   getMapAndPriceRangeFromSelectedFacets,
   validMapAndQuery,
+  getShippingOptionsFromSelectedFacets,
 } from './utils'
 import { toCompatibilityArgs } from './newURLs'
 import { PATH_SEPARATOR, MAP_VALUES_SEP } from './constants'
@@ -354,8 +355,9 @@ export const queries = {
     // unnecessary field. It's is an object and breaks the @vtex/api cache
     delete biggyArgs.selectedFacets
 
+    const [shippingOptions, facets] = getShippingOptionsFromSelectedFacets(selectedFacets)
 
-    const result = await intelligentSearchApi.facets({...biggyArgs, query: args.fullText}, buildAttributePath(selectedFacets))
+    const result = await intelligentSearchApi.facets({...biggyArgs, query: args.fullText}, buildAttributePath(facets), shippingOptions)
 
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated
@@ -441,8 +443,10 @@ export const queries = {
 
     // unnecessary field. It's is an object and breaks the @vtex/api cache
     delete biggyArgs.selectedFacets
+  
+    const [shippingOptions, facets] = getShippingOptionsFromSelectedFacets(selectedFacets)
 
-    const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets))
+    const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(facets), shippingOptions)
 
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated
@@ -520,7 +524,9 @@ export const queries = {
     // unnecessary field. It's is an object and breaks the @vtex/api cache
     delete biggyArgs.selectedFacets
 
-    const result = await intelligentSearchApi.productSearch({...biggyArgs}, buildAttributePath(selectedFacets))
+    const [shippingOptions, facets] = getShippingOptionsFromSelectedFacets(selectedFacets)
+
+    const result = await intelligentSearchApi.productSearch({...biggyArgs}, buildAttributePath(facets), shippingOptions)
 
     if (ctx.vtex.tenant && !args.productOriginVtex) {
       ctx.translated = result.translated
@@ -648,7 +654,7 @@ export const queries = {
     // unnecessary field. It's is an object and breaks the @vtex/api cache
     delete biggyArgs.selectedFacets
 
-    const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets))
+    const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets), args.shippingOptions)
 
     if (ctx.vtex.tenant && !args.productOriginVtex) {
       ctx.translated = result.translated

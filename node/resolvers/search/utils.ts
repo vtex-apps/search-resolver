@@ -203,3 +203,20 @@ export const logDegradedSearchError = (
     ...error,
   })
 }
+
+export const getShippingOptionsFromSelectedFacets = (
+  selectedFacets: SelectedFacet[] = []
+): [string[], SelectedFacet[]] => {
+  const shippingOptions: string[] = []
+  const filteredFacets: SelectedFacet[] = []
+
+  selectedFacets.forEach((facet) => {
+    if (facet.key === 'shipping-option') {
+      shippingOptions.push(facet.value)
+    } else {
+      filteredFacets.push(facet)
+    }
+  })
+
+  return [shippingOptions, filteredFacets]
+}

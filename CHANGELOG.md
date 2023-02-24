@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Shipping option header to `productSearch` and `facets` queries.
+
 ## [1.63.1] - 2023-01-02
 
 ### Added
