@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Path traversal validation.
+
 ## [1.64.0] - 2023-02-24
 
 ### Added

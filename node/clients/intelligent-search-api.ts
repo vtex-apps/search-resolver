@@ -1,6 +1,7 @@
 import { ExternalClient, InstanceOptions, IOContext } from "@vtex/api";
 import { parseState } from "../utils/searchState";
 
+const isPathTraversal = (str: string) => str.indexOf('..') >= 0
 interface CorrectionParams {
   query: string
 }
@@ -77,10 +78,18 @@ export class IntelligentSearchApi extends ExternalClient {
   }
 
   public async banners(params: BannersArgs, path: string) {
+    if (isPathTraversal(path)) {
+      throw new Error("Malformed URL")
+    }
+
     return this.http.get(`/banners/${path}`, {params: {...params, query: params.query, locale: this.locale}, metric: 'banners'})
   }
 
   public async facets(params: FacetsArgs, path: string, shippingHeader?: string[]) {
+    if (isPathTraversal(path)) {
+      throw new Error("Malformed URL")
+    }
+
     const {query, leap, searchState} = params
 
     return this.http.get(`/facets/${path}`, {
@@ -100,6 +109,9 @@ export class IntelligentSearchApi extends ExternalClient {
 
   public async productSearch(params: SearchResultArgs, path: string, shippingHeader?: string[]) {
     const {query, leap, searchState} = params
+    if (isPathTraversal(path)) {
+      throw new Error("Malformed URL")
+    }
 
     return this.http.get(`/product_search/${path}`, {
       params: {
