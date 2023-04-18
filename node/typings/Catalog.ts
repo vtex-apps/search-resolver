@@ -26,6 +26,7 @@ interface SearchArgs extends QueryArgs {
   hideUnavailableItems: boolean | null
   simulationBehavior: 'skip' | 'default' | null
   completeSpecifications: boolean
+  shippingOptions?: string[]
 }
 
 interface Metadata {
