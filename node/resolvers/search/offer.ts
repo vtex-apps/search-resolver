@@ -141,6 +141,10 @@ export const resolvers = {
       return spotPrice || sellingPrice
     },
     taxPercentage: (offer: CommertialOffer) => {
+      if (!offer.Price) {
+        return 0
+      }
+
       return offer.Tax / offer.Price
     }
   },

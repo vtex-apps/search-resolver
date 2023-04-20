@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Error with `taxPercentage` when Price is `null`.
+
 ## [1.65.0] - 2023-04-18
 
 ## [1.64.2] - 2023-03-16
