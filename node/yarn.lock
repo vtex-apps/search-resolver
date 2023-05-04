@@ -5228,9 +5228,9 @@ verror@1.10.0:
   version "1.53.4"
   resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.53.4/public/@types/vtex.rewriter#6348993efde4106196bca60fd40dba00b3a354b6"
 
-"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.46.0/public":
+"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.53.0-hkignore.1/public":
   version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.46.0/public#9ebc3c5137c43b94205c6e8a9b7b0262fc7c0eff"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.53.0-hkignore.1/public#8ee57aa86e81ca5efb380861691ad8419f8e6b2e"
 
 w3c-hr-time@^1.0.1:
   version "1.0.1"
