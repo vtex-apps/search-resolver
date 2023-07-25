@@ -127,4 +127,25 @@ export class IntelligentSearchApi extends ExternalClient {
       },
     })
   }
+
+  public async sponsoredProducts(params: SearchResultArgs, path: string, shippingHeader?: string[]) {
+    const {query, leap, searchState} = params
+    if (isPathTraversal(path)) {
+      throw new Error("Malformed URL")
+    }
+
+    return this.http.get(`/sponsored_products/${path}`, {
+      params: {
+        query: query && decodeQuery(query),
+        locale: this.locale,
+        bgy_leap: leap ? true : undefined,
+        ...parseState(searchState),
+        ...params,
+      },
+      metric: 'product-search',
+      headers: {
+        'x-vtex-shipping-options': shippingHeader ?? '',
+      },
+    })
+  }
 }
