@@ -1,5 +1,7 @@
 import { SearchCrossSellingTypes } from './utils'
 
+type SimilarProductsQuantityEnum = 'ALL_AVAILABLE' | 'DEFAULT'
+
 export const resolvers = {
   Recommendation: {
     buy: (
@@ -14,9 +16,14 @@ export const resolvers = {
 
     similars: (
       { productId }: SearchProduct,
-      _: any,
+      { quantity = 'DEFAULT' }: { quantity: SimilarProductsQuantityEnum },
       { clients: { search } }: Context
-    ) => search.crossSelling(productId, SearchCrossSellingTypes.similars),
+    ) => {
+      // Let's keep this variable name explicit
+      const groupByProduct = quantity !== 'ALL_AVAILABLE';
+
+      return search.crossSelling(productId, SearchCrossSellingTypes.similars, groupByProduct)
+    },
 
     view: (
       { productId }: SearchProduct,

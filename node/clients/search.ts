@@ -308,9 +308,9 @@ export class Search extends AppClient {
       metric: 'search-category',
     })
 
-  public crossSelling = (id: string, type: SearchCrossSellingTypes) =>
+  public crossSelling = (id: string, type: SearchCrossSellingTypes, groupByProduct = true) =>
     this.get<SearchProduct[]>(
-      `/pub/products/crossselling/${type}/${id}?groupByProduct=true`,
+      `/pub/products/crossselling/${type}/${id}?groupByProduct=${groupByProduct}`,
       {
         metric: 'search-crossSelling',
       }

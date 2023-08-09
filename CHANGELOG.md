@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- `groupByProduct` param to `crossSelling` query.
+- `groupByProduct` param to `productRecommendations` query.
+- `quantity` param to `Recommendation.similars` resolver.
+
 ## [1.65.1] - 2023-04-24
 
 ### Fixed

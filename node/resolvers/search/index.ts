@@ -62,6 +62,7 @@ enum CrossSellingInput {
 interface ProductRecommendationArg {
   identifier?: ProductIndentifier
   type?: CrossSellingInput
+  groupByProduct?: boolean
 }
 
 interface ProductsByIdentifierArgs {
@@ -541,7 +542,7 @@ export const queries = {
 
   productRecommendations: async (
     _: any,
-    { identifier, type }: ProductRecommendationArg,
+    { identifier, type, groupByProduct = true  }: ProductRecommendationArg,
     ctx: Context
   ) => {
     if (identifier == null || type == null) {
@@ -556,7 +557,8 @@ export const queries = {
 
     const products = await ctx.clients.search.crossSelling(
       productId,
-      searchType
+      searchType,
+      groupByProduct
     )
 
     searchFirstElements(products, 0, ctx.clients.search)
