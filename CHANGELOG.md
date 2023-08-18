@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [1.65.2] - 2023-08-18
+### Fixed
+- Retrieve translated text-based product specification values ("properties") when using the `productSearch` and `products` queries.
+
+## [1.66.0] - 2023-08-01
 
 ### Fixed
-
-- Retrieve translated text-based product specification values ("properties") when using the `productSearch` and `products` queries.
+- Version bump to reset circuit breaker
 
 ## [1.65.1] - 2023-04-24
 
