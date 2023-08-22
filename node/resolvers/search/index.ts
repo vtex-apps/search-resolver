@@ -37,7 +37,6 @@ import {
   convertOrderBy,
 } from '../../commons/compatibility-layer'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
-
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
   value: string
@@ -537,6 +536,51 @@ export const queries = {
       searchState: args.searchState,
       ...result
     }
+  },
+
+  sponsoredProducts: async (_: any, args: ProductSearchInput, ctx: any) => {
+    const [shippingOptions, facets] = getShippingOptionsFromSelectedFacets(args.selectedFacets)
+    args.selectedFacets = facets
+
+    args = (await getCompatibilityArgsFromSelectedFacets(
+      ctx,
+      args
+    )) as ProductSearchInput
+
+    if (!validMapAndQuery(args.query, args.map)) {
+      ctx.vtex.logger.warn({
+        message: 'Invalid map or query',
+        query: args.query,
+        map: args.map
+      })
+    }
+
+    const { intelligentSearchApi } = ctx.clients
+    const {
+      selectedFacets,
+      fullText
+    } = args
+
+    const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+
+    const biggyArgs: {[key:string]: any} = {
+      ...args,
+      query: fullText,
+      sort: convertOrderBy(args.orderBy),
+      ...args.options,
+      ...workspaceSearchParams,
+    }
+
+    // unnecessary field. It's is an object and breaks the @vtex/api cache
+    delete biggyArgs.selectedFacets
+
+    const result = await intelligentSearchApi.sponsoredProducts({...biggyArgs}, buildAttributePath(selectedFacets), shippingOptions)
+
+    if (ctx.vtex.tenant && !args.productOriginVtex) {
+      ctx.translated = result.translated
+    }
+
+    return result
   },
 
   productRecommendations: async (
