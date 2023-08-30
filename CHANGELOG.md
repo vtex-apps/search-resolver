@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.17.1] - 2023-08-30
+
 ### Changed
 
 - Change `node` builder to version `6.x`. This version it's running on NodeJS 16.
