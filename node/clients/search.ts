@@ -1,10 +1,9 @@
 import {
-  AppClient,
   InstanceOptions,
   IOContext,
   RequestConfig,
   SegmentData,
-  CacheType,
+  CacheType, JanusClient,
 } from '@vtex/api'
 import { stringify } from 'qs'
 
@@ -44,13 +43,12 @@ interface SearchPageTypeResponse {
 /** Search API
  * Docs: https://documenter.getpostman.com/view/845/catalogsystem-102/Hs44
  */
-export class Search extends AppClient {
+export class Search extends JanusClient {
   private searchEncodeURI: (x: string) => string
-  private basePath: string
 
   private addSalesChannel = (
     url: string,
-    salesChannel?: string | number | null
+    salesChannel?: string | number | null,
   ) => {
     if (!salesChannel) {
       return url
@@ -76,11 +74,8 @@ export class Search extends AppClient {
   }
 
   public constructor(ctx: IOContext, opts?: InstanceOptions) {
-    super('vtex.catalog-api-proxy@0.x', ctx, opts)
+    super(ctx, opts)
 
-    this.basePath = ctx.sessionToken
-      ? '/proxy/authenticated/catalog'
-      : '/proxy/catalog'
     this.searchEncodeURI = searchEncodeURI(ctx.account)
   }
 
@@ -90,83 +85,83 @@ export class Search extends AppClient {
     const pageTypeQuery = !query || query.startsWith('?') ? query : `?${query}`
 
     return this.get<SearchPageTypeResponse>(
-      `/pub/portal/pagetype/${pageTypePath}${pageTypeQuery}`,
-      { metric: 'search-pagetype' }
+      `/api/catalog_system/pub/portal/pagetype/${pageTypePath}${pageTypeQuery}`,
+      { metric: 'search-pagetype' },
     )
   }
 
   public product = (
     slug: string,
     vtexSegment?: string,
-    salesChannel?: string | number | null
+    salesChannel?: string | number | null,
   ) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(
-          `/pub/products/search/${this.searchEncodeURI(
-            slug && slug.toLowerCase()
+          `/api/catalog_system/pub/products/search/${this.searchEncodeURI(
+            slug && slug.toLowerCase(),
           )}/p`,
-          salesChannel
-        )
+          salesChannel,
+        ),
       ),
       {
         metric: 'search-product',
         headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
-      }
+      },
     )
 
   public productByEan = (
     id: string,
     vtexSegment?: string,
-    salesChannel?: string | number | null
+    salesChannel?: string | number | null,
   ) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(
-          `/pub/products/search?fq=alternateIds_Ean:${id}`,
-          salesChannel
-        )
+          `/api/catalog_system/pub/products/search?fq=alternateIds_Ean:${id}`,
+          salesChannel,
+        ),
       ),
       {
         metric: 'search-productByEan',
         headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
-      }
+      },
     )
 
   public productsByEan = (
     ids: string[],
     vtexSegment?: string,
-    salesChannel?: string | number | null
+    salesChannel?: string | number | null,
   ) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(
-          `/pub/products/search?${ids
+          `/api/catalog_system/pub/products/search?${ids
             ?.map(id => `fq=alternateIds_Ean:${id}`)
             .join('&')}`,
-          salesChannel
-        )
+          salesChannel,
+        ),
       ),
       {
         metric: 'search-productByEan',
         headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
-      }
+      },
     )
 
   public productById = (
     id: string,
     vtexSegment?: string,
     salesChannel?: string | number | null,
-    cacheable: boolean = true
+    cacheable: boolean = true,
   ) => {
     const isVtex = this.context.platform === 'vtex'
     const url = isVtex
       ? this.addCompleteSpecifications(
-          this.addSalesChannel(
-            `/pub/products/search?fq=productId:${id}`,
-            salesChannel
-          )
-        )
+        this.addSalesChannel(
+          `/api/catalog_system/pub/products/search?fq=productId:${id}`,
+          salesChannel,
+        ),
+      )
       : `/products/${id}`
     return this.get<SearchProduct[]>(url, {
       metric: 'search-productById',
@@ -178,97 +173,97 @@ export class Search extends AppClient {
   public productsById = (
     ids: string[],
     vtexSegment?: string,
-    salesChannel?: string | number | null
+    salesChannel?: string | number | null,
   ) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(
-          `/pub/products/search?${ids
+          `/api/catalog_system/pub/products/search?${ids
             ?.map(id => `fq=productId:${id}`)
             .join('&')}`,
-          salesChannel
-        )
+          salesChannel,
+        ),
       ),
       {
         metric: 'search-productById',
         headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
-      }
+      },
     )
 
   public productByReference = (
     id: string,
     vtexSegment?: string,
-    salesChannel?: string | number | null
+    salesChannel?: string | number | null,
   ) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(
-          `/pub/products/search?fq=alternateIds_RefId:${id}`,
-          salesChannel
-        )
+          `/api/catalog_system/pub/products/search?fq=alternateIds_RefId:${id}`,
+          salesChannel,
+        ),
       ),
       {
         metric: 'search-productByReference',
         headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
-      }
+      },
     )
 
   public productsByReference = (
     ids: string[],
     vtexSegment?: string,
-    salesChannel?: string | number | null
+    salesChannel?: string | number | null,
   ) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(
-          `/pub/products/search?${ids
+          `/api/catalog_system/pub/products/search?${ids
             ?.map(id => `fq=alternateIds_RefId:${id}`)
             .join('&')}`,
-          salesChannel
-        )
+          salesChannel,
+        ),
       ),
       {
         metric: 'search-productByReference',
         headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
-      }
+      },
     )
 
   public productBySku = (
     skuId: string,
     vtexSegment?: string,
-    salesChannel?: string | number | null
+    salesChannel?: string | number | null,
   ) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(
-          `/pub/products/search?fq=skuId:${skuId}`,
-          salesChannel
-        )
+          `/api/catalog_system/pub/products/search?fq=skuId:${skuId}`,
+          salesChannel,
+        ),
       ),
       {
         metric: 'search-productBySku',
         headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
-      }
+      },
     )
 
   public productsBySku = (
     skuIds: string[],
     vtexSegment?: string,
-    salesChannel?: string | number | null
+    salesChannel?: string | number | null,
   ) =>
     this.get<SearchProduct[]>(
       this.addCompleteSpecifications(
         this.addSalesChannel(
-          `/pub/products/search?${skuIds
+          `/api/catalog_system/pub/products/search?${skuIds
             ?.map(skuId => `fq=skuId:${skuId}`)
             .join('&')}`,
-          salesChannel
-        )
+          salesChannel,
+        ),
       ),
       {
         metric: 'search-productsBySku',
         headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
-      }
+      },
     )
 
   public products = (args: SearchArgs) => {
@@ -278,58 +273,58 @@ export class Search extends AppClient {
   }
 
   public brands = () =>
-    this.get<Brand[]>('/pub/brand/list', { metric: 'search-brands' })
+    this.get<Brand[]>('/api/catalog_system/pub/brand/list', { metric: 'search-brands' })
 
   public categories = (treeLevel: number) =>
-    this.get<CategoryTreeResponse[]>(`/pub/category/tree/${treeLevel}/`, {
+    this.get<CategoryTreeResponse[]>(`/api/catalog_system/pub/category/tree/${treeLevel}/`, {
       metric: 'search-categories',
     })
 
   public getCategoryChildren = (id: number) =>
     this.get<Record<string, string>>(
-      `/pub/category/categories/children?id=${id}`,
+      `/api/catalog_system/pub/category/categories/children?id=${id}`,
       {
         metric: 'search-category-children',
-      }
+      },
     )
 
   public facets = (facets: string = '') => {
     const [path, options] = decodeURI(facets).split('?')
     return this.get<SearchFacets>(
-      `/pub/facets/search/${encodeURI(
-        this.searchEncodeURI(`${path.trim()}${options ? '?' + options : ''}`)
+      `/api/catalog_system/pub/facets/search/${encodeURI(
+        this.searchEncodeURI(`${path.trim()}${options ? '?' + options : ''}`),
       )}`,
-      { metric: 'search-facets' }
+      { metric: 'search-facets' },
     )
   }
 
   public category = (id: string | number) =>
-    this.get<CategoryByIdResponse>(`/pub/category/${id}`, {
+    this.get<CategoryByIdResponse>(`/api/catalog_system/pub/category/${id}`, {
       metric: 'search-category',
     })
 
   public crossSelling = (id: string, type: SearchCrossSellingTypes) =>
     this.get<SearchProduct[]>(
-      `/pub/products/crossselling/${type}/${id}?groupByProduct=true`,
+      `/api/catalog_system/pub/products/crossselling/${type}/${id}?groupByProduct=true`,
       {
         metric: 'search-crossSelling',
-      }
+      },
     )
 
   public filtersInCategoryFromId = (id: string | number) =>
     this.get<FilterListTreeCategoryById[]>(
-      `/pub/specification/field/listTreeByCategoryId/${id}`,
+      `/api/catalog_system/pub/specification/field/listTreeByCategoryId/${id}`,
       {
         metric: 'search-listTreeByCategoryId',
-      }
+      },
     )
 
   public autocomplete = ({ maxRows, searchTerm }: AutocompleteArgs) =>
     this.get<{ itemsReturned: SearchAutocompleteUnit[] }>(
       `/buscaautocomplete?maxRows=${maxRows}&productNameContains=${encodeURIComponent(
-        this.searchEncodeURI(searchTerm)
+        this.searchEncodeURI(searchTerm),
       )}`,
-      { metric: 'search-autocomplete' }
+      { metric: 'search-autocomplete' },
     )
 
   private get = <T = any>(url: string, config: RequestConfig = {}) => {
@@ -343,32 +338,32 @@ export class Search extends AppClient {
     }
     config.inflightKey = inflightKey
 
-    return this.http.get<T>(`${this.basePath}${url}`, config)
+    return this.http.get<T>(`${url}`, config)
   }
 
   private productSearchUrl = ({
-    query = '',
-    category = '',
-    specificationFilters,
-    priceRange = '',
-    collection = '',
-    salesChannel = '',
-    orderBy = '',
-    from = 0,
-    to = 9,
-    map = '',
-    hideUnavailableItems = false,
-    simulationBehavior = SimulationBehavior.DEFAULT,
-    completeSpecifications = true,
-  }: SearchArgs) => {
+                                query = '',
+                                category = '',
+                                specificationFilters,
+                                priceRange = '',
+                                collection = '',
+                                salesChannel = '',
+                                orderBy = '',
+                                from = 0,
+                                to = 9,
+                                map = '',
+                                hideUnavailableItems = false,
+                                simulationBehavior = SimulationBehavior.DEFAULT,
+                                completeSpecifications = true,
+                              }: SearchArgs) => {
     const sanitizedQuery = encodeURIComponent(
-      this.searchEncodeURI(decodeURIComponent(query || '').trim())
+      this.searchEncodeURI(decodeURIComponent(query || '').trim()),
     )
     if (hideUnavailableItems) {
       const segmentData = (this.context as CustomIOContext).segment
       salesChannel = (segmentData && segmentData.channel.toString()) || ''
     }
-    let url = `/pub/products/search/${sanitizedQuery}?`
+    let url = `/api/catalog_system/pub/products/search/${sanitizedQuery}?`
     if (category && !query) {
       url += `&fq=C:/${category}/`
     }
