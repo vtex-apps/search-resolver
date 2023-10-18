@@ -1,10 +1,10 @@
 import {
-  AppClient,
   InstanceOptions,
   IOContext,
   RequestConfig,
   SegmentData,
   CacheType,
+  JanusClient,
 } from '@vtex/api'
 import { stringify } from 'qs'
 
@@ -44,7 +44,7 @@ interface SearchPageTypeResponse {
 /** Search API
  * Docs: https://documenter.getpostman.com/view/845/catalogsystem-102/Hs44
  */
-export class Search extends AppClient {
+export class Search extends JanusClient {
   private searchEncodeURI: (x: string) => string
   private basePath: string
 
@@ -76,11 +76,9 @@ export class Search extends AppClient {
   }
 
   public constructor(ctx: IOContext, opts?: InstanceOptions) {
-    super('vtex.catalog-api-proxy@0.x', ctx, opts)
+    super(ctx, opts)
 
-    this.basePath = ctx.sessionToken
-      ? '/proxy/authenticated/catalog'
-      : '/proxy/catalog'
+    this.basePath = '/api/catalog_system'
     this.searchEncodeURI = searchEncodeURI(ctx.account)
   }
 
