@@ -315,24 +315,65 @@ export const queries = {
     ctx: Context
   ) => {
     const {
-      clients: { search },
+      clients: { intelligentSearchApi },
     } = ctx
 
     if (!args.searchTerm) {
       throw new UserInputError('No search term provided')
     }
 
+    //  do we still need to translate it? not sure.
     const translatedTerm = await translateToStoreDefaultLanguage(
       ctx,
       args.searchTerm
     )
-    const { itemsReturned } = await search.autocomplete({
-      maxRows: args.maxRows,
-      searchTerm: translatedTerm,
-    })
+
+    const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+
+    const biggyArgs : {[key: string] : any} = {
+      query: translatedTerm,
+      from: 0,
+      to: args.maxRows ? args.maxRows - 1 : 4,
+      sort: '',
+      allowRedirect: false, // When there is a redirect, no product is returned.
+      ...workspaceSearchParams,
+    }
+
+    const isItems: (SearchAutocompleteUnit | { items: any[], linkText: string, productId: string, name: string })[] = []
+
+    const [isResult, searchSuggestions] = await Promise.all([
+      intelligentSearchApi.productSearch(biggyArgs, ''),
+      intelligentSearchApi.autocompleteSearchSuggestions({query: translatedTerm})
+    ])
+
+    const criterias = searchSuggestions.searches.filter((searchItem: any) => searchItem.term === translatedTerm)
+    if (criterias.length) {
+      criterias[0].attributes.map((att: any) => {
+        isItems.push({
+          items: [],
+          thumb: "",
+          thumbUrl: null,
+          name: `${translatedTerm}  ${att.labelValue}`,
+          href: `https://portal.vtexcommercestable.com.br/${att.value}/${translatedTerm}`,
+          criteria: `£${translatedTerm}  ${att.labelValue}¢/${att.value}/${translatedTerm}`, // validate with catalog
+        })
+      })
+    }
+
+    if (isResult.products.length) {
+      isResult.products.map((product: any) => {
+        isItems.push({
+          name: product.productName,
+          items: product.items,
+          productId: product.productId,
+          linkText: product.linkText,
+        })
+      })
+    }
+
     return {
       cacheId: args.searchTerm,
-      itemsReturned,
+      itemsReturned: isItems,
     }
   },
   facets: async (_: any, args: FacetsInput, ctx: any) => {
