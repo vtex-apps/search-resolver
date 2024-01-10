@@ -35,7 +35,7 @@ export const resolvers = {
       return items ? path([0, 'productId'], items) : null
     },
 
-    name: (root: any) => root.name ?? "",
+    name: (root: any) => root.productName ?? root.name ?? "",
 
     href: (root: any) => root.href ?? `https://portal.vtexcommercestable.com.br/${root.linkText}/p`,
 

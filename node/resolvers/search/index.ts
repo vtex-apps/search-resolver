@@ -322,16 +322,10 @@ export const queries = {
       throw new UserInputError('No search term provided')
     }
 
-    //  do we still need to translate it? not sure.
-    const translatedTerm = await translateToStoreDefaultLanguage(
-      ctx,
-      args.searchTerm
-    )
-
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
     const biggyArgs : {[key: string] : any} = {
-      query: translatedTerm,
+      query: args.searchTerm,
       from: 0,
       to: args.maxRows ? args.maxRows - 1 : 4,
       sort: '',
@@ -339,41 +333,34 @@ export const queries = {
       ...workspaceSearchParams,
     }
 
-    const isItems: (SearchAutocompleteUnit | { items: any[], linkText: string, productId: string, name: string })[] = []
+    const items: (SearchAutocompleteUnit | SearchProduct)[] = []
 
-    const [isResult, searchSuggestions] = await Promise.all([
+    const [productSuggestions, searchSuggestions] = await Promise.all([
       intelligentSearchApi.productSearch(biggyArgs, ''),
-      intelligentSearchApi.autocompleteSearchSuggestions({query: translatedTerm})
+      intelligentSearchApi.autocompleteSearchSuggestions({query: args.searchTerm})
     ])
 
-    const criterias = searchSuggestions.searches.filter((searchItem: any) => searchItem.term === translatedTerm)
+    const criterias = searchSuggestions.searches.filter((searchItem: any) => searchItem.term === args.searchTerm)
     if (criterias.length) {
       criterias[0].attributes.map((att: any) => {
-        isItems.push({
+        items.push({
           items: [],
           thumb: "",
           thumbUrl: null,
-          name: `${translatedTerm}  ${att.labelValue}`,
-          href: `https://portal.vtexcommercestable.com.br/${att.value}/${translatedTerm}`,
-          criteria: `£${translatedTerm}  ${att.labelValue}¢/${att.value}/${translatedTerm}`, // validate with catalog
+          name: `${args.searchTerm}  ${att.labelValue}`,
+          href: `https://portal.vtexcommercestable.com.br/${att.value}/${args.searchTerm}`,
+          criteria: `£${args.searchTerm}  ${att.labelValue}¢/${att.value}/${args.searchTerm}`, // validate with catalog
         })
       })
     }
 
-    if (isResult.products.length) {
-      isResult.products.map((product: any) => {
-        isItems.push({
-          name: product.productName,
-          items: product.items,
-          productId: product.productId,
-          linkText: product.linkText,
-        })
-      })
-    }
+    productSuggestions.products.map((product: SearchProduct) => {
+      items.push(product)
+    })
 
     return {
       cacheId: args.searchTerm,
-      itemsReturned: isItems,
+      itemsReturned: items,
     }
   },
   facets: async (_: any, args: FacetsInput, ctx: any) => {
