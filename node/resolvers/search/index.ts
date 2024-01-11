@@ -315,24 +315,52 @@ export const queries = {
     ctx: Context
   ) => {
     const {
-      clients: { search },
+      clients: { intelligentSearchApi },
     } = ctx
 
     if (!args.searchTerm) {
       throw new UserInputError('No search term provided')
     }
 
-    const translatedTerm = await translateToStoreDefaultLanguage(
-      ctx,
-      args.searchTerm
-    )
-    const { itemsReturned } = await search.autocomplete({
-      maxRows: args.maxRows,
-      searchTerm: translatedTerm,
+    const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+
+    const biggyArgs : {[key: string] : any} = {
+      query: args.searchTerm,
+      from: 0,
+      to: args.maxRows ? args.maxRows - 1 : 4,
+      sort: '',
+      allowRedirect: false, // When there is a redirect, no product is returned.
+      ...workspaceSearchParams,
+    }
+
+    const items: (SearchAutocompleteUnit | SearchProduct)[] = []
+
+    const [productSuggestions, searchSuggestions] = await Promise.all([
+      intelligentSearchApi.productSearch(biggyArgs, ''),
+      intelligentSearchApi.autocompleteSearchSuggestions({query: args.searchTerm})
+    ])
+
+    const criterias = searchSuggestions.searches.filter((searchItem: any) => searchItem.term === args.searchTerm)
+    if (criterias.length) {
+      criterias[0].attributes.map((att: any) => {
+        items.push({
+          items: [],
+          thumb: "",
+          thumbUrl: null,
+          name: `${args.searchTerm}  ${att.labelValue}`,
+          href: `https://portal.vtexcommercestable.com.br/${att.value}/${args.searchTerm}`,
+          criteria: `£${args.searchTerm}  ${att.labelValue}¢/${att.value}/${args.searchTerm}`, // validate with catalog
+        })
+      })
+    }
+
+    productSuggestions.products.map((product: SearchProduct) => {
+      items.push(product)
     })
+
     return {
       cacheId: args.searchTerm,
-      itemsReturned,
+      itemsReturned: items,
     }
   },
   facets: async (_: any, args: FacetsInput, ctx: any) => {
