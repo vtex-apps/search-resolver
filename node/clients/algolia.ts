@@ -73,6 +73,7 @@ export class Algolia extends ExternalClient {
     const client = algoliasearch(settings.algolia.appId, settings.algolia.searchKey, {
       headers: {
         'x-vtex-use-https': 'true',
+        'Proxy-Authorization': ctx.authToken,
       }
     })
     this.index = client.initIndex(settings.algolia.indexKey)
@@ -80,6 +81,7 @@ export class Algolia extends ExternalClient {
     const updateClient = algoliasearch(settings.algolia.appId, settings.algolia.adminKey, {
       headers: {
         'x-vtex-use-https': 'true',
+        'Proxy-Authorization': ctx.authToken,
       }
     })
     this.updateIndex = updateClient.initIndex(settings.algolia.updateKey)
