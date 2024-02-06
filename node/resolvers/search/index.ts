@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { NotFoundError, UserInputError, createMessagesLoader } from '@vtex/api'
 import {
   head,
@@ -12,7 +13,7 @@ import {
 } from 'ramda'
 
 import { resolvers as assemblyOptionResolvers } from './assemblyOption'
-import { resolvers as autocompleteResolvers } from './autocomplete'
+// import { resolvers as autocompleteResolvers } from './autocomplete'
 import { resolvers as brandResolvers } from './brand'
 import { resolvers as categoryResolvers } from './category'
 import { resolvers as discountResolvers } from './discount'
@@ -37,11 +38,7 @@ import {
 } from './utils'
 // import * as searchStats from '../stats/searchStats'
 import { toCompatibilityArgs, hasFacetsBadArgs } from './newURLs'
-import {
-  PATH_SEPARATOR,
-  MAP_VALUES_SEP,
-  FACETS_BUCKET,
-} from './constants'
+import { PATH_SEPARATOR, MAP_VALUES_SEP, FACETS_BUCKET } from './constants'
 import { staleFromVBaseWhileRevalidate } from '../../utils/vbase'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 
@@ -75,6 +72,21 @@ interface ProductsByIdentifierArgs {
   salesChannel?: string
 }
 
+interface ProductSuggestionsArgs {
+  fullText: string
+  facetKey: string
+  facetValue: string
+  productOriginVtex: string
+  simulationBehavior: 'skip' | 'default'
+  hideUnavailableItems: boolean
+  regionId: string
+  salesChannel: number
+  orderBy: string
+  count: number
+  shippingOptions: [string]
+  variant: string
+}
+
 const inputToSearchCrossSelling = {
   [CrossSellingInput.buy]: SearchCrossSellingTypes.whoboughtalsobought,
   [CrossSellingInput.view]: SearchCrossSellingTypes.whosawalsosaw,
@@ -86,7 +98,7 @@ const inputToSearchCrossSelling = {
 
 const translateToStoreDefaultLanguage = async (
   ctx: Context,
-  term: string,
+  term: string
 ): Promise<string> => {
   const {
     clients,
@@ -110,7 +122,7 @@ const translateToStoreDefaultLanguage = async (
   })
 }
 
-const noop = () => { }
+const noop = () => {}
 
 // Does prefetching and warms up cache for up to the 10 first elements of a search, so if user clicks on product page
 const searchFirstElements = (
@@ -130,7 +142,6 @@ const searchFirstElements = (
 }
 
 export const fieldResolvers = {
-  ...autocompleteResolvers,
   ...brandResolvers,
   ...categoryResolvers,
   ...facetsResolvers,
@@ -226,7 +237,11 @@ const filterSpecificationFilters = ({
   }
 }
 
-const getTranslatedSearchTerm = async (query: SearchArgs['query'], map: SearchArgs['map'], ctx: Context) => {
+const getTranslatedSearchTerm = async (
+  query: SearchArgs['query'],
+  map: SearchArgs['map'],
+  ctx: Context
+) => {
   if (!query || !map || !shouldTranslateToTenantLocale(ctx)) {
     return query
   }
@@ -237,18 +252,55 @@ const getTranslatedSearchTerm = async (query: SearchArgs['query'], map: SearchAr
   const queryArray = query.split('/')
   const queryUnit = queryArray[ftSearchIndex]
   const translated = await translateToStoreDefaultLanguage(ctx, queryUnit)
-  const queryTranslated = [...queryArray.slice(0, ftSearchIndex), translated, ...queryArray.slice(ftSearchIndex + 1)]
+  const queryTranslated = [
+    ...queryArray.slice(0, ftSearchIndex),
+    translated,
+    ...queryArray.slice(ftSearchIndex + 1),
+  ]
   return queryTranslated.join('/')
 }
 
 export const queries = {
+  productSuggestions: async (
+    _: any,
+    args: ProductSuggestionsArgs,
+    ctx: Context
+  ) => {
+    const {
+      clients: { algolia },
+    } = ctx
+
+    // {
+    //   "productOriginVtex": false,
+    //   "simulationBehavior": "skip",
+    //   "hideUnavailableItems": false,
+    //   "fullText": "test",
+    //   "count": 6,
+    //   "shippingOptions": [],
+    //   "variant": null
+    // }
+
+    if (!args.fullText) {
+      throw new UserInputError('No search term provided')
+    }
+    const translatedTerm = await translateToStoreDefaultLanguage(
+      ctx,
+      args.fullText
+    )
+
+    const ret = await algolia.productSuggestions(translatedTerm, {
+      length: args.count,
+    })
+
+    return ret
+  },
   autocomplete: async (
     _: any,
     args: { maxRows: number; searchTerm?: string },
     ctx: Context
   ) => {
     const {
-      clients: { search },
+      clients: { algolia },
     } = ctx
 
     if (!args.searchTerm) {
@@ -259,10 +311,12 @@ export const queries = {
       ctx,
       args.searchTerm
     )
-    const { itemsReturned } = await search.autocomplete({
+
+    const { itemsReturned } = await algolia.autocomplete({
       maxRows: args.maxRows,
       searchTerm: translatedTerm,
     })
+
     return {
       cacheId: args.searchTerm,
       itemsReturned,
@@ -273,7 +327,7 @@ export const queries = {
     const {
       clients: { search, vbase },
     } = ctx
-
+    console.log('### facets => ', args)
     if (args.selectedFacets) {
       const [map] = getMapAndPriceRangeFromSelectedFacets(args.selectedFacets)
       args.map = map
@@ -288,10 +342,10 @@ export const queries = {
     const filteredArgs =
       args.behavior === 'Static'
         ? filterSpecificationFilters({
-          ...args,
-          query: compatibilityArgs.query,
-          map: compatibilityArgs.map,
-        } as Required<FacetsArgs>)
+            ...args,
+            query: compatibilityArgs.query,
+            map: compatibilityArgs.map,
+          } as Required<FacetsArgs>)
         : (compatibilityArgs as Required<FacetsArgs>)
 
     if (hasFacetsBadArgs(filteredArgs)) {
@@ -307,6 +361,7 @@ export const queries = {
       : ''
 
     const assembledQuery = `${filteredQuery}?map=${filteredMap}${unavailableString}`
+
     const facetsResult = await staleFromVBaseWhileRevalidate(
       vbase,
       FACETS_BUCKET,
@@ -322,6 +377,9 @@ export const queries = {
         map: compatibilityArgs.map,
       },
     }
+
+    // console.log('### Facet results => ', result)
+
     return result
   },
 
@@ -329,7 +387,6 @@ export const queries = {
     const {
       clients: { search },
     } = ctx
-
     const args =
       rawArgs && isValidProductIdentifier(rawArgs.identifier)
         ? rawArgs
@@ -398,7 +455,6 @@ export const queries = {
     const {
       clients: { search },
     } = ctx
-
     let products = [] as SearchProduct[]
     const { field, values, salesChannel } = args
 
@@ -425,7 +481,9 @@ export const queries = {
   },
 
   productSearch: async (_: any, args: SearchArgs, ctx: Context, info: any) => {
-    const { clients: { search } } = ctx
+    const {
+      clients: { search, algolia },
+    } = ctx
     const queryTerm = args.query
 
     if (args.selectedFacets) {
@@ -456,28 +514,74 @@ export const queries = {
       query,
     }
 
-    const compatibilityArgs = await getCompatibilityArgs<SearchArgs>(
+    const compatibilityArgs: any = await getCompatibilityArgs<SearchArgs>(
       ctx,
       translatedArgs
     )
 
-    const [productsRaw, searchMetaData] = await Promise.all([
-      search.productsRaw(compatibilityArgs),
+    const filtersMap = (selectedFacets: any[] | undefined) => {
+      let ret: any = []
+      selectedFacets?.forEach(facet => {
+        if (facet.key === 'b') {
+          ret.push(
+            `${isNaN(facet.value) ? 'brandSlug' : 'BrandId'}:${facet.value}`
+          )
+        }
+        if (facet.key === 'c') {
+          ret.push(`categoriesSlug:${facet.value}`)
+        }
+      })
+      if (ret.length) {
+        return ret.join(' AND ')
+      }
+      return
+    }
+
+    const algoliaSearchResult = algolia.search(
+      compatibilityArgs?.fullText ?? '',
+      {
+        filters: filtersMap(compatibilityArgs?.selectedFacets),
+        offset: compatibilityArgs?.from,
+        length:
+          parseInt(compatibilityArgs?.to) -
+          parseInt(compatibilityArgs?.from) +
+          1,
+        facets: ['*'],
+        sort: compatibilityArgs?.orderBy,
+      }
+    )
+
+    const [algoliaProductsRaw, searchMetaData] = await Promise.all([
+      algoliaSearchResult,
       isQueryingMetadata(info)
         ? getSearchMetaData(_, compatibilityArgs, ctx)
         : emptyTitleTag,
     ])
 
-    searchFirstElements(productsRaw.data, args.from, search)
+    const resources = `${compatibilityArgs?.from}-${parseInt(
+      compatibilityArgs?.to
+    )}/${algoliaProductsRaw?.nbHits}`
 
-    // if (productsRaw.status === 200) {
-    //   searchStats.count(ctx, args)
-    // }
-    return {
+    const algoliaRawMap = {
+      status: 200,
+      statusText: 'OK',
+      headers: {
+        resources,
+      },
+      data: algoliaProductsRaw.hits,
+    }
+
+    searchFirstElements(algoliaRawMap.data, args.from, search)
+
+    const result = {
       translatedArgs: compatibilityArgs,
       searchMetaData,
-      productsRaw,
+      productsRaw: algoliaRawMap,
     }
+
+    console.log('### Resolver ProductSearch result => ', result)
+
+    return result
   },
 
   productRecommendations: async (
@@ -525,7 +629,11 @@ export const queries = {
       args.map = map
     }
 
-    const query = await getTranslatedSearchTerm(args.query || '', args.map || '', ctx)
+    const query = await getTranslatedSearchTerm(
+      args.query || '',
+      args.map || '',
+      ctx
+    )
     const translatedArgs = {
       ...args,
       query,
@@ -539,34 +647,33 @@ export const queries = {
   /* All search engines need to implement the topSearches, searchSuggestions, and productSuggestions queries.
   VTEX search doesn't support these queries, so it always returns empty results as a placeholder. */
   topSearches: () => {
+    console.log('### topSearches')
     return {
       searches: [],
     }
   },
   autocompleteSearchSuggestions: () => {
+    console.log('### autocompleteSearchSuggestions')
     return {
       searches: [],
     }
   },
-  productSuggestions: () => {
-    return {
-      count: 0,
-      products: [],
-    }
-  },
   banners: () => {
+    console.log('### banners')
     return {
-      banners: []
+      banners: [],
     }
   },
   searchSuggestions: () => {
+    console.log('### searchSuggestions')
     return {
       searches: [],
     }
   },
   correction: () => {
+    console.log('### correction')
     return {
-      correction: null
+      correction: null,
     }
-  }
+  },
 }

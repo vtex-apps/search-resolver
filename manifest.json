@@ -1,8 +1,8 @@
 {
-  "vendor": "vtex",
-  "name": "search-resolver",
-  "version": "0.17.1",
-  "title": "GraphQL resolver for the VTEX store APIs",
+  "vendor": "uselectrical",
+  "name": "algolia-search-resolver",
+  "version": "0.0.0",
+  "title": "Algolia GraphQL resolver for the VTEX store APIs",
   "description": "GraphQL resolvers for the VTEX API for the catalog and orders.",
   "credentialType": "absolute",
   "builders": {
@@ -13,7 +13,8 @@
     "vtex.messages": "1.x",
     "vtex.catalog-api-proxy": "0.x",
     "vtex.search-graphql": "0.x",
-    "vtex.rewriter": "1.x"
+    "vtex.rewriter": "1.x",
+    "vtex.broadcaster": "0.x"
   },
   "policies": [
     {
@@ -28,6 +29,23 @@
         "host": "{{account}}.vtexcommercestable.com.br",
         "path": "/api/catalog_system/*"
       }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "*",
+        "path": "*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "portal.vtexcommercestable.com.br",
+        "path": "/api/catalog_system/*"
+      }
+    },
+    {
+      "name": "Sku.aspx"
     },
     {
       "name": "vtex.rewriter:resolve-graphql"

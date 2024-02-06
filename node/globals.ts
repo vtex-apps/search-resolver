@@ -23,7 +23,7 @@ declare global {
     messagesBindingLanguage?: MessagesLoaderV2
   }
 
-  interface StaleRevalidateData<T>{
+  interface StaleRevalidateData<T> {
     ttl: Date
     data: T
   }

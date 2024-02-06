@@ -19,16 +19,13 @@ const objToNameValue = (
   if (!record) {
     return []
   }
-  return Object.keys(record).reduce(
-    (acc, key: any) => {
-      const value = record[key]
-      if (typeof value === 'string') {
-        acc.push({ [keyName]: key, [valueName]: value })
-      }
-      return acc
-    },
-    [] as Record<string, string>[]
-  )
+  return Object.keys(record).reduce((acc, key: any) => {
+    const value = record[key]
+    if (typeof value === 'string') {
+      acc.push({ [keyName]: key, [valueName]: value })
+    }
+    return acc
+  }, [] as Record<string, string>[])
 }
 
 type SearchProductWithCache = SearchProduct & { cacheId?: string }
@@ -69,22 +66,34 @@ const removeStartingSlashes = (str: string) =>
   str.startsWith('/') ? str.slice(1) : str
 
 const getProductFilterIdMap = async (product: SearchProduct, ctx: Context) => {
-  const filters = await ctx.clients.search.filtersInCategoryFromId(product.categoryId)
-  const filterMapFromName = filters.reduce(
-    (acc, curr) => {
-      acc[curr.Name] = curr.FieldId.toString()
-      return acc
-    },
-    {} as Record<string, string>
+  const filters = await ctx.clients.search.filtersInCategoryFromId(
+    product.categoryId
   )
+  const filterMapFromName = filters.reduce((acc, curr) => {
+    acc[curr.Name] = curr.FieldId.toString()
+    return acc
+  }, {} as Record<string, string>)
   return filterMapFromName
 }
 
-const getProductSpecificationGroupIdMap = async (skuId: string | number, ctx: Context) => {
-  const { clients: { catalog } } = ctx
-  const filters = await catalog.skuStockKeepingUnitById(skuId).then(response => response.ProductSpecifications)
+const getProductSpecificationGroupIdMap = async (
+  skuId: string | number,
+  ctx: Context
+) => {
+  const {
+    clients: { catalog },
+  } = ctx
+  const filters = await catalog
+    .skuStockKeepingUnitById(skuId)
+    .then(response => response?.ProductSpecifications)
   const filterMapFromName = filters.reduce(
-    (acc, curr) => {
+    (
+      acc: { [x: string]: any },
+      curr: {
+        FieldGroupId: { toString: () => any }
+        FieldGroupName: string | number
+      }
+    ) => {
       if (curr.FieldGroupId && curr.FieldGroupName) {
         acc[curr.FieldGroupName] = curr.FieldGroupId.toString()
       }
@@ -158,13 +167,21 @@ const urlToSlug = (slug: string | undefined) => {
   return finalSlug
 }
 
-const addTranslationParamsToSpecification = (filterIdFromNameMap: Record<string, string>, ctx: Context) => (specification: { name: string, values: string[] }) => {
+const addTranslationParamsToSpecification = (
+  filterIdFromNameMap: Record<string, string>,
+  ctx: Context
+) => (specification: { name: string; values: string[] }) => {
   const { name, values } = specification
   const filterId = filterIdFromNameMap[name]
   return {
     originalName: name,
-    name: addContextToTranslatableString({ content: name, context: filterId }, ctx),
-    values: values.map(value => addContextToTranslatableString({ content: value, context: filterId }, ctx))
+    name: addContextToTranslatableString(
+      { content: name, context: filterId },
+      ctx
+    ),
+    values: values.map(value =>
+      addContextToTranslatableString({ content: value, context: filterId }, ctx)
+    ),
   }
 }
 
@@ -201,19 +218,19 @@ export const resolvers = {
     productClusters: ({ productClusters = {} }: SearchProduct) =>
       objToNameValue('id', 'name', productClusters),
 
-    properties: async (product: SearchProduct, _: unknown, ctx: Context) => {
-      const valuesUntranslated = (product.allSpecifications ?? []).map((name: string) => {
-        const value = (product as unknown as DynamicKey<string[]>)[name]
-        return { name, originalName: name, values: value }
-      })
-      if (!shouldTranslateToUserLocale(ctx)) {
-        return valuesUntranslated
-      }
+    // properties: async (product: SearchProduct, _: unknown, ctx: Context) => {
+    //   const valuesUntranslated = (product.allSpecifications ?? []).map((name: string) => {
+    //     const value = (product as unknown as DynamicKey<string[]>)[name]
+    //     return { name, originalName: name, values: value }
+    //   })
+    //   if (!shouldTranslateToUserLocale(ctx)) {
+    //     return valuesUntranslated
+    //   }
 
-      const filterIdFromNameMap = await getProductFilterIdMap(product, ctx)
-      const valuesWithTranslations = valuesUntranslated.map(addTranslationParamsToSpecification(filterIdFromNameMap, ctx))
-      return valuesWithTranslations
-    },
+    //   const filterIdFromNameMap = await getProductFilterIdMap(product, ctx)
+    //   const valuesWithTranslations = valuesUntranslated.map(addTranslationParamsToSpecification(filterIdFromNameMap, ctx))
+    //   return valuesWithTranslations
+    // },
 
     propertyGroups: (product: SearchProduct) => {
       const { allSpecifications = [] } = product
@@ -223,32 +240,46 @@ export const resolvers = {
 
     recommendations: (product: SearchProduct) => product,
 
-    description: formatTranslatableProp<SearchProduct, 'description', 'productId'>(
+    description: formatTranslatableProp<
+      SearchProduct,
       'description',
       'productId'
-    ),
+    >('description', 'productId'),
 
-    metaTagDescription: formatTranslatableProp<SearchProduct, 'metaTagDescription', 'productId'>(
+    metaTagDescription: formatTranslatableProp<
+      SearchProduct,
       'metaTagDescription',
       'productId'
-    ),
+    >('metaTagDescription', 'productId'),
 
-    titleTag: ({ productId, productTitle, productName }: SearchProduct, _: unknown, ctx: Context) =>
+    titleTag: (
+      { productId, productTitle, productName }: SearchProduct,
+      _: unknown,
+      ctx: Context
+    ) =>
       addContextToTranslatableString(
         {
           content: productTitle ?? productName ?? '',
-          context: productId
+          context: productId,
         },
         ctx
       ),
 
-    productName: formatTranslatableProp<SearchProduct, 'productName', 'productId'>(
+    productName: formatTranslatableProp<
+      SearchProduct,
       'productName',
       'productId'
-    ),
+    >('productName', 'productId'),
 
-    linkText: async ({ productId, linkText }: SearchProduct, _: unknown, ctx: Context) => {
-      const { clients: { rewriter }, vtex: { binding } } = ctx
+    linkText: async (
+      { productId, linkText }: SearchProduct,
+      _: unknown,
+      ctx: Context
+    ) => {
+      const {
+        clients: { rewriter },
+        vtex: { binding },
+      } = ctx
 
       if (!shouldTranslateToBinding(ctx)) {
         return linkText
@@ -257,74 +288,109 @@ export const resolvers = {
       return urlToSlug(route) ?? linkText
     },
 
-    specificationGroups: async (product: SearchProduct, _: unknown, ctx: Context) => {
-      const allSpecificationsGroups = (product.allSpecificationsGroups ?? []).concat(['allSpecifications'])
+    specificationGroups: async (
+      product: SearchProduct,
+      _: unknown,
+      ctx: Context
+    ) => {
+      const allSpecificationsGroups = (
+        product.allSpecificationsGroups ?? []
+      ).concat(['allSpecifications'])
 
       const visibleSpecifications = product.completeSpecifications
-        ? product.completeSpecifications.reduce<Record<string, boolean>>((acc, specification) => {
-            acc[specification.Name] = specification.IsOnProductDetails
-            return acc
-          }, {})
+        ? product.completeSpecifications.reduce<Record<string, boolean>>(
+            (acc, specification) => {
+              acc[specification.Name] = specification.IsOnProductDetails
+              return acc
+            },
+            {}
+          )
         : null
 
       let noTranslationSpecificationGroups = allSpecificationsGroups.map(
         (groupName: string) => {
-          let groupSpecifications = (product as unknown as DynamicKey<string[]>)?.[groupName] ?? []
+          let groupSpecifications =
+            ((product as unknown) as DynamicKey<string[]>)?.[groupName] ?? []
 
-          groupSpecifications = groupSpecifications.filter(specificationName => {
-            if (visibleSpecifications && visibleSpecifications[specificationName] != null)
-              return visibleSpecifications[specificationName]
-            return true
-          })
+          groupSpecifications = groupSpecifications.filter(
+            specificationName => {
+              if (
+                visibleSpecifications &&
+                visibleSpecifications[specificationName] != null
+              )
+                return visibleSpecifications[specificationName]
+              return true
+            }
+          )
 
           return {
             originalName: groupName,
             name: groupName,
-            specifications: groupSpecifications.map((name) => {
-                const values = (product as unknown as DynamicKey<string[]>)[name] || []
-                return {
-                  originalName: name,
-                  name,
-                  values,
-                }
+            specifications: groupSpecifications.map(name => {
+              const values =
+                ((product as unknown) as DynamicKey<string[]>)[name] || []
+              return {
+                originalName: name,
+                name,
+                values,
               }
-            ),
+            }),
           }
         }
       )
 
-      noTranslationSpecificationGroups = noTranslationSpecificationGroups.filter(group => group.specifications.length > 0)
+      noTranslationSpecificationGroups = noTranslationSpecificationGroups.filter(
+        group => group.specifications.length > 0
+      )
 
       const sku = product.items[0]
       if (!shouldTranslateToUserLocale(ctx) || !sku) {
         return noTranslationSpecificationGroups
       }
 
-      const groupdNameIdMap = await getProductSpecificationGroupIdMap(sku.itemId, ctx)
+      const groupdNameIdMap = await getProductSpecificationGroupIdMap(
+        sku.itemId,
+        ctx
+      )
       const filterIdFromNameMap = await getProductFilterIdMap(product, ctx)
 
       const translatedGroups = noTranslationSpecificationGroups.map(group => {
         return {
           originalName: group.name,
-          name: addContextToTranslatableString({ content: group.name, context: groupdNameIdMap[group.name] }, ctx),
-          specifications: group.specifications.map(addTranslationParamsToSpecification(filterIdFromNameMap, ctx))
+          name: addContextToTranslatableString(
+            { content: group.name, context: groupdNameIdMap[group.name] },
+            ctx
+          ),
+          specifications: group.specifications.map(
+            addTranslationParamsToSpecification(filterIdFromNameMap, ctx)
+          ),
         }
       })
 
       return translatedGroups
     },
-    items: ({ items: searchItems, skuSpecifications = [] }: SearchProduct, { filter }: ItemArg) => {
-      const searchItemsWithVariations = searchItems.map(item => ({ ...item, skuSpecifications }))
+    items: (
+      { items: searchItems, skuSpecifications = [] }: SearchProduct,
+      { filter }: ItemArg
+    ) => {
+      const searchItemsWithVariations = searchItems.map(item => ({
+        ...item,
+        skuSpecifications,
+      }))
       if (filter === ItemsFilterEnum.ALL) {
         return searchItemsWithVariations
       }
       if (filter === ItemsFilterEnum.FIRST_AVAILABLE) {
         const firstAvailable = searchItemsWithVariations.find(isAvailable)
-        return firstAvailable ? [firstAvailable] : [searchItemsWithVariations[0]]
+        return firstAvailable
+          ? [firstAvailable]
+          : [searchItemsWithVariations[0]]
       }
       if (filter === ItemsFilterEnum.ALL_AVAILABLE) {
         const onlyAvailable = searchItemsWithVariations.filter(isAvailable)
-        return onlyAvailable.length > 0 ? onlyAvailable : [searchItemsWithVariations[0]]
+        return onlyAvailable.length > 0
+          ? onlyAvailable
+          : [searchItemsWithVariations[0]]
       }
       return searchItemsWithVariations
     },

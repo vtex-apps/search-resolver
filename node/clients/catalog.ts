@@ -1,32 +1,21 @@
-import { ExternalClient, InstanceOptions, IOContext } from '@vtex/api'
+import { InstanceOptions, IOContext, JanusClient } from '@vtex/api'
+export default class Catalog extends JanusClient {
+  private SKU_ENDPOINT: string =
+    '/api/catalog_system/pvt/sku/stockkeepingunitbyid'
 
-export interface SkuStockKeepingUnitByIdReponse {
-  'ProductSpecifications': {
-    "FieldGroupId": number,
-    "FieldGroupName": string
-  }[]
-}
-
-export class Catalog extends ExternalClient {
   constructor(context: IOContext, options?: InstanceOptions) {
-    super(
-      `http://${context.account}.vtexcommercestable.com.br/api/catalog_system`,
-      context,
-      {
-        ...(options ?? {}),
-        headers: {
-          ...(options?.headers ?? {}),
-          'Content-Type': 'application/json',
-          'VtexIdclientAutCookie': context.authToken,
-          'X-Vtex-Use-Https': 'true',
-        },
-      }
-    )
+    super(context, options)
   }
 
-  public skuStockKeepingUnitById (id: string | number) {
-    return this.http.get<SkuStockKeepingUnitByIdReponse>(`/pvt/sku/stockkeepingunitbyid/${id}`, {
-      metric: 'sku-stock-kepping-unit-by-id',
-    })
+  public async skuStockKeepingUnitById(skuId: number | string) {
+    let headers = this.headers()
+    return this.http.get(`${this.SKU_ENDPOINT}/${skuId}`, { headers: headers })
+  }
+
+  private headers() {
+    return {
+      'X-Vtex-Use-Https': true,
+      VtexIdclientAutCookie: this.context.authToken,
+    }
   }
 }

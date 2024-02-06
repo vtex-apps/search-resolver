@@ -6,6 +6,8 @@ import schema from 'vtex.search-graphql/graphql'
 import { Clients } from './clients'
 import { schemaDirectives } from './directives'
 import { resolvers } from './resolvers'
+// import { throttle } from './middlewares/throttle'
+import { catalogHandler } from './middlewares/catalog'
 
 const TWO_SECONDS_MS = 2 * 1000
 const THREE_SECONDS_MS = 3 * 1000
@@ -46,16 +48,19 @@ export default new Service<Clients, RecorderState, CustomContext>({
         memoryCache: searchCache,
         timeout: SIX_SECONDS_MS,
       },
-      vbase:{
+      vbase: {
         concurrency: 2,
         memoryCache: vbaseCache,
-        timeout: TWO_SECONDS_MS
-      }
+        timeout: TWO_SECONDS_MS,
+      },
     },
   },
   graphql: {
     resolvers,
     schema,
     schemaDirectives,
+  },
+  events: {
+    broadcasterCatalog: catalogHandler,
   },
 })
