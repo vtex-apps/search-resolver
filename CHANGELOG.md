@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Algolia hosts property to accept custom url and protocol
+
 ## [0.0.4] - 2024-02-06
 
 ### Added

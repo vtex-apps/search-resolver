@@ -74,7 +74,11 @@ export class Algolia extends ExternalClient {
       headers: {
         'x-vtex-use-https': 'true',
         'Proxy-Authorization': ctx.authToken,
-      }
+      },
+      hosts: [{
+        url: `TDB6H926RQ-dsn.algolia.net`,
+        protocol: 'http'
+      }]
     })
     this.index = client.initIndex(settings.algolia.indexKey)
 
@@ -82,7 +86,11 @@ export class Algolia extends ExternalClient {
       headers: {
         'x-vtex-use-https': 'true',
         'Proxy-Authorization': ctx.authToken,
-      }
+      },
+      hosts: [{
+        url: `TDB6H926RQ-dsn.algolia.net`,
+        protocol: 'http'
+      }]
     })
     this.updateIndex = updateClient.initIndex(settings.algolia.updateKey)
 
