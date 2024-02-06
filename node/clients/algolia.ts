@@ -69,19 +69,19 @@ export class Algolia extends ExternalClient {
   }
 
   public constructor(ctx: IOContext, opts?: InstanceOptions) {
-    super(`http://${settings.algolia.appId}-dsn.algolia.net/1/indexes/${settings.algolia.indexKey}`, ctx, {
-      ...opts,
+    super(``, ctx, opts)
+    const client = algoliasearch(settings.algolia.appId, settings.algolia.searchKey, {
       headers: {
-        ...opts?.headers,
-        'X-Algolia-API-Key': settings.algolia.searchKey,
-        'X-Algolia-Application-Id': settings.algolia.appId,
-        'X-Vtex-Use-Https': 'true',
+        'x-vtex-use-https': 'true',
       }
     })
-    const client = algoliasearch(settings.algolia.appId, settings.algolia.searchKey)
     this.index = client.initIndex(settings.algolia.indexKey)
 
-    const updateClient = algoliasearch(settings.algolia.appId, settings.algolia.adminKey)
+    const updateClient = algoliasearch(settings.algolia.appId, settings.algolia.adminKey, {
+      headers: {
+        'x-vtex-use-https': 'true',
+      }
+    })
     this.updateIndex = updateClient.initIndex(settings.algolia.updateKey)
 
     this.virtualReplicaASC = client.initIndex(settings.algolia.indexKey+'_asc')
