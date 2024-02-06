@@ -33,8 +33,8 @@
     {
       "name": "outbound-access",
       "attrs": {
-        "host": "*",
-        "path": "*"
+        "host": "TDB6H926RQ-dsn.algolia.net",
+        "path": "/1/indexes/*"
       }
     },
     {
