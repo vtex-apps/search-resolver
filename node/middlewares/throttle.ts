@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { TooManyRequestsError, EventContext } from '@vtex/api'
 
 const MAX_REQUEST = 10
@@ -10,10 +9,7 @@ export async function throttle(
 ) {
   const {
     vtex: { logger },
-    key,
   } = ctx
-
-  console.log('Throttle', key)
 
   COUNTER++
 

@@ -1,18 +1,12 @@
-/* eslint-disable no-console */
 import {
   ExternalClient,
-  RequestConfig,
 } from '@vtex/api'
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
-import { stringify } from 'qs'
 import algoliasearch from 'algoliasearch'
 
 import {ENVIRONMENT as settings} from '../constants'
 import { productSuggestions as productSuggestionsMapping } from '../utils/productMapping'
-import {
-  searchEncodeURI,
-} from '../resolvers/search/utils'
 
 
 interface AutocompleteArgs {
@@ -36,72 +30,67 @@ interface SearchAutocompleteUnit {
   href: string
   criteria: string
 }
-enum SimulationBehavior {
-  SKIP = 'skip',
-  DEFAULT = 'default',
-}
 
-const inflightKey = ({ baseURL, url, params, headers }: RequestConfig) => {
-  return (
-    baseURL! +
-    url! +
-    stringify(params, { arrayFormat: 'repeat', addQueryPrefix: true }) +
-    `&segmentToken=${headers['x-vtex-segment']}`
-  )
-}
-
-/** Search API
- * Docs: https://documenter.getpostman.com/view/845/catalogsystem-102/Hs44
+/**
+ * Algolia class for performing search and autocomplete operations.
+ *
+ * @class Algolia
+ * @extends ExternalClient
  */
 export class Algolia extends ExternalClient {
-  private searchEncodeURI: (x: string) => string
   private index: any
   private updateIndex: any
   private virtualReplicaASC: any
   private virtualReplicaDESC: any
 
-  private addCompleteSpecifications = (url: string) => {
-    if (!url.includes('?')) {
-      return `${url}?compSpecs=true`
-    }
 
-    return `${url}&compSpecs=true`
-  }
-
+  // Constructor for the Algolia class
   public constructor(ctx: IOContext, opts?: InstanceOptions) {
+    // Call the constructor of the parent class
     super(``, ctx, opts)
+
+    // Initialize the Algolia client for the main index
     const client = algoliasearch(settings.algolia.appId, settings.algolia.searchKey, {
       headers: {
         'x-vtex-use-https': 'true',
         'Proxy-Authorization': ctx.authToken,
       },
       hosts: [{
-        url: `TDB6H926RQ-dsn.algolia.net`,
+        url: `${settings.algolia.appId}-dsn.algolia.net`,
         protocol: 'http'
       }]
     })
     this.index = client.initIndex(settings.algolia.indexKey)
 
+    // Initialize the Algolia client for the update index
     const updateClient = algoliasearch(settings.algolia.appId, settings.algolia.adminKey, {
       headers: {
         'x-vtex-use-https': 'true',
         'Proxy-Authorization': ctx.authToken,
       },
       hosts: [{
-        url: `TDB6H926RQ-dsn.algolia.net`,
+        url: `${settings.algolia.appId}-dsn.algolia.net`,
         protocol: 'http'
       }]
     })
     this.updateIndex = updateClient.initIndex(settings.algolia.updateKey)
 
+    // Initialize the Algolia client for the ascending virtual replica index
     this.virtualReplicaASC = client.initIndex(settings.algolia.indexKey+'_asc')
 
+    // Initialize the Algolia client for the descending virtual replica index
     this.virtualReplicaDESC = client.initIndex(settings.algolia.indexKey+'_desc')
-
-    this.searchEncodeURI = searchEncodeURI(ctx.account)
   }
 
+  /**
+   * Performs a search operation using Algolia.
+   *
+   * @param {string} term - The search term.
+   * @param {object} args - Additional arguments for the search operation.
+   * @returns {Promise<any>} - The search results.
+   */
   public search = async (term: string, args: any = {}) => {
+    // Parse the arguments for the search operation
     const parsedArgs = {
       offset: args.offset ?? undefined,
       length: args.length ?? undefined,
@@ -109,30 +98,40 @@ export class Algolia extends ExternalClient {
       filters: args.filters ?? undefined,
     }
 
-    console.log('### Algolia search client => ', parsedArgs)
-
+    // Check if sorting is specified and not 'OrderByScoreDESC'
     if (args.sort && args.sort !== 'OrderByScoreDESC') {
+      // Check the sorting type
       if(args.sort === 'OrderByNameASC') {
+        // Perform the search using the ascending virtual replica index
         return this.virtualReplicaASC.search(term, parsedArgs)
       } else {
+        // Perform the search using the descending virtual replica index
         return this.virtualReplicaDESC.search(term, parsedArgs)
       }
     }
+    // Perform the search using the main index
     return this.index.search(term, parsedArgs)
   }
+
+  /**
+   * Saves an object to the Algolia update index.
+   *
+   * @param {object} args - The object to be saved.
+   * @returns {Promise<any>} - The result of the save operation.
+   */
   public saveObject = async (args: any) => await this.updateIndex.saveObject(args)
 
-  public productsQuantity = async (args: SearchArgs) => {
-    const {
-      headers: { resources },
-    } = await this.getRaw(this.productSearchUrl(args))
-    const quantity = resources.split('/')[1]
-    return parseInt(quantity, 10)
-  }
-
+  /**
+   * Performs an autocomplete operation using Algolia.
+   *
+   * @param {object} args - The autocomplete arguments.
+   * @returns {Promise<{ cacheId: null, itemsReturned: SearchAutocompleteUnit[] }>} - The autocomplete results.
+   */
   public autocomplete = async ({ maxRows, searchTerm }: AutocompleteArgs): Promise<{ cacheId: null, itemsReturned: SearchAutocompleteUnit[] }> => {
+    // Perform the autocomplete search
     const response: any = await this.index.search(searchTerm, {length: maxRows});
 
+    // Map the response hits to the autocomplete items
     const itemsReturned = response?.hits?.map(({
       slug,
       product_id,
@@ -151,15 +150,21 @@ export class Algolia extends ExternalClient {
       }
     }) || [];
 
-
     return { cacheId: null, itemsReturned };
   }
 
-
+  /**
+   * Performs a product suggestions operation using Algolia.
+   *
+   * @param {string} translatedTerm - The translated search term.
+   * @param {object} args - Additional arguments for the product suggestions operation.
+   * @returns {Promise<any>} - The product suggestions.
+   */
   public productSuggestions = async (translatedTerm: string, args: any) => {
+    // Perform the product suggestions search
     const ret = await this.index.search(translatedTerm, args)
+    // Map the search results to product suggestions
     const productsMap = productSuggestionsMapping(ret?.hits)
-
 
     return {
       count: ret?.nbHits ?? 0,
@@ -167,73 +172,5 @@ export class Algolia extends ExternalClient {
       operator: null,
       products: productsMap ?? []
     }
-  }
-
-
-  private getRaw = <T = any>(url: string, config: RequestConfig = {}) => {
-
-    config.inflightKey = inflightKey
-
-    return this.http.getRaw<T>(`/${url}`, config)
-  }
-
-  private productSearchUrl = ({
-    query = '',
-    fullText = '',
-    category = '',
-    specificationFilters,
-    priceRange = '',
-    collection = '',
-    salesChannel = '',
-    orderBy = '',
-    from = 0,
-    to = 9,
-    map = '',
-    hideUnavailableItems = false,
-    simulationBehavior = SimulationBehavior.DEFAULT,
-    completeSpecifications = true,
-  }: SearchArgs) => {
-    const sanitizedQuery = encodeURIComponent(
-      this.searchEncodeURI(decodeURIComponent(query || fullText || '').trim())
-    )
-    if (hideUnavailableItems) {
-      const segmentData = (this.context as CustomIOContext).segment
-      salesChannel = (segmentData && segmentData.channel.toString()) || ''
-    }
-    let url = `/pub/products/search/${sanitizedQuery}?`
-    if (category && !query) {
-      url += `&fq=C:/${category}/`
-    }
-    if (specificationFilters && specificationFilters.length > 0) {
-      url += specificationFilters.map(filter => `&fq=${filter}`)
-    }
-    if (priceRange) {
-      url += `&fq=P:[${priceRange}]`
-    }
-    if (collection) {
-      url += `&fq=productClusterIds:${collection}`
-    }
-    if (salesChannel) {
-      url += `&fq=isAvailablePerSalesChannel_${salesChannel}:1`
-    }
-    if (orderBy) {
-      url += `&O=${orderBy}`
-    }
-    if (map) {
-      url += `&map=${map}`
-    }
-    if (from != null && from > -1) {
-      url += `&_from=${from}`
-    }
-    if (to != null && to > -1) {
-      url += `&_to=${to}`
-    }
-    if (simulationBehavior === SimulationBehavior.SKIP) {
-      url += `&simulation=false`
-    }
-    if (completeSpecifications) {
-      url = this.addCompleteSpecifications(url)
-    }
-    return url
   }
 }

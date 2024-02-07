@@ -6,7 +6,7 @@ import schema from 'vtex.search-graphql/graphql'
 import { Clients } from './clients'
 import { schemaDirectives } from './directives'
 import { resolvers } from './resolvers'
-// import { throttle } from './middlewares/throttle'
+import { throttle } from './middlewares/throttle'
 import { catalogHandler } from './middlewares/catalog'
 
 const TWO_SECONDS_MS = 2 * 1000
@@ -61,6 +61,6 @@ export default new Service<Clients, RecorderState, CustomContext>({
     schemaDirectives,
   },
   events: {
-    broadcasterCatalog: catalogHandler,
+    broadcasterCatalog: [throttle, catalogHandler],
   },
 })

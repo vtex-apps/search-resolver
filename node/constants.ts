@@ -1,3 +1,4 @@
+// Define the environment settings
 export const ENVIRONMENT = {
   algolia: {
     searchKey: '8548b87ba1b669361f6a1f2e668cb629',

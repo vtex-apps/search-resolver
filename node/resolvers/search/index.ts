@@ -261,6 +261,14 @@ const getTranslatedSearchTerm = async (
 }
 
 export const queries = {
+  /**
+   * Retrieves a list of product suggestions based on a search term.
+   * @param _ Unused parameter.
+   * @param args The arguments for the product suggestions query.
+   * @param ctx The context object containing the Algolia client.
+   * @returns An array of product suggestions.
+   * @throws UserInputError if no search term is provided.
+   */
   productSuggestions: async (
     _: any,
     args: ProductSuggestionsArgs,
@@ -270,24 +278,18 @@ export const queries = {
       clients: { algolia },
     } = ctx
 
-    // {
-    //   "productOriginVtex": false,
-    //   "simulationBehavior": "skip",
-    //   "hideUnavailableItems": false,
-    //   "fullText": "test",
-    //   "count": 6,
-    //   "shippingOptions": [],
-    //   "variant": null
-    // }
-
+    // Check if a search term is provided
     if (!args.fullText) {
       throw new UserInputError('No search term provided')
     }
+
+    // Translate the search term to the default language of the store
     const translatedTerm = await translateToStoreDefaultLanguage(
       ctx,
       args.fullText
     )
 
+    // Retrieve product suggestions from Algolia
     const ret = await algolia.productSuggestions(translatedTerm, {
       length: args.count,
     })
@@ -480,12 +482,25 @@ export const queries = {
     throw new NotFoundError(`No products were found with requested ${field}`)
   },
 
+  /**
+   * This function performs a search for products based on the provided query and selected facets,
+   * using the Algolia search engine. It also includes functionality for translating the search term
+   * and retrieving search metadata.
+   *
+   * @param _ The parent value, which is not used in this function.
+   * @param args An object containing the arguments for the search, including the query, selected facets, and pagination parameters.
+   * @param ctx The context object, which contains client instances and other contextual information.
+   * @param info The GraphQL resolve info object, which contains information about the execution state of the query.
+   * @returns An object containing the translated arguments, search metadata, and raw search results from Algolia.
+   */
   productSearch: async (_: any, args: SearchArgs, ctx: Context, info: any) => {
     const {
       clients: { search, algolia },
     } = ctx
+
     const queryTerm = args.query
 
+    // Extract map and priceRange from selectedFacets
     if (args.selectedFacets) {
       const [map, priceRange] = getMapAndPriceRangeFromSelectedFacets(
         args.selectedFacets
@@ -494,31 +509,37 @@ export const queries = {
       args.priceRange = priceRange
     }
 
+    // Decode the map parameter if it is provided
     args.map = args.map && decodeURIComponent(args.map)
 
+    // Validate the query term and check for any invalid characters
     if (queryTerm == null || test(/[?&[\]=]/, queryTerm)) {
       throw new UserInputError(
         `The query term contains invalid characters. query=${queryTerm}`
       )
     }
 
+    // Check if the 'to' parameter exceeds the maximum allowed value
     if (args.to && args.to > 2500) {
       throw new UserInputError(
         `The maximum value allowed for the 'to' argument is 2500`
       )
     }
 
+    // Translate the search term to the store's default language if necessary
     const query = await getTranslatedSearchTerm(args.query, args.map, ctx)
     const translatedArgs = {
       ...args,
       query,
     }
 
+    // Get compatibility arguments for the search, including legacy search format conversion if needed
     const compatibilityArgs: any = await getCompatibilityArgs<SearchArgs>(
       ctx,
       translatedArgs
     )
 
+    // Map the selected facets to Algolia filter expressions
     const filtersMap = (selectedFacets: any[] | undefined) => {
       let ret: any = []
       selectedFacets?.forEach(facet => {
@@ -537,6 +558,7 @@ export const queries = {
       return
     }
 
+    // Perform the search using the Algolia search engine
     const algoliaSearchResult = algolia.search(
       compatibilityArgs?.fullText ?? '',
       {
@@ -551,6 +573,7 @@ export const queries = {
       }
     )
 
+    // Retrieve search metadata if the query includes metadata fields
     const [algoliaProductsRaw, searchMetaData] = await Promise.all([
       algoliaSearchResult,
       isQueryingMetadata(info)
@@ -571,15 +594,15 @@ export const queries = {
       data: algoliaProductsRaw.hits,
     }
 
+    // Perform additional operations on the search results
     searchFirstElements(algoliaRawMap.data, args.from, search)
 
+    // Return the search results, translated arguments, and search metadata
     const result = {
       translatedArgs: compatibilityArgs,
       searchMetaData,
       productsRaw: algoliaRawMap,
     }
-
-    console.log('### Resolver ProductSearch result => ', result)
 
     return result
   },
