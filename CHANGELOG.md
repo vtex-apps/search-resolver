@@ -12,6 +12,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `groupByProduct` param to `productRecommendations` query.
 - `quantity` param to `Recommendation.similars` resolver.
 
+## [1.67.1] - 2023-10-18
+
+## [1.67.0] - 2023-08-22
+
+### Added
+- `sponsoredProducts` query.
+
+## [1.66.1] - 2023-08-18
+
+### Fixed
+- Retrieve translated text-based product specification values ("properties") when using the `productSearch` and `products` queries.
+
+## [1.66.0] - 2023-08-01
+
+### Fixed
+- Version bump to reset circuit breaker
 ## [1.65.1] - 2023-04-24
 
 ### Fixed

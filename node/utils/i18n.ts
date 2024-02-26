@@ -3,6 +3,7 @@ import {
   parseTranslatableStringV2,
   createMessagesLoader,
 } from '@vtex/api'
+import { logDegradedSearchError } from '../resolvers/search/utils'
 
 export const formatTranslatableProp = <R, P extends keyof R, I extends keyof R>(prop: P, idProp: I) =>
   (root: R, _: unknown, ctx: Context) => addContextToTranslatableString(
@@ -34,16 +35,25 @@ export const addContextToTranslatableString = (message: Message, ctx: Context) =
     return message.content
   }
 
-  const {
-    content,
-    context: originalContext,
-    from: originalFrom
-  } = parseTranslatableStringV2(message.content)
 
-  const context = (originalContext || message.context)?.toString()
-  const from = originalFrom || message.from || locale
+  try {
+    const {
+      content,
+      context: originalContext,
+      from: originalFrom
+    } = parseTranslatableStringV2(message.content)
 
-  return formatTranslatableStringV2({ content, context, from })
+    const context = (originalContext || message.context)?.toString()
+    const from = originalFrom || message.from || locale
+    return formatTranslatableStringV2({ content, context, from })
+  } catch (e) {
+    logDegradedSearchError(ctx.vtex.logger, {
+      service: 'node-vtex-api translation',
+      error: 'Error when trying to add context to translatable string',
+      errorStack: e,
+    })
+    return message.content
+  }
 }
 
 export const translateToCurrentLanguage = (message: MessageWithContext, ctx: Context) => {

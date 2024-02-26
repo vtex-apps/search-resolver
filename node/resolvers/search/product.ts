@@ -209,14 +209,17 @@ export const resolvers = {
     },
 
     properties: async (product: SearchProduct, _: unknown, ctx: Context) => {
+      let valuesUntranslated = []
+
       if (product.origin === 'intelligent-search') {
-        return product.properties
+        valuesUntranslated = product.properties ?? []
+      } else {
+        valuesUntranslated = (product.allSpecifications ?? []).map((name: string) => {
+          const value = (product as unknown as DynamicKey<string[]>)[name]
+          return { name, originalName: name, values: value }
+        })
       }
 
-      const valuesUntranslated = (product.allSpecifications ?? []).map((name: string) => {
-        const value = (product as unknown as DynamicKey<string[]>)[name]
-        return { name, originalName: name, values: value }
-      })
       if (!shouldTranslateToUserLocale(ctx)) {
         return valuesUntranslated
       }

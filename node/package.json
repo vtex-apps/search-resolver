@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@gocommerce/utils": "^0.6.11",
-    "@vtex/vtexis-compatibility-layer": "^0.2.5",
+    "@vtex/vtexis-compatibility-layer": "^1.2.13",
     "atob": "^2.1.2",
     "axios": "^0.21.2",
     "camelcase": "^5.0.0",
@@ -33,7 +33,7 @@
     "slugify": "^1.6.4",
     "typescript": "3.9.7",
     "unescape": "^1.0.1",
-    "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.46.0/public"
+    "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.54.0-beta.1/public"
   },
   "devDependencies": {
     "@types/atob": "^2.1.2",
@@ -46,7 +46,7 @@
     "@types/node": "^12.0.0",
     "@types/qs": "^6.5.1",
     "@types/ramda": "^0.26.21",
-    "@vtex/api": "6.45.15",
+    "@vtex/api": "6.45.22",
     "@vtex/tsconfig": "^0.6.0",
     "eslint": "^5.15.3",
     "eslint-config-vtex": "^10.1.0",
@@ -59,5 +59,5 @@
     "vtex.rewriter": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.53.4/public/@types/vtex.rewriter",
     "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.46.0/public/@types/vtex.search-graphql"
   },
-  "version": "1.65.1"
+  "version": "1.67.1"
 }
