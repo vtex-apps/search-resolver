@@ -45,6 +45,7 @@ interface SearchResultArgs {
   regionId?: string | null
   from?: number | null
   to?: number | null
+  showSponsored?: boolean
 }
 
 interface BannersArgs {
@@ -115,6 +116,7 @@ interface ProductSearchInput {
   hideUnavailableItems: boolean
   map?: string
   options?: Options
+  showSponsored?: boolean
 }
 
 interface ElasticAttribute {
