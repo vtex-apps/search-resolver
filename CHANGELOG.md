@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Parameter `groupBy` into `recommendations` and `productRecommendations` resolvers and `groupByProduct` in `crossSelling` client.
 
 ## [1.67.1] - 2023-10-18
 
