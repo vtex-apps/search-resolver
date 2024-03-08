@@ -237,7 +237,7 @@ export const resolvers = {
 
     recommendations: (product: SearchProduct, args: any) => {
       const { groupBy } = args
-      return {product, groupBy}
+      return { product, groupBy }
     },
 
     description: formatTranslatableProp<SearchProduct, 'description', 'productId'>(
