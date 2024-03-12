@@ -369,7 +369,7 @@ export const queries = {
 
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
     const {
-      clients: { search },
+      clients: { intelligentSearchApi },
     } = ctx
 
     const args =
@@ -388,26 +388,27 @@ export const queries = {
     const { field, value } = args.identifier
 
     let products = [] as SearchProduct[]
-
-    const vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
+    let fieldId = ''
 
     switch (field) {
       case 'id':
-        products = await search.productById(value, vtexSegment, salesChannel)
+        fieldId = 'product.id'
         break
       case 'slug':
-        products = await search.product(value, vtexSegment, salesChannel)
+        fieldId = 'product.link'
         break
       case 'ean':
-        products = await search.productByEan(value, vtexSegment, salesChannel)
+        fieldId = 'sku.ean'
         break
       case 'reference':
-        products = await search.productByReference(value, vtexSegment, salesChannel)
+        fieldId = 'sku.reference'
         break
       case 'sku':
-        products = await search.productBySku(value, vtexSegment, salesChannel)
+        fieldId = 'sku.id'
         break
     }
+
+    products = await intelligentSearchApi.product({ field: fieldId, value, salesChannel})
 
     if (products.length > 0) {
       return head(products)
