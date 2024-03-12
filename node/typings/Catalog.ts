@@ -81,7 +81,7 @@ enum FacetsBehavior {
 interface SpecificationGroup {
   name: string
   originalName: string
-  specifications: { name: string; originalName: string; values: string[] }
+  specifications: { name: string; originalName: string; values: string[] }[]
 }
 interface SearchProduct {
   origin?: string
@@ -112,7 +112,9 @@ interface SearchProduct {
   completeSpecifications?: CompleteSpecification[]
   skuSpecifications?: SkuSpecification[]
   specificationGroups?: SpecificationGroup[]
-  properties?: { name: string; values: string[] }[]
+  properties?: {
+    originalName?: string; name: string; values: string[]
+}[]
 }
 
 interface SearchItem {
@@ -220,7 +222,7 @@ interface CommertialOffer {
   }[]
   GetInfoErrorMessage: any | null
   CacheVersionUsedToCallCheckout: string
-  // Supports the Intelligent Search API which 
+  // Supports the Intelligent Search API which
   // uses the same name from the simulation
   discountHighlights: any[]
 }

@@ -69,6 +69,8 @@ const knownNotPG = [
   'link',
   'linkText',
   'productReference',
+  'origin',
+  'cacheId',
 ]
 
 const removeTrailingSlashes = (str: string) =>
@@ -181,7 +183,7 @@ export const resolvers = {
       cacheId || linkText,
 
     clusterHighlights: ({origin, clusterHighlights }: SearchProduct) => {
-      if (origin === 'intelligent-search') {
+      if (origin === 'intelligent-search' || origin === 'search-document') {
         return clusterHighlights
       }
 
@@ -201,7 +203,7 @@ export const resolvers = {
     },
 
     productClusters: ({origin, productClusters }: SearchProduct) => {
-      if (origin === 'intelligent-search') {
+      if (origin === 'intelligent-search' || origin === 'search-document') {
         return productClusters
       }
 
@@ -211,8 +213,8 @@ export const resolvers = {
     properties: async (product: SearchProduct, _: unknown, ctx: Context) => {
       let valuesUntranslated = []
 
-      if (product.origin === 'intelligent-search') {
-        valuesUntranslated = product.properties ?? []
+      if (product.origin === 'intelligent-search' || product.origin === 'search-document') {
+        valuesUntranslated = product.properties?.map((prop) => ({...prop, name: prop.originalName ?? prop.name })) ?? []
       } else {
         valuesUntranslated = (product.allSpecifications ?? []).map((name: string) => {
           const value = (product as unknown as DynamicKey<string[]>)[name]
@@ -287,45 +289,57 @@ export const resolvers = {
 
     specificationGroups: async (product: SearchProduct, _: unknown, ctx: Context) => {
       if (product.origin === 'intelligent-search') {
-        return product.specificationGroups
+        return product.specificationGroups ?? []
       }
 
-      const allSpecificationsGroups = (product.allSpecificationsGroups ?? []).concat(['allSpecifications'])
+      let noTranslationSpecificationGroups = []
 
-      const visibleSpecifications = product.completeSpecifications
-        ? product.completeSpecifications.reduce<Record<string, boolean>>((acc, specification) => {
-            acc[specification.Name] = specification.IsOnProductDetails
-            return acc
-          }, {})
-        : null
-
-      let noTranslationSpecificationGroups = allSpecificationsGroups.map(
-        (groupName: string) => {
-          let groupSpecifications = (product as unknown as DynamicKey<string[]>)?.[groupName] ?? []
-
-          groupSpecifications = groupSpecifications.filter(specificationName => {
-            if (visibleSpecifications && visibleSpecifications[specificationName] != null)
-              return visibleSpecifications[specificationName]
-            return true
+      if (product.origin === 'search-document') {
+        noTranslationSpecificationGroups = product.specificationGroups?.map(
+          (group) => ({
+            ...group,
+            specifications: group.specifications.map((spec) => ({...spec, name: spec.originalName }))
           })
+        ) ?? []
+      } else {
+        const allSpecificationsGroups = (product.allSpecificationsGroups ?? []).concat(['allSpecifications'])
 
-          return {
-            originalName: groupName,
-            name: groupName,
-            specifications: groupSpecifications.map((name) => {
-                const values = (product as unknown as DynamicKey<string[]>)[name] || []
-                return {
-                  originalName: name,
-                  name,
-                  values,
+        const visibleSpecifications = product.completeSpecifications
+          ? product.completeSpecifications.reduce<Record<string, boolean>>((acc, specification) => {
+              acc[specification.Name] = specification.IsOnProductDetails
+              return acc
+            }, {})
+          : null
+
+        noTranslationSpecificationGroups = allSpecificationsGroups.map(
+          (groupName: string) => {
+            let groupSpecifications = (product as unknown as DynamicKey<string[]>)?.[groupName] ?? []
+
+            groupSpecifications = groupSpecifications.filter(specificationName => {
+              if (visibleSpecifications && visibleSpecifications[specificationName] != null)
+                return visibleSpecifications[specificationName]
+              return true
+            })
+
+            return {
+              originalName: groupName,
+              name: groupName,
+              specifications: groupSpecifications.map((name) => {
+                  const values = (product as unknown as DynamicKey<string[]>)[name] || []
+                  return {
+                    originalName: name,
+                    name,
+                    values,
+                  }
                 }
-              }
-            ),
+              ),
+            }
           }
-        }
-      )
+        )
 
-      noTranslationSpecificationGroups = noTranslationSpecificationGroups.filter(group => group.specifications.length > 0)
+        noTranslationSpecificationGroups = noTranslationSpecificationGroups.filter(group => group.specifications.length > 0)
+
+      }
 
       if (!shouldTranslateToUserLocale(ctx)) {
         return noTranslationSpecificationGroups

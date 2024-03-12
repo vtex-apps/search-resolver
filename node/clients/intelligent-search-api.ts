@@ -85,6 +85,19 @@ export class IntelligentSearchApi extends ExternalClient {
     return this.http.get(`/banners/${path}`, {params: {...params, query: params.query, locale: this.locale}, metric: 'banners'})
   }
 
+  public async product(params: { field: string, value: string, salesChannel: number }) {
+    const { field, value, salesChannel } = params
+    return this.http.get('/product', {
+      params: {
+        id: value,
+        type: field,
+        locale: this.locale,
+        salesChannel,
+      },
+      metric: 'product',
+    })
+  }
+
   public async facets(params: FacetsArgs, path: string, shippingHeader?: string[]) {
     if (isPathTraversal(path)) {
       throw new Error("Malformed URL")
