@@ -95,44 +95,6 @@ export class Search extends AppClient {
     )
   }
 
-  public product = (
-    slug: string,
-    vtexSegment?: string,
-    salesChannel?: string | number | null
-  ) =>
-    this.get<SearchProduct[]>(
-      this.addCompleteSpecifications(
-        this.addSalesChannel(
-          `/pub/products/search/${this.searchEncodeURI(
-            slug && slug.toLowerCase()
-          )}/p`,
-          salesChannel
-        )
-      ),
-      {
-        metric: 'search-product',
-        headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
-      }
-    )
-
-  public productByEan = (
-    id: string,
-    vtexSegment?: string,
-    salesChannel?: string | number | null
-  ) =>
-    this.get<SearchProduct[]>(
-      this.addCompleteSpecifications(
-        this.addSalesChannel(
-          `/pub/products/search?fq=alternateIds_Ean:${id}`,
-          salesChannel
-        )
-      ),
-      {
-        metric: 'search-productByEan',
-        headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
-      }
-    )
-
   public productsByEan = (
     ids: string[],
     vtexSegment?: string,
@@ -191,24 +153,6 @@ export class Search extends AppClient {
       ),
       {
         metric: 'search-productById',
-        headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
-      }
-    )
-
-  public productByReference = (
-    id: string,
-    vtexSegment?: string,
-    salesChannel?: string | number | null
-  ) =>
-    this.get<SearchProduct[]>(
-      this.addCompleteSpecifications(
-        this.addSalesChannel(
-          `/pub/products/search?fq=alternateIds_RefId:${id}`,
-          salesChannel
-        )
-      ),
-      {
-        metric: 'search-productByReference',
         headers: this.getVtexSegmentCookieAsHeader(vtexSegment),
       }
     )
