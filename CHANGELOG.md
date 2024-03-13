@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Call IS for `product` query instead of SOLR API.
+
 ## [1.68.0] - 2024-03-06
 
 ### Added
