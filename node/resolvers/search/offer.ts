@@ -79,7 +79,7 @@ export const resolvers = {
     },
     giftSkuIds: propOr([], 'GiftSkuIds'),
     gifts: async ({ GiftSkuIds }: CommertialOffer, _: any, ctx: Context) => {
-      if (GiftSkuIds?.length === 0) {
+      if (!GiftSkuIds || GiftSkuIds.length === 0) {
         return []
       }
 
