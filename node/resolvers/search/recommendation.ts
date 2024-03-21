@@ -1,28 +1,64 @@
-import { SearchCrossSellingTypes } from './utils'
+import { GroupByCrossSellingTypes, SearchCrossSellingTypes } from './utils'
+
+interface RecommendationParentProps {
+  product: SearchProduct
+  groupBy: string
+}
 
 export const resolvers = {
   Recommendation: {
     buy: (
-      { productId }: SearchProduct,
+      { product: {productId},
+        groupBy = GroupByCrossSellingTypes.PRODUCT
+      }: RecommendationParentProps,
       _: any,
       { clients: { search } }: Context
     ) =>
-      search.crossSelling(
+    {
+      const groupByProduct =
+        groupBy === GroupByCrossSellingTypes.PRODUCT ? true : false
+
+      return search.crossSelling(
         productId,
-        SearchCrossSellingTypes.whoboughtalsobought
-      ),
+        SearchCrossSellingTypes.whoboughtalsobought,
+        groupByProduct
+      )
+    },
 
     similars: (
-      { productId }: SearchProduct,
-      _: any,
-      { clients: { search } }: Context
-    ) => search.crossSelling(productId, SearchCrossSellingTypes.similars),
-
-    view: (
-      { productId }: SearchProduct,
+      { product: {productId},
+        groupBy = GroupByCrossSellingTypes.PRODUCT
+      }: RecommendationParentProps,
       _: any,
       { clients: { search } }: Context
     ) =>
-      search.crossSelling(productId, SearchCrossSellingTypes.whosawalsosaw),
+    {
+      const groupByProduct =
+        groupBy === GroupByCrossSellingTypes.PRODUCT ? true : false
+
+      return search.crossSelling(
+        productId,
+        SearchCrossSellingTypes.similars,
+        groupByProduct
+      )
+    },
+
+    view: (
+      { product: {productId},
+        groupBy = GroupByCrossSellingTypes.PRODUCT
+      }: RecommendationParentProps,
+      _: any,
+      { clients: { search } }: Context
+    ) =>
+    {
+      const groupByProduct =
+        groupBy === GroupByCrossSellingTypes.PRODUCT ? true : false
+
+      return search.crossSelling(
+        productId,
+        SearchCrossSellingTypes.whosawalsosaw,
+        groupByProduct
+      )
+    },
   },
 }

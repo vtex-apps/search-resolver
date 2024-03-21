@@ -14,6 +14,11 @@ export enum SearchCrossSellingTypes {
   suggestions = 'suggestions',
 }
 
+export enum GroupByCrossSellingTypes {
+  PRODUCT = 'PRODUCT',
+  NONE = 'NONE',
+}
+
 const pageTypeMapping: Record<string, string> = {
   Brand: 'brand',
   Department: 'department',

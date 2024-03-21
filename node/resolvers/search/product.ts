@@ -235,7 +235,10 @@ export const resolvers = {
       return objToNameValue('name', 'values', omit(notPG, product))
     },
 
-    recommendations: (product: SearchProduct) => product,
+    recommendations: (product: SearchProduct, args: any) => {
+      const { groupBy } = args
+      return { product, groupBy }
+    },
 
     description: formatTranslatableProp<SearchProduct, 'description', 'productId'>(
       'description',
