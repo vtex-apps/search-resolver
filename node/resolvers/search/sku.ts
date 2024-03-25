@@ -53,6 +53,11 @@ export const resolvers = {
       if (!sku) {
         return sku
       }
+
+      if (sku.variations?.length && typeof sku.variations[0] !== 'string') {
+        return sku.variations
+      }
+
       const variations = (sku.variations || []).map(variationObj => {
         const variationName = typeof variationObj === 'string' ? variationObj : (variationObj as {name: string}).name
         const fieldId = (sku.skuSpecifications || []).find(specification => specification.field.name === variationName)?.field?.id
