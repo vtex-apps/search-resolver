@@ -127,6 +127,7 @@ interface SearchItem {
   modalType: any | null
   images: SearchImage[]
   Videos: string[]
+  videos: string[]
   variations: string[]
   sellers: Seller[]
   attachments: {
@@ -220,7 +221,7 @@ interface CommertialOffer {
   }[]
   GetInfoErrorMessage: any | null
   CacheVersionUsedToCallCheckout: string
-  // Supports the Intelligent Search API which 
+  // Supports the Intelligent Search API which
   // uses the same name from the simulation
   discountHighlights: any[]
 }

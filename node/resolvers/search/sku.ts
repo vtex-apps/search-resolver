@@ -65,12 +65,16 @@ export const resolvers = {
       return variations
     },
 
-    videos: ({ Videos }: SearchItem) =>
-      map(
+    videos: ({ Videos, videos }: SearchItem) => {
+      let sanitizedVideo = Videos ? Videos : videos
+
+      const formattedVideo = sanitizedVideo.map(
         (video: string) => ({
-          videoUrl: video,
-        }),
-        Videos
-      ),
+          videoUrl: video
+        })
+      )
+
+      return formattedVideo
+    }
   },
 }
