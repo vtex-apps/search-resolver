@@ -93,6 +93,7 @@ interface AdvertisementOptions {
   showSponsored?: boolean
   sponsoredCount?: number
   repeatSponsoredProducts?: boolean
+  advertisementPlacement?: string
 }
 
 interface FacetsInput {
