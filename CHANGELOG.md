@@ -7,11 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- Pass `advertisementOptions` to Intelligent Search API on the `products` and `productSearch` queries.
+
 ## [1.70.0] - 2024-06-10
 
 ### Fix
 - `videos` in productSearch query 
-
 
 ## [1.69.0] - 2024-03-21
 - Parameter `groupBy` into `recommendations` and `productRecommendations` resolvers and `groupByProduct` in `crossSelling` search client.
