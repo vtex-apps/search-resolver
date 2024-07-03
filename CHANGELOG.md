@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- `showtogeter` crosselling search type added
+
 ## [1.70.0] - 2024-06-10
 
 ### Fix

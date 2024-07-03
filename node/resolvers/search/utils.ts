@@ -8,6 +8,7 @@ import { Logger } from '@vtex/api'
 export enum SearchCrossSellingTypes {
   whoboughtalsobought = 'whoboughtalsobought',
   similars = 'similars',
+  showtogether = 'showtogether',
   whosawalsosaw = 'whosawalsosaw',
   whosawalsobought = 'whosawalsobought',
   accessories = 'accessories',
