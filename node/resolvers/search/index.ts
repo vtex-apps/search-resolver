@@ -52,6 +52,7 @@ interface ProductArgs {
 enum CrossSellingInput {
   view = 'view',
   buy = 'buy',
+  showtogether = 'showtogether',
   similars = 'similars',
   viewAndBought = 'viewAndBought',
   suggestions = 'suggestions',
@@ -80,6 +81,7 @@ const inputToSearchCrossSelling = {
   [CrossSellingInput.buy]: SearchCrossSellingTypes.whoboughtalsobought,
   [CrossSellingInput.view]: SearchCrossSellingTypes.whosawalsosaw,
   [CrossSellingInput.similars]: SearchCrossSellingTypes.similars,
+  [CrossSellingInput.showtogether]: SearchCrossSellingTypes.showtogether,
   [CrossSellingInput.viewAndBought]: SearchCrossSellingTypes.whosawalsobought,
   [CrossSellingInput.accessories]: SearchCrossSellingTypes.accessories,
   [CrossSellingInput.suggestions]: SearchCrossSellingTypes.suggestions,
