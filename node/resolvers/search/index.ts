@@ -3,40 +3,40 @@ import {
   UserInputError,
   createMessagesLoader,
 } from '@vtex/api'
-import { head, isEmpty, isNil, test, pathOr } from 'ramda'
+import { head, isEmpty, isNil, pathOr, test } from 'ramda'
 
-import { resolvers as assemblyOptionResolvers } from './assemblyOption'
-import { resolvers as autocompleteResolvers } from './autocomplete'
-import { resolvers as brandResolvers } from './brand'
-import { resolvers as categoryResolvers } from './category'
-import { resolvers as discountResolvers } from './discount'
-import { resolvers as itemMetadataResolvers } from './itemMetadata'
-import { resolvers as itemMetadataPriceTableItemResolvers } from './itemMetadataPriceTableItem'
-import { resolvers as itemMetadataUnitResolvers } from './itemMetadataUnit'
-import { resolvers as offerResolvers } from './offer'
-import { resolvers as productResolvers } from './product'
-import { resolvers as recommendationResolvers } from './recommendation'
-import { resolvers as skuResolvers } from './sku'
-import { resolvers as skuSpecificationResolver } from './skuSpecification'
-import { resolvers as skuSpecificationFieldResolver } from './skuSpecificationField'
-import { resolvers as skuSpecificationValueResolver } from './skuSpecificationValue'
-import { resolvers as productPriceRangeResolvers } from './productPriceRange'
-import { resolvers as searchBreadcrumbResolvers } from './searchBreadcrumb'
-import { getSearchMetaData } from './modules/metadata'
-import {
-  SearchCrossSellingTypes,
-  getMapAndPriceRangeFromSelectedFacets,
-  validMapAndQuery,
-  getShippingOptionsFromSelectedFacets,
-} from './utils'
-import { toCompatibilityArgs } from './newURLs'
-import { PATH_SEPARATOR, MAP_VALUES_SEP } from './constants'
-import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import {
   buildAttributePath,
   convertOrderBy,
 } from '../../commons/compatibility-layer'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
+import { shouldTranslateToTenantLocale } from '../../utils/i18n'
+import { resolvers as assemblyOptionResolvers } from './assemblyOption'
+import { resolvers as autocompleteResolvers } from './autocomplete'
+import { resolvers as brandResolvers } from './brand'
+import { resolvers as categoryResolvers } from './category'
+import { MAP_VALUES_SEP, PATH_SEPARATOR } from './constants'
+import { resolvers as discountResolvers } from './discount'
+import { resolvers as itemMetadataResolvers } from './itemMetadata'
+import { resolvers as itemMetadataPriceTableItemResolvers } from './itemMetadataPriceTableItem'
+import { resolvers as itemMetadataUnitResolvers } from './itemMetadataUnit'
+import { getSearchMetaData } from './modules/metadata'
+import { toCompatibilityArgs } from './newURLs'
+import { resolvers as offerResolvers } from './offer'
+import { resolvers as productResolvers } from './product'
+import { resolvers as productPriceRangeResolvers } from './productPriceRange'
+import { resolvers as recommendationResolvers } from './recommendation'
+import { resolvers as searchBreadcrumbResolvers } from './searchBreadcrumb'
+import { resolvers as skuResolvers } from './sku'
+import { resolvers as skuSpecificationResolver } from './skuSpecification'
+import { resolvers as skuSpecificationFieldResolver } from './skuSpecificationField'
+import { resolvers as skuSpecificationValueResolver } from './skuSpecificationValue'
+import {
+  SearchCrossSellingTypes,
+  getMapAndPriceRangeFromSelectedFacets,
+  getShippingOptionsFromSelectedFacets,
+  validMapAndQuery,
+} from './utils'
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
   value: string
@@ -314,6 +314,12 @@ const buildSelectedFacets = (args: SearchArgs) => {
   return selectedFacets
 }
 
+const defaultAdvertisementOptions: AdvertisementOptions = {
+  showSponsored: false,
+  sponsoredCount: 3,
+  repeatSponsoredProducts: true
+}
+
 export const queries = {
   autocomplete: async (
     _: any,
@@ -424,13 +430,14 @@ export const queries = {
     )
   },
 
-  products: async (_: any, args: SearchArgs, ctx: Context) => {
+  products: async (_: any, args: ProductsInput, ctx: Context) => {
     const {
       clients: { intelligentSearchApi },
     } = ctx
     const {
       to,
-      orderBy
+      orderBy,
+      advertisementOptions = defaultAdvertisementOptions
     } = args
 
     if (to && to > 2500) {
@@ -443,6 +450,7 @@ export const queries = {
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
     const biggyArgs = {
+      ...advertisementOptions,
       ...args,
       sort: convertOrderBy(orderBy),
       ...workspaceSearchParams,
@@ -516,12 +524,14 @@ export const queries = {
     const { intelligentSearchApi } = ctx.clients
     const {
       selectedFacets,
-      fullText
+      fullText,
+      advertisementOptions = defaultAdvertisementOptions
     } = args
 
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
     const biggyArgs: {[key:string]: any} = {
+      ...advertisementOptions,
       ...args,
       query: fullText,
       sort: convertOrderBy(args.orderBy),

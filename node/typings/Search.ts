@@ -23,7 +23,7 @@ enum IndexingType {
   XML = 'XML',
 }
 
-interface SearchResultArgs {
+interface SearchResultArgs extends AdvertisementOptions {
   attributePath?: string
   query?: string
   page?: number
@@ -89,6 +89,13 @@ interface Options {
   allowRedirect?: boolean
 }
 
+interface AdvertisementOptions {
+  showSponsored?: boolean
+  sponsoredCount?: number
+  repeatSponsoredProducts?: boolean
+  advertisementPlacement?: string
+}
+
 interface FacetsInput {
   map: string
   selectedFacets: SelectedFacet[]
@@ -99,6 +106,10 @@ interface FacetsInput {
   hideUnavailableItems: boolean
   initialAttributes?: string
   categoryTreeBehavior: 'default' | 'show' | 'hide'
+}
+
+interface ProductsInput extends SearchArgs {
+  advertisementOptions?: AdvertisementOptions
 }
 
 interface ProductSearchInput {
@@ -117,6 +128,7 @@ interface ProductSearchInput {
   map?: string
   options?: Options
   showSponsored?: boolean
+  advertisementOptions?: AdvertisementOptions
 }
 
 interface ElasticAttribute {
