@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.71.0] - 2024-07-09
+
 ### Added
 
 - Pass `advertisementOptions` to Intelligent Search API on the `products` and `productSearch` queries.
