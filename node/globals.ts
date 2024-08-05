@@ -57,6 +57,7 @@ declare global {
 
   interface AppSettings {
     slugifyLinks: boolean
+    topsortApiKey: string
   }
 
   interface DegradedSearchError {

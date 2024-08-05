@@ -134,7 +134,7 @@ params: {
   public async sponsoredProducts(params: SearchResultArgs, path: string, shippingHeader?: string[]) {
     const newParams = {
       ...params,
-      to: Number(params.to ?? 0) < 100 ? 100 : params.to,
+      count: Number(params.count ?? 0) < 100 ? 100 : params.count,
     };
     const result = await this.productSearch(newParams, path, shippingHeader)
 
@@ -163,7 +163,7 @@ params: {
     };
     try {
       const auctionResult = await createAuction({ apiKey }, auction);
-      const sponsoredProducts = auctionResult.auctions[0].winners.map((winner: any) => {
+      const sponsoredProducts = auctionResult.results[0].winners.map((winner: any) => {
         const product = result.products.find((product: any) => product.productId === winner.productId);
         return {
           ...product,
@@ -180,7 +180,7 @@ params: {
       this.context.logger.warn({ service: "IntelligentSearchApi", error: err.message, errorStack: err });
     }
     // Cut to the original length
-    result.products.length = result.products.length > params.to ? params.to : result.products.length;
+    result.products.length = result.products.length > Number(params.to) ? params.to : result.products.length;
     return result;
   }
 }
