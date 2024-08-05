@@ -8,19 +8,12 @@
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
-    "testMatch": [
-      "**/__tests__/**/*.(js|ts)?(x)",
-      "**/?(*.)+(spec|test).(js|ts)?(x)"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ]
+    "testMatch": ["**/__tests__/**/*.(js|ts)?(x)", "**/?(*.)+(spec|test).(js|ts)?(x)"],
+    "moduleFileExtensions": ["ts", "tsx", "js"]
   },
   "dependencies": {
     "@gocommerce/utils": "^0.6.11",
-    "@vtex/vtexis-compatibility-layer": "^1.2.13",
+    "@vtex/vtexis-compatibility-layer": "^1.6.4",
     "atob": "^2.1.2",
     "axios": "^0.21.2",
     "camelcase": "^5.0.0",
@@ -31,7 +24,6 @@
     "querystring": "^0.2.0",
     "ramda": "^0.27.1",
     "slugify": "^1.6.4",
-    "typescript": "3.9.7",
     "unescape": "^1.0.1",
     "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.54.0-beta.1/public",
     "@topsort/sdk": "^0.2.1"
@@ -52,6 +44,7 @@
     "jest": "^25.1.0",
     "ts-jest": "^25.2.1",
     "typemoq": "^2.1.0",
+    "typescript": "5.5.4",
     "vtex.catalog-api-proxy": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.10.4/public/_types/react",
     "vtex.intelligent-search-api": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.intelligent-search-api@0.27.0/public/_types/react",
     "vtex.messages": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.68.1/public/@types/vtex.messages",
