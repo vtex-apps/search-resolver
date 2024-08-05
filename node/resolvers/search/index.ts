@@ -554,6 +554,10 @@ export const queries = {
     }
   },
 
+  topsortSponsoredProducts: async (_: any, args: ProductSearchInput, ctx: any) => {
+    const { searchState, ...result } = await queries.productSearch(_, args, ctx)
+  },
+
   sponsoredProducts: async (_: any, args: ProductSearchInput, ctx: any) => {
     const [shippingOptions, facets] = getShippingOptionsFromSelectedFacets(args.selectedFacets)
     args.selectedFacets = facets
