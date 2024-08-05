@@ -834,7 +834,7 @@
   resolved "https://registry.yarnpkg.com/@vtex/tsconfig/-/tsconfig-0.6.0.tgz#c9dfffc95d2ef55195237411f9c15269ca30b2a5"
   integrity sha512-SVQBxaSdEVdpJFja1aVTIiZBgpQKePyYOUWGzcYq6LYkSWqSbz2LoC7TuLUsmfweYmVkv8+4eVuxcDpQVEpq1A==
 
-"@vtex/vtexis-compatibility-layer@^1.2.13":
+"@vtex/vtexis-compatibility-layer@^1.6.4":
   version "1.6.4"
   resolved "https://registry.yarnpkg.com/@vtex/vtexis-compatibility-layer/-/vtexis-compatibility-layer-1.6.4.tgz#55c24495478720e1cc48dd9e48c9ef9e43661118"
   integrity sha512-dMJUKDFzmFz8LQigRQYBCivkb5KlxNBwQQkZb2/Hue/Gc6zeY+pcGRiVwUCYxT2InG2b4R5x6hCE4A3Lj63DpA==
@@ -4496,7 +4496,7 @@ static-extend@^0.1.1:
     define-property "^0.2.5"
     object-copy "^0.1.0"
 
-"stats-lite@github:vtex/node-stats-lite#dist":
+stats-lite@vtex/node-stats-lite#dist:
   version "2.2.0"
   resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/1b0d39cc41ef7aaecfd541191f877887a2044797"
   dependencies:
@@ -5026,10 +5026,6 @@ verror@1.10.0:
 "vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.54.0-beta.1/public":
   version "0.0.0"
   resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.54.0-beta.1/public#0804c2c849202332395756f4601f281a54390268"
-
-"vtex.search-resolver@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-resolver@1.71.0/public/_types/react":
-  version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-resolver@1.71.0/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
 
 w3c-hr-time@^1.0.1:
   version "1.0.2"

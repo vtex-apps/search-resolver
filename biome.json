@@ -1,0 +1,61 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true,
+    "defaultBranch": "main"
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "suspicious": {
+        "noConsoleLog": "error",
+        "noExplicitAny": "off"
+      },
+      "correctness": {
+        "noPrecisionLoss": "error",
+        "noUnusedVariables": "off",
+        "noUnusedImports": "error"
+      },
+      "style": {
+        "useConsistentArrayType": "error",
+        "useNumberNamespace": "error",
+        "useImportType": "off",
+        "useExportType": "error",
+        "noNonNullAssertion": "off"
+      },
+      "nursery": {
+        "noDuplicateJsonKeys": "error"
+      }
+    }
+  },
+  "formatter": {
+    "formatWithErrors": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "javascript": {
+    "formatter": {
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "enabled": true,
+      "arrowParentheses": "asNeeded",
+      "trailingCommas": "all",
+      "lineEnding": "lf"
+    },
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
+    }
+  },
+  "json": {
+    "formatter": {
+      "enabled": true
+    }
+  }
+}

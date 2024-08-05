@@ -44,14 +44,12 @@
     "jest": "^25.1.0",
     "ts-jest": "^25.2.1",
     "typemoq": "^2.1.0",
-    "typescript": "5.5.4",
+    "typescript": "3.9.7",
     "vtex.catalog-api-proxy": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.10.4/public/_types/react",
     "vtex.intelligent-search-api": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.intelligent-search-api@0.27.0/public/_types/react",
     "vtex.messages": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.68.1/public/@types/vtex.messages",
     "vtex.rewriter": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.63.0/public/@types/vtex.rewriter",
-    "vtex.sae-analytics": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.sae-analytics@2.13.0/public/@types/vtex.sae-analytics",
-    "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.62.0/public/@types/vtex.search-graphql",
-    "vtex.search-resolver": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-resolver@1.71.0/public/_types/react"
+    "vtex.sae-analytics": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.sae-analytics@2.13.0/public/@types/vtex.sae-analytics"
   },
   "version": "1.71.0",
   "packageManager": "yarn@4.4.0+sha512.91d93b445d9284e7ed52931369bc89a663414e5582d00eea45c67ddc459a2582919eece27c412d6ffd1bd0793ff35399381cb229326b961798ce4f4cc60ddfdb"
