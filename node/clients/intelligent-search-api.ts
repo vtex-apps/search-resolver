@@ -132,8 +132,22 @@ params: {
   }
 
   public async sponsoredProducts(params: SearchResultArgs, path: string, shippingHeader?: string[]) {
-    const result = await this.productSearch(params, path, shippingHeader)
+    const newParams = {
+      ...params,
+      to: Number(params.to ?? 0) < 100 ? 100 : params.to,
+    };
+    const result = await this.productSearch(newParams, path, shippingHeader)
+
+    if (result.products.length === 0) {
+      return result;
+    }
+    // Skip if sort is already defined
+    if (params.sort != null) {
+      return result;
+    }
+
     const productIds = result.products.map((product: any) => product.productId);
+
     // TODO: set the api key on vtex admin page
     const apiKey = process.env.TOPSORT_API_KEY;
     const auction = {
@@ -143,8 +157,7 @@ params: {
             ids: productIds,
           },
           type: "listings",
-          // TODO: Set number of slots in params
-          slots: 2,
+          slots: params.sponsoredCount ?? 3,
         }
       ]
     };
@@ -166,6 +179,8 @@ params: {
     } catch(err) {
       this.context.logger.warn({ service: "IntelligentSearchApi", error: err.message, errorStack: err });
     }
+    // Cut to the original length
+    result.products.length = result.products.length > params.to ? params.to : result.products.length;
     return result;
   }
 }
