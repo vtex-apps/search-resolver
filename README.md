@@ -4,5 +4,5 @@ To develop on this:
 brew install vtex
 corepack enable yarn
 yarn install
-vtex link
+vtex link -u # To avoid typescript errors
 ```
