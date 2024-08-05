@@ -1,7 +1,7 @@
 {
   "name": "vtex.search-resolver",
   "scripts": {
-    "lint": "tsc --noEmit && eslint --ext ts .",
+    "lint": "tsc --noEmit && biome check",
     "test": "jest"
   },
   "jest": {
@@ -34,7 +34,7 @@
     "typescript": "3.9.7",
     "unescape": "^1.0.1",
     "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.54.0-beta.1/public",
-    "@topsort/sdk": "^0.2.0"
+    "@topsort/sdk": "^0.2.1"
   },
   "devDependencies": {
     "@types/atob": "^2.1.2",
@@ -49,10 +49,7 @@
     "@types/ramda": "^0.26.21",
     "@vtex/api": "6.47.0",
     "@vtex/tsconfig": "^0.6.0",
-    "eslint": "^5.15.3",
-    "eslint-config-vtex": "^10.1.0",
     "jest": "^25.1.0",
-    "prettier": "^1.16.4",
     "ts-jest": "^25.2.1",
     "typemoq": "^2.1.0",
     "vtex.catalog-api-proxy": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.10.4/public/_types/react",

@@ -3,8 +3,8 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "lint": "eslint --ext js,jsx,ts,tsx .",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json}\""
+    "lint": "biome check",
+    "format": "biome check --write"
   },
   "husky": {
     "hooks": {
@@ -13,22 +13,18 @@
   },
   "lint-staged": {
     "*.{ts,js,tsx,jsx}": [
-      "eslint --fix",
-      "prettier --write"
+      "biome check --write"
     ],
     "*.{json,graphql,gql}": [
-      "prettier --write"
+      "biome check --write"
     ]
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
     "@types/node": "^12.12.21",
-    "@vtex/prettier-config": "^0.1.4",
-    "eslint": "^7.12.1",
-    "eslint-config-vtex": "^12.3.2",
     "husky": "^4.2.3",
     "lint-staged": "^10.1.1",
-    "prettier": "^2.0.2",
-    "typescript": "^3.8.3"
+    "typescript": "^5.5.4"
   },
   "packageManager": "yarn@4.4.0+sha512.91d93b445d9284e7ed52931369bc89a663414e5582d00eea45c67ddc459a2582919eece27c412d6ffd1bd0793ff35399381cb229326b961798ce4f4cc60ddfdb"
 }

@@ -1,6 +1,6 @@
 import { ExternalClient, InstanceOptions, IOContext } from "@vtex/api";
 import { parseState } from "../utils/searchState";
-import { createAuction } from "@topsort/sdk";
+import { createAuction, TopsortAuction } from "@topsort/sdk";
 
 const isPathTraversal = (str: string) => str.indexOf('..') >= 0
 interface CorrectionParams {
@@ -131,13 +131,16 @@ params: {
     })
   }
 
-  public async sponsoredProducts(params: SearchResultArgs, path: string, shippingHeader?: string[]) {
+  public async sponsoredProducts(params: SearchResultArgs, path: string, shippingHeader?: string[], topsortApiKey?: string) {
     const newParams = {
       ...params,
       count: Number(params.count ?? 0) < 100 ? 100 : params.count,
     };
     const result = await this.productSearch(newParams, path, shippingHeader)
 
+    if (!topsortApiKey) {
+      return result;
+    }
     if (result.products.length === 0) {
       return result;
     }
@@ -148,21 +151,19 @@ params: {
 
     const productIds = result.products.map((product: any) => product.productId);
 
-    // TODO: set the api key on vtex admin page
-    const apiKey = process.env.TOPSORT_API_KEY;
-    const auction = {
+    const auction: TopsortAuction = {
       auctions: [
         {
           products: {
             ids: productIds,
-          },
+          } as any,
           type: "listings",
           slots: params.sponsoredCount ?? 3,
         }
       ]
     };
     try {
-      const auctionResult = await createAuction({ apiKey }, auction);
+      const auctionResult = await createAuction({ apiKey: topsortApiKey }, auction);
       const sponsoredProducts = auctionResult.results[0].winners.map((winner: any) => {
         const product = result.products.find((product: any) => product.productId === winner.productId);
         return {
