@@ -74,6 +74,7 @@ interface SuggestionProductsArgs {
   orderBy?: string
   count?: number
   shippingOptions?: string[]
+  advertisementOptions: AdvertisementOptions
 }
 
 interface SuggestionSearchesArgs {
