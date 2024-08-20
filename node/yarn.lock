@@ -505,10 +505,10 @@
   dependencies:
     type-detect "4.0.8"
 
-"@topsort/sdk@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@topsort/sdk/-/sdk-0.2.1.tgz#d6a8a4b8238c363db92a87062c033f6220b4769a"
-  integrity sha512-npAYCHUgoLuG8YBA4MsMhEULl3IgGgqpIOpC2Hk7xLQ0muFkKiGwpkWIOxIx2DIcKwyg4EiB0aDs5ZWzixm8Sw==
+"@topsort/sdk@^0.3.1":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@topsort/sdk/-/sdk-0.3.1.tgz#41f70ebc691ea8e4003937be6444b3ed705eaad7"
+  integrity sha512-rXL2QlNtX+W6cwR/GGTsLCGpPyBWAltYaStMVMrTCVKnr90HmWc7bhDv6rZjf0A0OwCDLC2jNkagBDvk9N0hoQ==
 
 "@types/accepts@*":
   version "1.3.7"
