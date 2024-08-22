@@ -1,5 +1,9 @@
 import { resolvers } from './product'
-import { mockContext, getBindingLocale, resetContext } from '../../__mocks__/helpers'
+import {
+  mockContext,
+  getBindingLocale,
+  resetContext,
+} from '../../__mocks__/helpers'
 import { getProduct } from '../../__mocks__/product'
 import productSpecs from '../../__mocks__/productSpecs'
 
@@ -122,15 +126,15 @@ describe('tests related to product resolver', () => {
   test('productClusters should be properly formatted', () => {
     const product = getProduct()
     product.productClusters = {
-      "140": 'Casual Footwear',
-      "195": 'All products',
-      "201": "Third"
+      '140': 'Casual Footwear',
+      '195': 'All products',
+      '201': 'Third',
     }
     const result = resolvers.Product.productClusters(product as any)
     expect(result).toMatchObject([
       { id: '140', name: 'Casual Footwear' },
       { id: '195', name: 'All products' },
-      { id: '201', name: 'Third' }
+      { id: '201', name: 'Third' },
     ])
   })
 
@@ -144,15 +148,15 @@ describe('tests related to product resolver', () => {
   test('clusterHighlights should be properly formatted', () => {
     const product = getProduct()
     product.clusterHighlights = {
-      "140": 'Casual Footwear',
-      "195": 'All products',
-      "201": "Third"
+      '140': 'Casual Footwear',
+      '195': 'All products',
+      '201': 'Third',
     }
     const result = resolvers.Product.clusterHighlights(product as any)
     expect(result).toMatchObject([
       { id: '140', name: 'Casual Footwear' },
       { id: '195', name: 'All products' },
-      { id: '201', name: 'Third' }
+      { id: '201', name: 'Third' },
     ])
   })
 
@@ -166,15 +170,15 @@ describe('tests related to product resolver', () => {
   test('clusterHighlights should be properly formatted', () => {
     const product = getProduct()
     product.clusterHighlights = {
-      "140": 'Casual Footwear',
-      "195": 'All products',
-      "201": "Third"
+      '140': 'Casual Footwear',
+      '195': 'All products',
+      '201': 'Third',
     }
     const result = resolvers.Product.clusterHighlights(product as any)
     expect(result).toMatchObject([
       { id: '140', name: 'Casual Footwear' },
       { id: '195', name: 'All products' },
-      { id: '201', name: 'Third' }
+      { id: '201', name: 'Third' },
     ])
   })
 
@@ -190,90 +194,165 @@ describe('tests related to product resolver', () => {
       const product = getProduct()
       mockContext.vtex.binding.locale = 'fr-FR'
       mockContext.clients.rewriter.getRoute.mockImplementationOnce(
-        (id: string, type: string, bindingId: string) => Promise.resolve(`/${id}-${type}-${bindingId}-${getBindingLocale()}/p`)
+        (id: string, type: string, bindingId: string) =>
+          Promise.resolve(`/${id}-${type}-${bindingId}-${getBindingLocale()}/p`)
       )
-      const result = await resolvers.Product.linkText(product as any, {}, mockContext as any)
+      const result = await resolvers.Product.linkText(
+        product as any,
+        {},
+        mockContext as any
+      )
       expect(result).toBe('16-product-abc-fr-FR')
     })
     test('linkText for same binding language', async () => {
       const product = getProduct()
-      const result = await resolvers.Product.linkText(product as any, {}, mockContext as any)
+      const result = await resolvers.Product.linkText(
+        product as any,
+        {},
+        mockContext as any
+      )
       expect(result).toBe(product.linkText)
     })
   })
 
   describe('specificationGroups resolver', () => {
-
     test('specifications groups should have expected format but not translated if same locale as tenant', async () => {
       const product = getProduct()
-      const result = await resolvers.Product.specificationGroups(product as any, {}, mockContext as any)
-      expect(result[0]).toMatchObject({
-        name: 'Tamanho',
-        specifications: [{ name: 'Numero do calçado', values: ["35"] }]
-      })
-      expect(result[1]).toMatchObject({
-        name: 'allSpecifications',
-        specifications: [{ name: 'Numero do calçado', values: ["35"] }]
-      })
+      const result = await resolvers.Product.specificationGroups<
+        SpecificationGroup[]
+      >(product as any, {}, mockContext as any)
+      /**
+       * Fixed adding tests to test not undefined and add conditional test for result
+       */
+      expect(result).not.toBeUndefined()
+      expect(result).toHaveLength(2)
+      if (result) {
+        expect(result[0]).toMatchObject({
+          name: 'Tamanho',
+          specifications: [{ name: 'Numero do calçado', values: ['35'] }],
+        })
+        expect(result[1]).toMatchObject({
+          name: 'allSpecifications',
+          specifications: [{ name: 'Numero do calçado', values: ['35'] }],
+        })
+      }
     })
 
     test('specifications groups should have expected format and translated values', async () => {
       mockContext.vtex.locale = 'fr-FR'
       const product = getProduct()
-      mockContext.clients.search.filtersInCategoryFromId.mockImplementationOnce(() => ([{
-        Name: 'Numero do calçado',
-        FieldId: 'specification-Id',
-      }]))
-      const result = await resolvers.Product.specificationGroups(product as any, {}, mockContext as any)
+      mockContext.clients.search.filtersInCategoryFromId.mockImplementationOnce(
+        () => [
+          {
+            Name: 'Numero do calçado',
+            FieldId: 'specification-Id',
+          },
+        ]
+      )
+      const result = await resolvers.Product.specificationGroups<
+        SpecificationGroup[]
+      >(product as any, {}, mockContext as any)
 
-      expect(result[0]).toMatchObject({
-        name: 'Tamanho (((16))) <<<pt-BR>>>',
-        specifications: [{ name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>', values: ["35 (((specification-Id))) <<<pt-BR>>>"] }]
-      })
-      expect(result[1]).toMatchObject({
-        name: 'allSpecifications (((16))) <<<pt-BR>>>',
-        specifications: [{ name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>', values: ["35 (((specification-Id))) <<<pt-BR>>>"] }]
-      })
+      /**
+       * Fixed adding tests to test not undefined and add conditional test for result
+       */
+      expect(result).not.toBeUndefined()
+      expect(result).toHaveLength(2)
+      if (result) {
+        expect(result[0]).toMatchObject({
+          name: 'Tamanho (((16))) <<<pt-BR>>>',
+          specifications: [
+            {
+              name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>',
+              values: ['35 (((specification-Id))) <<<pt-BR>>>'],
+            },
+          ],
+        })
+        expect(result[1]).toMatchObject({
+          name: 'allSpecifications (((16))) <<<pt-BR>>>',
+          specifications: [
+            {
+              name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>',
+              values: ['35 (((specification-Id))) <<<pt-BR>>>'],
+            },
+          ],
+        })
+      }
     })
 
     test('should filter specifications that are not visible', async () => {
-      const specificationGroups = await resolvers.Product.specificationGroups(productSpecs as any, {}, mockContext)
+      /**
+       * Fixed having speficiationGroups different than undefined
+       */
+      let specificationGroups: SpecificationGroup[] = []
+      specificationGroups = await resolvers.Product.specificationGroups(
+        productSpecs as any,
+        {},
+        mockContext
+      )
 
       expect(specificationGroups).toHaveLength(5)
+      /**
+       * Fixed adding tests to test not undefined and length greater than 0 and add conditional test for specificationGroups
+       */
+      expect(specificationGroups).not.toBeUndefined()
+      expect(specificationGroups.length).toBeGreaterThan(0)
 
-      // If the completeSpecifications doesn't give info on the specs, return it
-      const cucardas = specificationGroups.find(group => group.name === 'Cucardas')
-      expect(cucardas).toBeTruthy()
+      if (specificationGroups) {
+        // If the completeSpecifications doesn't give info on the specs, return it
+        const cucardas = specificationGroups.find(
+          group => group.name === 'Cucardas'
+        )
+        expect(cucardas).toBeTruthy()
+      }
     })
   })
 
   describe('properties resolver', () => {
     test('properties should have expected format but not translated if same locale as tenant', async () => {
       const product = getProduct()
-      const result = await resolvers.Product.properties(product as any, {}, mockContext as any)
-      expect(result).toMatchObject([{ name: 'Numero do calçado', values: ['35'] }])
+      const result = await resolvers.Product.properties(
+        product as any,
+        {},
+        mockContext as any
+      )
+      expect(result).toMatchObject([
+        { name: 'Numero do calçado', values: ['35'] },
+      ])
     })
     test('specifications groups should have expected format and translated values', async () => {
       mockContext.vtex.locale = 'fr-FR'
       const product = getProduct({
         allSpecifications: ['Numero do calçado', 'testeName'],
-        'testeName': ['teste value']
+        testeName: ['teste value'],
       })
 
-      mockContext.clients.search.filtersInCategoryFromId.mockImplementationOnce(() => ([
+      mockContext.clients.search.filtersInCategoryFromId.mockImplementationOnce(
+        () => [
+          {
+            Name: 'Numero do calçado',
+            FieldId: 'specification-Id',
+          },
+          {
+            Name: 'testeName',
+            FieldId: 'teste-id',
+          },
+        ]
+      )
+      const result = await resolvers.Product.properties(
+        product as any,
+        {},
+        mockContext as any
+      )
+      expect(result).toMatchObject([
         {
-          Name: 'Numero do calçado',
-          FieldId: 'specification-Id',
+          name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>',
+          values: ['35 (((specification-Id))) <<<pt-BR>>>'],
         },
         {
-          Name: 'testeName',
-          FieldId: 'teste-id'
-        }
-      ]))
-      const result = await resolvers.Product.properties(product as any, {}, mockContext as any)
-      expect(result).toMatchObject([
-        { name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>', values: ['35 (((specification-Id))) <<<pt-BR>>>'] },
-        { name: 'testeName (((teste-id))) <<<pt-BR>>>', values: ['teste value (((teste-id))) <<<pt-BR>>>'] }
+          name: 'testeName (((teste-id))) <<<pt-BR>>>',
+          values: ['teste value (((teste-id))) <<<pt-BR>>>'],
+        },
       ])
     })
   })

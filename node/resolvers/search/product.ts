@@ -1,5 +1,4 @@
 import { compose, last, omit, pathOr, split, flatten } from 'ramda'
-
 import {
   addContextToTranslatableString,
   formatTranslatableProp,
@@ -285,9 +284,12 @@ export const resolvers = {
       return linkText
     },
 
-    specificationGroups: async (product: SearchProduct, _: unknown, ctx: Context) => {
+    /**
+     * Fixed generic types
+     */
+    specificationGroups: async <T>(product: SearchProduct, _: unknown, ctx: Context):Promise<Awaited<T>> => {
       if (product.origin === 'intelligent-search') {
-        return product.specificationGroups
+        return product.specificationGroups as Awaited<T>
       }
 
       const allSpecificationsGroups = (product.allSpecificationsGroups ?? []).concat(['allSpecifications'])
@@ -328,7 +330,7 @@ export const resolvers = {
       noTranslationSpecificationGroups = noTranslationSpecificationGroups.filter(group => group.specifications.length > 0)
 
       if (!shouldTranslateToUserLocale(ctx)) {
-        return noTranslationSpecificationGroups
+        return noTranslationSpecificationGroups as Awaited<T>
       }
 
       const filterIdFromNameMap = await getProductFilterIdMap(product, ctx)
@@ -340,7 +342,7 @@ export const resolvers = {
         }
       })
 
-      return translatedGroups
+      return translatedGroups as Awaited<T>
     },
     items: ({ items: searchItems, skuSpecifications = [] }: SearchProduct, { filter }: ItemArg) => {
       const searchItemsWithVariations = searchItems.map(item => ({ ...item, skuSpecifications }))

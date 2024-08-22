@@ -31,11 +31,11 @@
     "querystring": "^0.2.0",
     "ramda": "^0.27.1",
     "slugify": "^1.6.4",
-    "typescript": "3.9.7",
     "unescape": "^1.0.1",
     "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.54.0-beta.1/public"
   },
   "devDependencies": {
+    "typescript": "^4",
     "@types/atob": "^2.1.2",
     "@types/camelcase": "^4.1.0",
     "@types/cookie": "^0.4.1",

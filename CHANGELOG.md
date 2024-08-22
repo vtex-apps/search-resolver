@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Fixed tests in helpers.ts
+  - By adding mocks for clients for:
+    - vbase
+    - intelligentSearchAPI
+- Fixed in newURL test
+  - To return something instead of void in saveJSON function
+  - Fixed to have facets with all previous object properties
+  - Fixed to have requirement properties (Quantity, Link, LinkEncoded)
+- Fixed in product test
+  - Fixed adding tests to test not undefined and and length verification qadd conditional test for result
+  - Fixed having speficiationGroups different than undefined
+  - Fixed adding tests to test not undefined and length greater than 0 and add conditional test for specificationGroups
+- Fixed generic types in product.ts
+- Fixed from utils.ts
+  - import for crypto
+  - adding children property from category getCategoryInfo function
+- Typescript required as dev dependency instead in node
+  - And version 4 to make sure right generic types work in product.ts
+
+### Removed
+
+- Removed wrong tests from productSearch.test.ts because they were asserting from mock rather than actual functionality.
+
+### Added
+
+- Dev dependencies at root level to be able to run:
+  - Tests
+  - Lint
+
 ## [1.71.0] - 2024-07-09
 
 ### Added

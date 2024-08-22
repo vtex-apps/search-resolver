@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import * as crypto from 'crypto'
 import { compose, last, split, toLower, zip } from 'ramda'
 import { Functions } from '@gocommerce/utils'
 
@@ -96,7 +96,7 @@ export async function getCategoryInfo(
   const categories = await search.categories(levels)
   const mapCategories = categories.reduce(appendToMap, {}) as CategoryMap
 
-  const category = mapCategories[id] || { url: '' }
+  const category = mapCategories[id] || { url: '', children: null }
 
   return category
 }

@@ -16,7 +16,9 @@ const searchClientMock = {
   categories: jest.fn(),
   crossSelling: jest.fn(),
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  productById: jest.fn((_id: string, _cacheable: boolean = true) => promisify(null)),
+  productById: jest.fn((_id: string, _cacheable: boolean = true) =>
+    promisify(null)
+  ),
   filtersInCategoryFromId: jest.fn(),
 }
 
@@ -35,10 +37,28 @@ const segmentClientMock = {
     }),
 }
 
+/**
+ * Added getJSON function so it doesn't fail during tests with unknown or undefined
+ */
+const vbaseMock = {
+  getJSON: () => {},
+}
+
+/**
+ * Added getJSON function so it doesn't fail during tests with unknown or undefined
+ */
+const intelligentSearchApiMock = {
+  productSearch: () => {
+    return { translated: { jk: 'jk' } }
+  },
+}
+
 export const getBindingLocale = () => mockContext.vtex.binding.locale
 
 const rewriterClientMock: any = {
-  getRoute: jest.fn((id: string, type: string, bindingId: string) => promisify(`${id}-${type}-${bindingId}-${getBindingLocale()}`))
+  getRoute: jest.fn((id: string, type: string, bindingId: string) =>
+    promisify(`${id}-${type}-${bindingId}-${getBindingLocale()}`)
+  ),
 }
 
 const getLocale = () => mockContext.vtex.locale
@@ -49,12 +69,15 @@ const initialCtxState = {
   platform: 'vtex',
   locale: 'pt-BR',
   tenant: { locale: 'pt-BR' },
-  binding: { id: 'abc', locale: 'pt-BR' }
+  binding: { id: 'abc', locale: 'pt-BR' },
 }
 
 const generateDeepCopy = (obj: any) => JSON.parse(JSON.stringify(obj))
 
 export const mockContext: any = {
+  /**
+   * added mocked clients vbase and intelligentSearchAPI defined above
+   */
   vtex: {
     ...generateDeepCopy(initialCtxState),
   },
@@ -63,15 +86,23 @@ export const mockContext: any = {
     segment: segmentClientMock,
     messagesGraphQL: messagesGraphQLClientMock,
     rewriter: rewriterClientMock,
+    vbase: vbaseMock,
+    intelligentSearchApi: intelligentSearchApiMock,
   },
   state: {
     messagesBindingLanguage: {
-      loadMany: jest.fn((messages: any) => messages.map((message: any) => `${message.content}-${getLocale()}`))
+      loadMany: jest.fn((messages: any) =>
+        messages.map((message: any) => `${message.content}-${getLocale()}`)
+      ),
     },
     messagesTenantLanguage: {
-      load: jest.fn((message: any) => `${message.content}-${getTenantLocale()}`)
-    }
+      load: jest.fn(
+        (message: any) => `${message.content}-${getTenantLocale()}`
+      ),
+    },
   },
 }
 
-export const resetContext = () => {mockContext.vtex = { ...generateDeepCopy(initialCtxState) }}
+export const resetContext = () => {
+  mockContext.vtex = { ...generateDeepCopy(initialCtxState) }
+}

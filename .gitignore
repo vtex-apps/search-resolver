@@ -4,3 +4,6 @@ node/**/*.js.map
 .vscode/
 .DS_Store
 node/package-lock.json
+.yarn/
+.pnp.cjs
+.pnp.loader.mjs
