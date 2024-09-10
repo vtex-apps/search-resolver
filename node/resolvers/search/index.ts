@@ -15,7 +15,7 @@ import { resolvers as assemblyOptionResolvers } from './assemblyOption'
 import { resolvers as autocompleteResolvers } from './autocomplete'
 import { resolvers as brandResolvers } from './brand'
 import { resolvers as categoryResolvers } from './category'
-import { MAP_VALUES_SEP, PATH_SEPARATOR, APP_NAME } from './constants'
+import { MAP_VALUES_SEP, PATH_SEPARATOR } from './constants'
 import { resolvers as discountResolvers } from './discount'
 import { resolvers as itemMetadataResolvers } from './itemMetadata'
 import { resolvers as itemMetadataPriceTableItemResolvers } from './itemMetadataPriceTableItem'
@@ -370,8 +370,7 @@ export const queries = {
     // unnecessary field. It's is an object and breaks the @vtex/api cache
     delete biggyArgs.selectedFacets
 
-    const settings: AppSettings = await ctx.clients.apps.getAppSettings(APP_NAME)
-    const result = await intelligentSearchApi.facets({...biggyArgs, query: args.fullText}, buildAttributePath(selectedFacets), shippingOptions, settings.topsortApiKey)
+    const result = await intelligentSearchApi.facets({...biggyArgs, query: args.fullText}, buildAttributePath(selectedFacets), shippingOptions)
 
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated

@@ -1,9 +1,9 @@
 {
-  "vendor": "topsortpartnercl",
+  "vendor": "vtex",
   "name": "search-resolver",
-  "version": "0.1.0",
-  "title": "Topsort's Fork of vtex search resolver.",
-  "description": "Topsort's Fork of vtex search resolver.",
+  "version": "1.72.0",
+  "title": "GraphQL resolver for the VTEX store APIs",
+  "description": "GraphQL resolvers for the VTEX API for the catalog and orders.",
   "credentialType": "absolute",
   "builders": {
     "node": "6.x",
@@ -18,14 +18,9 @@
     "vtex.intelligent-search-api": "0.x"
   },
   "settingsSchema": {
-    "title": "Topsort Intelligent Search Resolver",
+    "title": "Intelligent Search Resolver",
     "type": "object",
     "properties": {
-      "topsortApiKey": {
-        "title": "Topsort API Key",
-        "type": "string",
-        "default": ""
-      },
       "slugifyLinks": {
         "title": "Set to slugify links. Uses default catalog slug instead",
         "type": "boolean",
@@ -66,13 +61,6 @@
       "name": "outbound-access",
       "attrs": {
         "host": "search.biggylabs.com.br",
-        "path": "/*"
-      }
-    },
-    {
-      "name": "outbound-access",
-      "attrs": {
-        "host": "api.topsort.com",
         "path": "/*"
       }
     },
