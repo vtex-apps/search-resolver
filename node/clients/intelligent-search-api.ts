@@ -1,4 +1,3 @@
-import { Auction } from "@topsort/sdk";
 import { ExternalClient, InstanceOptions, IOContext } from "@vtex/api";
 import { parseState } from "../utils/searchState";
 import axios from "axios";
@@ -144,7 +143,7 @@ export class IntelligentSearchApi extends ExternalClient {
 
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     const productIds = result.products.map((product: any) => product.productId);
-    const auction: Auction = {
+    const auction = {
       auctions: [
         {
           type: "listings",
