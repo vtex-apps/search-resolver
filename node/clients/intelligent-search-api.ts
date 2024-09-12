@@ -112,7 +112,7 @@ export class IntelligentSearchApi extends ExternalClient {
     params: SearchResultArgs,
     path: string,
     shippingHeader?: string[],
-    topsortApiKey?: string,
+    topsortApiKey = "TSE_3mgZ2Q388Fu6J7AxdDxTcyTp1cvG8z2uLRP4",
   ) {
     const { query, leap, searchState } = params;
     if (isPathTraversal(path)) {
@@ -174,7 +174,7 @@ export class IntelligentSearchApi extends ExternalClient {
       const sponsoredProducts =
         auctionResult.data.results[0].winners?.map((winner: any) => {
           const product = result.products.find(
-            (product: any) => product.productId === winner.productId,
+            (product: any) => product.productId === winner.id,
           );
           return {
             ...product,
