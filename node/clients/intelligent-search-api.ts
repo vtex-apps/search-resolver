@@ -171,22 +171,33 @@ export class IntelligentSearchApi extends ExternalClient {
       // eslint-disable-next-line no-console
       console.log("auctionResult", auctionResult.data);
 
-      const sponsoredProducts =
-        auctionResult.data.results[0].winners?.map((winner: any) => {
-          const product = result.products.find(
-            (product: any) => product.productId === winner.id,
-          );
-          return {
-            ...product,
-            sponsored: true,
-            topsort: {
-              resolvedBidId: winner.resolvedBidId,
-            },
-          };
-        }) || [];
+      const productMap = new Map(result.products.map((product: any) => [product.productId, product]));
+      const sponsoredProducts: any[] = [];
 
-      for (const product of sponsoredProducts.reverse()) {
-        result.products.unshift(product);
+      if (auctionResult.data.results[0].winners) {
+        for (const winner of auctionResult.data.results[0].winners) {
+          const product: any = productMap.get(winner.id);
+          if (product) {
+            // Mark product as sponsored and attach topsort data
+            sponsoredProducts.push({
+              ...product,
+              sponsored: true,
+              topsort: {
+                resolvedBidId: winner.resolvedBidId,
+              },
+            });
+          }
+        }
+      }
+
+      if (sponsoredProducts.length > 0) {
+        result.products = result.products.filter(
+          (product: any) =>
+            !productMap.has(product.productId) ||
+            !sponsoredProducts.find(sp => sp.productId === product.productId)
+        );
+
+        result.products = [...sponsoredProducts, ...result.products];
       }
 
       // eslint-disable-next-line no-console
