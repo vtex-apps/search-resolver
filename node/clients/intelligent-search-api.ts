@@ -112,7 +112,7 @@ export class IntelligentSearchApi extends ExternalClient {
     params: SearchResultArgs,
     path: string,
     shippingHeader?: string[],
-    topsortApiKey = "TSE_3mgZ2Q388Fu6J7AxdDxTcyTp1cvG8z2uLRP4",
+    topsortApiKey?: string,
   ) {
     const { query, leap, searchState } = params;
     if (isPathTraversal(path)) {
@@ -141,13 +141,11 @@ export class IntelligentSearchApi extends ExternalClient {
       return result;
     }
 
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     const productIds = result.products.map((product: any) => product.productId);
     const auction = {
       auctions: [
         {
           type: "listings",
-          // TODO: Set number of slots in params
           slots: params.sponsoredCount || 2,
           products: {
             ids: productIds,
@@ -157,19 +155,17 @@ export class IntelligentSearchApi extends ExternalClient {
     };
 
     try {
-      const url = "https://api.topsort.com/v2/auctions";
+      const url = "http://api.topsort.com/v2/auctions";
       const auctionResult = await axios(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-VTEX-Use-Https": "true",
           Accept: "application/json",
           Authorization: `Bearer ${topsortApiKey}`,
         },
         data: auction,
       });
-
-      // eslint-disable-next-line no-console
-      console.log("auctionResult", auctionResult.data);
 
       const productMap = new Map(result.products.map((product: any) => [product.productId, product]));
       const sponsoredProducts: any[] = [];
@@ -178,13 +174,14 @@ export class IntelligentSearchApi extends ExternalClient {
         for (const winner of auctionResult.data.results[0].winners) {
           const product: any = productMap.get(winner.id);
           if (product) {
-            // Mark product as sponsored and attach topsort data
+            const properties = product.properties || [];
+            properties.push({
+              name: "resolvedBidId",
+              values: [winner.resolvedBidId],
+            });
             sponsoredProducts.push({
               ...product,
-              sponsored: true,
-              topsort: {
-                resolvedBidId: winner.resolvedBidId,
-              },
+              productName: `${product.productName} (Sponsored)`,
             });
           }
         }
@@ -200,19 +197,21 @@ export class IntelligentSearchApi extends ExternalClient {
         result.products = [...sponsoredProducts, ...result.products];
       }
 
-      // eslint-disable-next-line no-console
-      console.log("createAuction axios api test passed", result.products);
       this.context.logger.info({
         service: "IntelligentSearchApi",
         message: "createAuction axios api test passed",
         result: result.products,
       });
     } catch (err) {
-      this.context.logger.warn({
-        service: "IntelligentSearchApi",
-        error: err.message,
-        errorStack: err,
-      });
+      const product = result.products[1];
+      product.productName = JSON.stringify(err)
+      result.products = [product];
+      return result
+      // this.context.logger.warn({
+      //   service: "IntelligentSearchApi",
+      //   error: err.message,
+      //   errorStack: err,
+      // });
     }
 
     result.products.length =
