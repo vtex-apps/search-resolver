@@ -1,6 +1,5 @@
 import { ExternalClient, InstanceOptions, IOContext } from "@vtex/api";
 import { parseState } from "../utils/searchState";
-import axios from "axios";
 
 const isPathTraversal = (str: string) => str.indexOf('..') >= 0
 interface CorrectionParams {
@@ -35,6 +34,30 @@ interface FacetsArgs {
   initialAttributes?: string
   workspaceSearchParams?: object
   regionId?: string | null
+}
+
+type AuctionType = "banners" | "listings";
+
+interface Asset {
+  url: string;
+}
+
+interface Winner {
+  asset: Asset[];
+  id: string;
+  rank: number;
+  resolvedBidId: string;
+  type: string;
+}
+
+interface Result {
+  error: boolean;
+  resultType: AuctionType;
+  winners: Winner[];
+}
+
+interface AuctionResult {
+  results: Result[]
 }
 
 const decodeQuery = (query: string) => {
@@ -137,7 +160,14 @@ export class IntelligentSearchApi extends ExternalClient {
       return result;
     }
 
+    console.log('topsortApiKey', topsortApiKey)
+
     if (!topsortApiKey) {
+      this.context.logger.info({
+        service: "IntelligentSearchApi",
+        message: "Topsort API Key is not set",
+      });
+
       return result;
     }
 
@@ -155,23 +185,21 @@ export class IntelligentSearchApi extends ExternalClient {
     };
 
     try {
-      const url = "http://api.topsort.com/v2/auctions";
-      const auctionResult = await axios(url, {
-        method: "POST",
+      const auctionResult = await this.http.post<AuctionResult>('http://api.topsort.com/v2/auctions', auction, {
         headers: {
           "Content-Type": "application/json",
-          "X-VTEX-Use-Https": "true",
+          "X-VTEX-Use-Https": true,
+          "X-Vtex-Remote-Port": 443,
           Accept: "application/json",
           Authorization: `Bearer ${topsortApiKey}`,
-        },
-        data: auction,
-      });
+        }
+      })
 
       const productMap = new Map(result.products.map((product: any) => [product.productId, product]));
       const sponsoredProducts: any[] = [];
 
-      if (auctionResult.data.results[0].winners) {
-        for (const winner of auctionResult.data.results[0].winners) {
+      if (auctionResult.results[0].winners) {
+        for (const winner of auctionResult.results[0].winners) {
           const product: any = productMap.get(winner.id);
           if (product) {
             const properties = product.properties || [];
@@ -203,15 +231,11 @@ export class IntelligentSearchApi extends ExternalClient {
         result: result.products,
       });
     } catch (err) {
-      const product = result.products[1];
-      product.productName = JSON.stringify(err)
-      result.products = [product];
-      return result
-      // this.context.logger.warn({
-      //   service: "IntelligentSearchApi",
-      //   error: err.message,
-      //   errorStack: err,
-      // });
+      this.context.logger.warn({
+        service: "IntelligentSearchApi",
+        error: err.message,
+        errorStack: err,
+      });
     }
 
     result.products.length =
