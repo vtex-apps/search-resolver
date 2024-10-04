@@ -160,8 +160,6 @@ export class IntelligentSearchApi extends ExternalClient {
       return result;
     }
 
-    console.log('topsortApiKey', topsortApiKey)
-
     if (!topsortApiKey) {
       this.context.logger.info({
         service: "IntelligentSearchApi",
