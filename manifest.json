@@ -1,9 +1,9 @@
 {
   "vendor": "topsortpartnercl",
   "name": "auctions",
-  "version": "0.1.0",
-  "title": "Topsort's Fork of VTEX search resolver.",
-  "description": "Topsort's Fork of VTEX search resolver.",
+  "version": "0.1.1",
+  "title": "Topsort's Auctions Integration",
+  "description": "Topsort's Fork of VTEX search resolver to run auctions in Topsort.",
   "credentialType": "absolute",
   "builders": {
     "node": "6.x",
@@ -25,6 +25,11 @@
         "title": "Topsort API Key",
         "type": "string",
         "default": ""
+      },
+      "sponsoredCount": {
+        "title": "Topsort Number of Sponsored Slots",
+        "type": "number",
+        "default": 2
       },
       "slugifyLinks": {
         "title": "Set to slugify links. Uses default catalog slug instead",

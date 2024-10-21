@@ -460,6 +460,7 @@ export const queries = {
     delete biggyArgs.selectedFacets
 
     const settings: AppSettings = await ctx.clients.apps.getAppSettings(APP_NAME)
+    biggyArgs.sponsoredCount = settings.sponsoredCount || biggyArgs.sponsoredCount;
     const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets), args.shippingOptions, settings.topsortApiKey)
 
     if (ctx.vtex.tenant) {
