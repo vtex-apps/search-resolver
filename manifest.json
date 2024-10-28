@@ -9,6 +9,14 @@
     "node": "6.x",
     "docs": "0.x"
   },
+  "billingOptions": {
+    "type": "free",
+    "support": {
+        "email": "support@topsort.com",
+        "url": "https://docs.topsort.com/overview/"
+    },
+    "availableCountries": ["*"]
+  },
   "dependencies": {
     "vtex.messages": "1.x",
     "vtex.catalog-api-proxy": "0.x",
