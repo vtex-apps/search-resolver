@@ -188,6 +188,7 @@ export class IntelligentSearchApi extends ExternalClient {
           "Content-Type": "application/json",
           "X-VTEX-Use-Https": true,
           "X-Vtex-Remote-Port": 443,
+          "X-UA": `@topsort/vtex-search-resolver`,
           Accept: "application/json",
           Authorization: `Bearer ${topsortApiKey}`,
         }
