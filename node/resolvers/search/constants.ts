@@ -15,4 +15,4 @@ export const FILTER_TITLE_SEP = '_'
 export const CATEGORY_SEGMENT = 'c'
 export const FULL_TEXT_SEGMENT = 'ft'
 
-export const APP_NAME = 'topsortpartnercl.search-resolver'
+export const APP_NAME = 'topsortpartnercl.auctions'
