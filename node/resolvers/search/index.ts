@@ -37,6 +37,7 @@ import {
   getShippingOptionsFromSelectedFacets,
   validMapAndQuery,
 } from './utils'
+
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
   value: string
@@ -461,7 +462,7 @@ export const queries = {
 
     const settings: AppSettings = await ctx.clients.apps.getAppSettings(APP_NAME)
     biggyArgs.sponsoredCount = settings.sponsoredCount || biggyArgs.sponsoredCount;
-    const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets), args.shippingOptions, settings.topsortApiKey)
+    const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets), args.shippingOptions)
 
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated

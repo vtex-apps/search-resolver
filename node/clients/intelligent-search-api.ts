@@ -84,21 +84,23 @@ export class IntelligentSearchApi extends ExternalClient {
   }
 
   public async topSearches() {
-    return this.http.get('/top_searches', {params: {
-      locale: this.locale
-    }, metric: 'topSearches'})
+    return this.http.get('/top_searches', {
+      params: {
+        locale: this.locale
+      }, metric: 'topSearches'
+    })
   }
 
   public async correction(params: CorrectionParams) {
-    return this.http.get('/correction_search', {params: {...params, locale: this.locale}, metric: 'correction'})
+    return this.http.get('/correction_search', { params: { ...params, locale: this.locale }, metric: 'correction' })
   }
 
   public async searchSuggestions(params: SearchSuggestionsParams) {
-    return this.http.get('/search_suggestions', {params: {...params, locale: this.locale}, metric: 'searchSuggestions'})
+    return this.http.get('/search_suggestions', { params: { ...params, locale: this.locale }, metric: 'searchSuggestions' })
   }
 
   public async autocompleteSearchSuggestions(params: AutocompleteSearchSuggestionsParams) {
-    return this.http.get('/autocomplete_suggestions', {params: {...params, locale: this.locale}, metric: 'autocompleteSearchSuggestions'})
+    return this.http.get('/autocomplete_suggestions', { params: { ...params, locale: this.locale }, metric: 'autocompleteSearchSuggestions' })
   }
 
   public async banners(params: BannersArgs, path: string) {
@@ -106,7 +108,7 @@ export class IntelligentSearchApi extends ExternalClient {
       throw new Error("Malformed URL")
     }
 
-    return this.http.get(`/banners/${path}`, {params: {...params, query: params.query, locale: this.locale}, metric: 'banners'})
+    return this.http.get(`/banners/${path}`, { params: { ...params, query: params.query, locale: this.locale }, metric: 'banners' })
   }
 
   public async facets(params: FacetsArgs, path: string, shippingHeader?: string[]) {
@@ -114,7 +116,7 @@ export class IntelligentSearchApi extends ExternalClient {
       throw new Error("Malformed URL")
     }
 
-    const {query, leap, searchState} = params
+    const { query, leap, searchState } = params
 
     return this.http.get(`/facets/${path}`, {
       params: {
@@ -135,7 +137,6 @@ export class IntelligentSearchApi extends ExternalClient {
     params: SearchResultArgs,
     path: string,
     shippingHeader?: string[],
-    topsortApiKey?: string,
   ) {
     const { query, leap, searchState } = params;
     if (isPathTraversal(path)) {
@@ -160,7 +161,15 @@ export class IntelligentSearchApi extends ExternalClient {
       return result;
     }
 
-    if (!topsortApiKey) {
+
+    const serviceSettings: ServiceSettings | undefined = await this.http
+      .get(`http://${this.context.workspace}--${this.context.account}.myvtex.com/_v/ts/settings`)
+      .catch((error) => {
+        console.error(`Error fetching Topsort Services settings: ${error}`)
+        return undefined
+      });
+
+    if (!serviceSettings?.marketplaceAPIKey) {
       this.context.logger.info({
         service: "IntelligentSearchApi",
         message: "Topsort API Key is not set",
@@ -190,7 +199,7 @@ export class IntelligentSearchApi extends ExternalClient {
           "X-Vtex-Remote-Port": 443,
           "X-UA": `@topsort/vtex-search-resolver`,
           Accept: "application/json",
-          Authorization: `Bearer ${topsortApiKey}`,
+          Authorization: `Bearer ${serviceSettings.marketplaceAPIKey}`,
         }
       })
 
@@ -243,7 +252,7 @@ export class IntelligentSearchApi extends ExternalClient {
   }
 
   public async sponsoredProducts(params: SearchResultArgs, path: string, shippingHeader?: string[]) {
-    const {query, leap, searchState} = params
+    const { query, leap, searchState } = params
     if (isPathTraversal(path)) {
       throw new Error("Malformed URL")
     }

@@ -1,7 +1,7 @@
 {
   "vendor": "topsortpartnercl",
   "name": "auctions",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "title": "Topsort's Auctions Integration",
   "description": "Topsort's Fork of VTEX search resolver to run auctions in Topsort.",
   "credentialType": "absolute",
@@ -19,6 +19,9 @@
       "*"
     ]
   },
+  "peerDependencies": {
+    "topsortpartnercl.services": "3.x"
+  },
   "dependencies": {
     "vtex.messages": "1.x",
     "vtex.catalog-api-proxy": "0.x",
@@ -31,11 +34,6 @@
     "title": "Topsort Intelligent Search Resolver",
     "type": "object",
     "properties": {
-      "topsortApiKey": {
-        "title": "Topsort API Key",
-        "type": "string",
-        "default": ""
-      },
       "sponsoredCount": {
         "title": "Topsort Number of Sponsored Slots",
         "type": "number",

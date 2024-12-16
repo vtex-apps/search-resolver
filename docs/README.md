@@ -16,25 +16,20 @@ The store’s search resolver will continue functioning as the standard VTEX sea
 
 First, make sure you have created a `Marketplace API Key` in your Topsort's dashboard. Check out how to do it [here](https://api.docs.topsort.com/api-reference/authentication).
 
-It is possible to install in your store either by using App Store or the VTEX IO Toolbelt.
-
-### Using VTEX App Store
-
-1. Access the **Apps** section in your account's admin page and look for the App Store;
-2. Search for `Topsort's Auctions Integration`, and open it;
-2. Then, click on the **Install** button;
-3. You'll see a warning message about needing to enter the necessary configurations. Scroll down and type in your **Topsort API Key** in the `topsortAPIKey` field, and if the available sponsored slots is different than 2, add also the amount on the **Topsort Number of Sponsored Slots** field;
-4. Click on **Save**.
+It is possible to install in your store either by using VTEX IO Toolbelt.
 
 ### Using VTEX IO Toolbelt
 
 1. [Install](https://developers.vtex.com/docs/guides/vtex-io-documentation-vtex-io-cli-install) VTEX's CLI. You can confirm that the app has now been installed by running `vtex ls` again.
-2. Run the command `vtex install topsortpartnercl.auctions@0.x.`
-3. Go to the App Settings on VTEX's App Management, add your __Topsort API Key__;
-4. Add the __Topsort Number of Sponsored Slots__
-5. Click on **Save**.
+2. Run the command `vtex install topsortpartnercl.services@3.x.`
+3. Run the command `vtex install topsortpartnercl.auctions@2.x.`
+4. Go to the App Settings on VTEX's App Management, search for `Topsort's Services` and add your **Topsort Marketplace API Key**;
+5. Click on **Save**;
+6. Optionally, go to the App Settings on VTEX's App Management, search for `Topsort's Auctions Integration`;
+7. Add the __Topsort Number of Sponsored Slots__;
+8. Click on **Save**.
 
-Now Topsort is listening to your catalog changes on VTEX and integrate it accordingly!
+Now Topsort is running auctions and augmenting your search results successfully!
 
 ### Next Steps
 See how to send your ad [events](https://developers.vtex.com/docs/apps/topsortpartnercl.events)

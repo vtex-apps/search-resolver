@@ -57,8 +57,12 @@ declare global {
 
   interface AppSettings {
     slugifyLinks: boolean,
-    topsortApiKey: string,
     sponsoredCount: number,
+  }
+
+  interface ServiceSettings {
+    advancedAPIKey: string,
+    marketplaceAPIKey: string
   }
 
   interface DegradedSearchError {
