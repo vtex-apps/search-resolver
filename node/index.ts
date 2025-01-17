@@ -1,6 +1,5 @@
-import './globals'
-
-import { Cached, LRUCache, RecorderState, Service, method } from '@vtex/api'
+import type { Cached, RecorderState } from '@vtex/api'
+import { LRUCache, Service, method } from '@vtex/api'
 import schema from 'vtex.search-graphql/graphql'
 
 import { Clients } from './clients'
@@ -23,7 +22,6 @@ const searchCache = new LRUCache<string, Cached>({ max: 3000 })
 const messagesCache = new LRUCache<string, Cached>({ max: 3000 })
 const vbaseCache = new LRUCache<string, Cached>({ max: 3000 })
 const appsCache = new LRUCache<string, Cached>({ max: 3000 })
-
 
 metrics.trackCache('segment', segmentCache)
 metrics.trackCache('search', searchCache)

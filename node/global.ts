@@ -1,4 +1,4 @@
-import {
+import type {
   IOContext,
   ParamsContext,
   RecorderState,
@@ -7,7 +7,7 @@ import {
   MessagesLoaderV2,
 } from '@vtex/api'
 
-import { Clients } from './clients'
+import type { Clients } from './clients'
 
 declare global {
   type Context = ServiceContext<Clients, State, CustomContext>
@@ -17,7 +17,7 @@ declare global {
     messagesBindingLanguage?: MessagesLoaderV2
   }
 
-  interface StaleRevalidateData<T>{
+  interface StaleRevalidateData<T> {
     ttl: Date
     data: T
   }
