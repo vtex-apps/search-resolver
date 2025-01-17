@@ -1,6 +1,5 @@
 import {
   IOContext,
-  MetricsAccumulator,
   ParamsContext,
   RecorderState,
   SegmentData,
@@ -9,11 +8,6 @@ import {
 } from '@vtex/api'
 
 import { Clients } from './clients'
-
-if (!global.metrics) {
-  console.error('No global.metrics at require time')
-  global.metrics = new MetricsAccumulator()
-}
 
 declare global {
   type Context = ServiceContext<Clients, State, CustomContext>

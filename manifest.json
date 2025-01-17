@@ -6,7 +6,7 @@
   "description": "GraphQL resolvers for the VTEX API for the catalog and orders.",
   "credentialType": "absolute",
   "builders": {
-    "node": "6.x",
+    "node": "7.x",
     "docs": "0.x"
   },
   "dependencies": {
