@@ -1,6 +1,5 @@
-import {
+import type {
   IOContext,
-  MetricsAccumulator,
   ParamsContext,
   RecorderState,
   SegmentData,
@@ -8,12 +7,7 @@ import {
   MessagesLoaderV2,
 } from '@vtex/api'
 
-import { Clients } from './clients'
-
-if (!global.metrics) {
-  console.error('No global.metrics at require time')
-  global.metrics = new MetricsAccumulator()
-}
+import type { Clients } from './clients'
 
 declare global {
   type Context = ServiceContext<Clients, State, CustomContext>
@@ -23,7 +17,7 @@ declare global {
     messagesBindingLanguage?: MessagesLoaderV2
   }
 
-  interface StaleRevalidateData<T>{
+  interface StaleRevalidateData<T> {
     ttl: Date
     data: T
   }

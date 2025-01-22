@@ -1,14 +1,11 @@
 {
   "extends": "@vtex/tsconfig",
-  "include": [
-    "./typings/*.d.ts",
-    "./**/*.tsx",
-    "./**/*.ts"
-  ],
   "compilerOptions": {
-    "types": [
-      "node",
-      "jest"
-    ]
-  }
+    "noEmitOnError": false,
+    "lib": ["dom"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es2019"
+  },
+  "include": ["./typings/*.d.ts", "./**/*.tsx", "./**/*.ts"]
 }
