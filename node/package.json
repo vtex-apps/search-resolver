@@ -38,5 +38,5 @@
     "vtex.messages": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.64.0/public/@types/vtex.messages",
     "vtex.rewriter": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.53.4/public/@types/vtex.rewriter"
   },
-  "version": "1.72.0"
+  "version": "1.73.0"
 }
