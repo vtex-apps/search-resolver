@@ -1,14 +1,14 @@
 {
   "stack": "nodejs",
-  "memory": 2048,
+  "memory": 4096,
   "cpu": {
     "type": "shared",
-    "value": 80,
-    "scalingPercentage": 95
+    "value": 200,
+    "scalingPercentage": 80
   },
-  "ttl": 30,
+  "ttl": 60,
   "timeout": 12,
-  "minReplicas": 30,
+  "minReplicas": 10,
   "maxReplicas": 250,
   "workers": 2,
   "routes": {
