@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Set minimum replicas to 5.
+- Increased search cache size.
+- Reduced apps cache size.
+
 ## [1.74.0] - 2025-01-29
 
 ### Changed
