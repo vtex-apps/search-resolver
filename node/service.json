@@ -8,7 +8,7 @@
   },
   "ttl": 60,
   "timeout": 12,
-  "minReplicas": 10,
+  "minReplicas": 5,
   "maxReplicas": 250,
   "workers": 2,
   "routes": {
