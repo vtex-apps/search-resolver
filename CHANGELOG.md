@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Pod scaling configs to use 0.8 vCPUs and 2Gb of memory.
+- Increase minimum to 30.
+- Reduce search-cache to 3000 items.
+
 ## [1.75.0] - 2025-02-04
 
 ### Changed
