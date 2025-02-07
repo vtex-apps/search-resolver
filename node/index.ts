@@ -17,7 +17,7 @@ const NINE_SECONDS_MS = 9 * 1000
 
 // Segments are small and immutable.
 const segmentCache = new LRUCache<string, Cached>({ max: 1000 })
-const searchCache = new LRUCache<string, Cached>({ max: 6000 })
+const searchCache = new LRUCache<string, Cached>({ max: 3000 })
 const messagesCache = new LRUCache<string, Cached>({ max: 3000 })
 const vbaseCache = new LRUCache<string, Cached>({ max: 3000 })
 const appsCache = new LRUCache<string, Cached>({ max: 1500 })
