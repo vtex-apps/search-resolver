@@ -1,5 +1,6 @@
 import { ExternalClient, InstanceOptions, IOContext } from "@vtex/api";
 import { parseState } from "../utils/searchState";
+import { unveil } from "../resolvers/search/utils";
 
 const isPathTraversal = (str: string) => str.indexOf('..') >= 0
 interface CorrectionParams {
@@ -161,15 +162,16 @@ export class IntelligentSearchApi extends ExternalClient {
       return result;
     }
 
-
-    const serviceSettings: ServiceSettings | undefined = await this.http
+    const { data } = await this.http
       .get(`http://${this.context.workspace}--${this.context.account}.myvtex.com/_v/ts/settings`)
       .catch((error) => {
         console.error(`Error fetching Topsort Services settings: ${error}`)
         return undefined
       });
 
-    if (!serviceSettings?.marketplaceAPIKey) {
+    const marketplaceAPIKey = unveil(data)?.marketplaceAPIKey || undefined
+
+    if (!marketplaceAPIKey) {
       this.context.logger.info({
         service: "IntelligentSearchApi",
         message: "Topsort API Key is not set",
@@ -199,7 +201,7 @@ export class IntelligentSearchApi extends ExternalClient {
           "X-Vtex-Remote-Port": 443,
           "X-UA": `@topsort/vtex-search-resolver`,
           Accept: "application/json",
-          Authorization: `Bearer ${serviceSettings.marketplaceAPIKey}`,
+          Authorization: `Bearer ${marketplaceAPIKey}`,
         }
       })
 

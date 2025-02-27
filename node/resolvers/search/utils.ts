@@ -51,6 +51,30 @@ export function hashMD5(text: string) {
   return hash.update(text).digest('hex')
 }
 
+export function unveil(encryptedData: string): ServiceSettings | undefined {
+  const VEIL_KEY = 'a2c4e6g8i0k2m4o6q8s0u2w4y6A8C0E2'
+  const VEIL_IV = 'G4I6K8M0O2Q4S6U8'
+  const VEIL_ALGORITHM = 'aes-256-cbc'
+   try {
+     const unveil = crypto.createDecipheriv(
+       VEIL_ALGORITHM,
+       Buffer.from(VEIL_KEY),
+       Buffer.from(VEIL_IV)
+     )
+
+     let unveiled = unveil.update(encryptedData, 'base64', 'utf8')
+     unveiled += unveil.final('utf8')
+
+     try {
+       return JSON.parse(unveiled) ?? undefined
+     } catch (e) {
+       return undefined;
+     }
+   } catch (error) {
+     return undefined
+   }
+ }
+
 export function findCategoryInTree(
   tree: CategoryTreeResponse[],
   values: string[],
