@@ -246,8 +246,6 @@ export class IntelligentSearchApi extends ExternalClient {
       });
     }
 
-    result.products.length =
-      result.products.length > Number(params.to) ? params.to : result.products.length;
     return result;
   }
 
