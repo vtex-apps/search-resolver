@@ -219,7 +219,7 @@ export class IntelligentSearchApi extends ExternalClient {
             });
             sponsoredProducts.push({
               ...product,
-              productName: `${product.productName} (Sponsored)`,
+              productName: `${product.productName} (ad)`,
             });
           }
         }
