@@ -2,6 +2,13 @@ import { ExternalClient, InstanceOptions, IOContext } from "@vtex/api";
 import { parseState } from "../utils/searchState";
 import { unveil } from "../resolvers/search/utils";
 
+interface TopsortQueryArgParams {
+  type: string;
+  value: string;
+}
+
+const topsortQueryArgParams: TopsortQueryArgParams[] = [];
+
 const isPathTraversal = (str: string) => str.indexOf('..') >= 0
 interface CorrectionParams {
   query: string
@@ -119,7 +126,7 @@ export class IntelligentSearchApi extends ExternalClient {
 
     const { query, leap, searchState } = params
 
-    return this.http.get(`/facets/${path}`, {
+    const result = await this.http.get(`/facets/${path}`, {
       params: {
         ...params,
         query: query && decodeQuery(query),
@@ -132,6 +139,23 @@ export class IntelligentSearchApi extends ExternalClient {
         'x-vtex-shipping-options': shippingHeader ?? '',
       },
     })
+
+    const queryArgs = result.queryArgs.selectedFacets
+    const forbiddenKeywords = ["installHook.js.map"];
+    for (const arg of queryArgs) {
+      if (!forbiddenKeywords.includes(arg.value)) {
+        topsortQueryArgParams.push({
+          type: arg.key === 'ft'
+            ? 'query'
+            : arg.key === 'c'
+              ? 'category'
+              : 'none',
+          value: arg.value
+        })
+      }
+    }
+
+    return result;
   }
 
   public async productSearch(
@@ -180,19 +204,54 @@ export class IntelligentSearchApi extends ExternalClient {
       return result;
     }
 
-    const productIds = result.products.map((product: any) => product.productId);
-    const auction = {
-      auctions: [
-        {
-          type: "listings",
-          slots: params.sponsoredCount || 2,
-          products: {
-            ids: productIds,
-          },
-        },
-      ],
-    };
+    let auction = undefined;
 
+    const arg = topsortQueryArgParams[0];
+    if (arg) {
+      switch (arg.type) {
+        case 'query':
+            auction = {
+              auctions: [
+                {
+                  type: "listings",
+                  slots: params.sponsoredCount || 2,
+                  searchQuery: arg.value,
+                },
+              ],
+            };
+          break;
+        case 'category':
+          auction = {
+            auctions: [
+              {
+                type: "listings",
+                slots: params.sponsoredCount || 2,
+                category: {
+                  ids: topsortQueryArgParams.map(arg => arg.value),
+                },
+              },
+            ],
+          };
+          break;
+        default:
+          break;
+      }
+    } else {
+      const productIds = result.products.map((product: any) => product.productId);
+      auction = {
+        auctions: [
+          {
+            type: "listings",
+            slots: params.sponsoredCount || 2,
+            products: {
+              ids: productIds,
+            },
+          },
+        ],
+      };
+    }
+
+    topsortQueryArgParams.splice(0, topsortQueryArgParams.length);
     try {
       const auctionResult = await this.http.post<AuctionResult>('http://api.topsort.com/v2/auctions', auction, {
         headers: {

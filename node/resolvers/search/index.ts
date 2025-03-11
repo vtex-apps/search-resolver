@@ -364,11 +364,10 @@ export const queries = {
       clients: { intelligentSearchApi },
     } = ctx
 
-    const biggyArgs: {[key:string]: any}  = {
+    const biggyArgs: {[key:string]: any} = {
       ...args
     }
 
-    // unnecessary field. It's is an object and breaks the @vtex/api cache
     delete biggyArgs.selectedFacets
 
     const result = await intelligentSearchApi.facets({...biggyArgs, query: args.fullText}, buildAttributePath(selectedFacets), shippingOptions)
