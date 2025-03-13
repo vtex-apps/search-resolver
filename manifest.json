@@ -1,7 +1,7 @@
 {
   "vendor": "topsortpartnercl",
   "name": "auctions",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "title": "Topsort's Auctions Integration",
   "description": "Topsort's Fork of VTEX search resolver to run auctions in Topsort.",
   "credentialType": "absolute",
@@ -46,6 +46,11 @@
       },
       "slugifyLinks": {
         "title": "Set to slugify links. Uses default catalog slug instead",
+        "type": "boolean",
+        "default": false
+      },
+      "activateDebugSponsoredTags": {
+        "title": "Activate debug sponsored tags",
         "type": "boolean",
         "default": false
       }

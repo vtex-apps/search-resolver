@@ -455,6 +455,7 @@ export const queries = {
       sort: convertOrderBy(orderBy),
       ...workspaceSearchParams,
       alwaysLeafCategoryAuction: false,
+      activateDebugSponsoredTags: false,
     }
 
     // unnecessary field. It's is an object and breaks the @vtex/api cache
@@ -463,6 +464,7 @@ export const queries = {
     const settings: AppSettings = await ctx.clients.apps.getAppSettings(APP_NAME)
     biggyArgs.sponsoredCount = settings.sponsoredCount || biggyArgs.sponsoredCount;
     biggyArgs.alwaysLeafCategoryAuction = settings.alwaysLeafCategoryAuction || biggyArgs.alwaysLeafCategoryAuction;
+    biggyArgs.activateDebugSponsoredTags = settings.activateDebugSponsoredTags || biggyArgs.activateDebugSponsoredTags;
     const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets), args.shippingOptions)
 
     if (ctx.vtex.tenant) {

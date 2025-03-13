@@ -163,7 +163,7 @@ export class IntelligentSearchApi extends ExternalClient {
     path: string,
     shippingHeader?: string[],
   ) {
-    const { query, leap, searchState, alwaysLeafCategoryAuction } = params;
+    const { query, leap, searchState, alwaysLeafCategoryAuction, activateDebugSponsoredTags } = params;
     if (isPathTraversal(path)) {
       throw new Error("Malformed URL");
     }
@@ -278,7 +278,7 @@ export class IntelligentSearchApi extends ExternalClient {
             });
             sponsoredProducts.push({
               ...product,
-              productName: `${product.productName} (ad)`,
+              productName: activateDebugSponsoredTags ? `${product.productName} (ad)` : product.productName
             });
           }
         }

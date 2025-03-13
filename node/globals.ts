@@ -59,6 +59,7 @@ declare global {
     slugifyLinks: boolean,
     sponsoredCount: number,
     alwaysLeafCategoryAuction: boolean,
+    activateDebugSponsoredTags: boolean
   }
 
   interface ServiceSettings {
