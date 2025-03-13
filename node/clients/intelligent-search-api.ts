@@ -163,7 +163,7 @@ export class IntelligentSearchApi extends ExternalClient {
     path: string,
     shippingHeader?: string[],
   ) {
-    const { query, leap, searchState } = params;
+    const { query, leap, searchState, alwaysLeafCategoryAuction } = params;
     if (isPathTraversal(path)) {
       throw new Error("Malformed URL");
     }
@@ -227,7 +227,7 @@ export class IntelligentSearchApi extends ExternalClient {
                 type: "listings",
                 slots: params.sponsoredCount || 2,
                 category: {
-                  ids: topsortQueryArgParams.map(arg => arg.value),
+                  ids: alwaysLeafCategoryAuction ? [arg.value] : topsortQueryArgParams.map(arg => arg.value),
                 },
               },
             ],
