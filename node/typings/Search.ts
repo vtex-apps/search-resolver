@@ -47,6 +47,7 @@ interface SearchResultArgs extends AdvertisementOptions {
   to?: number | null
   showSponsored?: boolean
   alwaysLeafCategoryAuction?: boolean
+  activateDebugSponsoredTags?: boolean
 }
 
 interface BannersArgs {
