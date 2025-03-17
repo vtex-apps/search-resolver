@@ -171,6 +171,7 @@ export class IntelligentSearchApi extends ExternalClient {
     const result = await this.http.get(`/product_search/${path}`, {
       params: {
         query: query && decodeQuery(query),
+        count: 100,
         locale: this.locale,
         bgy_leap: leap ? true : undefined,
         ...parseState(searchState),
