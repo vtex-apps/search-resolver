@@ -39,8 +39,18 @@
         "type": "number",
         "default": 2
       },
+      "alwaysLeafCategoryAuction": {
+        "title": "Run category auctions only on leaf categories",
+        "type": "boolean",
+        "default": false
+      },
       "slugifyLinks": {
         "title": "Set to slugify links. Uses default catalog slug instead",
+        "type": "boolean",
+        "default": false
+      },
+      "activateDebugSponsoredTags": {
+        "title": "Activate debug sponsored tags",
         "type": "boolean",
         "default": false
       }

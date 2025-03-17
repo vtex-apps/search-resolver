@@ -454,6 +454,8 @@ export const queries = {
       ...args,
       sort: convertOrderBy(orderBy),
       ...workspaceSearchParams,
+      alwaysLeafCategoryAuction: false,
+      activateDebugSponsoredTags: false,
     }
 
     // unnecessary field. It's is an object and breaks the @vtex/api cache
@@ -461,6 +463,8 @@ export const queries = {
 
     const settings: AppSettings = await ctx.clients.apps.getAppSettings(APP_NAME)
     biggyArgs.sponsoredCount = settings.sponsoredCount || biggyArgs.sponsoredCount;
+    biggyArgs.alwaysLeafCategoryAuction = settings.alwaysLeafCategoryAuction || biggyArgs.alwaysLeafCategoryAuction;
+    biggyArgs.activateDebugSponsoredTags = settings.activateDebugSponsoredTags || biggyArgs.activateDebugSponsoredTags;
     const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets), args.shippingOptions)
 
     if (ctx.vtex.tenant) {
@@ -531,6 +535,7 @@ export const queries = {
     } = args
 
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+    const settings: AppSettings = await ctx.clients.apps.getAppSettings(APP_NAME)
 
     const biggyArgs: {[key:string]: any} = {
       ...advertisementOptions,
@@ -539,6 +544,9 @@ export const queries = {
       sort: convertOrderBy(args.orderBy),
       ...args.options,
       ...workspaceSearchParams,
+      sponsoredCount: settings.sponsoredCount,
+      alwaysLeafCategoryAuction: settings.alwaysLeafCategoryAuction,
+      activateDebugSponsoredTags: settings.activateDebugSponsoredTags,
     }
 
     // unnecessary field. It's is an object and breaks the @vtex/api cache

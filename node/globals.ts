@@ -58,6 +58,8 @@ declare global {
   interface AppSettings {
     slugifyLinks: boolean,
     sponsoredCount: number,
+    alwaysLeafCategoryAuction: boolean,
+    activateDebugSponsoredTags: boolean
   }
 
   interface ServiceSettings {

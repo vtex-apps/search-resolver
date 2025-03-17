@@ -163,7 +163,7 @@ export class IntelligentSearchApi extends ExternalClient {
     path: string,
     shippingHeader?: string[],
   ) {
-    const { query, leap, searchState } = params;
+    const { query, leap, searchState, alwaysLeafCategoryAuction, activateDebugSponsoredTags } = params;
     if (isPathTraversal(path)) {
       throw new Error("Malformed URL");
     }
@@ -227,7 +227,7 @@ export class IntelligentSearchApi extends ExternalClient {
                 type: "listings",
                 slots: params.sponsoredCount || 2,
                 category: {
-                  ids: topsortQueryArgParams.map(arg => arg.value),
+                  ids: alwaysLeafCategoryAuction ? [arg.value] : topsortQueryArgParams.map(arg => arg.value),
                 },
               },
             ],
@@ -268,8 +268,30 @@ export class IntelligentSearchApi extends ExternalClient {
       const sponsoredProducts: any[] = [];
 
       if (auctionResult.results[0].winners) {
+        const allWinnersInProductMap = auctionResult.results[0].winners.every((winner: any) => productMap.has(winner.id));
+
+        let expandedProductMap = new Map<string, any>();
+        if (!allWinnersInProductMap) {
+          const expandedResult = await this.http.get(`/facets/${path}`, {
+            params: {
+              ...params,
+              query: query && decodeQuery(query),
+              count: 100,
+              locale: this.locale,
+              bgy_leap: leap ? true : undefined,
+              ...parseState(searchState),
+            },
+            metric: 'facets',
+            headers: {
+              'x-vtex-shipping-options': shippingHeader ?? '',
+            },
+          })
+          expandedProductMap = new Map(expandedResult.products.map((product: any) => [product.productId, product]));
+        }
+
         for (const winner of auctionResult.results[0].winners) {
-          const product: any = productMap.get(winner.id);
+          const product: any = productMap.get(winner.id) || expandedProductMap.get(winner.id);
+
           if (product) {
             const properties = product.properties || [];
             properties.push({
@@ -278,7 +300,7 @@ export class IntelligentSearchApi extends ExternalClient {
             });
             sponsoredProducts.push({
               ...product,
-              productName: `${product.productName} (ad)`,
+              productName: activateDebugSponsoredTags ? `${product.productName} (ad)` : product.productName
             });
           }
         }
