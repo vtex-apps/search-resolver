@@ -18,6 +18,12 @@ First, make sure you have created a `Marketplace API Key` in your Topsort's dash
 
 It is possible to install in your store either by using VTEX IO Toolbelt.
 
+The app has several configuration options:
+
+- **Topsort Number of Sponsored Slots**: Number of sponsored product slots to show at the top of search results (default: 2)
+- **Run category auctions only on leaf categories**: When enabled, category auctions will only run on leaf categories rather than parent categories (default: false)  
+- **Activate debug sponsored tags**: Shows "(Ad)" tag next to sponsored products for debugging (default: false)
+
 ### Using VTEX IO Toolbelt
 
 1. [Install](https://developers.vtex.com/docs/guides/vtex-io-documentation-vtex-io-cli-install) VTEX's CLI. You can confirm that the app has now been installed by running `vtex ls` again.
