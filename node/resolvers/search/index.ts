@@ -535,6 +535,7 @@ export const queries = {
     } = args
 
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+    const settings: AppSettings = await ctx.clients.apps.getAppSettings(APP_NAME)
 
     const biggyArgs: {[key:string]: any} = {
       ...advertisementOptions,
@@ -543,6 +544,9 @@ export const queries = {
       sort: convertOrderBy(args.orderBy),
       ...args.options,
       ...workspaceSearchParams,
+      sponsoredCount: settings.sponsoredCount,
+      alwaysLeafCategoryAuction: settings.alwaysLeafCategoryAuction,
+      activateDebugSponsoredTags: settings.activateDebugSponsoredTags,
     }
 
     // unnecessary field. It's is an object and breaks the @vtex/api cache
