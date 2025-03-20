@@ -1,7 +1,7 @@
 import { ExternalClient, InstanceOptions, IOContext } from "@vtex/api";
 import { parseState } from "../utils/searchState";
 import { unveil } from "../resolvers/search/utils";
-
+import { Search } from "./search";
 interface TopsortQueryArgParams {
   type: string;
   value: string;
@@ -168,6 +168,13 @@ export class IntelligentSearchApi extends ExternalClient {
       throw new Error("Malformed URL");
     }
 
+    const search = new Search(this.context, {
+      ...this.options,
+      headers: {
+        ...this.options?.headers,
+      }
+    })
+
     const result = await this.http.get(`/product_search/${path}`, {
       params: {
         query: query && decodeQuery(query),
@@ -272,23 +279,10 @@ export class IntelligentSearchApi extends ExternalClient {
 
         let expandedProductMap = new Map<string, any>();
         if (!allWinnersInProductMap) {
-          const expandedResult = await this.http.get(`/facets/${path}`, {
-            params: {
-              ...params,
-              query: query && decodeQuery(query),
-              count: 100,
-              locale: this.locale,
-              bgy_leap: leap ? true : undefined,
-              ...parseState(searchState),
-            },
-            metric: 'facets',
-            headers: {
-              'x-vtex-shipping-options': shippingHeader ?? '',
-            },
-          })
-          expandedProductMap = new Map(expandedResult.products.map((product: any) => [product.productId, product]));
+          const expandedResult = await search.productsById(auctionResult.results[0].winners.map((winner: any) => winner.id))
+          expandedProductMap = new Map(expandedResult.map((product: any) => [product.productId, product]));
         }
-
+        
         for (const winner of auctionResult.results[0].winners) {
           const product: any = productMap.get(winner.id) || expandedProductMap.get(winner.id);
 
