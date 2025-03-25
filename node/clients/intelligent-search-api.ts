@@ -189,8 +189,10 @@ export class IntelligentSearchApi extends ExternalClient {
       },
     });
 
-    if (result.products.length === 0) {
-      return result;
+    let sponsoredResult = result;
+
+    if (sponsoredResult.products.length === 0) {
+      return sponsoredResult;
     }
 
     const { data } = await this.http
@@ -270,7 +272,7 @@ export class IntelligentSearchApi extends ExternalClient {
           Authorization: `Bearer ${marketplaceAPIKey}`,
         }
       })
-
+      
       const productMap = new Map(result.products.map((product: any) => [product.productId, product]));
       const sponsoredProducts: any[] = [];
 
@@ -285,16 +287,25 @@ export class IntelligentSearchApi extends ExternalClient {
         
         for (const winner of auctionResult.results[0].winners) {
           const product: any = productMap.get(winner.id) || expandedProductMap.get(winner.id);
-
+          if (expandedProductMap.has(winner.id)) {
+            product.properties = Object.keys(expandedProductMap.get(winner.id)).map((key: any) => ({
+              name: key,
+              originalName: key,
+              values: [expandedProductMap.get(winner.id)[key]],
+            }));
+          }
           if (product) {
-            const properties = product.properties || [];
-            properties.push({
+            if (!product.properties) {
+              product.properties = [];
+            }
+            product.properties.push({
               name: "resolvedBidId",
+              originalName: "resolvedBidId",
               values: [winner.resolvedBidId],
             });
             sponsoredProducts.push({
               ...product,
-              productName: activateDebugSponsoredTags ? `${product.productName} (ad)` : product.productName
+              productName: activateDebugSponsoredTags ? `${product.productName} (ad)` : product.productName,
             });
           }
         }
@@ -307,7 +318,11 @@ export class IntelligentSearchApi extends ExternalClient {
             !sponsoredProducts.find(sp => sp.productId === product.productId)
         );
 
-        result.products = [...sponsoredProducts, ...result.products];
+        const newProducts = [...sponsoredProducts, ...result.products];
+        sponsoredResult = {
+          ...result,
+          products: newProducts,
+        }
       }
 
       this.context.logger.info({
@@ -323,7 +338,7 @@ export class IntelligentSearchApi extends ExternalClient {
       });
     }
 
-    return result;
+    return sponsoredResult;
   }
 
   public async sponsoredProducts(params: SearchResultArgs, path: string, shippingHeader?: string[]) {
