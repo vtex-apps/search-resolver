@@ -1,7 +1,7 @@
 {
   "vendor": "topsortpartnercl",
   "name": "auctions",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "title": "Topsort's Auctions Integration",
   "description": "Topsort's Fork of VTEX search resolver to run auctions in Topsort.",
   "credentialType": "absolute",
