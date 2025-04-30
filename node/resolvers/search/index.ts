@@ -729,7 +729,8 @@ export const queries = {
 
     return {
       ...result,
-      count: result.recordsFiltered
+      count: result.recordsFiltered,
+      misspelled: result.correction?.misspelled,
     }
   },
   banners: (

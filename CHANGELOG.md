@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Misspelled information for the productSuggestions query.
+
 ## [1.76.0] - 2025-02-07
 
 ### Changed
