@@ -536,11 +536,6 @@ export const queries = {
 
   searchMetadata: async (_: any, args: SearchMetadataArgs, ctx: Context) => {
     const queryTerm = args.query
-    if (queryTerm == null || test(/[?&[\]=]/, queryTerm)) {
-      throw new UserInputError(
-        `The query term contains invalid characters. query=${queryTerm}`
-      )
-    }
 
     if (args.selectedFacets) {
       const { maps, queries } = args.selectedFacets.reduce(
