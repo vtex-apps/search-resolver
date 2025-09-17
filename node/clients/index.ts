@@ -4,6 +4,7 @@ import { Search } from './search'
 import { Checkout } from './checkout'
 import { Rewriter } from './rewriter'
 import { IntelligentSearchApi } from './intelligent-search-api'
+import { Intsch } from './intsch'
 
 export class Clients extends IOClients {
   public get search() {
@@ -17,5 +18,9 @@ export class Clients extends IOClients {
   }
   public get intelligentSearchApi() {
     return this.getOrSet('intelligentSearchApi', IntelligentSearchApi)
+  }
+
+  public get intsch() {
+    return this.getOrSet('intsch', Intsch)
   }
 }

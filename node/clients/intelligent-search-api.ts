@@ -50,7 +50,7 @@ const decodeQuery = (query: string) => {
 export class IntelligentSearchApi extends ExternalClient {
   private locale: string | undefined
 
-  constructor(context: IOContext, options?: InstanceOptions) {
+  public constructor(context: IOContext, options?: InstanceOptions) {
     super(
       `http://${context.workspace}--${context.account}.myvtex.com/_v/api/intelligent-search`,
       context,
@@ -126,6 +126,7 @@ export class IntelligentSearchApi extends ExternalClient {
         ...params,
         query: query && decodeQuery(query),
         locale: this.locale,
+        // eslint-disable-next-line @typescript-eslint/camelcase
         bgy_leap: leap ? true : undefined,
         ...parseState(searchState),
       },
@@ -151,6 +152,7 @@ export class IntelligentSearchApi extends ExternalClient {
       params: {
         query: query && decodeQuery(query),
         locale: this.locale,
+        // eslint-disable-next-line @typescript-eslint/camelcase
         bgy_leap: leap ? true : undefined,
         ...parseState(searchState),
         ...params,
@@ -177,6 +179,7 @@ export class IntelligentSearchApi extends ExternalClient {
       params: {
         query: query && decodeQuery(query),
         locale: this.locale,
+        // eslint-disable-next-line @typescript-eslint/camelcase
         bgy_leap: leap ? true : undefined,
         ...parseState(searchState),
         ...params,
