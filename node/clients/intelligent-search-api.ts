@@ -2,6 +2,7 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
 import { parseState } from '../utils/searchState'
+import { IIntelligentSearchClient } from './intsch/types'
 
 const isPathTraversal = (str: string) => str.indexOf('..') >= 0
 
@@ -47,7 +48,10 @@ const decodeQuery = (query: string) => {
   }
 }
 
-export class IntelligentSearchApi extends ExternalClient {
+export class IntelligentSearchApi
+  extends ExternalClient
+  implements IIntelligentSearchClient
+{
   private locale: string | undefined
 
   public constructor(context: IOContext, options?: InstanceOptions) {
@@ -90,7 +94,7 @@ export class IntelligentSearchApi extends ExternalClient {
     })
   }
 
-  public async autocompleteSearchSuggestions(
+  public async fetchAutocompleteSuggestions(
     params: AutocompleteSearchSuggestionsParams
   ) {
     return this.http.get('/autocomplete_suggestions', {

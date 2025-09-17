@@ -1,8 +1,4 @@
-import {
-  NotFoundError,
-  UserInputError,
-  createMessagesLoader,
-} from '@vtex/api'
+import { NotFoundError, UserInputError, createMessagesLoader } from '@vtex/api'
 import { head, isEmpty, isNil, pathOr, test } from 'ramda'
 
 import {
@@ -72,7 +68,7 @@ interface ProductRecommendationArg {
 interface ProductsByIdentifierArgs {
   field: 'id' | 'ean' | 'reference' | 'sku'
   values: string[]
-  salesChannel?: string | null,
+  salesChannel?: string | null
   regionId?: string | null
 }
 
@@ -85,19 +81,23 @@ const inputToSearchCrossSelling = {
   [CrossSellingInput.suggestions]: SearchCrossSellingTypes.suggestions,
 }
 
-const buildVtexSegment = (vtexSegment?: SegmentData, tradePolicy?: number, regionId?: string | null): string => {
-    const cookie = {
-      regionId: regionId,
-      channel: tradePolicy,
-      utm_campaign: vtexSegment?.utm_campaign || "",
-      utm_source: vtexSegment?.utm_source || "",
-      utmi_campaign: vtexSegment?.utmi_campaign || "",
-      currencyCode: vtexSegment?.currencyCode || "",
-      currencySymbol: vtexSegment?.currencySymbol || "",
-      countryCode: vtexSegment?.countryCode || "",
-      cultureInfo: vtexSegment?.cultureInfo || "",
-    }
-    return new Buffer(JSON.stringify(cookie)).toString('base64');
+const buildVtexSegment = (
+  vtexSegment?: SegmentData,
+  tradePolicy?: number,
+  regionId?: string | null
+): string => {
+  const cookie = {
+    regionId: regionId,
+    channel: tradePolicy,
+    utm_campaign: vtexSegment?.utm_campaign || '',
+    utm_source: vtexSegment?.utm_source || '',
+    utmi_campaign: vtexSegment?.utmi_campaign || '',
+    currencyCode: vtexSegment?.currencyCode || '',
+    currencySymbol: vtexSegment?.currencySymbol || '',
+    countryCode: vtexSegment?.countryCode || '',
+    cultureInfo: vtexSegment?.cultureInfo || '',
+  }
+  return new Buffer(JSON.stringify(cookie)).toString('base64')
 }
 
 /**
@@ -176,7 +176,7 @@ const translateToStoreDefaultLanguage = async (
   })
 }
 
-const noop = () => { }
+const noop = () => {}
 
 // Does prefetching and warms up cache for up to the 10 first elements of a search, so if user clicks on product page
 const searchFirstElements = (
@@ -190,8 +190,10 @@ const searchFirstElements = (
   }
   products
     .slice(0, Math.min(10, products.length))
-    .forEach(product =>
-      search.productById(product.productId, undefined, undefined, false).catch(noop)
+    .forEach((product) =>
+      search
+        .productById(product.productId, undefined, undefined, false)
+        .catch(noop)
     )
 }
 
@@ -263,7 +265,7 @@ const getTranslatedSearchTerm = async (
   if (!query || !map || !shouldTranslateToTenantLocale(ctx)) {
     return query
   }
-  const ftSearchIndex = map.split(',').findIndex(m => m === 'ft')
+  const ftSearchIndex = map.split(',').findIndex((m) => m === 'ft')
   if (ftSearchIndex === -1) {
     return query
   }
@@ -278,17 +280,21 @@ const getTranslatedSearchTerm = async (
   return queryTranslated.join('/')
 }
 
-const buildSpecificationFiltersAsFacets = (specificationFilters: string[]): SelectedFacet[] => {
+const buildSpecificationFiltersAsFacets = (
+  specificationFilters: string[]
+): SelectedFacet[] => {
   return specificationFilters.map((specificationFilter: string) => {
-    const [key, value] = specificationFilter.split(":")
+    const [key, value] = specificationFilter.split(':')
     return { key, value }
   })
 }
 
-const buildCategoriesAndSubcategoriesAsFacets = (categories: string): SelectedFacet[] => {
-  const categoriesAndSubcategories = categories.split("/");
+const buildCategoriesAndSubcategoriesAsFacets = (
+  categories: string
+): SelectedFacet[] => {
+  const categoriesAndSubcategories = categories.split('/')
   return categoriesAndSubcategories.map((c: string) => {
-    return { key: "c", value: c }
+    return { key: 'c', value: c }
   })
 }
 
@@ -296,19 +302,23 @@ const buildSelectedFacets = (args: SearchArgs) => {
   const selectedFacets: SelectedFacet[] = []
 
   if (args.priceRange) {
-    selectedFacets.push({ key: "priceRange", value: args.priceRange })
+    selectedFacets.push({ key: 'priceRange', value: args.priceRange })
   }
 
   if (args.category) {
-    selectedFacets.push(...buildCategoriesAndSubcategoriesAsFacets(args.category))
+    selectedFacets.push(
+      ...buildCategoriesAndSubcategoriesAsFacets(args.category)
+    )
   }
 
   if (args.collection) {
-    selectedFacets.push({ key: "productClusterIds", value: args.collection })
+    selectedFacets.push({ key: 'productClusterIds', value: args.collection })
   }
 
   if (args.specificationFilters) {
-    selectedFacets.push(...buildSpecificationFiltersAsFacets(args.specificationFilters))
+    selectedFacets.push(
+      ...buildSpecificationFiltersAsFacets(args.specificationFilters)
+    )
   }
 
   return selectedFacets
@@ -317,7 +327,7 @@ const buildSelectedFacets = (args: SearchArgs) => {
 const defaultAdvertisementOptions: AdvertisementOptions = {
   showSponsored: false,
   sponsoredCount: 3,
-  repeatSponsoredProducts: true
+  repeatSponsoredProducts: true,
 }
 
 export const queries = {
@@ -348,7 +358,9 @@ export const queries = {
     }
   },
   facets: async (_: any, args: FacetsInput, ctx: any) => {
-    const [shippingOptions, facets] = getShippingOptionsFromSelectedFacets(args.selectedFacets)
+    const [shippingOptions, facets] = getShippingOptionsFromSelectedFacets(
+      args.selectedFacets
+    )
 
     args.selectedFacets = facets
 
@@ -363,14 +375,18 @@ export const queries = {
       clients: { intelligentSearchApi },
     } = ctx
 
-    const biggyArgs: {[key:string]: any}  = {
-      ...args
+    const biggyArgs: { [key: string]: any } = {
+      ...args,
     }
 
     // unnecessary field. It's is an object and breaks the @vtex/api cache
     delete biggyArgs.selectedFacets
 
-    const result = await intelligentSearchApi.facets({...biggyArgs, query: args.fullText}, buildAttributePath(selectedFacets), shippingOptions)
+    const result = await intelligentSearchApi.facets(
+      { ...biggyArgs, query: args.fullText },
+      buildAttributePath(selectedFacets),
+      shippingOptions
+    )
 
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated
@@ -401,7 +417,10 @@ export const queries = {
 
     let products = [] as SearchProduct[]
 
-    const vtexSegment = (!cookie || (!cookie?.regionId && rawArgs.regionId)) ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId) : ctx.vtex.segmentToken
+    const vtexSegment =
+      !cookie || (!cookie?.regionId && rawArgs.regionId)
+        ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId)
+        : ctx.vtex.segmentToken
 
     switch (field) {
       case 'id':
@@ -414,7 +433,11 @@ export const queries = {
         products = await search.productByEan(value, vtexSegment, salesChannel)
         break
       case 'reference':
-        products = await search.productByReference(value, vtexSegment, salesChannel)
+        products = await search.productByReference(
+          value,
+          vtexSegment,
+          salesChannel
+        )
         break
       case 'sku':
         products = await search.productBySku(value, vtexSegment, salesChannel)
@@ -437,7 +460,7 @@ export const queries = {
     const {
       to,
       orderBy,
-      advertisementOptions = defaultAdvertisementOptions
+      advertisementOptions = defaultAdvertisementOptions,
     } = args
 
     if (to && to > 2500) {
@@ -459,7 +482,11 @@ export const queries = {
     // unnecessary field. It's is an object and breaks the @vtex/api cache
     delete biggyArgs.selectedFacets
 
-    const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets), args.shippingOptions)
+    const result = await intelligentSearchApi.productSearch(
+      biggyArgs,
+      buildAttributePath(selectedFacets),
+      args.shippingOptions
+    )
 
     if (ctx.vtex.tenant) {
       ctx.translated = result.translated
@@ -480,7 +507,14 @@ export const queries = {
     let products = [] as SearchProduct[]
     const { field, values, salesChannel } = args
 
-    const vtexSegment =  (!ctx.vtex.segment || (!ctx.vtex.segment?.regionId && args.regionId)) ? buildVtexSegment(ctx.vtex.segment, Number(args.salesChannel), args.regionId) : ctx.vtex.segmentToken
+    const vtexSegment =
+      !ctx.vtex.segment || (!ctx.vtex.segment?.regionId && args.regionId)
+        ? buildVtexSegment(
+            ctx.vtex.segment,
+            Number(args.salesChannel),
+            args.regionId
+          )
+        : ctx.vtex.segmentToken
 
     switch (field) {
       case 'id':
@@ -490,7 +524,11 @@ export const queries = {
         products = await search.productsByEan(values, vtexSegment, salesChannel)
         break
       case 'reference':
-        products = await search.productsByReference(values, vtexSegment, salesChannel)
+        products = await search.productsByReference(
+          values,
+          vtexSegment,
+          salesChannel
+        )
         break
       case 'sku':
         products = await search.productsBySku(values, vtexSegment, salesChannel)
@@ -505,7 +543,9 @@ export const queries = {
   },
 
   productSearch: async (_: any, args: ProductSearchInput, ctx: any) => {
-    const [shippingOptions, facets] = getShippingOptionsFromSelectedFacets(args.selectedFacets)
+    const [shippingOptions, facets] = getShippingOptionsFromSelectedFacets(
+      args.selectedFacets
+    )
     args.selectedFacets = facets
 
     args = (await getCompatibilityArgsFromSelectedFacets(
@@ -517,7 +557,7 @@ export const queries = {
       ctx.vtex.logger.warn({
         message: 'Invalid map or query',
         query: args.query,
-        map: args.map
+        map: args.map,
       })
     }
 
@@ -525,12 +565,12 @@ export const queries = {
     const {
       selectedFacets,
       fullText,
-      advertisementOptions = defaultAdvertisementOptions
+      advertisementOptions = defaultAdvertisementOptions,
     } = args
 
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
-    const biggyArgs: {[key:string]: any} = {
+    const biggyArgs: { [key: string]: any } = {
       ...advertisementOptions,
       ...args,
       query: fullText,
@@ -542,7 +582,11 @@ export const queries = {
     // unnecessary field. It's is an object and breaks the @vtex/api cache
     delete biggyArgs.selectedFacets
 
-    const result = await intelligentSearchApi.productSearch({...biggyArgs}, buildAttributePath(selectedFacets), shippingOptions)
+    const result = await intelligentSearchApi.productSearch(
+      { ...biggyArgs },
+      buildAttributePath(selectedFacets),
+      shippingOptions
+    )
 
     if (ctx.vtex.tenant && !args.productOriginVtex) {
       ctx.translated = result.translated
@@ -550,12 +594,14 @@ export const queries = {
 
     return {
       searchState: args.searchState,
-      ...result
+      ...result,
     }
   },
 
   sponsoredProducts: async (_: any, args: ProductSearchInput, ctx: any) => {
-    const [shippingOptions, facets] = getShippingOptionsFromSelectedFacets(args.selectedFacets)
+    const [shippingOptions, facets] = getShippingOptionsFromSelectedFacets(
+      args.selectedFacets
+    )
     args.selectedFacets = facets
 
     args = (await getCompatibilityArgsFromSelectedFacets(
@@ -567,19 +613,16 @@ export const queries = {
       ctx.vtex.logger.warn({
         message: 'Invalid map or query',
         query: args.query,
-        map: args.map
+        map: args.map,
       })
     }
 
     const { intelligentSearchApi } = ctx.clients
-    const {
-      selectedFacets,
-      fullText
-    } = args
+    const { selectedFacets, fullText } = args
 
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
-    const biggyArgs: {[key:string]: any} = {
+    const biggyArgs: { [key: string]: any } = {
       ...args,
       query: fullText,
       sort: convertOrderBy(args.orderBy),
@@ -590,7 +633,11 @@ export const queries = {
     // unnecessary field. It's is an object and breaks the @vtex/api cache
     delete biggyArgs.selectedFacets
 
-    const result = await intelligentSearchApi.sponsoredProducts({...biggyArgs}, buildAttributePath(selectedFacets), shippingOptions)
+    const result = await intelligentSearchApi.sponsoredProducts(
+      { ...biggyArgs },
+      buildAttributePath(selectedFacets),
+      shippingOptions
+    )
 
     if (ctx.vtex.tenant && !args.productOriginVtex) {
       ctx.translated = result.translated
@@ -614,7 +661,8 @@ export const queries = {
       productId = product!.productId
     }
 
-    const groupByProduct = groupBy === CrossSellingGroupByInput.PRODUCT ? true : false
+    const groupByProduct =
+      groupBy === CrossSellingGroupByInput.PRODUCT ? true : false
 
     const products = await ctx.clients.search.crossSelling(
       productId,
@@ -625,7 +673,7 @@ export const queries = {
     searchFirstElements(products, 0, ctx.clients.search)
     // We add a custom cacheId because these products are not exactly like the other products from search apis.
     // Each product is basically a SKU and you may have two products in response with same ID but each one representing a SKU.
-    return products.map(product => {
+    return products.map((product) => {
       const skuId = pathOr('', ['items', '0', 'itemId'], product)
       return {
         ...product,
@@ -652,7 +700,7 @@ export const queries = {
 
           return acc
         },
-        { maps: [] as string[], queries: [] as string[]}
+        { maps: [] as string[], queries: [] as string[] }
       )
       const map = maps.join(',')
       const query = queries.join('/')
@@ -688,9 +736,8 @@ export const queries = {
   ) => {
     const { intelligentSearchApi } = ctx.clients
 
-    return intelligentSearchApi.autocompleteSearchSuggestions({
+    return intelligentSearchApi.fetchAutocompleteSuggestions({
       query: args.fullText,
-      ...args
     })
   },
   productSuggestions: async (
@@ -703,11 +750,14 @@ export const queries = {
     } = ctx
 
     const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
-    const selectedFacets: SelectedFacet[] = args.facetKey && args.facetValue ? [{key: args.facetKey, value: args.facetValue}] : []
+    const selectedFacets: SelectedFacet[] =
+      args.facetKey && args.facetValue
+        ? [{ key: args.facetKey, value: args.facetValue }]
+        : []
 
     const { advertisementOptions = defaultAdvertisementOptions } = args
 
-    const biggyArgs : {[key: string] : any} = {
+    const biggyArgs: { [key: string]: any } = {
       ...advertisementOptions,
       ...args,
       query: args.fullText,
@@ -721,7 +771,11 @@ export const queries = {
     // unnecessary field. It's is an object and breaks the @vtex/api cache
     delete biggyArgs.selectedFacets
 
-    const result = await intelligentSearchApi.productSearch(biggyArgs, buildAttributePath(selectedFacets), args.shippingOptions)
+    const result = await intelligentSearchApi.productSearch(
+      biggyArgs,
+      buildAttributePath(selectedFacets),
+      args.shippingOptions
+    )
 
     if (ctx.vtex.tenant && !args.productOriginVtex) {
       ctx.translated = result.translated
@@ -729,7 +783,7 @@ export const queries = {
 
     return {
       ...result,
-      count: result.recordsFiltered
+      count: result.recordsFiltered,
     }
   },
   banners: (
@@ -739,21 +793,24 @@ export const queries = {
   ) => {
     const { intelligentSearchApi } = ctx.clients
 
-    return intelligentSearchApi.banners({
-      query: args.fullText,
-    }, buildAttributePath(args.selectedFacets))
+    return intelligentSearchApi.banners(
+      {
+        query: args.fullText,
+      },
+      buildAttributePath(args.selectedFacets)
+    )
   },
   correction: (_: any, args: { fullText: string }, ctx: Context) => {
     const { intelligentSearchApi } = ctx.clients
 
     return intelligentSearchApi.correction({
       query: args.fullText,
-      ...args
+      ...args,
     })
   },
   searchSuggestions: (_: any, args: { fullText: string }, ctx: Context) => {
     const { intelligentSearchApi } = ctx.clients
 
-    return intelligentSearchApi.searchSuggestions({query: args.fullText})
+    return intelligentSearchApi.searchSuggestions({ query: args.fullText })
   },
 }

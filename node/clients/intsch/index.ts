@@ -23,7 +23,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     args: AutocompleteSuggestionsArgs
   ): Promise<AutocompleteSuggestionsResponse> {
     return this.http.get(
-      '/api/intelligent-search/v1/autocomplete-suggestions',
+      '/api/intelligent-search/v0/autocomplete-suggestions',
       {
         params: { query: args.query, locale: this.locale },
         metric: 'autocompleteSearchSuggestions-new',
