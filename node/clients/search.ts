@@ -25,10 +25,10 @@ enum SimulationBehavior {
 
 const inflightKey = ({ baseURL, url, params, headers }: RequestConfig) => {
   return (
-    baseURL! +
-    url! +
+    (baseURL ?? '') +
+    (url ?? '') +
     stringify(params, { arrayFormat: 'repeat', addQueryPrefix: true }) +
-    `&segmentToken=${headers['x-vtex-segment']}`
+    `&segmentToken=${headers ? headers['x-vtex-segment'] : ''}`
   )
 }
 
