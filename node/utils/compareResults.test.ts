@@ -217,7 +217,7 @@ describe('compareApiResults', () => {
       const func1 = jest.fn().mockResolvedValue('result1')
       const func2 = jest.fn().mockResolvedValue('result2')
 
-      const result = await compareApiResults(func1, func2, 0, {}, mockLogger)
+      const result = await compareApiResults(func1, func2, 0, mockLogger)
 
       expect(func1).toHaveBeenCalledTimes(1)
       expect(func2).not.toHaveBeenCalled()
@@ -229,7 +229,7 @@ describe('compareApiResults', () => {
       const func1 = jest.fn().mockResolvedValue('result1')
       const func2 = jest.fn().mockResolvedValue('result1')
 
-      const result = await compareApiResults(func1, func2, 100, {}, mockLogger)
+      const result = await compareApiResults(func1, func2, 100, mockLogger)
 
       expect(func1).toHaveBeenCalledTimes(1)
       expect(func2).toHaveBeenCalledTimes(1)
@@ -244,7 +244,7 @@ describe('compareApiResults', () => {
       const func2 = jest.fn().mockResolvedValue('result2')
 
       // 50% sample rate, but random returns 60%, so should not be in sample
-      const result = await compareApiResults(func1, func2, 50, {}, mockLogger)
+      const result = await compareApiResults(func1, func2, 50, mockLogger)
 
       expect(func1).toHaveBeenCalledTimes(1)
       expect(func2).not.toHaveBeenCalled()
@@ -259,7 +259,7 @@ describe('compareApiResults', () => {
       const func2 = jest.fn().mockResolvedValue('result1')
 
       // 50% sample rate, and random returns 30%, so should be in sample
-      const result = await compareApiResults(func1, func2, 50, {}, mockLogger)
+      const result = await compareApiResults(func1, func2, 50, mockLogger)
 
       expect(func1).toHaveBeenCalledTimes(1)
       expect(func2).toHaveBeenCalledTimes(1)
@@ -277,7 +277,7 @@ describe('compareApiResults', () => {
       const func1 = jest.fn().mockResolvedValue({ data: 'test' })
       const func2 = jest.fn().mockResolvedValue({ data: 'test' })
 
-      const result = await compareApiResults(func1, func2, 100, {}, mockLogger)
+      const result = await compareApiResults(func1, func2, 100, mockLogger)
 
       expect(result).toEqual({ data: 'test' })
       expect(mockLogger.error).not.toHaveBeenCalled()
@@ -287,13 +287,10 @@ describe('compareApiResults', () => {
       const func1 = jest.fn().mockResolvedValue({ data: 'test1' })
       const func2 = jest.fn().mockResolvedValue({ data: 'test2' })
 
-      const result = await compareApiResults(
-        func1,
-        func2,
-        100,
-        { args: { query: 'test' }, logPrefix: 'Test API' },
-        mockLogger
-      )
+      const result = await compareApiResults(func1, func2, 100, mockLogger, {
+        args: { query: 'test' },
+        logPrefix: 'Test API',
+      })
 
       expect(result).toEqual({ data: 'test1' })
       expect(mockLogger.error).toHaveBeenCalledWith({
@@ -306,7 +303,7 @@ describe('compareApiResults', () => {
       const func1 = jest.fn().mockRejectedValue(new Error('func1 error'))
       const func2 = jest.fn().mockResolvedValue({ data: 'test2' })
 
-      const result = await compareApiResults(func1, func2, 100, {}, mockLogger)
+      const result = await compareApiResults(func1, func2, 100, mockLogger)
 
       expect(result).toEqual({ data: 'test2' })
     })
@@ -316,7 +313,7 @@ describe('compareApiResults', () => {
       const func2 = jest.fn().mockRejectedValue(new Error('func2 error'))
 
       await expect(
-        compareApiResults(func1, func2, 100, {}, mockLogger)
+        compareApiResults(func1, func2, 100, mockLogger)
       ).rejects.toThrow('Both calls resulted in errors')
     })
   })
