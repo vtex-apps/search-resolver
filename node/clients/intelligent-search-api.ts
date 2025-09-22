@@ -2,7 +2,7 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
 import { parseState } from '../utils/searchState'
-import { IIntelligentSearchClient } from './intsch/types'
+import type { IIntelligentSearchClient } from './intsch/types'
 
 const isPathTraversal = (str: string) => str.indexOf('..') >= 0
 

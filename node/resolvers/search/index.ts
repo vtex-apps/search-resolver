@@ -33,6 +33,7 @@ import {
   getShippingOptionsFromSelectedFacets,
   validMapAndQuery,
 } from './utils'
+import { fetchAutocompleteSuggestions } from '../../services/autocomplete'
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
   value: string
@@ -734,11 +735,7 @@ export const queries = {
     args: { fullText: string },
     ctx: Context
   ) => {
-    const { intelligentSearchApi } = ctx.clients
-
-    return intelligentSearchApi.fetchAutocompleteSuggestions({
-      query: args.fullText,
-    })
+    return fetchAutocompleteSuggestions(ctx, args.fullText)
   },
   productSuggestions: async (
     _: any,
