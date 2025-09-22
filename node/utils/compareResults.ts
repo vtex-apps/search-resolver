@@ -1,4 +1,4 @@
-import { Logger } from '@vtex/api'
+import type { Logger } from '@vtex/api'
 
 /**
  * Utility to compare the results of two functions in parallel
@@ -17,8 +17,8 @@ import { Logger } from '@vtex/api'
 export function isDeepEqual(
   a: unknown,
   b: unknown,
-  maxDepth: number = 20,
-  currentDepth: number = 0
+  maxDepth = 20,
+  currentDepth = 0
 ): boolean {
   // If both values are exactly the same, they are equal
   if (a === b) return true
@@ -33,7 +33,7 @@ export function isDeepEqual(
     return false
 
   // Check if maximum recursion depth has been reached
-  if (currentDepth >= maxDepth) return false
+  if (currentDepth > maxDepth) return true
 
   // Handle arrays specially
   if (Array.isArray(a) && Array.isArray(b)) {
@@ -43,6 +43,7 @@ export function isDeepEqual(
     for (let i = 0; i < a.length; i++) {
       if (!isDeepEqual(a[i], b[i], maxDepth, currentDepth + 1)) return false
     }
+
     return true
   }
 
@@ -103,10 +104,12 @@ export async function compareApiResults<T>(
   // Check if either function resulted in an error
   const hasError1 =
     result1 && typeof result1 === 'object' && '__error' in result1
+
   const hasError2 =
     result2 && typeof result2 === 'object' && '__error' in result2
 
   let areEqual = false
+
   try {
     areEqual = !hasError1 && !hasError2 && isDeepEqual(result1, result2)
   } catch (error) {

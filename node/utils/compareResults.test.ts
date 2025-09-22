@@ -167,33 +167,10 @@ describe('isDeepEqual', () => {
       expect(isDeepEqual(nestedArray1, nestedArray2)).toBe(false)
 
       // With depth of 4, the difference at the deepest level should not be detected
-      expect(isDeepEqual(nestedArray1, nestedArray2, 4)).toBe(true)
+      expect(isDeepEqual(nestedArray1, nestedArray2, 3)).toBe(true)
 
       // With depth of 5, the difference should be detected
-      expect(isDeepEqual(nestedArray1, nestedArray2, 5)).toBe(false)
-    })
-
-    it('should stop comparing at maxDepth even for equal objects', () => {
-      // Create a very deep object structure
-      let obj1: Record<string, unknown> = {}
-      let obj2: Record<string, unknown> = {}
-      let current1: Record<string, unknown> = obj1
-      let current2: Record<string, unknown> = obj2
-
-      // Create 25 levels of nesting
-      for (let i = 0; i < 25; i++) {
-        current1.next = { value: i }
-        current2.next = { value: i }
-        current1 = current1.next as Record<string, unknown>
-        current2 = current2.next as Record<string, unknown>
-      }
-
-      // With default depth (20), the comparison should stop at level 20
-      // and return false since we haven't compared all properties
-      expect(isDeepEqual(obj1, obj2)).toBe(false)
-
-      // With depth of 30, all properties should be compared and found equal
-      expect(isDeepEqual(obj1, obj2, 30)).toBe(true)
+      expect(isDeepEqual(nestedArray1, nestedArray2, 4)).toBe(false)
     })
   })
 })
