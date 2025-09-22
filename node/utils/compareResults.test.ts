@@ -1,4 +1,6 @@
-import { isDeepEqual } from './compareResults'
+import type { Logger } from '@vtex/api'
+
+import { isDeepEqual, compareApiResults } from './compareResults'
 
 describe('isDeepEqual', () => {
   // Basic equality tests
@@ -171,6 +173,151 @@ describe('isDeepEqual', () => {
 
       // With depth of 5, the difference should be detected
       expect(isDeepEqual(nestedArray1, nestedArray2, 4)).toBe(false)
+    })
+  })
+})
+
+describe('compareApiResults', () => {
+  const mockLogger = {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+    account: '',
+    workspace: '',
+    operationId: '',
+    requestId: '',
+    traceId: '',
+    transactionId: '',
+    config: {},
+    child: jest.fn(),
+    addTags: jest.fn(),
+  } as unknown as Logger
+
+  let originalMathRandom: () => number
+
+  beforeAll(() => {
+    // Store original Math.random
+    originalMathRandom = Math.random
+  })
+
+  afterAll(() => {
+    // Restore original Math.random
+    Math.random = originalMathRandom
+  })
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    // Reset Math.random to original implementation
+    Math.random = originalMathRandom
+  })
+
+  describe('sampling functionality', () => {
+    it('should only call func1 when sample is 0', async () => {
+      const func1 = jest.fn().mockResolvedValue('result1')
+      const func2 = jest.fn().mockResolvedValue('result2')
+
+      const result = await compareApiResults(func1, func2, 0, {}, mockLogger)
+
+      expect(func1).toHaveBeenCalledTimes(1)
+      expect(func2).not.toHaveBeenCalled()
+      expect(result).toBe('result1')
+      expect(mockLogger.error).not.toHaveBeenCalled()
+    })
+
+    it('should call both functions when sample is 100', async () => {
+      const func1 = jest.fn().mockResolvedValue('result1')
+      const func2 = jest.fn().mockResolvedValue('result1')
+
+      const result = await compareApiResults(func1, func2, 100, {}, mockLogger)
+
+      expect(func1).toHaveBeenCalledTimes(1)
+      expect(func2).toHaveBeenCalledTimes(1)
+      expect(result).toBe('result1')
+    })
+
+    it('should only call func1 when Math.random indicates not in sample', async () => {
+      // Mock Math.random to return 0.6 (60%), which should be >= 50% sample
+      jest.spyOn(Math, 'random').mockImplementation().mockReturnValue(0.6)
+
+      const func1 = jest.fn().mockResolvedValue('result1')
+      const func2 = jest.fn().mockResolvedValue('result2')
+
+      // 50% sample rate, but random returns 60%, so should not be in sample
+      const result = await compareApiResults(func1, func2, 50, {}, mockLogger)
+
+      expect(func1).toHaveBeenCalledTimes(1)
+      expect(func2).not.toHaveBeenCalled()
+      expect(result).toBe('result1')
+    })
+
+    it('should call both functions when Math.random indicates in sample', async () => {
+      // Mock Math.random to return 0.3 (30%), which should be < 50% sample
+      jest.spyOn(Math, 'random').mockImplementation().mockReturnValue(0.3)
+
+      const func1 = jest.fn().mockResolvedValue('result1')
+      const func2 = jest.fn().mockResolvedValue('result1')
+
+      // 50% sample rate, and random returns 30%, so should be in sample
+      const result = await compareApiResults(func1, func2, 50, {}, mockLogger)
+
+      expect(func1).toHaveBeenCalledTimes(1)
+      expect(func2).toHaveBeenCalledTimes(1)
+      expect(result).toBe('result1')
+    })
+  })
+
+  describe('comparison logic when in sample', () => {
+    beforeEach(() => {
+      // Always be in sample for these tests
+      jest.spyOn(Math, 'random').mockImplementation().mockReturnValue(0.1)
+    })
+
+    it('should return result1 when both functions succeed and results are equal', async () => {
+      const func1 = jest.fn().mockResolvedValue({ data: 'test' })
+      const func2 = jest.fn().mockResolvedValue({ data: 'test' })
+
+      const result = await compareApiResults(func1, func2, 100, {}, mockLogger)
+
+      expect(result).toEqual({ data: 'test' })
+      expect(mockLogger.error).not.toHaveBeenCalled()
+    })
+
+    it('should log error when results differ', async () => {
+      const func1 = jest.fn().mockResolvedValue({ data: 'test1' })
+      const func2 = jest.fn().mockResolvedValue({ data: 'test2' })
+
+      const result = await compareApiResults(
+        func1,
+        func2,
+        100,
+        { args: { query: 'test' }, logPrefix: 'Test API' },
+        mockLogger
+      )
+
+      expect(result).toEqual({ data: 'test1' })
+      expect(mockLogger.error).toHaveBeenCalledWith({
+        message: 'Test API: Results differ',
+        params: JSON.stringify({ query: 'test' }),
+      })
+    })
+
+    it('should return result2 when func1 errors but func2 succeeds', async () => {
+      const func1 = jest.fn().mockRejectedValue(new Error('func1 error'))
+      const func2 = jest.fn().mockResolvedValue({ data: 'test2' })
+
+      const result = await compareApiResults(func1, func2, 100, {}, mockLogger)
+
+      expect(result).toEqual({ data: 'test2' })
+    })
+
+    it('should throw error when both functions fail', async () => {
+      const func1 = jest.fn().mockRejectedValue(new Error('func1 error'))
+      const func2 = jest.fn().mockRejectedValue(new Error('func2 error'))
+
+      await expect(
+        compareApiResults(func1, func2, 100, {}, mockLogger)
+      ).rejects.toThrow('Both calls resulted in errors')
     })
   })
 })

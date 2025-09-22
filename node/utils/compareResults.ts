@@ -83,17 +83,27 @@ export interface CompareApiResultsOptions {
  * Executes two functions in parallel and compares their results
  * @param func1 First function to execute
  * @param func2 Second function to execute
- * @param options Configuration options
+ * @param sample Percentage of traffic that should execute the comparison (0-100)
  * @param logger Logger instance to use for logging
+ * @param options Configuration options
  * @returns Promise with a result object containing the results and comparison details
  */
 export async function compareApiResults<T>(
   func1: () => Promise<T>,
   func2: () => Promise<T>,
-  options: CompareApiResultsOptions = {},
-  logger: Logger
+  sample: number,
+  logger: Logger,
+  options: CompareApiResultsOptions = {}
 ): Promise<T> {
   const { logPrefix = 'API Comparison' } = options
+
+  // Check if we should perform comparison based on sample percentage
+  const shouldCompare = Math.random() * 100 < sample
+
+  if (!shouldCompare) {
+    // If not in sample, just execute func1 and return its result
+    return func1()
+  }
 
   // Execute both functions in parallel
   const [result1, result2] = await Promise.all([
