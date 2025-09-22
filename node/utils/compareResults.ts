@@ -129,7 +129,7 @@ export async function compareApiResults<T>(
     })
   }
 
-  if (!areEqual) {
+  if (!areEqual && !hasError1 && !hasError2) {
     logger.error({
       message: `${logPrefix}: Results differ`,
       params: JSON.stringify(options.args),
