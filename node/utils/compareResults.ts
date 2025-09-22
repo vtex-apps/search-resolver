@@ -79,49 +79,6 @@ export interface CompareApiResultsOptions {
 }
 
 /**
- * Result object returned by compareApiResults
- */
-export interface CompareApiResultsOutput<T, U> {
-  /**
-   * Whether the results of both functions are equal
-   */
-  areEqual: boolean
-
-  /**
-   * Result of the first function
-   */
-  result1: T | null
-
-  /**
-   * Result of the second function
-   */
-  result2: U | null
-
-  /**
-   * Error from the first function, if any
-   */
-  error1: {
-    message: string
-    stack?: string
-    name: string
-  } | null
-
-  /**
-   * Error from the second function, if any
-   */
-  error2: {
-    message: string
-    stack?: string
-    name: string
-  } | null
-
-  /**
-   * Elapsed time in milliseconds
-   */
-  elapsedTime?: number
-}
-
-/**
  * Executes two functions in parallel and compares their results
  * @param func1 First function to execute
  * @param func2 Second function to execute
@@ -129,79 +86,50 @@ export interface CompareApiResultsOutput<T, U> {
  * @param logger Logger instance to use for logging
  * @returns Promise with a result object containing the results and comparison details
  */
-export async function compareApiResults<T, U = T>(
+export async function compareApiResults<T>(
   func1: () => Promise<T>,
-  func2: () => Promise<U>,
+  func2: () => Promise<T>,
   options: CompareApiResultsOptions = {},
   logger: Logger
-): Promise<CompareApiResultsOutput<T, U>> {
+): Promise<T> {
   const { logPrefix = 'API Comparison' } = options
 
+  // Execute both functions in parallel
+  const [result1, result2] = await Promise.all([
+    func1().catch((error) => ({ __error: error })),
+    func2().catch((error) => ({ __error: error })),
+  ])
+
+  // Check if either function resulted in an error
+  const hasError1 =
+    result1 && typeof result1 === 'object' && '__error' in result1
+  const hasError2 =
+    result2 && typeof result2 === 'object' && '__error' in result2
+
+  let areEqual = false
   try {
-    // Execute both functions in parallel
-    const [result1, result2] = await Promise.all([
-      func1().catch((error) => ({ __error: error })),
-      func2().catch((error) => ({ __error: error })),
-    ])
-
-    // Check if either function resulted in an error
-    const hasError1 =
-      result1 && typeof result1 === 'object' && '__error' in result1
-    const hasError2 =
-      result2 && typeof result2 === 'object' && '__error' in result2
-
-    // Compare results
-    const areEqual = !hasError1 && !hasError2 && isDeepEqual(result1, result2)
-
-    // Format the error objects for logging if needed
-    const error1 = hasError1 ? (result1 as { __error: Error }).__error : null
-    const error2 = hasError2 ? (result2 as { __error: Error }).__error : null
-
-    // Create result object
-    const resultObject: CompareApiResultsOutput<T, U> = {
-      areEqual,
-      result1: hasError1 ? null : (result1 as T),
-      result2: hasError2 ? null : (result2 as U),
-      error1: error1
-        ? {
-            message: error1.message,
-            stack: error1.stack,
-            name: error1.name,
-          }
-        : null,
-      error2: error2
-        ? {
-            message: error2.message,
-            stack: error2.stack,
-            name: error2.name,
-          }
-        : null,
-    }
-
-    // Logging based on options
-    if (!areEqual) {
-      logger.error({
-        message: `${logPrefix}: Results differ`,
-        params: JSON.stringify(options.args),
-      })
-    }
-
-    return resultObject
+    areEqual = !hasError1 && !hasError2 && isDeepEqual(result1, result2)
   } catch (error) {
-    if (error.message.includes('Results differ between functions')) {
-      throw error
-    }
-
-    return {
-      areEqual: false,
-      result1: null,
-      result2: null,
-      error1: {
-        message: `Comparison failed: ${error.message}`,
-        stack: error.stack,
-        name: error.name,
-      },
-      error2: null,
-    }
+    logger.error({
+      message: `${logPrefix}: Error during deep comparison`,
+      error,
+    })
   }
+
+  if (!areEqual) {
+    logger.error({
+      message: `${logPrefix}: Results differ`,
+      params: JSON.stringify(options.args),
+    })
+  }
+
+  if (!hasError1) {
+    return result1 as T
+  }
+
+  if (hasError1 && !hasError2) {
+    return result2 as T
+  }
+
+  throw Error('Both calls resulted in errors')
 }
