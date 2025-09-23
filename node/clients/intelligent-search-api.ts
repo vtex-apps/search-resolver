@@ -1,7 +1,11 @@
-import { ExternalClient, InstanceOptions, IOContext } from "@vtex/api";
-import { parseState } from "../utils/searchState";
+import type { InstanceOptions, IOContext } from '@vtex/api'
+import { ExternalClient } from '@vtex/api'
+
+import { parseState } from '../utils/searchState'
+import type { IIntelligentSearchClient } from './intsch/types'
 
 const isPathTraversal = (str: string) => str.indexOf('..') >= 0
+
 interface CorrectionParams {
   query: string
 }
@@ -44,59 +48,89 @@ const decodeQuery = (query: string) => {
   }
 }
 
-export class IntelligentSearchApi extends ExternalClient {
+export class IntelligentSearchApi
+  extends ExternalClient
+  implements IIntelligentSearchClient
+{
   private locale: string | undefined
 
   public constructor(context: IOContext, options?: InstanceOptions) {
-    super(`http://${context.workspace}--${context.account}.myvtex.com/_v/api/intelligent-search`, context, {
-      ...options,
-      headers: {
-        ...options?.headers,
+    super(
+      `http://${context.workspace}--${context.account}.myvtex.com/_v/api/intelligent-search`,
+      context,
+      {
+        ...options,
+        headers: {
+          ...options?.headers,
+        },
       }
-    })
+    )
 
     const { locale, tenant } = context
+
     this.locale = locale ?? tenant?.locale
   }
 
   public async topSearches() {
-    return this.http.get('/top_searches', {params: {
-      locale: this.locale
-    }, metric: 'topSearches'})
+    return this.http.get('/top_searches', {
+      params: {
+        locale: this.locale,
+      },
+      metric: 'topSearches',
+    })
   }
 
   public async correction(params: CorrectionParams) {
-    return this.http.get('/correction_search', {params: {...params, locale: this.locale}, metric: 'correction'})
+    return this.http.get('/correction_search', {
+      params: { ...params, locale: this.locale },
+      metric: 'correction',
+    })
   }
 
   public async searchSuggestions(params: SearchSuggestionsParams) {
-    return this.http.get('/search_suggestions', {params: {...params, locale: this.locale}, metric: 'searchSuggestions'})
+    return this.http.get('/search_suggestions', {
+      params: { ...params, locale: this.locale },
+      metric: 'searchSuggestions',
+    })
   }
 
-  public async autocompleteSearchSuggestions(params: AutocompleteSearchSuggestionsParams) {
-    return this.http.get('/autocomplete_suggestions', {params: {...params, locale: this.locale}, metric: 'autocompleteSearchSuggestions'})
+  public async fetchAutocompleteSuggestions(
+    params: AutocompleteSearchSuggestionsParams
+  ) {
+    return this.http.get('/autocomplete_suggestions', {
+      params: { ...params, locale: this.locale },
+      metric: 'autocompleteSearchSuggestions',
+    })
   }
 
   public async banners(params: BannersArgs, path: string) {
     if (isPathTraversal(path)) {
-      throw new Error("Malformed URL")
+      throw new Error('Malformed URL')
     }
 
-    return this.http.get(`/banners/${path}`, {params: {...params, query: params.query, locale: this.locale}, metric: 'banners'})
+    return this.http.get(`/banners/${path}`, {
+      params: { ...params, query: params.query, locale: this.locale },
+      metric: 'banners',
+    })
   }
 
-  public async facets(params: FacetsArgs, path: string, shippingHeader?: string[]) {
+  public async facets(
+    params: FacetsArgs,
+    path: string,
+    shippingHeader?: string[]
+  ) {
     if (isPathTraversal(path)) {
-      throw new Error("Malformed URL")
+      throw new Error('Malformed URL')
     }
 
-    const {query, leap, searchState} = params
+    const { query, leap, searchState } = params
 
     return this.http.get(`/facets/${path}`, {
       params: {
         ...params,
         query: query && decodeQuery(query),
         locale: this.locale,
+        // eslint-disable-next-line @typescript-eslint/camelcase
         bgy_leap: leap ? true : undefined,
         ...parseState(searchState),
       },
@@ -107,16 +141,22 @@ export class IntelligentSearchApi extends ExternalClient {
     })
   }
 
-  public async productSearch(params: SearchResultArgs, path: string, shippingHeader?: string[]) {
-    const {query, leap, searchState} = params
+  public async productSearch(
+    params: SearchResultArgs,
+    path: string,
+    shippingHeader?: string[]
+  ) {
+    const { query, leap, searchState } = params
+
     if (isPathTraversal(path)) {
-      throw new Error("Malformed URL")
+      throw new Error('Malformed URL')
     }
 
     return this.http.get(`/product_search/${path}`, {
       params: {
         query: query && decodeQuery(query),
         locale: this.locale,
+        // eslint-disable-next-line @typescript-eslint/camelcase
         bgy_leap: leap ? true : undefined,
         ...parseState(searchState),
         ...params,
@@ -128,16 +168,22 @@ export class IntelligentSearchApi extends ExternalClient {
     })
   }
 
-  public async sponsoredProducts(params: SearchResultArgs, path: string, shippingHeader?: string[]) {
-    const {query, leap, searchState} = params
+  public async sponsoredProducts(
+    params: SearchResultArgs,
+    path: string,
+    shippingHeader?: string[]
+  ) {
+    const { query, leap, searchState } = params
+
     if (isPathTraversal(path)) {
-      throw new Error("Malformed URL")
+      throw new Error('Malformed URL')
     }
 
     return this.http.get(`/sponsored_products/${path}`, {
       params: {
         query: query && decodeQuery(query),
         locale: this.locale,
+        // eslint-disable-next-line @typescript-eslint/camelcase
         bgy_leap: leap ? true : undefined,
         ...parseState(searchState),
         ...params,

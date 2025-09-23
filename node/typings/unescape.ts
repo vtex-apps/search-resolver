@@ -1,3 +1,3 @@
 declare module 'unescape' {
-  export default function(codedString: string): string
+  export default function (codedString: string): string
 }

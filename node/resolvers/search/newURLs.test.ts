@@ -19,8 +19,6 @@ const state = TypeMoq.Mock.ofType<State>()
 const customContext = TypeMoq.Mock.ofType<CustomContext>()
 
 describe('Search new URLs dicovery', () => {
-  let context: any
-
   class VBaseMock extends vbaseTypeMock.object {
     private jsonData: any
 
@@ -82,24 +80,6 @@ describe('Search new URLs dicovery', () => {
       return Promise.resolve(this.facetsResponse)
     }
   }
-
-  beforeEach(() => {
-    // tslint:disable-next-line: max-classes-per-file
-    const ClientsImpl = class ClientsMock extends Clients {
-      public get vbase() {
-        return this.getOrSet('vbase', VBaseMock)
-      }
-    }
-
-    context = {
-      clients: new ClientsImpl({}, contextMock.object),
-      ...contextMock.object,
-      ...customContext.object,
-      state: {
-        ...state.object,
-      },
-    }
-  })
 
   it('Should transform /category in /category?map=c', async () => {
     const args = {
@@ -385,6 +365,38 @@ describe('Search new URLs dicovery', () => {
     ]
 
     for (const args of argsList) {
+      const ClientsImpl = class ClientsMock extends Clients {
+        public get search() {
+          try {
+            return new search([], {}, { SpecificationFilters: {} } as any)
+          } catch (error) {
+            console.error('Error getting search client:', error)
+
+            return {} as any
+          }
+        }
+
+        public get vbase() {
+          try {
+            return new VBaseMock()
+          } catch (error) {
+            console.error('Error getting vbase client:', error)
+
+            return {} as any
+          }
+        }
+      }
+
+      const context = {
+        metrics: {} as any,
+        clients: new ClientsImpl({}, contextMock.object),
+        ...contextMock.object,
+        ...customContext.object,
+        state: {
+          ...state.object,
+        },
+      } as any
+
       const result = await getCompatibilityArgs(context, args)
 
       expect(result).toStrictEqual(args)

@@ -12,4 +12,4 @@ node/**/*.test.js
 node/**/*.test.ts
 node/**/*.test.tsx
 node/coverage/*
-node/mocks
+node/mocks/

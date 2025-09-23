@@ -28,11 +28,7 @@ import {
  */
 type Tuple = [string, any]
 const renameKeysWith = curry((func: any, object: any) =>
-  pipe<any, Tuple[], any, any>(
-    toPairs,
-    map(adjust(0, func)),
-    fromPairs
-  )(object)
+  pipe<any, Tuple[], any, any>(toPairs, map(adjust(0, func)), fromPairs)(object)
 )
 
 /*
@@ -49,6 +45,5 @@ const parseFieldsToJson = (fields: any) =>
 function distinct<T>(value: T, index: number, self: T[]) {
   return self.indexOf(value) === index
 }
-
 
 export { renameKeysWith, parseFieldsToJson, distinct }

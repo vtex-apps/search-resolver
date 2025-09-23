@@ -65,6 +65,20 @@
       }
     },
     {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "portal.vtexcommercestable.com.br",
+        "path": "/api/intelligent-search"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "portal.vtexcommercebeta.com.br",
+        "path": "/api/intelligent-search"
+      }
+    },
+    {
       "name": "vtex.messages:graphql-translate-messages"
     }
   ],
