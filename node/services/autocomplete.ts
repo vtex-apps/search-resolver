@@ -18,7 +18,7 @@ export function fetchAutocompleteSuggestions(
       intsch.fetchAutocompleteSuggestions({
         query,
       }),
-    ctx.vtex.production ? 1 : 100,
+    ctx.vtex.production ? 10 : 100,
     ctx.vtex.logger,
     {
       logPrefix: 'Autocomplete Suggestions',
@@ -33,7 +33,7 @@ export function fetchTopSearches(ctx: Context<Clients>) {
   return compareApiResults(
     () => intelligentSearchApi.fetchTopSearches(),
     () => intsch.fetchTopSearches(),
-    ctx.vtex.production ? 1 : 100,
+    ctx.vtex.production ? 10 : 100,
     ctx.vtex.logger,
     {
       logPrefix: 'Top Searches',
@@ -42,10 +42,7 @@ export function fetchTopSearches(ctx: Context<Clients>) {
   )
 }
 
-export function fetchSearchSuggestions(
-  ctx: Context<Clients>,
-  query: string
-) {
+export function fetchSearchSuggestions(ctx: Context<Clients>, query: string) {
   const { intelligentSearchApi, intsch } = ctx.clients
 
   return compareApiResults(
@@ -57,7 +54,7 @@ export function fetchSearchSuggestions(
       intsch.fetchSearchSuggestions({
         query,
       }),
-    ctx.vtex.production ? 1 : 100,
+    ctx.vtex.production ? 10 : 100,
     ctx.vtex.logger,
     {
       logPrefix: 'Search Suggestions',
