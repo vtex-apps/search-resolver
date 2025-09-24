@@ -23,11 +23,11 @@ export interface ObjectDifference {
 }
 
 /**
- * Result of deep comparison with optional differences
+ * Result of deep comparison with differences
  */
 export interface DeepComparisonResult {
   isEqual: boolean
-  differences?: ObjectDifference[]
+  differences: ObjectDifference[]
 }
 
 /**
@@ -51,12 +51,6 @@ export function findDifferences(
   // If both values are exactly the same, no differences
   if (a === b) return differences
 
-  // Check if maximum recursion depth has been reached
-  if (currentDepth > maxDepth) {
-    // When max depth is reached, consider values equal (original behavior)
-    return differences
-  }
-
   // Check for null values or different types
   if (a === null || b === null || typeof a !== typeof b) {
     differences.push({
@@ -78,6 +72,12 @@ export function findDifferences(
       actual: b,
     })
 
+    return differences
+  }
+
+  // Check if maximum recursion depth has been reached (only for objects)
+  if (currentDepth > maxDepth) {
+    // When max depth is reached, consider values equal (original behavior)
     return differences
   }
 
@@ -184,100 +184,19 @@ export function findDifferences(
  * @param a First value to compare
  * @param b Second value to compare
  * @param maxDepth Maximum recursion depth (default: 20)
- * @param currentDepth Current recursion depth (internal use)
- * @returns boolean indicating if the values are deeply equal
+ * @returns DeepComparisonResult with isEqual boolean and differences array
  */
-// Function overloads for isDeepEqual
 export function isDeepEqual(
   a: unknown,
   b: unknown,
-  maxDepth?: number,
-  currentDepth?: number
-): boolean
+  maxDepth = 20
+): DeepComparisonResult {
+  const differences = findDifferences(a, b, '', maxDepth, 0)
 
-export function isDeepEqual(
-  a: unknown,
-  b: unknown,
-  options: { maxDepth?: number; returnDifferences: true }
-): DeepComparisonResult
-
-export function isDeepEqual(
-  a: unknown,
-  b: unknown,
-  maxDepthOrOptions:
-    | number
-    | { maxDepth?: number; returnDifferences: true } = 20,
-  currentDepth = 0
-): boolean | DeepComparisonResult {
-  // Handle the options parameter
-  const isOptionsObject = typeof maxDepthOrOptions === 'object'
-  const maxDepth = isOptionsObject
-    ? maxDepthOrOptions.maxDepth ?? 20
-    : maxDepthOrOptions
-
-  const returnDifferences = isOptionsObject
-    ? maxDepthOrOptions.returnDifferences
-    : false
-
-  if (returnDifferences) {
-    const differences = findDifferences(a, b, '', maxDepth, 0)
-
-    return {
-      isEqual: differences.length === 0,
-      differences,
-    }
+  return {
+    isEqual: differences.length === 0,
+    differences,
   }
-
-  // Original implementation for backward compatibility
-  // If both values are exactly the same, they are equal
-  if (a === b) return true
-
-  // If either value is null or not an object, they can only be equal if they are strictly equal (handled above)
-  if (
-    a === null ||
-    b === null ||
-    typeof a !== 'object' ||
-    typeof b !== 'object'
-  )
-    return false
-
-  // Check if maximum recursion depth has been reached
-  if (currentDepth > maxDepth) return true
-
-  // Handle arrays specially
-  if (Array.isArray(a) && Array.isArray(b)) {
-    if (a.length !== b.length) return false
-
-    // Check if all items in arrays are deeply equal
-    for (let i = 0; i < a.length; i++) {
-      if (!isDeepEqual(a[i], b[i], maxDepth, currentDepth + 1)) return false
-    }
-
-    return true
-  }
-
-  // If one is an array but the other isn't, they are not equal
-  if (Array.isArray(a) !== Array.isArray(b)) return false
-
-  // Cast to Record<string, unknown> for type safety
-  const objA = a as Record<string, unknown>
-  const objB = b as Record<string, unknown>
-
-  // Compare object keys
-  const keysA = Object.keys(objA)
-  const keysB = Object.keys(objB)
-
-  if (keysA.length !== keysB.length) return false
-
-  // Check if all keys in a exist in b and have the same values
-  for (const key of keysA) {
-    if (!Object.prototype.hasOwnProperty.call(objB, key)) return false
-    if (!isDeepEqual(objA[key], objB[key], maxDepth, currentDepth + 1)) {
-      return false
-    }
-  }
-
-  return true
 }
 
 /**
@@ -332,12 +251,10 @@ export async function compareApiResults<T>(
 
   try {
     if (!hasError1 && !hasError2) {
-      const comparisonResult = isDeepEqual(result1, result2, {
-        returnDifferences: true,
-      })
+      const comparisonResult = isDeepEqual(result1, result2)
 
       areEqual = comparisonResult.isEqual
-      differences = comparisonResult.differences || []
+      differences = comparisonResult.differences
     }
   } catch (error) {
     logger.error({

@@ -10,52 +10,52 @@ describe('isDeepEqual', () => {
   // Basic equality tests
   describe('basic equality', () => {
     it('should return true for identical primitive values', () => {
-      expect(isDeepEqual(1, 1)).toBe(true)
-      expect(isDeepEqual('hello', 'hello')).toBe(true)
-      expect(isDeepEqual(true, true)).toBe(true)
-      expect(isDeepEqual(null, null)).toBe(true)
-      expect(isDeepEqual(undefined, undefined)).toBe(true)
+      expect(isDeepEqual(1, 1).isEqual).toBe(true)
+      expect(isDeepEqual('hello', 'hello').isEqual).toBe(true)
+      expect(isDeepEqual(true, true).isEqual).toBe(true)
+      expect(isDeepEqual(null, null).isEqual).toBe(true)
+      expect(isDeepEqual(undefined, undefined).isEqual).toBe(true)
     })
 
     it('should return false for different primitive values', () => {
-      expect(isDeepEqual(1, 2)).toBe(false)
-      expect(isDeepEqual('hello', 'world')).toBe(false)
-      expect(isDeepEqual(true, false)).toBe(false)
-      expect(isDeepEqual(null, undefined)).toBe(false)
-      expect(isDeepEqual(0, null)).toBe(false)
-      expect(isDeepEqual('', null)).toBe(false)
+      expect(isDeepEqual(1, 2).isEqual).toBe(false)
+      expect(isDeepEqual('hello', 'world').isEqual).toBe(false)
+      expect(isDeepEqual(true, false).isEqual).toBe(false)
+      expect(isDeepEqual(null, undefined).isEqual).toBe(false)
+      expect(isDeepEqual(0, null).isEqual).toBe(false)
+      expect(isDeepEqual('', null).isEqual).toBe(false)
     })
 
     it('should handle empty arrays and objects', () => {
-      expect(isDeepEqual([], [])).toBe(true)
-      expect(isDeepEqual({}, {})).toBe(true)
-      expect(isDeepEqual([], {})).toBe(false)
+      expect(isDeepEqual([], []).isEqual).toBe(true)
+      expect(isDeepEqual({}, {}).isEqual).toBe(true)
+      expect(isDeepEqual([], {}).isEqual).toBe(false)
     })
   })
 
   // Simple objects and arrays tests
   describe('simple objects and arrays', () => {
     it('should compare simple arrays correctly', () => {
-      expect(isDeepEqual([1, 2, 3], [1, 2, 3])).toBe(true)
-      expect(isDeepEqual([1, 2, 3], [1, 2, 4])).toBe(false)
-      expect(isDeepEqual([1, 2], [1, 2, 3])).toBe(false)
+      expect(isDeepEqual([1, 2, 3], [1, 2, 3]).isEqual).toBe(true)
+      expect(isDeepEqual([1, 2, 3], [1, 2, 4]).isEqual).toBe(false)
+      expect(isDeepEqual([1, 2], [1, 2, 3]).isEqual).toBe(false)
     })
 
     it('should compare simple objects correctly', () => {
-      expect(isDeepEqual({ a: 1, b: 2 }, { a: 1, b: 2 })).toBe(true)
-      expect(isDeepEqual({ a: 1, b: 2 }, { a: 1, b: 3 })).toBe(false)
-      expect(isDeepEqual({ a: 1 }, { a: 1, b: 2 })).toBe(false)
-      expect(isDeepEqual({ a: 1, b: 2 }, { b: 2, a: 1 })).toBe(true) // order doesn't matter
+      expect(isDeepEqual({ a: 1, b: 2 }, { a: 1, b: 2 }).isEqual).toBe(true)
+      expect(isDeepEqual({ a: 1, b: 2 }, { a: 1, b: 3 }).isEqual).toBe(false)
+      expect(isDeepEqual({ a: 1 }, { a: 1, b: 2 }).isEqual).toBe(false)
+      expect(isDeepEqual({ a: 1, b: 2 }, { b: 2, a: 1 }).isEqual).toBe(true) // order doesn't matter
     })
 
     it('should handle arrays with objects', () => {
-      expect(isDeepEqual([{ a: 1 }], [{ a: 1 }])).toBe(true)
-      expect(isDeepEqual([{ a: 1 }], [{ a: 2 }])).toBe(false)
+      expect(isDeepEqual([{ a: 1 }], [{ a: 1 }]).isEqual).toBe(true)
+      expect(isDeepEqual([{ a: 1 }], [{ a: 2 }]).isEqual).toBe(false)
     })
 
     it('should handle objects with arrays', () => {
-      expect(isDeepEqual({ a: [1, 2] }, { a: [1, 2] })).toBe(true)
-      expect(isDeepEqual({ a: [1, 2] }, { a: [1, 3] })).toBe(false)
+      expect(isDeepEqual({ a: [1, 2] }, { a: [1, 2] }).isEqual).toBe(true)
+      expect(isDeepEqual({ a: [1, 2] }, { a: [1, 3] }).isEqual).toBe(false)
     })
   })
 
@@ -101,8 +101,8 @@ describe('isDeepEqual', () => {
         },
       }
 
-      expect(isDeepEqual(obj1, obj2)).toBe(true)
-      expect(isDeepEqual(obj1, obj3)).toBe(false)
+      expect(isDeepEqual(obj1, obj2).isEqual).toBe(true)
+      expect(isDeepEqual(obj1, obj3).isEqual).toBe(false)
     })
 
     it('should handle circular references', () => {
@@ -123,8 +123,8 @@ describe('isDeepEqual', () => {
       const arr2 = [1, 'string', true, { a: 1 }, [1, 2]]
       const arr3 = [1, 'string', true, { a: 2 }, [1, 2]]
 
-      expect(isDeepEqual(arr1, arr2)).toBe(true)
-      expect(isDeepEqual(arr1, arr3)).toBe(false)
+      expect(isDeepEqual(arr1, arr2).isEqual).toBe(true)
+      expect(isDeepEqual(arr1, arr3).isEqual).toBe(false)
     })
 
     it('should handle objects with same content but different property order in nested arrays', () => {
@@ -220,7 +220,7 @@ describe('isDeepEqual', () => {
 
       // These objects should be considered equal since they have the same content
       // but different property order in the attributes objects
-      expect(isDeepEqual(obj1, obj2)).toBe(true)
+      expect(isDeepEqual(obj1, obj2).isEqual).toBe(true)
     })
   })
 
@@ -252,13 +252,13 @@ describe('isDeepEqual', () => {
       }
 
       // With default depth (20), the difference should be detected
-      expect(isDeepEqual(deepObj1, deepObj2)).toBe(false)
+      expect(isDeepEqual(deepObj1, deepObj2).isEqual).toBe(false)
 
       // With depth of 3, the difference at level4 should not be detected
-      expect(isDeepEqual(deepObj1, deepObj2, 3)).toBe(true)
+      expect(isDeepEqual(deepObj1, deepObj2, 3).isEqual).toBe(true)
 
       // With depth of 4, the difference should be detected
-      expect(isDeepEqual(deepObj1, deepObj2, 4)).toBe(false)
+      expect(isDeepEqual(deepObj1, deepObj2, 4).isEqual).toBe(false)
     })
 
     it('should respect the maxDepth parameter for nested arrays', () => {
@@ -266,13 +266,13 @@ describe('isDeepEqual', () => {
       const nestedArray2 = [1, [2, [3, [4, [5, 7]]]]]
 
       // With default depth, the difference should be detected
-      expect(isDeepEqual(nestedArray1, nestedArray2)).toBe(false)
+      expect(isDeepEqual(nestedArray1, nestedArray2).isEqual).toBe(false)
 
       // With depth of 4, the difference at the deepest level should not be detected
-      expect(isDeepEqual(nestedArray1, nestedArray2, 3)).toBe(true)
+      expect(isDeepEqual(nestedArray1, nestedArray2, 3).isEqual).toBe(true)
 
       // With depth of 5, the difference should be detected
-      expect(isDeepEqual(nestedArray1, nestedArray2, 4)).toBe(false)
+      expect(isDeepEqual(nestedArray1, nestedArray2, 4).isEqual).toBe(false)
     })
   })
 
@@ -281,7 +281,7 @@ describe('isDeepEqual', () => {
       const obj1 = { name: 'John', age: 25 }
       const obj2 = { name: 'Jane', age: 30 }
 
-      const result = isDeepEqual(obj1, obj2, { returnDifferences: true })
+      const result = isDeepEqual(obj1, obj2)
 
       expect(result.isEqual).toBe(false)
       expect(result.differences).toHaveLength(2)
@@ -305,7 +305,7 @@ describe('isDeepEqual', () => {
       const obj1 = { name: 'John', age: 25 }
       const obj2 = { name: 'John', age: 25 }
 
-      const result = isDeepEqual(obj1, obj2, { returnDifferences: true })
+      const result = isDeepEqual(obj1, obj2)
 
       expect(result.isEqual).toBe(true)
       expect(result.differences).toHaveLength(0)
@@ -315,7 +315,7 @@ describe('isDeepEqual', () => {
       const obj1 = { name: 'John', age: 25 }
       const obj2 = { name: 'John', email: 'john@example.com' }
 
-      const result = isDeepEqual(obj1, obj2, { returnDifferences: true })
+      const result = isDeepEqual(obj1, obj2)
 
       expect(result.isEqual).toBe(false)
       expect(result.differences).toHaveLength(2)
@@ -354,7 +354,7 @@ describe('isDeepEqual', () => {
         },
       }
 
-      const result = isDeepEqual(obj1, obj2, { returnDifferences: true })
+      const result = isDeepEqual(obj1, obj2)
 
       expect(result.isEqual).toBe(false)
       expect(result.differences).toHaveLength(2)
@@ -378,7 +378,7 @@ describe('isDeepEqual', () => {
       const arr1 = [1, 2, { value: 'a' }]
       const arr2 = [1, 3, { value: 'b' }]
 
-      const result = isDeepEqual(arr1, arr2, { returnDifferences: true })
+      const result = isDeepEqual(arr1, arr2)
 
       expect(result.isEqual).toBe(false)
       expect(result.differences).toHaveLength(2)
@@ -402,11 +402,11 @@ describe('isDeepEqual', () => {
       const obj1 = { value: 'string' }
       const obj2 = { value: 42 }
 
-      const result = isDeepEqual(obj1, obj2, { returnDifferences: true })
+      const result = isDeepEqual(obj1, obj2)
 
       expect(result.isEqual).toBe(false)
       expect(result.differences).toHaveLength(1)
-      expect(result.differences![0]).toEqual({
+      expect(result.differences[0]).toEqual({
         path: 'value',
         type: 'different_type',
         expected: 'string',
