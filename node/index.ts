@@ -62,6 +62,11 @@ export default new Service<Clients, RecorderState, CustomContext>({
         concurrency: 10,
         timeout: NINE_SECONDS_MS,
       },
+      intsch: {
+        retries: 0,
+        concurrency: 10,
+        timeout: NINE_SECONDS_MS,
+      },
       rewriter: {
         timeout: SIX_SECONDS_MS,
       },
