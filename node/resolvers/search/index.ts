@@ -33,7 +33,11 @@ import {
   getShippingOptionsFromSelectedFacets,
   validMapAndQuery,
 } from './utils'
-import { fetchAutocompleteSuggestions } from '../../services/autocomplete'
+import { 
+  fetchAutocompleteSuggestions,
+  fetchTopSearches,
+  fetchSearchSuggestions 
+} from '../../services/autocomplete'
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
   value: string
@@ -725,10 +729,8 @@ export const queries = {
     )
     return getSearchMetaData(_, compatibilityArgs, ctx)
   },
-  topSearches: async (_: any, __: any, ctx: Context) => {
-    const { intelligentSearchApi } = ctx.clients
-
-    return await intelligentSearchApi.fetchTopSearches()
+  topSearches: (_: any, __: any, ctx: Context) => {
+    return fetchTopSearches(ctx)
   },
   autocompleteSearchSuggestions: (
     _: any,
@@ -806,8 +808,6 @@ export const queries = {
     })
   },
   searchSuggestions: (_: any, args: { fullText: string }, ctx: Context) => {
-    const { intelligentSearchApi } = ctx.clients
-
-    return intelligentSearchApi.fetchSearchSuggestions({ query: args.fullText })
+    return fetchSearchSuggestions(ctx, args.fullText)
   },
 }
