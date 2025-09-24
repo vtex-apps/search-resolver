@@ -7,6 +7,179 @@ import type { Logger } from '@vtex/api'
  */
 
 /**
+ * Represents a difference found between two values
+ */
+export interface ObjectDifference {
+  path: string
+  type:
+    | 'missing_key'
+    | 'extra_key'
+    | 'different_value'
+    | 'different_type'
+    | 'array_length_mismatch'
+  expected?: unknown
+  actual?: unknown
+  details?: string
+}
+
+/**
+ * Result of deep comparison with optional differences
+ */
+export interface DeepComparisonResult {
+  isEqual: boolean
+  differences?: ObjectDifference[]
+}
+
+/**
+ * Finds differences between two values recursively
+ * @param a First value to compare
+ * @param b Second value to compare
+ * @param path Current path in the object (for tracking location of differences)
+ * @param maxDepth Maximum recursion depth (default: 20)
+ * @param currentDepth Current recursion depth (internal use)
+ * @returns Array of differences found
+ */
+export function findDifferences(
+  a: unknown,
+  b: unknown,
+  path = '',
+  maxDepth = 20,
+  currentDepth = 0
+): ObjectDifference[] {
+  const differences: ObjectDifference[] = []
+
+  // If both values are exactly the same, no differences
+  if (a === b) return differences
+
+  // Check if maximum recursion depth has been reached
+  if (currentDepth > maxDepth) {
+    // When max depth is reached, consider values equal (original behavior)
+    return differences
+  }
+
+  // Check for null values or different types
+  if (a === null || b === null || typeof a !== typeof b) {
+    differences.push({
+      path,
+      type: 'different_type',
+      expected: a === null ? 'null' : typeof a,
+      actual: b === null ? 'null' : typeof b,
+    })
+
+    return differences
+  }
+
+  // If neither is an object, they are different primitive values
+  if (typeof a !== 'object' || typeof b !== 'object') {
+    differences.push({
+      path,
+      type: 'different_value',
+      expected: a,
+      actual: b,
+    })
+
+    return differences
+  }
+
+  // Handle arrays specially
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) {
+      differences.push({
+        path,
+        type: 'array_length_mismatch',
+        expected: a.length,
+        actual: b.length,
+      })
+    }
+
+    const maxLength = Math.max(a.length, b.length)
+
+    for (let i = 0; i < maxLength; i++) {
+      const currentPath = path ? `${path}[${i}]` : `[${i}]`
+
+      if (i >= a.length) {
+        differences.push({
+          path: currentPath,
+          type: 'missing_key',
+          actual: b[i],
+        })
+      } else if (i >= b.length) {
+        differences.push({
+          path: currentPath,
+          type: 'extra_key',
+          expected: a[i],
+        })
+      } else {
+        differences.push(
+          ...findDifferences(
+            a[i],
+            b[i],
+            currentPath,
+            maxDepth,
+            currentDepth + 1
+          )
+        )
+      }
+    }
+
+    return differences
+  }
+
+  // If one is an array but the other isn't
+  if (Array.isArray(a) !== Array.isArray(b)) {
+    differences.push({
+      path,
+      type: 'different_type',
+      expected: Array.isArray(a) ? 'array' : 'object',
+      actual: Array.isArray(b) ? 'array' : 'object',
+    })
+
+    return differences
+  }
+
+  // Cast to Record<string, unknown> for type safety
+  const objA = a as Record<string, unknown>
+  const objB = b as Record<string, unknown>
+
+  // Compare object keys
+  const keysA = Object.keys(objA)
+  const keysB = Object.keys(objB)
+  const allKeys = new Set([...keysA, ...keysB])
+
+  for (const key of allKeys) {
+    const currentPath = path ? `${path}.${key}` : key
+    const hasKeyA = Object.prototype.hasOwnProperty.call(objA, key)
+    const hasKeyB = Object.prototype.hasOwnProperty.call(objB, key)
+
+    if (hasKeyA && !hasKeyB) {
+      differences.push({
+        path: currentPath,
+        type: 'extra_key',
+        expected: objA[key],
+      })
+    } else if (!hasKeyA && hasKeyB) {
+      differences.push({
+        path: currentPath,
+        type: 'missing_key',
+        actual: objB[key],
+      })
+    } else if (hasKeyA && hasKeyB) {
+      differences.push(
+        ...findDifferences(
+          objA[key],
+          objB[key],
+          currentPath,
+          maxDepth,
+          currentDepth + 1
+        )
+      )
+    }
+  }
+
+  return differences
+}
+
+/**
  * Performs a deep equality comparison between two values
  * @param a First value to compare
  * @param b Second value to compare
@@ -14,12 +187,48 @@ import type { Logger } from '@vtex/api'
  * @param currentDepth Current recursion depth (internal use)
  * @returns boolean indicating if the values are deeply equal
  */
+// Function overloads for isDeepEqual
 export function isDeepEqual(
   a: unknown,
   b: unknown,
-  maxDepth = 20,
+  maxDepth?: number,
+  currentDepth?: number
+): boolean
+
+export function isDeepEqual(
+  a: unknown,
+  b: unknown,
+  options: { maxDepth?: number; returnDifferences: true }
+): DeepComparisonResult
+
+export function isDeepEqual(
+  a: unknown,
+  b: unknown,
+  maxDepthOrOptions:
+    | number
+    | { maxDepth?: number; returnDifferences: true } = 20,
   currentDepth = 0
-): boolean {
+): boolean | DeepComparisonResult {
+  // Handle the options parameter
+  const isOptionsObject = typeof maxDepthOrOptions === 'object'
+  const maxDepth = isOptionsObject
+    ? maxDepthOrOptions.maxDepth ?? 20
+    : maxDepthOrOptions
+
+  const returnDifferences = isOptionsObject
+    ? maxDepthOrOptions.returnDifferences
+    : false
+
+  if (returnDifferences) {
+    const differences = findDifferences(a, b, '', maxDepth, 0)
+
+    return {
+      isEqual: differences.length === 0,
+      differences,
+    }
+  }
+
+  // Original implementation for backward compatibility
   // If both values are exactly the same, they are equal
   if (a === b) return true
 
@@ -119,9 +328,17 @@ export async function compareApiResults<T>(
     result2 && typeof result2 === 'object' && '__error' in result2
 
   let areEqual = false
+  let differences: ObjectDifference[] = []
 
   try {
-    areEqual = !hasError1 && !hasError2 && isDeepEqual(result1, result2)
+    if (!hasError1 && !hasError2) {
+      const comparisonResult = isDeepEqual(result1, result2, {
+        returnDifferences: true,
+      })
+
+      areEqual = comparisonResult.isEqual
+      differences = comparisonResult.differences || []
+    }
   } catch (error) {
     logger.error({
       message: `${logPrefix}: Error during deep comparison`,
@@ -133,11 +350,15 @@ export async function compareApiResults<T>(
     logger.error({
       message: `${logPrefix}: Results differ`,
       params: JSON.stringify(options.args),
+      differences: differences.slice(0, 10), // Limit to first 10 differences to avoid log overflow
+      differenceCount: differences.length,
+      result1,
+      result2,
     })
   } else if (areEqual) {
     logger.info({
       //  Since the log level is indexed we are using it to get a sense of the % of results that are equal.
-      message: `${logPrefix}: Results differ`,
+      message: `${logPrefix}: Results are equal`,
       params: JSON.stringify(options.args),
     })
   }

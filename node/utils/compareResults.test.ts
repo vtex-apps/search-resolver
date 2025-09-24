@@ -1,6 +1,10 @@
 import type { Logger } from '@vtex/api'
 
-import { isDeepEqual, compareApiResults } from './compareResults'
+import {
+  isDeepEqual,
+  compareApiResults,
+  findDifferences,
+} from './compareResults'
 
 describe('isDeepEqual', () => {
   // Basic equality tests
@@ -122,6 +126,102 @@ describe('isDeepEqual', () => {
       expect(isDeepEqual(arr1, arr2)).toBe(true)
       expect(isDeepEqual(arr1, arr3)).toBe(false)
     })
+
+    it('should handle objects with same content but different property order in nested arrays', () => {
+      const obj1 = {
+        searches: [
+          {
+            term: 'areia',
+            count: 217,
+            attributes: [
+              {
+                key: 'departamento',
+                labelKey: 'Departamento',
+                labelValue: 'Material de Construção',
+                value: 'material-de-construcao',
+              },
+              {
+                key: 'categoria',
+                labelKey: 'Categoria',
+                labelValue: 'Materiais básicos para obra',
+                value: 'materiais-basicos-para-obra',
+              },
+              {
+                key: 'subcategoria',
+                labelKey: 'Subcategoria',
+                labelValue: 'Areias',
+                value: 'areias',
+              },
+            ],
+          },
+          {
+            term: 'vaso caixa acoplada',
+            count: 239,
+          },
+          {
+            term: 'caixa acoplada',
+            count: 86,
+          },
+          {
+            term: 'vasos caixa acopladas',
+            count: 66,
+          },
+          {
+            term: 'kit vaso caixa acoplada',
+            count: 117,
+          },
+        ],
+      }
+
+      const obj2 = {
+        searches: [
+          {
+            term: 'areia',
+            count: 217,
+            attributes: [
+              {
+                key: 'departamento',
+                value: 'material-de-construcao',
+                labelKey: 'Departamento',
+                labelValue: 'Material de Construção',
+              },
+              {
+                key: 'categoria',
+                value: 'materiais-basicos-para-obra',
+                labelKey: 'Categoria',
+                labelValue: 'Materiais básicos para obra',
+              },
+              {
+                key: 'subcategoria',
+                value: 'areias',
+                labelKey: 'Subcategoria',
+                labelValue: 'Areias',
+              },
+            ],
+          },
+          {
+            term: 'vaso caixa acoplada',
+            count: 239,
+          },
+          {
+            term: 'caixa acoplada',
+            count: 86,
+          },
+          {
+            term: 'vasos caixa acopladas',
+            count: 66,
+          },
+          {
+            term: 'kit vaso caixa acoplada',
+            count: 117,
+          },
+        ],
+      }
+
+      // These objects should be considered equal since they have the same content
+      // but different property order in the attributes objects
+      expect(isDeepEqual(obj1, obj2)).toBe(true)
+    })
   })
 
   // maxDepth parameter tests
@@ -174,6 +274,180 @@ describe('isDeepEqual', () => {
       // With depth of 5, the difference should be detected
       expect(isDeepEqual(nestedArray1, nestedArray2, 4)).toBe(false)
     })
+  })
+
+  describe('difference detection', () => {
+    it('should return differences when using returnDifferences option', () => {
+      const obj1 = { name: 'John', age: 25 }
+      const obj2 = { name: 'Jane', age: 30 }
+
+      const result = isDeepEqual(obj1, obj2, { returnDifferences: true })
+
+      expect(result.isEqual).toBe(false)
+      expect(result.differences).toHaveLength(2)
+      expect(result.differences).toEqual([
+        {
+          path: 'name',
+          type: 'different_value',
+          expected: 'John',
+          actual: 'Jane',
+        },
+        {
+          path: 'age',
+          type: 'different_value',
+          expected: 25,
+          actual: 30,
+        },
+      ])
+    })
+
+    it('should return no differences when objects are equal', () => {
+      const obj1 = { name: 'John', age: 25 }
+      const obj2 = { name: 'John', age: 25 }
+
+      const result = isDeepEqual(obj1, obj2, { returnDifferences: true })
+
+      expect(result.isEqual).toBe(true)
+      expect(result.differences).toHaveLength(0)
+    })
+
+    it('should detect missing and extra keys', () => {
+      const obj1 = { name: 'John', age: 25 }
+      const obj2 = { name: 'John', email: 'john@example.com' }
+
+      const result = isDeepEqual(obj1, obj2, { returnDifferences: true })
+
+      expect(result.isEqual).toBe(false)
+      expect(result.differences).toHaveLength(2)
+      expect(result.differences).toEqual(
+        expect.arrayContaining([
+          {
+            path: 'age',
+            type: 'extra_key',
+            expected: 25,
+          },
+          {
+            path: 'email',
+            type: 'missing_key',
+            actual: 'john@example.com',
+          },
+        ])
+      )
+    })
+
+    it('should detect nested differences with correct paths', () => {
+      const obj1 = {
+        user: {
+          profile: {
+            name: 'John',
+            preferences: { theme: 'dark' },
+          },
+        },
+      }
+
+      const obj2 = {
+        user: {
+          profile: {
+            name: 'Jane',
+            preferences: { theme: 'light' },
+          },
+        },
+      }
+
+      const result = isDeepEqual(obj1, obj2, { returnDifferences: true })
+
+      expect(result.isEqual).toBe(false)
+      expect(result.differences).toHaveLength(2)
+      expect(result.differences).toEqual([
+        {
+          path: 'user.profile.name',
+          type: 'different_value',
+          expected: 'John',
+          actual: 'Jane',
+        },
+        {
+          path: 'user.profile.preferences.theme',
+          type: 'different_value',
+          expected: 'dark',
+          actual: 'light',
+        },
+      ])
+    })
+
+    it('should detect array differences', () => {
+      const arr1 = [1, 2, { value: 'a' }]
+      const arr2 = [1, 3, { value: 'b' }]
+
+      const result = isDeepEqual(arr1, arr2, { returnDifferences: true })
+
+      expect(result.isEqual).toBe(false)
+      expect(result.differences).toHaveLength(2)
+      expect(result.differences).toEqual([
+        {
+          path: '[1]',
+          type: 'different_value',
+          expected: 2,
+          actual: 3,
+        },
+        {
+          path: '[2].value',
+          type: 'different_value',
+          expected: 'a',
+          actual: 'b',
+        },
+      ])
+    })
+
+    it('should detect type differences', () => {
+      const obj1 = { value: 'string' }
+      const obj2 = { value: 42 }
+
+      const result = isDeepEqual(obj1, obj2, { returnDifferences: true })
+
+      expect(result.isEqual).toBe(false)
+      expect(result.differences).toHaveLength(1)
+      expect(result.differences![0]).toEqual({
+        path: 'value',
+        type: 'different_type',
+        expected: 'string',
+        actual: 'number',
+      })
+    })
+  })
+})
+
+describe('findDifferences', () => {
+  it('should find differences between simple objects', () => {
+    const obj1 = { a: 1, b: 2 }
+    const obj2 = { a: 1, b: 3, c: 4 }
+
+    const differences = findDifferences(obj1, obj2)
+
+    expect(differences).toHaveLength(2)
+    expect(differences).toEqual(
+      expect.arrayContaining([
+        {
+          path: 'b',
+          type: 'different_value',
+          expected: 2,
+          actual: 3,
+        },
+        {
+          path: 'c',
+          type: 'missing_key',
+          actual: 4,
+        },
+      ])
+    )
+  })
+
+  it('should respect maxDepth parameter', () => {
+    const deep1 = { level1: { level2: { level3: { value: 'a' } } } }
+    const deep2 = { level1: { level2: { level3: { value: 'b' } } } }
+
+    const differences = findDifferences(deep1, deep2, '', 2)
+
+    expect(differences).toHaveLength(0) // Should not find differences beyond maxDepth
   })
 })
 
@@ -296,6 +570,17 @@ describe('compareApiResults', () => {
       expect(mockLogger.error).toHaveBeenCalledWith({
         message: 'Test API: Results differ',
         params: JSON.stringify({ query: 'test' }),
+        differences: [
+          {
+            path: 'data',
+            type: 'different_value',
+            expected: 'test1',
+            actual: 'test2',
+          },
+        ],
+        differenceCount: 1,
+        result1: { data: 'test1' },
+        result2: { data: 'test2' },
       })
     })
 
