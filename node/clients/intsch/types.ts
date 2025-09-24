@@ -17,9 +17,29 @@ export type AutocompleteSuggestionsResponse = {
   }[]
 }
 
+export type TopSearchesResponse = {
+  searches:  {
+    term: string
+    count: number
+  }[]
+}
+
+export type SearchSuggestionsArgs = {
+  query: string
+}
+
+export type SearchSuggestionsResponse = {
+  searches: {
+    term: string
+    count: number
+  }[]
+}
+
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface IIntelligentSearchClient {
   fetchAutocompleteSuggestions(
     args: AutocompleteSuggestionsArgs
   ): Promise<AutocompleteSuggestionsResponse>
+  fetchTopSearches(): Promise<TopSearchesResponse>
+  fetchSearchSuggestions(args: SearchSuggestionsArgs): Promise<SearchSuggestionsResponse>
 }

@@ -1,6 +1,8 @@
 import type {
   IIntelligentSearchClient,
   AutocompleteSuggestionsResponse,
+  TopSearchesResponse,
+  SearchSuggestionsResponse,
 } from '../clients/intsch/types'
 
 export class MockedIntschClient implements IIntelligentSearchClient {
@@ -14,11 +16,29 @@ export class MockedIntschClient implements IIntelligentSearchClient {
         args?.fetchAutocompleteSuggestions ?? null
       )
     }
+
+    if (args?.fetchTopSearches instanceof Error) {
+      this.fetchTopSearches.mockRejectedValue(args.fetchTopSearches)
+    } else {
+      this.fetchTopSearches.mockResolvedValue(args?.fetchTopSearches ?? null)
+    }
+
+    if (args?.fetchSearchSuggestions instanceof Error) {
+      this.fetchSearchSuggestions.mockRejectedValue(args.fetchSearchSuggestions)
+    } else {
+      this.fetchSearchSuggestions.mockResolvedValue(
+        args?.fetchSearchSuggestions ?? null
+      )
+    }
   }
 
   public fetchAutocompleteSuggestions = jest.fn()
+  public fetchTopSearches = jest.fn()
+  public fetchSearchSuggestions = jest.fn()
 }
 
 export type IntelligentSearchClientArgs = {
   fetchAutocompleteSuggestions?: AutocompleteSuggestionsResponse | Error
+  fetchTopSearches?: TopSearchesResponse | Error
+  fetchSearchSuggestions?: SearchSuggestionsResponse | Error
 }

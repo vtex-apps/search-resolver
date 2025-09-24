@@ -97,7 +97,7 @@ describe('fetchAutocompleteSuggestions', () => {
       query: 'test',
     })
     expect(ctx.vtex.logger.error).toHaveBeenCalledWith({
-      message: 'Autocomplete Suggestions: "test": Results differ',
+      message: 'Autocomplete Suggestions: Results differ',
       params: JSON.stringify({ query: 'test' }),
     })
     expect(response).toEqual(result)
