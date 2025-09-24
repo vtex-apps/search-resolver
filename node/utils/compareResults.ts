@@ -134,6 +134,12 @@ export async function compareApiResults<T>(
       message: `${logPrefix}: Results differ`,
       params: JSON.stringify(options.args),
     })
+  } else if (areEqual) {
+    logger.info({
+      //  Since the log level is indexed we are using it to get a sense of the % of results that are equal.
+      message: `${logPrefix}: Results differ`,
+      params: JSON.stringify(options.args),
+    })
   }
 
   if (!hasError1) {
