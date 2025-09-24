@@ -728,7 +728,7 @@ export const queries = {
   topSearches: async (_: any, __: any, ctx: Context) => {
     const { intelligentSearchApi } = ctx.clients
 
-    return await intelligentSearchApi.topSearches()
+    return await intelligentSearchApi.fetchTopSearches()
   },
   autocompleteSearchSuggestions: (
     _: any,
@@ -808,6 +808,6 @@ export const queries = {
   searchSuggestions: (_: any, args: { fullText: string }, ctx: Context) => {
     const { intelligentSearchApi } = ctx.clients
 
-    return intelligentSearchApi.searchSuggestions({ query: args.fullText })
+    return intelligentSearchApi.fetchSearchSuggestions({ query: args.fullText })
   },
 }

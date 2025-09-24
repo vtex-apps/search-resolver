@@ -4,6 +4,9 @@ import {
   AutocompleteSuggestionsArgs,
   AutocompleteSuggestionsResponse,
   IIntelligentSearchClient,
+  SearchSuggestionsArgs,
+  SearchSuggestionsResponse,
+  TopSearchesResponse,
 } from './types'
 
 export class Intsch extends JanusClient implements IIntelligentSearchClient {
@@ -29,5 +32,21 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
         metric: 'autocompleteSearchSuggestions-new',
       }
     )
+  }
+
+  public fetchTopSearches(): Promise<TopSearchesResponse> {
+    return this.http.get('/api/intelligent-search/v0/top-searches', {
+      params: { locale: this.locale },
+      metric: 'topSearches-new',
+    })
+  }
+
+  public fetchSearchSuggestions(
+    args: SearchSuggestionsArgs
+  ): Promise<SearchSuggestionsResponse> {
+    return this.http.get('/api/intelligent-search/v0/search-suggestions', {
+      params: { query: args.query, locale: this.locale },
+      metric: 'searchSuggestions-new',
+    })
   }
 }

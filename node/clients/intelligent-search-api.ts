@@ -71,7 +71,7 @@ export class IntelligentSearchApi
     this.locale = locale ?? tenant?.locale
   }
 
-  public async topSearches() {
+  public async fetchTopSearches() {
     return this.http.get('/top_searches', {
       params: {
         locale: this.locale,
@@ -87,7 +87,7 @@ export class IntelligentSearchApi
     })
   }
 
-  public async searchSuggestions(params: SearchSuggestionsParams) {
+  public async fetchSearchSuggestions(params: SearchSuggestionsParams) {
     return this.http.get('/search_suggestions', {
       params: { ...params, locale: this.locale },
       metric: 'searchSuggestions',
