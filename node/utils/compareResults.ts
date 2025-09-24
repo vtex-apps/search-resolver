@@ -269,8 +269,6 @@ export async function compareApiResults<T>(
       params: JSON.stringify(options.args),
       differences: differences.slice(0, 10), // Limit to first 10 differences to avoid log overflow
       differenceCount: differences.length,
-      result1,
-      result2,
     })
   } else if (areEqual) {
     logger.info({

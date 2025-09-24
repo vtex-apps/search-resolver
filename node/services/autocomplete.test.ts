@@ -115,43 +115,6 @@ describe('fetchAutocompleteSuggestions', () => {
             actual: 'camisa feminina',
           }),
         ]),
-        result1: {
-          searches: [{ term: 'test', count: 1 }],
-        },
-        result2: {
-          searches: [
-            {
-              term: 'camisa feminina',
-              count: 1,
-              attributes: [
-                {
-                  key: 'departamento',
-                  labelKey: 'Departamento',
-                  labelValue: 'Apparel & Accessories',
-                  value: 'apparel---accessories',
-                },
-                {
-                  key: 'categoria',
-                  labelKey: 'Categoria',
-                  labelValue: 'Roupa',
-                  value: 'roupa',
-                },
-              ],
-            },
-            {
-              term: 'camisa masculina',
-              count: 1,
-            },
-            {
-              term: 'camiseta',
-              count: 2,
-            },
-            {
-              term: 'camisa',
-              count: 1,
-            },
-          ],
-        },
       })
     )
     expect(response).toEqual(result)

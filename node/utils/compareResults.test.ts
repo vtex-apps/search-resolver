@@ -579,8 +579,6 @@ describe('compareApiResults', () => {
           },
         ],
         differenceCount: 1,
-        result1: { data: 'test1' },
-        result2: { data: 'test2' },
       })
     })
 
