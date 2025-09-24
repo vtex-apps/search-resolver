@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Send 10% of the production traffic to the new intsch service authough still uses the result from the I/O app. For the routes: autocompleteSearchSuggestions, topSearches and searchSuggestions.
+
 ## [1.77.0] - 2025-09-23
 
 ### Changed
