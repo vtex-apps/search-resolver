@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Add new log line to the compareResults function so we can estimate the amount of requests that are different.
+
 ## [1.78.0] - 2025-09-24
 
 ### Changed
