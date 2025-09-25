@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.80.0] - 2025-09-25
+
 ### Changed
 
 - Change the differences log to contain the diff between the 2 results.
