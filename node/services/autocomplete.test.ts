@@ -96,10 +96,27 @@ describe('fetchAutocompleteSuggestions', () => {
     ).toHaveBeenCalledWith({
       query: 'test',
     })
-    expect(ctx.vtex.logger.error).toHaveBeenCalledWith({
-      message: 'Autocomplete Suggestions: Results differ',
-      params: JSON.stringify({ query: 'test' }),
-    })
+    expect(ctx.vtex.logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Autocomplete Suggestions: Results differ',
+        params: JSON.stringify({ query: 'test' }),
+        differenceCount: 6,
+        differences: expect.arrayContaining([
+          expect.objectContaining({
+            path: 'searches',
+            type: 'array_length_mismatch',
+            expected: 1,
+            actual: 4,
+          }),
+          expect.objectContaining({
+            path: 'searches[0].term',
+            type: 'different_value',
+            expected: 'test',
+            actual: 'camisa feminina',
+          }),
+        ]),
+      })
+    )
     expect(response).toEqual(result)
   })
 
