@@ -80,7 +80,7 @@ export class IntelligentSearchApi
     })
   }
 
-  public async correction(params: CorrectionParams) {
+  public async fetchCorrection(params: CorrectionParams) {
     return this.http.get('/correction_search', {
       params: { ...params, locale: this.locale },
       metric: 'correction',

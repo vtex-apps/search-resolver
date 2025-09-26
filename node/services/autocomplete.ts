@@ -62,3 +62,24 @@ export function fetchSearchSuggestions(ctx: Context<Clients>, query: string) {
     }
   )
 }
+
+export function fetchCorrection(ctx: Context<Clients>, query: string) {
+  const { intelligentSearchApi, intsch } = ctx.clients
+
+  return compareApiResults(
+    () =>
+      intelligentSearchApi.fetchCorrection({
+        query,
+      }),
+    () =>
+      intsch.fetchCorrection({
+        query,
+      }),
+    ctx.vtex.production ? 10 : 100,
+    ctx.vtex.logger,
+    {
+      logPrefix: 'Correction',
+      args: { query },
+    }
+  )
+}
