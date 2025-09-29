@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.81.0] - 2025-09-29
+
 ### Changed
 - Switch autocomplete endpoints to use intsch as primary with intelligentSearchApi as fallback.
 - Start testing 10% of the fetchCorrection traffic to intsch and compare the result against the VTEX /IO version.
