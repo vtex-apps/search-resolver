@@ -9,16 +9,19 @@ async function withFallback<T>(
   primaryFn: () => Promise<T>,
   fallbackFn: () => Promise<T>,
   logger: any,
-  operationName: string
+  operationName: string,
+  args?: Record<string, unknown>
 ): Promise<T> {
   try {
-    return await primaryFn()
+    return primaryFn()
   } catch (error) {
     logger.warn({
       message: `${operationName}: Primary call failed, using fallback`,
       error: error.message,
+      args,
     })
-    return await fallbackFn()
+
+    return fallbackFn()
   }
 }
 
@@ -32,7 +35,8 @@ export function fetchAutocompleteSuggestions(
     () => intsch.fetchAutocompleteSuggestions({ query }),
     () => intelligentSearchApi.fetchAutocompleteSuggestions({ query }),
     ctx.vtex.logger,
-    'Autocomplete Suggestions'
+    'Autocomplete Suggestions',
+    { query }
   )
 }
 
@@ -43,7 +47,8 @@ export function fetchTopSearches(ctx: Context<Clients>) {
     () => intsch.fetchTopSearches(),
     () => intelligentSearchApi.fetchTopSearches(),
     ctx.vtex.logger,
-    'Top Searches'
+    'Top Searches',
+    {}
   )
 }
 
@@ -54,9 +59,11 @@ export function fetchSearchSuggestions(ctx: Context<Clients>, query: string) {
     () => intsch.fetchSearchSuggestions({ query }),
     () => intelligentSearchApi.fetchSearchSuggestions({ query }),
     ctx.vtex.logger,
-    'Search Suggestions'
+    'Search Suggestions',
+    { query }
   )
 }
+
 export function fetchCorrection(ctx: Context<Clients>, query: string) {
   const { intelligentSearchApi, intsch } = ctx.clients
 
@@ -64,6 +71,7 @@ export function fetchCorrection(ctx: Context<Clients>, query: string) {
     () => intsch.fetchCorrection({ query }),
     () => intelligentSearchApi.fetchCorrection({ query }),
     ctx.vtex.logger,
-    'Correction'
+    'Correction',
+    { query }
   )
 }

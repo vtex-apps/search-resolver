@@ -1,7 +1,8 @@
-import { 
-  fetchAutocompleteSuggestions, 
-  fetchTopSearches, 
-  fetchSearchSuggestions 
+import {
+  fetchAutocompleteSuggestions,
+  fetchTopSearches,
+  fetchSearchSuggestions,
+  fetchCorrection,
 } from './autocomplete'
 import { createContext } from '../mocks/contextFactory'
 
@@ -71,6 +72,7 @@ describe('fetchAutocompleteSuggestions', () => {
     expect(ctx.vtex.logger.warn).toHaveBeenCalledWith({
       message: 'Autocomplete Suggestions: Primary call failed, using fallback',
       error: 'Intsch service unavailable',
+      args: { query: 'test' },
     })
     expect(response).toEqual(fallbackResult)
   })
@@ -78,7 +80,9 @@ describe('fetchAutocompleteSuggestions', () => {
   it('should throw error when both intsch and fallback fail', async () => {
     const ctx = createContext({
       intelligentSearchApiSettings: {
-        fetchAutocompleteSuggestions: new Error('Fallback service also unavailable'),
+        fetchAutocompleteSuggestions: new Error(
+          'Fallback service also unavailable'
+        ),
       },
       intschSettings: {
         fetchAutocompleteSuggestions: new Error('Primary service unavailable'),
@@ -103,6 +107,7 @@ describe('fetchAutocompleteSuggestions', () => {
     expect(ctx.vtex.logger.warn).toHaveBeenCalledWith({
       message: 'Autocomplete Suggestions: Primary call failed, using fallback',
       error: 'Primary service unavailable',
+      args: { query: 'test' },
     })
   })
 })
@@ -131,7 +136,9 @@ describe('fetchTopSearches', () => {
     const result = await fetchTopSearches(ctx)
 
     expect(ctx.clients.intsch.fetchTopSearches).toHaveBeenCalledWith()
-    expect(ctx.clients.intelligentSearchApi.fetchTopSearches).not.toHaveBeenCalled()
+    expect(
+      ctx.clients.intelligentSearchApi.fetchTopSearches
+    ).not.toHaveBeenCalled()
 
     expect(result).toEqual(intschResult)
     expect(ctx.vtex.logger.warn).not.toHaveBeenCalled()
@@ -154,11 +161,14 @@ describe('fetchTopSearches', () => {
     const response = await fetchTopSearches(ctx)
 
     expect(ctx.clients.intsch.fetchTopSearches).toHaveBeenCalledWith()
-    expect(ctx.clients.intelligentSearchApi.fetchTopSearches).toHaveBeenCalledWith()
+    expect(
+      ctx.clients.intelligentSearchApi.fetchTopSearches
+    ).toHaveBeenCalledWith()
 
     expect(ctx.vtex.logger.warn).toHaveBeenCalledWith({
       message: 'Top Searches: Primary call failed, using fallback',
       error: 'Intsch top searches unavailable',
+      args: {},
     })
     expect(response).toEqual(fallbackResult)
   })
@@ -190,7 +200,9 @@ describe('fetchSearchSuggestions', () => {
     expect(ctx.clients.intsch.fetchSearchSuggestions).toHaveBeenCalledWith({
       query: 'search',
     })
-    expect(ctx.clients.intelligentSearchApi.fetchSearchSuggestions).not.toHaveBeenCalled()
+    expect(
+      ctx.clients.intelligentSearchApi.fetchSearchSuggestions
+    ).not.toHaveBeenCalled()
 
     expect(result).toEqual(intschResult)
     expect(ctx.vtex.logger.warn).not.toHaveBeenCalled()
@@ -206,7 +218,9 @@ describe('fetchSearchSuggestions', () => {
         fetchSearchSuggestions: fallbackResult,
       },
       intschSettings: {
-        fetchSearchSuggestions: new Error('Intsch search suggestions unavailable'),
+        fetchSearchSuggestions: new Error(
+          'Intsch search suggestions unavailable'
+        ),
       },
     })
 
@@ -215,14 +229,130 @@ describe('fetchSearchSuggestions', () => {
     expect(ctx.clients.intsch.fetchSearchSuggestions).toHaveBeenCalledWith({
       query: 'search',
     })
-    expect(ctx.clients.intelligentSearchApi.fetchSearchSuggestions).toHaveBeenCalledWith({
+    expect(
+      ctx.clients.intelligentSearchApi.fetchSearchSuggestions
+    ).toHaveBeenCalledWith({
       query: 'search',
     })
 
     expect(ctx.vtex.logger.warn).toHaveBeenCalledWith({
       message: 'Search Suggestions: Primary call failed, using fallback',
       error: 'Intsch search suggestions unavailable',
+      args: { query: 'search' },
     })
     expect(response).toEqual(fallbackResult)
+  })
+})
+
+describe('fetchCorrection', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('should call intsch as primary and return its result when successful', async () => {
+    const intschResult = {
+      correction: {
+        text: 'text',
+        highlighted: '<b>text</b>',
+        misspelled: true,
+        correction: true,
+      },
+    }
+
+    const ctx = createContext({
+      intelligentSearchApiSettings: {
+        fetchCorrection: {
+          correction: {
+            text: 'fallback',
+            highlighted: '<b>fallback</b>',
+            misspelled: true,
+            correction: true,
+          },
+        },
+      },
+      intschSettings: {
+        fetchCorrection: intschResult,
+      },
+    })
+
+    const result = await fetchCorrection(ctx, 'test')
+
+    expect(ctx.clients.intsch.fetchCorrection).toHaveBeenCalledWith({
+      query: 'test',
+    })
+    expect(
+      ctx.clients.intelligentSearchApi.fetchCorrection
+    ).not.toHaveBeenCalled()
+
+    expect(result).toEqual(intschResult)
+    expect(ctx.vtex.logger.warn).not.toHaveBeenCalled()
+  })
+
+  it('should use fallback when intsch fails', async () => {
+    const fallbackResult = {
+      correction: {
+        text: 'fallback-correction',
+        highlighted: '<b>fallback-correction</b>',
+        misspelled: true,
+        correction: true,
+      },
+    }
+
+    const ctx = createContext({
+      intelligentSearchApiSettings: {
+        fetchCorrection: fallbackResult,
+      },
+      intschSettings: {
+        fetchCorrection: new Error('Intsch correction unavailable'),
+      },
+    })
+
+    const response = await fetchCorrection(ctx, 'test')
+
+    expect(ctx.clients.intsch.fetchCorrection).toHaveBeenCalledWith({
+      query: 'test',
+    })
+    expect(
+      ctx.clients.intelligentSearchApi.fetchCorrection
+    ).toHaveBeenCalledWith({
+      query: 'test',
+    })
+
+    expect(ctx.vtex.logger.warn).toHaveBeenCalledWith({
+      message: 'Correction: Primary call failed, using fallback',
+      error: 'Intsch correction unavailable',
+      args: { query: 'test' },
+    })
+    expect(response).toEqual(fallbackResult)
+  })
+
+  it('should throw error when both intsch and fallback fail', async () => {
+    const ctx = createContext({
+      intelligentSearchApiSettings: {
+        fetchCorrection: new Error('Fallback correction also unavailable'),
+      },
+      intschSettings: {
+        fetchCorrection: new Error('Primary correction unavailable'),
+      },
+    })
+
+    await expect(fetchCorrection(ctx, 'test')).rejects.toThrow(
+      'Fallback correction also unavailable'
+    )
+
+    expect(ctx.clients.intsch.fetchCorrection).toHaveBeenCalledWith({
+      query: 'test',
+    })
+    expect(
+      ctx.clients.intelligentSearchApi.fetchCorrection
+    ).toHaveBeenCalledWith({
+      query: 'test',
+    })
+
+    expect(ctx.vtex.logger.warn).toHaveBeenCalledWith({
+      message: 'Correction: Primary call failed, using fallback',
+      error: 'Primary correction unavailable',
+      args: { query: 'test' },
+    })
   })
 })
