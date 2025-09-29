@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Switch correction endpoint to use intsch as primary with intelligentSearchApi as fallback.
+
 ## [1.81.0] - 2025-09-29
 
 ### Changed
