@@ -13,7 +13,7 @@ async function withFallback<T>(
   args?: Record<string, unknown>
 ): Promise<T> {
   try {
-    return primaryFn()
+    return await primaryFn()
   } catch (error) {
     logger.warn({
       message: `${operationName}: Primary call failed, using fallback`,
