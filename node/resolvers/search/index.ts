@@ -36,7 +36,8 @@ import {
 import { 
   fetchAutocompleteSuggestions,
   fetchTopSearches,
-  fetchSearchSuggestions 
+  fetchSearchSuggestions,
+  fetchCorrection,
 } from '../../services/autocomplete'
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -800,12 +801,7 @@ export const queries = {
     )
   },
   correction: (_: any, args: { fullText: string }, ctx: Context) => {
-    const { intelligentSearchApi } = ctx.clients
-
-    return intelligentSearchApi.correction({
-      query: args.fullText,
-      ...args,
-    })
+    return fetchCorrection(ctx, args.fullText)
   },
   searchSuggestions: (_: any, args: { fullText: string }, ctx: Context) => {
     return fetchSearchSuggestions(ctx, args.fullText)

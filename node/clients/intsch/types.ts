@@ -35,6 +35,19 @@ export type SearchSuggestionsResponse = {
   }[]
 }
 
+export type CorrectionArgs = {
+  query: string
+}
+
+export type CorrectionResponse = {
+  correction: {
+    text: string
+    highlighted: string
+    misspelled: boolean
+    correction: boolean
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface IIntelligentSearchClient {
   fetchAutocompleteSuggestions(
@@ -42,4 +55,5 @@ export interface IIntelligentSearchClient {
   ): Promise<AutocompleteSuggestionsResponse>
   fetchTopSearches(): Promise<TopSearchesResponse>
   fetchSearchSuggestions(args: SearchSuggestionsArgs): Promise<SearchSuggestionsResponse>
+  fetchCorrection(args: CorrectionArgs): Promise<CorrectionResponse>
 }

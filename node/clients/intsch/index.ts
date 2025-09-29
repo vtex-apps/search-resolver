@@ -3,6 +3,8 @@ import { InstanceOptions, IOContext, JanusClient } from '@vtex/api'
 import {
   AutocompleteSuggestionsArgs,
   AutocompleteSuggestionsResponse,
+  CorrectionArgs,
+  CorrectionResponse,
   IIntelligentSearchClient,
   SearchSuggestionsArgs,
   SearchSuggestionsResponse,
@@ -47,6 +49,13 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     return this.http.get('/api/intelligent-search/v0/search-suggestions', {
       params: { query: args.query, locale: this.locale },
       metric: 'searchSuggestions-new',
+    })
+  }
+
+  public fetchCorrection(args: CorrectionArgs): Promise<CorrectionResponse> {
+    return this.http.get('/api/intelligent-search/v0/correction-search', {
+      params: { query: args.query, locale: this.locale },
+      metric: 'correction-new',
     })
   }
 }

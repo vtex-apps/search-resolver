@@ -3,61 +3,78 @@ import type { Context } from '@vtex/api'
 import { compareApiResults } from '../utils/compareResults'
 import type { Clients } from '../clients'
 
+/**
+ * Helper function to execute intsch as primary with intelligentSearchApi as fallback
+ */
+async function withFallback<T>(
+  primaryFn: () => Promise<T>,
+  fallbackFn: () => Promise<T>,
+  logger: any,
+  operationName: string
+): Promise<T> {
+  try {
+    return await primaryFn()
+  } catch (error) {
+    logger.warn({
+      message: `${operationName}: Primary call failed, using fallback`,
+      error: error.message,
+    })
+    return await fallbackFn()
+  }
+}
+
 export function fetchAutocompleteSuggestions(
   ctx: Context<Clients>,
   query: string
 ) {
   const { intelligentSearchApi, intsch } = ctx.clients
 
-  return compareApiResults(
-    () =>
-      intelligentSearchApi.fetchAutocompleteSuggestions({
-        query,
-      }),
-    () =>
-      intsch.fetchAutocompleteSuggestions({
-        query,
-      }),
-    ctx.vtex.production ? 10 : 100,
+  return withFallback(
+    () => intsch.fetchAutocompleteSuggestions({ query }),
+    () => intelligentSearchApi.fetchAutocompleteSuggestions({ query }),
     ctx.vtex.logger,
-    {
-      logPrefix: 'Autocomplete Suggestions',
-      args: { query },
-    }
+    'Autocomplete Suggestions'
   )
 }
 
 export function fetchTopSearches(ctx: Context<Clients>) {
   const { intelligentSearchApi, intsch } = ctx.clients
 
-  return compareApiResults(
-    () => intelligentSearchApi.fetchTopSearches(),
+  return withFallback(
     () => intsch.fetchTopSearches(),
-    ctx.vtex.production ? 10 : 100,
+    () => intelligentSearchApi.fetchTopSearches(),
     ctx.vtex.logger,
-    {
-      logPrefix: 'Top Searches',
-      args: {},
-    }
+    'Top Searches'
   )
 }
 
 export function fetchSearchSuggestions(ctx: Context<Clients>, query: string) {
   const { intelligentSearchApi, intsch } = ctx.clients
 
+  return withFallback(
+    () => intsch.fetchSearchSuggestions({ query }),
+    () => intelligentSearchApi.fetchSearchSuggestions({ query }),
+    ctx.vtex.logger,
+    'Search Suggestions'
+  )
+}
+
+export function fetchCorrection(ctx: Context<Clients>, query: string) {
+  const { intelligentSearchApi, intsch } = ctx.clients
+
   return compareApiResults(
     () =>
-      intelligentSearchApi.fetchSearchSuggestions({
+      intelligentSearchApi.fetchCorrection({
         query,
       }),
     () =>
-      intsch.fetchSearchSuggestions({
+      intsch.fetchCorrection({
         query,
       }),
     ctx.vtex.production ? 10 : 100,
     ctx.vtex.logger,
     {
-      logPrefix: 'Search Suggestions',
+      logPrefix: 'Correction',
       args: { query },
     }
   )

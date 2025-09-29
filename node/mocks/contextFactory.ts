@@ -1,6 +1,5 @@
 import parse from 'co-body'
 
-import { MockedIntelligentSearchApiClient } from './intelligent-search-api'
 import type { IntelligentSearchClientArgs } from './intsch'
 import { MockedIntschClient } from './intsch'
 
@@ -44,7 +43,7 @@ export function createContext<Ctx = Context>({
     },
     clients: {
       intsch: new MockedIntschClient(intschSettings),
-      intelligentSearchApi: new MockedIntelligentSearchApiClient(
+      intelligentSearchApi: new MockedIntschClient(
         intelligentSearchApiSettings
       ),
       apps: {

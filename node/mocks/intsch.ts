@@ -3,6 +3,7 @@ import type {
   AutocompleteSuggestionsResponse,
   TopSearchesResponse,
   SearchSuggestionsResponse,
+  CorrectionResponse,
 } from '../clients/intsch/types'
 
 export class MockedIntschClient implements IIntelligentSearchClient {
@@ -30,15 +31,23 @@ export class MockedIntschClient implements IIntelligentSearchClient {
         args?.fetchSearchSuggestions ?? null
       )
     }
+
+    if (args?.fetchCorrection instanceof Error) {
+      this.fetchCorrection.mockRejectedValue(args.fetchCorrection)
+    } else {
+      this.fetchCorrection.mockResolvedValue(args?.fetchCorrection ?? null)
+    }
   }
 
   public fetchAutocompleteSuggestions = jest.fn()
   public fetchTopSearches = jest.fn()
   public fetchSearchSuggestions = jest.fn()
+  public fetchCorrection = jest.fn()
 }
 
 export type IntelligentSearchClientArgs = {
   fetchAutocompleteSuggestions?: AutocompleteSuggestionsResponse | Error
   fetchTopSearches?: TopSearchesResponse | Error
   fetchSearchSuggestions?: SearchSuggestionsResponse | Error
+  fetchCorrection?: CorrectionResponse | Error
 }
