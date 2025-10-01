@@ -1,6 +1,5 @@
 import type { Context } from '@vtex/api'
 
-import { compareApiResults } from '../utils/compareResults'
 import type { Clients } from '../clients'
 
 /**
@@ -10,7 +9,8 @@ async function withFallback<T>(
   primaryFn: () => Promise<T>,
   fallbackFn: () => Promise<T>,
   logger: any,
-  operationName: string
+  operationName: string,
+  args?: Record<string, unknown>
 ): Promise<T> {
   try {
     return await primaryFn()
@@ -18,8 +18,10 @@ async function withFallback<T>(
     logger.warn({
       message: `${operationName}: Primary call failed, using fallback`,
       error: error.message,
+      args,
     })
-    return await fallbackFn()
+
+    return fallbackFn()
   }
 }
 
@@ -33,7 +35,8 @@ export function fetchAutocompleteSuggestions(
     () => intsch.fetchAutocompleteSuggestions({ query }),
     () => intelligentSearchApi.fetchAutocompleteSuggestions({ query }),
     ctx.vtex.logger,
-    'Autocomplete Suggestions'
+    'Autocomplete Suggestions',
+    { query }
   )
 }
 
@@ -44,7 +47,8 @@ export function fetchTopSearches(ctx: Context<Clients>) {
     () => intsch.fetchTopSearches(),
     () => intelligentSearchApi.fetchTopSearches(),
     ctx.vtex.logger,
-    'Top Searches'
+    'Top Searches',
+    {}
   )
 }
 
@@ -55,27 +59,19 @@ export function fetchSearchSuggestions(ctx: Context<Clients>, query: string) {
     () => intsch.fetchSearchSuggestions({ query }),
     () => intelligentSearchApi.fetchSearchSuggestions({ query }),
     ctx.vtex.logger,
-    'Search Suggestions'
+    'Search Suggestions',
+    { query }
   )
 }
 
 export function fetchCorrection(ctx: Context<Clients>, query: string) {
   const { intelligentSearchApi, intsch } = ctx.clients
 
-  return compareApiResults(
-    () =>
-      intelligentSearchApi.fetchCorrection({
-        query,
-      }),
-    () =>
-      intsch.fetchCorrection({
-        query,
-      }),
-    ctx.vtex.production ? 10 : 100,
+  return withFallback(
+    () => intsch.fetchCorrection({ query }),
+    () => intelligentSearchApi.fetchCorrection({ query }),
     ctx.vtex.logger,
-    {
-      logPrefix: 'Correction',
-      args: { query },
-    }
+    'Correction',
+    { query }
   )
 }
