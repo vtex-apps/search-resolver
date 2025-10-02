@@ -6,7 +6,7 @@ import {
   convertOrderBy,
 } from '../../commons/compatibility-layer'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
-import { buildVtexSegment, resolveProduct } from '../../services/product'
+import { buildVtexSegment, ProductArgs, ProductIdentifier, resolveProduct } from '../../services/product'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import { resolvers as assemblyOptionResolvers } from './assemblyOption'
 import { resolvers as autocompleteResolvers } from './autocomplete'
@@ -41,17 +41,6 @@ import {
   fetchCorrection,
 } from '../../services/autocomplete'
 import { fetchBanners } from '../../services/banners'
-interface ProductIndentifier {
-  field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
-  value: string
-}
-
-interface ProductArgs {
-  slug?: string
-  identifier?: ProductIndentifier
-  regionId?: string
-  salesChannel?: number
-}
 
 enum CrossSellingInput {
   view = 'view',
@@ -68,7 +57,7 @@ enum CrossSellingGroupByInput {
 }
 
 interface ProductRecommendationArg {
-  identifier?: ProductIndentifier
+  identifier?: ProductIdentifier
   type?: CrossSellingInput
   groupBy?: CrossSellingGroupByInput
 }

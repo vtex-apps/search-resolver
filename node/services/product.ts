@@ -1,8 +1,15 @@
 import { compareApiResults } from '../utils/compareResults'
 
-interface ProductIdentifier {
+export type ProductIdentifier = {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
   value: string
+}
+
+export type ProductArgs = {
+  slug?: string
+  identifier?: ProductIdentifier
+  regionId?: string
+  salesChannel?: number
 }
 
 interface FetchProductArgs {
@@ -142,7 +149,7 @@ export function isValidProductIdentifier(
 
 export async function resolveProduct(
   ctx: Context,
-  rawArgs: any
+  rawArgs: ProductArgs
 ): Promise<SearchProduct | null> {
   const args =
     rawArgs && isValidProductIdentifier(rawArgs.identifier)
@@ -162,7 +169,7 @@ export async function resolveProduct(
       : ctx.vtex.segmentToken
 
   const fetchArgs: FetchProductArgs = {
-    identifier: args.identifier,
+    identifier: args.identifier as ProductIdentifier,
     salesChannel,
     regionId: rawArgs.regionId,
     vtexSegment,
