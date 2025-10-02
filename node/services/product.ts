@@ -64,18 +64,46 @@ async function fetchProductFromIntsch(
   args: FetchProductArgs
 ): Promise<SearchProduct[]> {
   const { intsch } = ctx.clients
-  const { identifier, salesChannel, regionId } = args
+  const { identifier, salesChannel, regionId, vtexSegment } = args
   const { field, value } = identifier
 
-  // Get locale from context
-  const locale = ctx.vtex.tenant?.locale || ctx.vtex.locale
+  // Get locale from context (fallback)
+  const defaultLocale = ctx.vtex.tenant?.locale || ctx.vtex.locale
+
+  // Default salesChannel from args
+  let finalSalesChannel = salesChannel ? `${salesChannel}` : undefined
+  let finalLocale = defaultLocale
+
+  // Parse vtexSegment if available to extract locale and salesChannel
+  if (vtexSegment) {
+    try {
+      const segmentData: SegmentData = JSON.parse(atob(vtexSegment))
+
+      // Use segment's salesChannel if available, otherwise use the provided one
+      if (segmentData.channel) {
+        finalSalesChannel = segmentData.channel
+      }
+
+      // Use segment's locale (cultureInfo) if available, otherwise use default
+      if (segmentData.cultureInfo) {
+        finalLocale = segmentData.cultureInfo
+      }
+    } catch (error) {
+      // If parsing fails, continue with defaults
+      ctx.vtex.logger.warn({
+        message: 'Failed to parse vtexSegment token, using defaults',
+        error: error.message,
+        vtexSegment,
+      })
+    }
+  }
 
   const product = await intsch.fetchProduct({
     field,
     value,
-    salesChannel: salesChannel?.toString(),
+    salesChannel: finalSalesChannel?.toString(),
     regionId,
-    locale,
+    locale: finalLocale,
   })
 
   // intsch.fetchProduct returns a single SearchProduct, but we need to return an array
@@ -98,7 +126,7 @@ export function buildVtexSegment({
 }): string {
   const cookie = {
     regionId: regionId ?? vtexSegment?.regionId,
-    channel: salesChannel ? salesChannel : vtexSegment?.channel,
+    channel: salesChannel || vtexSegment?.channel,
     utm_campaign: vtexSegment?.utm_campaign || '',
     utm_source: vtexSegment?.utm_source || '',
     utmi_campaign: vtexSegment?.utmi_campaign || '',
@@ -167,14 +195,13 @@ export async function resolveProduct(
   const cookie: SegmentData | undefined = ctx.vtex.segment as
     | SegmentData
     | undefined
-  const salesChannel = rawArgs.salesChannel
+
+  const { salesChannel } = rawArgs
 
   const vtexSegment =
     !cookie || (!cookie?.regionId && rawArgs.regionId)
       ? buildVtexSegment({
-          vtexSegment: ctx.vtex.segment as
-          | SegmentData
-          | undefined,
+          vtexSegment: ctx.vtex.segment as SegmentData | undefined,
           salesChannel: rawArgs.salesChannel?.toString(),
           regionId: rawArgs.regionId,
         })
