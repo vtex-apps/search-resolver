@@ -1,11 +1,12 @@
 import { NotFoundError, UserInputError, createMessagesLoader } from '@vtex/api'
-import { head, isEmpty, isNil, pathOr, test } from 'ramda'
+import { pathOr, test } from 'ramda'
 
 import {
   buildAttributePath,
   convertOrderBy,
 } from '../../commons/compatibility-layer'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
+import { resolveProduct } from '../../services/product'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import { resolvers as assemblyOptionResolvers } from './assemblyOption'
 import { resolvers as autocompleteResolvers } from './autocomplete'
@@ -261,9 +262,6 @@ const isLegacySearchFormat = ({
   return map.split(MAP_VALUES_SEP).length === query.split(PATH_SEPARATOR).length
 }
 
-const isValidProductIdentifier = (identifier: ProductIndentifier | undefined) =>
-  !!identifier && !isNil(identifier.value) && !isEmpty(identifier.value)
-
 const getTranslatedSearchTerm = async (
   query: SearchArgs['query'],
   map: SearchArgs['map'],
@@ -403,61 +401,18 @@ export const queries = {
   },
 
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
-    const {
-      clients: { search },
-    } = ctx
+    try {
+      const product = await resolveProduct(ctx, rawArgs)
 
-    const args =
-      rawArgs && isValidProductIdentifier(rawArgs.identifier)
-        ? rawArgs
-        : { identifier: { field: 'slug', value: rawArgs.slug! } }
-
-    if (!args.identifier) {
-      throw new UserInputError('No product identifier provided')
-    }
-
-    let cookie: SegmentData | undefined = ctx.vtex.segment
-
-    const salesChannel = rawArgs.salesChannel || cookie?.channel || 1
-
-    const { field, value } = args.identifier
-
-    let products = [] as SearchProduct[]
-
-    const vtexSegment =
-      !cookie || (!cookie?.regionId && rawArgs.regionId)
-        ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId)
-        : ctx.vtex.segmentToken
-
-    switch (field) {
-      case 'id':
-        products = await search.productById(value, vtexSegment, salesChannel)
-        break
-      case 'slug':
-        products = await search.product(value, vtexSegment, salesChannel)
-        break
-      case 'ean':
-        products = await search.productByEan(value, vtexSegment, salesChannel)
-        break
-      case 'reference':
-        products = await search.productByReference(
-          value,
-          vtexSegment,
-          salesChannel
+      if (!product) {
+        const identifier = rawArgs?.identifier || { field: 'slug', value: rawArgs.slug! }
+        throw new NotFoundError(
+          `No product was found with requested ${identifier.field} ${JSON.stringify({ identifier })}`
         )
-        break
-      case 'sku':
-        products = await search.productBySku(value, vtexSegment, salesChannel)
-        break
-    }
+      }
 
-    if (products.length > 0) {
-      return head(products)
+      return product
     }
-
-    throw new NotFoundError(
-      `No product was found with requested ${field} ${JSON.stringify(args)}`
-    )
   },
 
   products: async (_: any, args: ProductsInput, ctx: Context) => {
