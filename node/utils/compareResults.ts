@@ -43,7 +43,7 @@ export function findDifferences(
   a: unknown,
   b: unknown,
   path = '',
-  maxDepth = 20,
+  maxDepth = 50,
   currentDepth = 0
 ): ObjectDifference[] {
   const differences: ObjectDifference[] = []
