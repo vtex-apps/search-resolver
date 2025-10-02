@@ -14,7 +14,7 @@ export type ProductArgs = {
 
 interface FetchProductArgs {
   identifier: ProductIdentifier
-  salesChannel?: string | number | null
+  salesChannel?: number | null
   regionId?: string
   vtexSegment?: string
 }
@@ -87,14 +87,18 @@ async function fetchProductFromIntsch(
  * Builds vtex segment token for product fetching
  */
 
-export function buildVtexSegment(
-  vtexSegment?: SegmentData,
-  tradePolicy?: number,
-  regionId?: string | null
-): string {
+export function buildVtexSegment({
+  vtexSegment,
+  salesChannel,
+  regionId,
+}: {
+  vtexSegment?: SegmentData
+  salesChannel?: string
+  regionId?: string
+}): string {
   const cookie = {
-    regionId,
-    channel: tradePolicy,
+    regionId: regionId ?? vtexSegment?.regionId,
+    channel: salesChannel ? salesChannel : vtexSegment?.channel,
     utm_campaign: vtexSegment?.utm_campaign || '',
     utm_source: vtexSegment?.utm_source || '',
     utmi_campaign: vtexSegment?.utmi_campaign || '',
@@ -160,12 +164,20 @@ export async function resolveProduct(
     throw new Error('No product identifier provided')
   }
 
-  const cookie: SegmentData | undefined = ctx.vtex.segment
-  const salesChannel = rawArgs.salesChannel || cookie?.channel || 1
+  const cookie: SegmentData | undefined = ctx.vtex.segment as
+    | SegmentData
+    | undefined
+  const salesChannel = rawArgs.salesChannel
 
   const vtexSegment =
     !cookie || (!cookie?.regionId && rawArgs.regionId)
-      ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId)
+      ? buildVtexSegment({
+          vtexSegment: ctx.vtex.segment as
+          | SegmentData
+          | undefined,
+          salesChannel: rawArgs.salesChannel?.toString(),
+          regionId: rawArgs.regionId,
+        })
       : ctx.vtex.segmentToken
 
   const fetchArgs: FetchProductArgs = {

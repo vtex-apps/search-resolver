@@ -6,7 +6,12 @@ import {
   convertOrderBy,
 } from '../../commons/compatibility-layer'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
-import { buildVtexSegment, ProductArgs, ProductIdentifier, resolveProduct } from '../../services/product'
+import {
+  buildVtexSegment,
+  ProductArgs,
+  ProductIdentifier,
+  resolveProduct,
+} from '../../services/product'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import { resolvers as assemblyOptionResolvers } from './assemblyOption'
 import { resolvers as autocompleteResolvers } from './autocomplete'
@@ -444,11 +449,13 @@ export const queries = {
 
     const vtexSegment =
       !ctx.vtex.segment || (!ctx.vtex.segment?.regionId && args.regionId)
-        ? buildVtexSegment(
-            ctx.vtex.segment,
-            Number(args.salesChannel),
-            args.regionId
-          )
+        ? buildVtexSegment({
+            vtexSegment: ctx.vtex.segment as
+              | SegmentData
+              | undefined,
+            salesChannel: args.salesChannel?.toString(),
+            regionId: args.regionId ?? undefined,
+          })
         : ctx.vtex.segmentToken
 
     switch (field) {

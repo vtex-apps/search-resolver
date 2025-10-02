@@ -1,6 +1,6 @@
 interface SegmentData {
   campaigns?: any
-  channel: number
+  channel: string
   priceTables?: any
   utm_campaign: string
   regionId?: string
