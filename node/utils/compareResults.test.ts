@@ -4,6 +4,9 @@ import {
   isDeepEqual,
   compareApiResults,
   findDifferences,
+  filterIgnoredDifferences,
+  type IgnoredDifference,
+  type ObjectDifference,
 } from './compareResults'
 
 describe('isDeepEqual', () => {
@@ -451,6 +454,309 @@ describe('findDifferences', () => {
   })
 })
 
+describe('filterIgnoredDifferences', () => {
+  describe('basic filtering', () => {
+    it('should return all differences when no ignored differences are provided', () => {
+      const differences: ObjectDifference[] = [
+        {
+          path: 'name',
+          type: 'different_value',
+          expected: 'John',
+          actual: 'Jane',
+        },
+        { path: 'age', type: 'extra_key', expected: 25 },
+      ]
+
+      const result = filterIgnoredDifferences(differences, [])
+
+      expect(result).toEqual(differences)
+    })
+
+    it('should return all differences when ignoredDifferences is undefined', () => {
+      const differences: ObjectDifference[] = [
+        {
+          path: 'name',
+          type: 'different_value',
+          expected: 'John',
+          actual: 'Jane',
+        },
+        { path: 'age', type: 'extra_key', expected: 25 },
+      ]
+
+      const result = filterIgnoredDifferences(differences)
+
+      expect(result).toEqual(differences)
+    })
+
+    it('should filter out exact path and type matches', () => {
+      const differences: ObjectDifference[] = [
+        {
+          path: 'name',
+          type: 'different_value',
+          expected: 'John',
+          actual: 'Jane',
+        },
+        { path: 'age', type: 'extra_key', expected: 25 },
+        { path: 'email', type: 'missing_key', actual: 'john@example.com' },
+      ]
+
+      const ignoredDifferences: IgnoredDifference[] = [
+        { path: 'age', type: 'extra_key' },
+        { path: 'email', type: 'missing_key' },
+      ]
+
+      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+
+      expect(result).toEqual([
+        {
+          path: 'name',
+          type: 'different_value',
+          expected: 'John',
+          actual: 'Jane',
+        },
+      ])
+    })
+
+    it('should not filter out differences with same path but different type', () => {
+      const differences: ObjectDifference[] = [
+        {
+          path: 'value',
+          type: 'different_value',
+          expected: 'John',
+          actual: 'Jane',
+        },
+        {
+          path: 'value',
+          type: 'different_type',
+          expected: 'string',
+          actual: 'number',
+        },
+      ]
+
+      const ignoredDifferences: IgnoredDifference[] = [
+        { path: 'value', type: 'different_value' },
+      ]
+
+      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+
+      expect(result).toEqual([
+        {
+          path: 'value',
+          type: 'different_type',
+          expected: 'string',
+          actual: 'number',
+        },
+      ])
+    })
+
+    it('should not filter out differences with same type but different path', () => {
+      const differences: ObjectDifference[] = [
+        { path: 'name', type: 'extra_key', expected: 'John' },
+        { path: 'age', type: 'extra_key', expected: 25 },
+      ]
+
+      const ignoredDifferences: IgnoredDifference[] = [
+        { path: 'name', type: 'extra_key' },
+      ]
+
+      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+
+      expect(result).toEqual([{ path: 'age', type: 'extra_key', expected: 25 }])
+    })
+  })
+
+  describe('array path filtering', () => {
+    it('should filter array index paths correctly', () => {
+      const differences: ObjectDifference[] = [
+        { path: '[0].productReferenceCode', type: 'extra_key', expected: null },
+        { path: '[0].brandImageUrl', type: 'extra_key', expected: null },
+        {
+          path: '[1].productReference',
+          type: 'different_value',
+          expected: 'ABC',
+          actual: 'DEF',
+        },
+      ]
+
+      const ignoredDifferences: IgnoredDifference[] = [
+        { path: '[0].productReferenceCode', type: 'extra_key' },
+        { path: '[0].brandImageUrl', type: 'extra_key' },
+      ]
+
+      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+
+      expect(result).toEqual([
+        {
+          path: '[1].productReference',
+          type: 'different_value',
+          expected: 'ABC',
+          actual: 'DEF',
+        },
+      ])
+    })
+
+    it('should handle nested array paths', () => {
+      const differences: ObjectDifference[] = [
+        { path: 'data[0].items[2].specs', type: 'missing_key', actual: {} },
+        {
+          path: 'data[1].categories[0]',
+          type: 'different_value',
+          expected: 'A',
+          actual: 'B',
+        },
+      ]
+
+      const ignoredDifferences: IgnoredDifference[] = [
+        { path: 'data[0].items[2].specs', type: 'missing_key' },
+      ]
+
+      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+
+      expect(result).toEqual([
+        {
+          path: 'data[1].categories[0]',
+          type: 'different_value',
+          expected: 'A',
+          actual: 'B',
+        },
+      ])
+    })
+  })
+
+  describe('complex nested paths', () => {
+    it('should filter deeply nested object paths', () => {
+      const differences: ObjectDifference[] = [
+        {
+          path: 'user.profile.preferences.theme',
+          type: 'different_value',
+          expected: 'dark',
+          actual: 'light',
+        },
+        {
+          path: 'user.profile.avatar',
+          type: 'extra_key',
+          expected: 'avatar.jpg',
+        },
+        {
+          path: 'user.settings.notifications',
+          type: 'missing_key',
+          actual: true,
+        },
+      ]
+
+      const ignoredDifferences: IgnoredDifference[] = [
+        { path: 'user.profile.avatar', type: 'extra_key' },
+        { path: 'user.settings.notifications', type: 'missing_key' },
+      ]
+
+      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+
+      expect(result).toEqual([
+        {
+          path: 'user.profile.preferences.theme',
+          type: 'different_value',
+          expected: 'dark',
+          actual: 'light',
+        },
+      ])
+    })
+  })
+
+  describe('all difference types', () => {
+    it('should handle all supported difference types', () => {
+      const differences: ObjectDifference[] = [
+        { path: 'missing', type: 'missing_key', actual: 'value' },
+        { path: 'extra', type: 'extra_key', expected: 'value' },
+        {
+          path: 'different',
+          type: 'different_value',
+          expected: 'old',
+          actual: 'new',
+        },
+        {
+          path: 'type',
+          type: 'different_type',
+          expected: 'string',
+          actual: 'number',
+        },
+        {
+          path: 'array',
+          type: 'array_length_mismatch',
+          expected: 3,
+          actual: 5,
+        },
+      ]
+
+      const ignoredDifferences: IgnoredDifference[] = [
+        { path: 'missing', type: 'missing_key' },
+        { path: 'extra', type: 'extra_key' },
+        { path: 'type', type: 'different_type' },
+        { path: 'array', type: 'array_length_mismatch' },
+      ]
+
+      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+
+      expect(result).toEqual([
+        {
+          path: 'different',
+          type: 'different_value',
+          expected: 'old',
+          actual: 'new',
+        },
+      ])
+    })
+  })
+
+  describe('edge cases', () => {
+    it('should handle empty differences array', () => {
+      const differences: any[] = []
+      const ignoredDifferences: IgnoredDifference[] = [
+        { path: 'any', type: 'extra_key' },
+      ]
+
+      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+
+      expect(result).toEqual([])
+    })
+
+    it('should handle empty ignored differences array', () => {
+      const differences: ObjectDifference[] = [
+        {
+          path: 'name',
+          type: 'different_value',
+          expected: 'John',
+          actual: 'Jane',
+        },
+      ]
+
+      const result = filterIgnoredDifferences(differences, [])
+
+      expect(result).toEqual(differences)
+    })
+
+    it('should filter all differences when all are ignored', () => {
+      const differences: ObjectDifference[] = [
+        {
+          path: 'name',
+          type: 'different_value',
+          expected: 'John',
+          actual: 'Jane',
+        },
+        { path: 'age', type: 'extra_key', expected: 25 },
+      ]
+
+      const ignoredDifferences: IgnoredDifference[] = [
+        { path: 'name', type: 'different_value' },
+        { path: 'age', type: 'extra_key' },
+      ]
+
+      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+
+      expect(result).toEqual([])
+    })
+  })
+})
+
 describe('compareApiResults', () => {
   const mockLogger = {
     error: jest.fn(),
@@ -579,6 +885,8 @@ describe('compareApiResults', () => {
           },
         ],
         differenceCount: 1,
+        totalDifferences: 1,
+        ignoredDifferences: 0,
       })
     })
 
@@ -598,6 +906,227 @@ describe('compareApiResults', () => {
       await expect(
         compareApiResults(func1, func2, 100, mockLogger)
       ).rejects.toThrow('Both calls resulted in errors')
+    })
+  })
+
+  describe('ignored differences functionality', () => {
+    beforeEach(() => {
+      // Always be in sample for these tests
+      jest.spyOn(Math, 'random').mockImplementation().mockReturnValue(0.1)
+    })
+
+    it('should consider results equal when all differences are ignored', async () => {
+      const func1 = jest.fn().mockResolvedValue({
+        name: 'John',
+        age: 25,
+        extra: 'field',
+      })
+
+      const func2 = jest.fn().mockResolvedValue({
+        name: 'Jane',
+        age: 30,
+      })
+
+      const ignoredDifferences: IgnoredDifference[] = [
+        { path: 'name', type: 'different_value' },
+        { path: 'age', type: 'different_value' },
+        { path: 'extra', type: 'extra_key' },
+      ]
+
+      const result = await compareApiResults(func1, func2, 100, mockLogger, {
+        ignoredDifferences,
+        logPrefix: 'Test API',
+      })
+
+      expect(result).toEqual({ name: 'John', age: 25, extra: 'field' })
+      expect(mockLogger.error).not.toHaveBeenCalled()
+      expect(mockLogger.info).toHaveBeenCalledWith({
+        message: 'Test API: Results are equal',
+        params: undefined,
+        totalDifferences: 3,
+        ignoredDifferences: 3,
+      })
+    })
+
+    it('should log differences after filtering out ignored ones', async () => {
+      const func1 = jest.fn().mockResolvedValue([
+        {
+          productReferenceCode: null,
+          brandImageUrl: null,
+          name: 'Product A',
+          price: 100,
+        },
+      ])
+
+      const func2 = jest.fn().mockResolvedValue([
+        {
+          name: 'Product B',
+          price: 150,
+        },
+      ])
+
+      const ignoredDifferences: IgnoredDifference[] = [
+        { path: '[0].productReferenceCode', type: 'extra_key' },
+        { path: '[0].brandImageUrl', type: 'extra_key' },
+      ]
+
+      const result = await compareApiResults(func1, func2, 100, mockLogger, {
+        ignoredDifferences,
+        args: { query: 'test product' },
+        logPrefix: 'Product API',
+      })
+
+      expect(result).toEqual([
+        {
+          productReferenceCode: null,
+          brandImageUrl: null,
+          name: 'Product A',
+          price: 100,
+        },
+      ])
+
+      expect(mockLogger.error).toHaveBeenCalledWith({
+        message: 'Product API: Results differ',
+        params: JSON.stringify({ query: 'test product' }),
+        differences: [
+          {
+            path: '[0].name',
+            type: 'different_value',
+            expected: 'Product A',
+            actual: 'Product B',
+          },
+          {
+            path: '[0].price',
+            type: 'different_value',
+            expected: 100,
+            actual: 150,
+          },
+        ],
+        differenceCount: 2,
+        totalDifferences: 4,
+        ignoredDifferences: 2,
+      })
+    })
+
+    it('should work with complex nested paths as in the example', async () => {
+      const func1 = jest.fn().mockResolvedValue([
+        {
+          productReferenceCode: null,
+          brandImageUrl: null,
+          releaseDate: '2023-12-01',
+          clusterHighlights: { '259': 'Solução Completa' },
+          productClusters: { '260': 'Campanha' },
+          searchableClusters: {
+            '259': 'Solução Completa',
+            '260': 'Campanha Pais Colaborador',
+          },
+          categories: [
+            '/Segurança eletrônica/Câmeras de segurança/Câmeras Wi-fi/',
+          ],
+          categoriesIds: ['/2/33/101/'],
+        },
+      ])
+
+      const func2 = jest.fn().mockResolvedValue([
+        {
+          releaseDate: 1702857600,
+          clusterHighlights: ['Solução Completa'],
+          productClusters: ['Campanha'],
+          categories: ['/Segurança eletrônica/'],
+          categoriesIds: ['2'],
+        },
+      ])
+
+      const ignoredDifferences: IgnoredDifference[] = [
+        { path: '[0].productReferenceCode', type: 'extra_key' },
+        { path: '[0].brandImageUrl', type: 'extra_key' },
+        { path: '[0].searchableClusters', type: 'extra_key' },
+        { path: '[0].releaseDate', type: 'different_type' },
+        { path: '[0].clusterHighlights', type: 'different_type' },
+        { path: '[0].productClusters', type: 'different_type' },
+      ]
+
+      const result = await compareApiResults(func1, func2, 100, mockLogger, {
+        ignoredDifferences,
+        logPrefix: 'Complex Product API',
+      })
+
+      expect(result).toBeDefined()
+      // Should still log errors for categories and categoriesIds differences
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'Complex Product API: Results differ',
+          differenceCount: 2, // Only categories and categoriesIds differences remain
+          totalDifferences: 8, // Total before filtering
+          ignoredDifferences: 6, // Number filtered out
+        })
+      )
+    })
+
+    it('should handle empty ignored differences array', async () => {
+      const func1 = jest.fn().mockResolvedValue({ name: 'John' })
+      const func2 = jest.fn().mockResolvedValue({ name: 'Jane' })
+
+      const result = await compareApiResults(func1, func2, 100, mockLogger, {
+        ignoredDifferences: [],
+      })
+
+      expect(result).toEqual({ name: 'John' })
+      expect(mockLogger.error).toHaveBeenCalled()
+    })
+
+    it('should handle undefined ignored differences', async () => {
+      const func1 = jest.fn().mockResolvedValue({ name: 'John' })
+      const func2 = jest.fn().mockResolvedValue({ name: 'Jane' })
+
+      const result = await compareApiResults(func1, func2, 100, mockLogger, {
+        // No ignoredDifferences property
+      })
+
+      expect(result).toEqual({ name: 'John' })
+      expect(mockLogger.error).toHaveBeenCalled()
+    })
+
+    it('should handle mixed difference types in ignored differences', async () => {
+      const func1 = jest.fn().mockResolvedValue({
+        user: {
+          name: 'John',
+          avatar: 'avatar.jpg',
+          settings: { theme: 'dark' },
+        },
+        items: [1, 2, 3],
+      })
+
+      const func2 = jest.fn().mockResolvedValue({
+        user: {
+          name: 'John',
+          settings: { theme: 'light', notifications: true },
+        },
+        items: [1, 2],
+      })
+
+      const ignoredDifferences: IgnoredDifference[] = [
+        { path: 'user.avatar', type: 'extra_key' },
+        { path: 'user.settings.notifications', type: 'missing_key' },
+        { path: 'items', type: 'array_length_mismatch' },
+        { path: 'items[2]', type: 'extra_key' },
+      ]
+
+      const result = await compareApiResults(func1, func2, 100, mockLogger, {
+        ignoredDifferences,
+        logPrefix: 'Mixed Types API',
+      })
+
+      expect(result).toBeDefined()
+      // Should still have one difference for theme
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'Mixed Types API: Results differ',
+          differenceCount: 1, // Only theme difference remains
+          totalDifferences: 5, // Total before filtering
+          ignoredDifferences: 4, // Number filtered out
+        })
+      )
     })
   })
 })
