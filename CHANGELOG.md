@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Start testing 1% of the PDP traffic to intsch and compare the result against the Portal search version.
+
 ## [1.84.0] - 2025-10-07
 
 ### Changed
