@@ -31,14 +31,19 @@ async function fetchProductFromSearch(
   switch (field) {
     case 'id':
       return search.productById(value, vtexSegment, salesChannel)
+
     case 'slug':
       return search.product(value, vtexSegment, salesChannel)
+
     case 'ean':
       return search.productByEan(value, vtexSegment, salesChannel)
+
     case 'reference':
       return search.productByReference(value, vtexSegment, salesChannel)
+
     case 'sku':
       return search.productBySku(value, vtexSegment, salesChannel)
+
     default:
       throw new Error(`Unsupported product identifier field: ${field}`)
   }
@@ -75,13 +80,13 @@ async function fetchProductFromIntsch(
  * Builds vtex segment token for product fetching
  */
 
-export function buildVtexSegment (
+export function buildVtexSegment(
   vtexSegment?: SegmentData,
   tradePolicy?: number,
   regionId?: string | null
 ): string {
   const cookie = {
-    regionId: regionId,
+    regionId,
     channel: tradePolicy,
     utm_campaign: vtexSegment?.utm_campaign || '',
     utm_source: vtexSegment?.utm_source || '',
@@ -111,7 +116,7 @@ export async function fetchProduct(
     COMPARISON_SAMPLE_RATE,
     ctx.vtex.logger,
     {
-      logPrefix: 'Product Fetching Comparison',
+      logPrefix: 'Product Details',
       args: {
         identifier: args.identifier,
         salesChannel: args.salesChannel,
@@ -148,7 +153,7 @@ export async function resolveProduct(
     throw new Error('No product identifier provided')
   }
 
-  let cookie: SegmentData | undefined = ctx.vtex.segment
+  const cookie: SegmentData | undefined = ctx.vtex.segment
   const salesChannel = rawArgs.salesChannel || cookie?.channel || 1
 
   const vtexSegment =
