@@ -6,7 +6,7 @@ import {
   convertOrderBy,
 } from '../../commons/compatibility-layer'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
-import { resolveProduct } from '../../services/product'
+import { buildVtexSegment, resolveProduct } from '../../services/product'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import { resolvers as assemblyOptionResolvers } from './assemblyOption'
 import { resolvers as autocompleteResolvers } from './autocomplete'
@@ -34,7 +34,7 @@ import {
   getShippingOptionsFromSelectedFacets,
   validMapAndQuery,
 } from './utils'
-import { 
+import {
   fetchAutocompleteSuggestions,
   fetchTopSearches,
   fetchSearchSuggestions,
@@ -87,25 +87,6 @@ const inputToSearchCrossSelling = {
   [CrossSellingInput.viewAndBought]: SearchCrossSellingTypes.whosawalsobought,
   [CrossSellingInput.accessories]: SearchCrossSellingTypes.accessories,
   [CrossSellingInput.suggestions]: SearchCrossSellingTypes.suggestions,
-}
-
-const buildVtexSegment = (
-  vtexSegment?: SegmentData,
-  tradePolicy?: number,
-  regionId?: string | null
-): string => {
-  const cookie = {
-    regionId: regionId,
-    channel: tradePolicy,
-    utm_campaign: vtexSegment?.utm_campaign || '',
-    utm_source: vtexSegment?.utm_source || '',
-    utmi_campaign: vtexSegment?.utmi_campaign || '',
-    currencyCode: vtexSegment?.currencyCode || '',
-    currencySymbol: vtexSegment?.currencySymbol || '',
-    countryCode: vtexSegment?.countryCode || '',
-    cultureInfo: vtexSegment?.cultureInfo || '',
-  }
-  return new Buffer(JSON.stringify(cookie)).toString('base64')
 }
 
 /**
@@ -401,18 +382,21 @@ export const queries = {
   },
 
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
-    try {
-      const product = await resolveProduct(ctx, rawArgs)
+    const product = await resolveProduct(ctx, rawArgs)
 
-      if (!product) {
-        const identifier = rawArgs?.identifier || { field: 'slug', value: rawArgs.slug! }
-        throw new NotFoundError(
-          `No product was found with requested ${identifier.field} ${JSON.stringify({ identifier })}`
-        )
+    if (!product) {
+      const identifier = rawArgs?.identifier || {
+        field: 'slug',
+        value: rawArgs.slug!,
       }
-
-      return product
+      throw new NotFoundError(
+        `No product was found with requested ${
+          identifier.field
+        } ${JSON.stringify({ identifier })}`
+      )
     }
+
+    return product
   },
 
   products: async (_: any, args: ProductsInput, ctx: Context) => {

@@ -74,24 +74,25 @@ async function fetchProductFromIntsch(
 /**
  * Builds vtex segment token for product fetching
  */
-function buildVtexSegment(
-  cookie: SegmentData | undefined,
-  salesChannel: string | number | null,
-  regionId?: string
-): string | undefined {
-  if (!regionId && cookie?.regionId) {
-    return undefined // Use existing segment
+
+export function buildVtexSegment (
+  vtexSegment?: SegmentData,
+  tradePolicy?: number,
+  regionId?: string | null
+): string {
+  const cookie = {
+    regionId: regionId,
+    channel: tradePolicy,
+    utm_campaign: vtexSegment?.utm_campaign || '',
+    utm_source: vtexSegment?.utm_source || '',
+    utmi_campaign: vtexSegment?.utmi_campaign || '',
+    currencyCode: vtexSegment?.currencyCode || '',
+    currencySymbol: vtexSegment?.currencySymbol || '',
+    countryCode: vtexSegment?.countryCode || '',
+    cultureInfo: vtexSegment?.cultureInfo || '',
   }
 
-  const segmentData = {
-    ...cookie,
-    channel: salesChannel?.toString() || cookie?.channel?.toString() || '1',
-    ...(regionId && { regionId }),
-  }
-
-  // This is a simplified implementation - in practice you might need
-  // to encode this properly based on VTEX's segment token format
-  return JSON.stringify(segmentData)
+  return btoa(JSON.stringify(cookie))
 }
 
 /**
@@ -102,12 +103,10 @@ export async function fetchProduct(
   ctx: Context,
   args: FetchProductArgs
 ): Promise<SearchProduct[]> {
-  const COMPARISON_SAMPLE_RATE = 10 // 10% of requests will be compared
+  const COMPARISON_SAMPLE_RATE = ctx.vtex.production ? 1 : 100 // 1% of requests will be compared in prod and 100% in dev
 
   return compareApiResults(
-    // Primary function: search client
     () => fetchProductFromSearch(ctx, args),
-    // Secondary function: intsch client  
     () => fetchProductFromIntsch(ctx, args),
     COMPARISON_SAMPLE_RATE,
     ctx.vtex.logger,
@@ -136,15 +135,10 @@ export function isValidProductIdentifier(
   )
 }
 
-/**
- * Service function to handle the complete product resolution logic
- * This replaces the logic that was in the search resolver
- */
 export async function resolveProduct(
   ctx: Context,
   rawArgs: any
 ): Promise<SearchProduct | null> {
-  // Process arguments similar to the original resolver
   const args =
     rawArgs && isValidProductIdentifier(rawArgs.identifier)
       ? rawArgs
@@ -176,14 +170,9 @@ export async function resolveProduct(
       return null
     }
 
-    // Return the first product (similar to original implementation)
     const product = products[0]
 
-    // Add origin to track which client was used
-    return {
-      ...product,
-      origin: 'search-resolver-service',
-    }
+    return product
   } catch (error) {
     ctx.vtex.logger.error({
       message: 'Error fetching product',
