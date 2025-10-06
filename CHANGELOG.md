@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Start testing 10% of the fetchBanners traffic to intsch and compare the result against the VTEX /IO version.
+
 ## [1.82.0] - 2025-10-01
 
 ### Changed

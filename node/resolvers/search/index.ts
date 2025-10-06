@@ -39,6 +39,7 @@ import {
   fetchSearchSuggestions,
   fetchCorrection,
 } from '../../services/autocomplete'
+import { fetchBanners } from '../../services/banners'
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
   value: string
@@ -791,14 +792,7 @@ export const queries = {
     args: { fullText: string; selectedFacets: SelectedFacet[] },
     ctx: Context
   ) => {
-    const { intelligentSearchApi } = ctx.clients
-
-    return intelligentSearchApi.banners(
-      {
-        query: args.fullText,
-      },
-      buildAttributePath(args.selectedFacets)
-    )
+    return fetchBanners(ctx, args)
   },
   correction: (_: any, args: { fullText: string }, ctx: Context) => {
     return fetchCorrection(ctx, args.fullText)

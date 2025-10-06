@@ -2,7 +2,7 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
 import { parseState } from '../utils/searchState'
-import type { IIntelligentSearchClient } from './intsch/types'
+import type { FetchBannersArgs, IIntelligentSearchClient } from './intsch/types'
 
 const isPathTraversal = (str: string) => str.indexOf('..') >= 0
 
@@ -18,9 +18,6 @@ interface AutocompleteSearchSuggestionsParams {
   query: string
 }
 
-interface BannersArgs {
-  query: string
-}
 
 interface FacetsArgs {
   query?: string
@@ -103,13 +100,13 @@ export class IntelligentSearchApi
     })
   }
 
-  public async banners(params: BannersArgs, path: string) {
-    if (isPathTraversal(path)) {
+  public async fetchBanners(params: FetchBannersArgs) {
+    if (isPathTraversal(params.path)) {
       throw new Error('Malformed URL')
     }
 
-    return this.http.get(`/banners/${path}`, {
-      params: { ...params, query: params.query, locale: this.locale },
+    return this.http.get(`/banners/${params.path}`, {
+      params: { query: params.query, locale: this.locale },
       metric: 'banners',
     })
   }
