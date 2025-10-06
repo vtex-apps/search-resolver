@@ -142,12 +142,21 @@ export function buildVtexSegment({
 /**
  * Main product fetching function with compareApiResults implementation
  * Uses search client as primary and intsch.fetchProduct as secondary
+ * For specific accounts, skips comparison and uses intsch directly
  */
 export async function fetchProduct(
   ctx: Context,
   args: FetchProductArgs
 ): Promise<SearchProduct[]> {
   const COMPARISON_SAMPLE_RATE = ctx.vtex.production ? 1 : 100 // 1% of requests will be compared in prod and 100% in dev
+
+  // List of accounts that should use intsch directly without comparison
+  const INTSCH_ONLY_ACCOUNTS = ['b2bstoreqa', 'biggy', 'diegob2b', 'intelbras']
+  
+  // Check if current account should skip comparison and use intsch directly
+  if (INTSCH_ONLY_ACCOUNTS.includes(ctx.vtex.account)) {
+    return fetchProductFromIntsch(ctx, args)
+  }
 
   return compareApiResults(
     () => fetchProductFromSearch(ctx, args),
