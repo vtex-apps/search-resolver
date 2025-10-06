@@ -5,6 +5,8 @@ import {
   AutocompleteSuggestionsResponse,
   CorrectionArgs,
   CorrectionResponse,
+  FetchBannersArgs,
+  FetchBannersResponse,
   IIntelligentSearchClient,
   SearchSuggestionsArgs,
   SearchSuggestionsResponse,
@@ -56,6 +58,13 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     return this.http.get('/api/intelligent-search/v0/correction-search', {
       params: { query: args.query, locale: this.locale },
       metric: 'correction-new',
+    })
+  }
+
+  public fetchBanners(args: FetchBannersArgs): Promise<FetchBannersResponse> {
+    return this.http.get(`/api/intelligent-search/v0/banners/${args.path}`, {
+      params: { query: args.query, locale: this.locale },
+      metric: 'banners-new',
     })
   }
 }

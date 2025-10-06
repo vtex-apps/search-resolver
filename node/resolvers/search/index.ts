@@ -793,11 +793,11 @@ export const queries = {
   ) => {
     const { intelligentSearchApi } = ctx.clients
 
-    return intelligentSearchApi.banners(
+    return intelligentSearchApi.fetchBanners(
       {
         query: args.fullText,
+        path: buildAttributePath(args.selectedFacets)
       },
-      buildAttributePath(args.selectedFacets)
     )
   },
   correction: (_: any, args: { fullText: string }, ctx: Context) => {

@@ -4,6 +4,7 @@ import type {
   TopSearchesResponse,
   SearchSuggestionsResponse,
   CorrectionResponse,
+  FetchBannersResponse,
 } from '../clients/intsch/types'
 
 export class MockedIntschClient implements IIntelligentSearchClient {
@@ -37,12 +38,19 @@ export class MockedIntschClient implements IIntelligentSearchClient {
     } else {
       this.fetchCorrection.mockResolvedValue(args?.fetchCorrection ?? null)
     }
+
+    if (args?.fetchBanners instanceof Error) {
+      this.fetchBanners.mockRejectedValue(args.fetchBanners)
+    } else {
+      this.fetchBanners.mockResolvedValue(args?.fetchBanners ?? null)
+    }
   }
 
   public fetchAutocompleteSuggestions = jest.fn()
   public fetchTopSearches = jest.fn()
   public fetchSearchSuggestions = jest.fn()
   public fetchCorrection = jest.fn()
+  public fetchBanners = jest.fn()
 }
 
 export type IntelligentSearchClientArgs = {
@@ -50,4 +58,5 @@ export type IntelligentSearchClientArgs = {
   fetchTopSearches?: TopSearchesResponse | Error
   fetchSearchSuggestions?: SearchSuggestionsResponse | Error
   fetchCorrection?: CorrectionResponse | Error
+  fetchBanners?: FetchBannersResponse | Error
 }

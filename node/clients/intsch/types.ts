@@ -18,7 +18,7 @@ export type AutocompleteSuggestionsResponse = {
 }
 
 export type TopSearchesResponse = {
-  searches:  {
+  searches: {
     term: string
     count: number
   }[]
@@ -48,12 +48,29 @@ export type CorrectionResponse = {
   }
 }
 
+export type FetchBannersArgs = {
+  query: string
+  path: string
+}
+
+export type FetchBannersResponse = {
+  banners: {
+    id: string
+    name: string
+    area: string
+    html: string
+  }[]
+}
+
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface IIntelligentSearchClient {
   fetchAutocompleteSuggestions(
     args: AutocompleteSuggestionsArgs
   ): Promise<AutocompleteSuggestionsResponse>
   fetchTopSearches(): Promise<TopSearchesResponse>
-  fetchSearchSuggestions(args: SearchSuggestionsArgs): Promise<SearchSuggestionsResponse>
+  fetchSearchSuggestions(
+    args: SearchSuggestionsArgs
+  ): Promise<SearchSuggestionsResponse>
   fetchCorrection(args: CorrectionArgs): Promise<CorrectionResponse>
+  fetchBanners(args: FetchBannersArgs): Promise<FetchBannersResponse>
 }
