@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.84.0] - 2025-10-07
+
 ### Changed
 
 - Switch banners endpoint to use intsch as primary with intelligentSearchApi as fallback.
