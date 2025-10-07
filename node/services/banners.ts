@@ -1,5 +1,5 @@
-import { compareApiResults } from '../utils/compareResults'
-import { buildAttributePath } from '../commons/compatibility-layer';
+import { withFallback } from '../utils/with-fallback'
+import { buildAttributePath } from '../commons/compatibility-layer'
 
 export async function fetchBanners(
   ctx: Context,
@@ -12,15 +12,11 @@ export async function fetchBanners(
     path: buildAttributePath(args.selectedFacets),
   }
 
-  return compareApiResults(
+  return withFallback(
+    () => intsch.fetchBanners(argumentsToFetchBanners),
     () => intelligentSearchApi.fetchBanners(argumentsToFetchBanners),
-    () =>
-      intsch.fetchBanners(argumentsToFetchBanners),
-    ctx.vtex.production ? 10 : 100,
     ctx.vtex.logger,
-    {
-      logPrefix: 'Banners',
-      args: argumentsToFetchBanners,
-    }
+    'Banners',
+    argumentsToFetchBanners
   )
 }
