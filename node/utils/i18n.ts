@@ -6,22 +6,15 @@ import {
 import { logDegradedSearchError } from '../resolvers/search/utils'
 
 export const formatTranslatableProp = <R, P extends keyof R, I extends keyof R>(prop: P, idProp: I) =>
-  (root: R, _: unknown, ctx: Context) => addContextToTranslatableString(
-    {
+  (root: R, _: unknown, ctx: Context) => {
+    const message = {
       content: root[prop] as unknown as string,
       context: root[idProp] as unknown as string
-    },
-    ctx
-  )
-
-export const formatTranslatablePropWithTranslatedFlag = <R, P extends keyof R, I extends keyof R>(prop: P, idProp: I) =>
-  (root: R, _: unknown, ctx: Context) => addContextToTranslatableStringWithTranslatedFlag(
-    {
-      content: root[prop] as unknown as string,
-      context: root[idProp] as unknown as string
-    },
-    ctx
-  )
+    }
+    return ctx.translated === true
+      ? addContextToTranslatableString(message, ctx, true)
+      : addContextToTranslatableString(message, ctx)
+  }
 
 interface BaseMessage {
   content: string
@@ -71,8 +64,11 @@ export const addContextToTranslatableString = (message: Message, ctx: Context, i
   }
 }
 
-export const addContextToTranslatableStringWithTranslatedFlag = (message: Message, ctx: Context) => {
-  return addContextToTranslatableString(message, ctx, true)
+// Helper function to create translatable string with conditional flag
+export const createTranslatableString = (message: Message, ctx: Context) => {
+  return ctx.translated === true
+    ? addContextToTranslatableString(message, ctx, true)
+    : addContextToTranslatableString(message, ctx)
 }
 
 export const translateToCurrentLanguage = (message: MessageWithContext, ctx: Context) => {

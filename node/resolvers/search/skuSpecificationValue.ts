@@ -1,4 +1,4 @@
-import { addContextToTranslatableStringWithTranslatedFlag } from '../../utils/i18n'
+import { createTranslatableString } from '../../utils/i18n'
 
 // if it has `originalName`, the specification is already coming in the appropriate format and language
 export const resolvers = {
@@ -7,7 +7,7 @@ export const resolvers = {
       return  value.originalName ? value.originalName : value.name
     },
     name: (value: SKUSpecificationValue, _: any, ctx: Context) => {
-      return value.originalName ? value.name : addContextToTranslatableStringWithTranslatedFlag(
+      return value.originalName ? value.name : createTranslatableString(
         {
           content: value.name,
           context: value.fieldId

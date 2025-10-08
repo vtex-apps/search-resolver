@@ -402,6 +402,9 @@ export const queries = {
   },
 
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
+    // Set flag to use translated flag for this query
+    ctx.translated = true
+
     const {
       clients: { search },
     } = ctx
@@ -657,6 +660,9 @@ export const queries = {
     { identifier, type, groupBy }: ProductRecommendationArg,
     ctx: Context
   ) => {
+    // Set flag to use translated flag for this query
+    ctx.translated = true
+
     if (identifier == null || type == null) {
       throw new UserInputError('Wrong input provided')
     }

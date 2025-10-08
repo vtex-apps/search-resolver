@@ -1,8 +1,8 @@
 import { compose, flatten, last, omit, pathOr, split } from 'ramda'
 
 import {
-  addContextToTranslatableStringWithTranslatedFlag,
-  formatTranslatablePropWithTranslatedFlag,
+  createTranslatableString,
+  formatTranslatableProp,
   shouldTranslateToBinding,
   shouldTranslateToUserLocale
 } from '../../utils/i18n'
@@ -148,14 +148,14 @@ const addTranslationParamsToSpecification = (filterIdFromNameMap: Record<string,
   const filterId = filterIdFromNameMap[name]
   return {
     originalName: name,
-    name: addContextToTranslatableStringWithTranslatedFlag({ content: name, context: filterId }, ctx),
-    values: values.map(value => addContextToTranslatableStringWithTranslatedFlag({ content: value, context: filterId }, ctx))
+    name: createTranslatableString({ content: name, context: filterId }, ctx),
+    values: values.map(value => createTranslatableString({ content: value, context: filterId }, ctx))
   }
 }
 
 export const resolvers = {
   Product: {
-    brand: formatTranslatablePropWithTranslatedFlag<SearchProduct, 'brand', 'brandId'>(
+    brand: formatTranslatableProp<SearchProduct, 'brand', 'brandId'>(
       'brand',
       'brandId'
     ),
@@ -240,18 +240,18 @@ export const resolvers = {
       return { product, groupBy }
     },
 
-    description: formatTranslatablePropWithTranslatedFlag<SearchProduct, 'description', 'productId'>(
+    description: formatTranslatableProp<SearchProduct, 'description', 'productId'>(
       'description',
       'productId'
     ),
 
-    metaTagDescription: formatTranslatablePropWithTranslatedFlag<SearchProduct, 'metaTagDescription', 'productId'>(
+    metaTagDescription: formatTranslatableProp<SearchProduct, 'metaTagDescription', 'productId'>(
       'metaTagDescription',
       'productId'
     ),
 
     titleTag: ({ productId, productTitle, productName }: SearchProduct, _: unknown, ctx: Context) =>
-      addContextToTranslatableStringWithTranslatedFlag(
+      createTranslatableString(
         {
           content: productTitle ?? productName ?? '',
           context: productId
@@ -259,7 +259,7 @@ export const resolvers = {
         ctx
       ),
 
-    productName: formatTranslatablePropWithTranslatedFlag<SearchProduct, 'productName', 'productId'>(
+    productName: formatTranslatableProp<SearchProduct, 'productName', 'productId'>(
       'productName',
       'productId'
     ),
@@ -335,7 +335,7 @@ export const resolvers = {
       const translatedGroups = noTranslationSpecificationGroups.map(group => {
         return {
           originalName: group.name,
-          name: addContextToTranslatableStringWithTranslatedFlag({ content: group.name, context: product.productId }, ctx),
+          name: createTranslatableString({ content: group.name, context: product.productId }, ctx),
           specifications: group.specifications.map(addTranslationParamsToSpecification(filterIdFromNameMap, ctx))
         }
       })
