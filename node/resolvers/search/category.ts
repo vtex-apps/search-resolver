@@ -1,9 +1,9 @@
 import { compose, last, prop, split } from 'ramda'
 
-import { getCategoryInfo, logDegradedSearchError } from './utils'
-import { formatTranslatableProp, shouldTranslateToBinding } from '../../utils/i18n'
+import { formatTranslatablePropWithTranslatedFlag, shouldTranslateToBinding } from '../../utils/i18n'
 import { Slugify } from '../../utils/slug'
 import { APP_NAME } from './constants'
+import { getCategoryInfo, logDegradedSearchError } from './utils'
 
 const lastSegment = compose<string, string[], string>(
   last,
@@ -22,7 +22,7 @@ type SafeCategory = CategoryByIdResponse | CategoryTreeResponse
 
 export const resolvers = {
   Category: {
-    name: formatTranslatableProp<SafeCategory, 'name', 'id'>(
+    name: formatTranslatablePropWithTranslatedFlag<SafeCategory, 'name', 'id'>(
       'name',
       'id'
     ),
@@ -51,12 +51,12 @@ export const resolvers = {
       return settings.slugifyLinks ? Slugify(pathname) : pathname
     },
 
-    metaTagDescription: formatTranslatableProp<SafeCategory, 'MetaTagDescription', 'id'>(
+    metaTagDescription: formatTranslatablePropWithTranslatedFlag<SafeCategory, 'MetaTagDescription', 'id'>(
       'MetaTagDescription',
       'id'
     ),
 
-    titleTag: formatTranslatableProp<SafeCategory, 'Title', 'id'>(
+    titleTag: formatTranslatablePropWithTranslatedFlag<SafeCategory, 'Title', 'id'>(
       'Title',
       'id'
     ),

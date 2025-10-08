@@ -6,8 +6,8 @@ import { Clients } from './clients'
 import { schemaDirectives } from './directives'
 import { resolvers } from './resolvers'
 import {
-  setWorkspaceSearchParams,
   getWorkspaceSearchParams,
+  setWorkspaceSearchParams,
 } from './routes/workspaceSearchParams'
 
 const TWO_SECONDS_MS = 2 * 1000
@@ -80,6 +80,7 @@ export default new Service<Clients, RecorderState, CustomContext>({
   graphql: {
     resolvers,
     schema,
+    // @ts-expect-error
     schemaDirectives,
   },
   routes: {

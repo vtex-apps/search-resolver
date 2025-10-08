@@ -6,6 +6,12 @@ import {
   convertOrderBy,
 } from '../../commons/compatibility-layer'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
+import {
+  fetchAutocompleteSuggestions,
+  fetchCorrection,
+  fetchSearchSuggestions,
+  fetchTopSearches,
+} from '../../services/autocomplete'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import { resolvers as assemblyOptionResolvers } from './assemblyOption'
 import { resolvers as autocompleteResolvers } from './autocomplete'
@@ -33,12 +39,6 @@ import {
   getShippingOptionsFromSelectedFacets,
   validMapAndQuery,
 } from './utils'
-import { 
-  fetchAutocompleteSuggestions,
-  fetchTopSearches,
-  fetchSearchSuggestions,
-  fetchCorrection,
-} from '../../services/autocomplete'
 interface ProductIndentifier {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
   value: string

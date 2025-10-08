@@ -1,12 +1,21 @@
 import {
+  createMessagesLoader,
   formatTranslatableStringV2,
   parseTranslatableStringV2,
-  createMessagesLoader,
 } from '@vtex/api'
 import { logDegradedSearchError } from '../resolvers/search/utils'
 
 export const formatTranslatableProp = <R, P extends keyof R, I extends keyof R>(prop: P, idProp: I) =>
   (root: R, _: unknown, ctx: Context) => addContextToTranslatableString(
+    {
+      content: root[prop] as unknown as string,
+      context: root[idProp] as unknown as string
+    },
+    ctx
+  )
+
+export const formatTranslatablePropWithTranslatedFlag = <R, P extends keyof R, I extends keyof R>(prop: P, idProp: I) =>
+  (root: R, _: unknown, ctx: Context) => addContextToTranslatableStringWithTranslatedFlag(
     {
       content: root[prop] as unknown as string,
       context: root[idProp] as unknown as string
@@ -27,7 +36,7 @@ export interface Message extends BaseMessage {
   context?: string
 }
 
-export const addContextToTranslatableString = (message: Message, ctx: Context) => {
+export const addContextToTranslatableString = (message: Message, ctx: Context, includeState: boolean = false) => {
   const { vtex: { tenant } } = ctx
   const { locale } = tenant!
 
@@ -45,7 +54,13 @@ export const addContextToTranslatableString = (message: Message, ctx: Context) =
 
     const context = (originalContext || message.context)?.toString()
     const from = originalFrom || message.from || locale
-    return formatTranslatableStringV2({ content, context, from })
+    const formatParams: any = { content, context, from }
+
+    if (includeState) {
+      formatParams.state = 'translated'
+    }
+
+    return formatTranslatableStringV2(formatParams)
   } catch (e) {
     logDegradedSearchError(ctx.vtex.logger, {
       service: 'node-vtex-api translation',
@@ -54,6 +69,10 @@ export const addContextToTranslatableString = (message: Message, ctx: Context) =
     })
     return message.content
   }
+}
+
+export const addContextToTranslatableStringWithTranslatedFlag = (message: Message, ctx: Context) => {
+  return addContextToTranslatableString(message, ctx, true)
 }
 
 export const translateToCurrentLanguage = (message: MessageWithContext, ctx: Context) => {

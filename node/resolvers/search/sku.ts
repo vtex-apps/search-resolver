@@ -1,14 +1,14 @@
 import { find, head, map, replace, slice } from 'ramda'
-import { formatTranslatableProp, addContextToTranslatableString } from '../../utils/i18n'
+import { addContextToTranslatableStringWithTranslatedFlag, formatTranslatablePropWithTranslatedFlag } from '../../utils/i18n'
 
 export const resolvers = {
   SKU: {
-    name: formatTranslatableProp<SearchItem, 'name', 'itemId'>(
+    name: formatTranslatablePropWithTranslatedFlag<SearchItem, 'name', 'itemId'>(
       'name',
       'itemId'
     ),
 
-    nameComplete: formatTranslatableProp<SearchItem, 'nameComplete', 'itemId'>(
+    nameComplete: formatTranslatablePropWithTranslatedFlag<SearchItem, 'nameComplete', 'itemId'>(
       'nameComplete',
       'itemId'
     ),
@@ -58,8 +58,8 @@ export const resolvers = {
         const fieldId = (sku.skuSpecifications || []).find(specification => specification.field.name === variationName)?.field?.id
         const variationsValues = (sku as any)[variationName] as string[]
         return {
-          name: addContextToTranslatableString({ content: variationName, context: fieldId }, ctx),
-          values: variationsValues.map(value => addContextToTranslatableString({ content: value, context: fieldId }, ctx))
+          name: addContextToTranslatableStringWithTranslatedFlag({ content: variationName, context: fieldId }, ctx),
+          values: variationsValues.map(value => addContextToTranslatableStringWithTranslatedFlag({ content: value, context: fieldId }, ctx))
         }
       })
       return variations
