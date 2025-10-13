@@ -14,7 +14,21 @@ describe('fetchProduct service', () => {
 
   it('should build vtex segment correctly', () => {
     const vtexSegment = buildVtexSegment({
-      vtexSegment: { regionId: '1', countryCode: 'US' } as any,
+      vtexSegment: {
+        campaigns: null,
+        channel: '1',
+        priceTables: null,
+        regionId: 'U1cjMQ==',
+        utm_campaign: null,
+        utm_source: null,
+        utmi_campaign: null,
+        currencyCode: 'ARS',
+        currencySymbol: '$',
+        countryCode: 'ARG',
+        cultureInfo: 'es-AR',
+        admin_cultureInfo: 'es-AR',
+        channelPrivacy: 'public',
+      },
       salesChannel: '2',
       regionId: '3',
     })
@@ -22,8 +36,18 @@ describe('fetchProduct service', () => {
     const result = JSON.parse(Buffer.from(vtexSegment, 'base64').toString())
 
     expect(result.regionId).toBe('3')
-    expect(result.countryCode).toBe('US')
+    expect(result.countryCode).toBe('ARG')
+    expect(result.currencySymbol).toBe('$')
+    expect(result.currencyCode).toBe('ARS')
     expect(result.channel).toBe('2')
+    expect(result.cultureInfo).toBe('es-AR')
+    expect(result.admin_cultureInfo).toBe('es-AR')
+    expect(result.channelPrivacy).toBe('public')
+    expect(result.campaigns).toBeNull()
+    expect(result.priceTables).toBeNull()
+    expect(result.utm_campaign).toBeNull()
+    expect(result.utm_source).toBeNull()
+    expect(result.utmi_campaign).toBeNull()
   })
 
   it('should use intsch directly for b2bstoreqa account', async () => {

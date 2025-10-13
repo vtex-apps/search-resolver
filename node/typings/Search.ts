@@ -2,10 +2,10 @@ interface SegmentData {
   campaigns?: any
   channel: string
   priceTables?: any
-  utm_campaign: string
+  utm_campaign: string | null
   regionId?: string
-  utm_source: string
-  utmi_campaign: string
+  utm_source: string | null
+  utmi_campaign: string | null
   currencyCode: string
   currencySymbol: string
   countryCode: string
@@ -18,10 +18,7 @@ interface ElasticImage {
   value: string
 }
 
-enum IndexingType {
-  API = 'API',
-  XML = 'XML',
-}
+export type IndexingType = 'API' | 'XML'
 
 interface SearchResultArgs extends AdvertisementOptions {
   attributePath?: string

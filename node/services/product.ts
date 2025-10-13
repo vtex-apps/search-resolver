@@ -127,15 +127,9 @@ export function buildVtexSegment({
   regionId?: string
 }): string {
   const cookie = {
+    ...vtexSegment,
     regionId: regionId ?? vtexSegment?.regionId,
     channel: salesChannel ?? vtexSegment?.channel,
-    utm_campaign: vtexSegment?.utm_campaign ?? null,
-    utm_source: vtexSegment?.utm_source ?? null,
-    utmi_campaign: vtexSegment?.utmi_campaign ?? null,
-    currencyCode: vtexSegment?.currencyCode ?? null,
-    currencySymbol: vtexSegment?.currencySymbol ?? null,
-    countryCode: vtexSegment?.countryCode ?? null,
-    cultureInfo: vtexSegment?.cultureInfo ?? null,
   }
 
   return Buffer.from(JSON.stringify(cookie)).toString('base64')
