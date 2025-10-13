@@ -6,7 +6,7 @@ describe('fetchProduct service', () => {
     productId: 'test-product',
     productName: 'Test Product',
     brand: 'Test Brand',
-  }
+  } as SearchProduct
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -31,7 +31,7 @@ describe('fetchProduct service', () => {
       salesChannel: 1,
     }
 
-    const result = await fetchProduct(ctx as any, args)
+    const result = await fetchProduct(ctx, args)
 
     expect(ctx.clients.intsch.fetchProduct).toHaveBeenCalled()
     expect(result).toEqual([mockProduct])
@@ -56,7 +56,7 @@ describe('fetchProduct service', () => {
       salesChannel: 1,
     }
 
-    const result = await fetchProduct(ctx as any, args)
+    const result = await fetchProduct(ctx, args)
 
     expect(ctx.clients.intsch.fetchProduct).toHaveBeenCalled()
     expect(result).toEqual([mockProduct])
