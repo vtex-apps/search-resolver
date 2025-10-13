@@ -1,4 +1,5 @@
 import { fetchAppSettings } from './settings'
+import type { SegmentData } from '../typings/Search'
 
 export type ProductIdentifier = {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
