@@ -15,11 +15,17 @@ describe('fetchProduct service', () => {
   it('should use intsch directly for b2bstoreqa account', async () => {
     const ctx = createContext({
       accountName: 'b2bstoreqa',
+      appSettings: {
+        shouldUseNewPDPEndpoint: true,
+      },
     })
 
     // Mock the intsch client to return a product
-    ctx.clients.intsch.fetchProduct = jest.fn().mockResolvedValue(mockProduct)
-    
+    jest
+      .spyOn(ctx.clients.intsch, 'fetchProduct')
+      .mockImplementation()
+      .mockResolvedValue(mockProduct)
+
     const args = {
       identifier: { field: 'id' as const, value: 'test-id' },
       salesChannel: 1,
@@ -34,11 +40,17 @@ describe('fetchProduct service', () => {
   it('should use intsch directly for biggy account', async () => {
     const ctx = createContext({
       accountName: 'biggy',
+      appSettings: {
+        shouldUseNewPDPEndpoint: true,
+      },
     })
 
     // Mock the intsch client to return a product
-    ctx.clients.intsch.fetchProduct = jest.fn().mockResolvedValue(mockProduct)
-    
+    jest
+      .spyOn(ctx.clients.intsch, 'fetchProduct')
+      .mockImplementation()
+      .mockResolvedValue(mockProduct)
+
     const args = {
       identifier: { field: 'id' as const, value: 'test-id' },
       salesChannel: 1,

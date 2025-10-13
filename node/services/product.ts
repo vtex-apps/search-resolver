@@ -1,3 +1,5 @@
+import { fetchAppSettings } from './settings'
+
 export type ProductIdentifier = {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
   value: string
@@ -139,20 +141,14 @@ export function buildVtexSegment({
   return Buffer.from(JSON.stringify(cookie), 'base64').toString()
 }
 
-/**
- * Main product fetching function with compareApiResults implementation
- * Uses search client as primary and intsch.fetchProduct as secondary
- * For specific accounts, skips comparison and uses intsch directly
- */
 export async function fetchProduct(
   ctx: Context,
   args: FetchProductArgs
 ): Promise<SearchProduct[]> {
-  // List of accounts that should use intsch directly without comparison
-  const INTSCH_ONLY_ACCOUNTS = ['b2bstoreqa', 'biggy', 'diegob2b']
+  const { shouldUseNewPDPEndpoint } = await fetchAppSettings(ctx)
 
   // Check if current account should skip comparison and use intsch directly
-  if (INTSCH_ONLY_ACCOUNTS.includes(ctx.vtex.account)) {
+  if (shouldUseNewPDPEndpoint) {
     return fetchProductFromIntsch(ctx, args)
   }
 
