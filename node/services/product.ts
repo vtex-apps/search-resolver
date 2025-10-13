@@ -1,5 +1,3 @@
-import { compareApiResults } from '../utils/compareResults'
-
 export type ProductIdentifier = {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
   value: string
@@ -138,7 +136,7 @@ export function buildVtexSegment({
     cultureInfo: vtexSegment?.cultureInfo || '',
   }
 
-  return btoa(JSON.stringify(cookie))
+  return Buffer.from(JSON.stringify(cookie), 'base64').toString()
 }
 
 /**
@@ -150,8 +148,6 @@ export async function fetchProduct(
   ctx: Context,
   args: FetchProductArgs
 ): Promise<SearchProduct[]> {
-  const COMPARISON_SAMPLE_RATE = ctx.vtex.production ? 1 : 100 // 1% of requests will be compared in prod and 100% in dev
-
   // List of accounts that should use intsch directly without comparison
   const INTSCH_ONLY_ACCOUNTS = ['b2bstoreqa', 'biggy', 'diegob2b']
 
@@ -160,20 +156,7 @@ export async function fetchProduct(
     return fetchProductFromIntsch(ctx, args)
   }
 
-  return compareApiResults(
-    () => fetchProductFromSearch(ctx, args),
-    () => fetchProductFromIntsch(ctx, args),
-    COMPARISON_SAMPLE_RATE,
-    ctx.vtex.logger,
-    {
-      logPrefix: 'Product Details',
-      args: {
-        identifier: args.identifier,
-        salesChannel: args.salesChannel,
-        regionId: args.regionId,
-      },
-    }
-  )
+  return fetchProductFromSearch(ctx, args)
 }
 
 /**
@@ -183,8 +166,7 @@ export function isValidProductIdentifier(
   identifier: ProductIdentifier | undefined
 ): identifier is ProductIdentifier {
   return (
-    identifier !== undefined &&
-    identifier.field !== undefined &&
+    identifier?.field !== undefined &&
     identifier.value !== undefined &&
     ['id', 'slug', 'ean', 'reference', 'sku'].includes(identifier.field)
   )

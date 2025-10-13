@@ -1,11 +1,6 @@
 import { fetchProduct } from './product'
 import { createContext } from '../mocks/contextFactory'
 
-// Mock the compareApiResults function
-jest.mock('../utils/compareResults', () => ({
-  compareApiResults: jest.fn().mockImplementation((func1) => func1())
-}))
-
 describe('fetchProduct service', () => {
   const mockProduct = {
     productId: 'test-product',
@@ -53,26 +48,5 @@ describe('fetchProduct service', () => {
 
     expect(ctx.clients.intsch.fetchProduct).toHaveBeenCalled()
     expect(result).toEqual([mockProduct])
-  })
-
-  it('should use compareApiResults for other accounts', async () => {
-    const { compareApiResults } = require('../utils/compareResults')
-    const ctx = createContext({
-      accountName: 'regularaccount',
-    })
-
-    // Mock the search client by casting to any
-    ;(ctx.clients as any).search = {
-      productById: jest.fn().mockResolvedValue([mockProduct])
-    }
-    
-    const args = {
-      identifier: { field: 'id' as const, value: 'test-id' },
-      salesChannel: 1,
-    }
-
-    await fetchProduct(ctx as any, args)
-
-    expect(compareApiResults).toHaveBeenCalled()
   })
 })
