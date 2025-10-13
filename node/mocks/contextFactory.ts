@@ -12,6 +12,7 @@ export function createContext<Ctx = Context>({
   req,
   query,
   production,
+  appSettings,
 }: {
   production?: boolean
   appSettings?: Record<string, any>
@@ -47,7 +48,7 @@ export function createContext<Ctx = Context>({
         intelligentSearchApiSettings
       ),
       apps: {
-        getAppSettings: jest.fn().mockReturnValue({}),
+        getAppSettings: jest.fn().mockReturnValue(appSettings ?? {}),
       },
     },
     vtex: {

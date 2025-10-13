@@ -62,6 +62,15 @@ export type FetchBannersResponse = {
   }[]
 }
 
+export type FetchProductArgs = {
+  field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
+  value: string
+  salesChannel?: string
+  regionId?: string
+  locale?:string
+}
+
+export type FetchProductResponse = SearchProduct
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface IIntelligentSearchClient {
   fetchAutocompleteSuggestions(
@@ -73,4 +82,5 @@ export interface IIntelligentSearchClient {
   ): Promise<SearchSuggestionsResponse>
   fetchCorrection(args: CorrectionArgs): Promise<CorrectionResponse>
   fetchBanners(args: FetchBannersArgs): Promise<FetchBannersResponse>
+  fetchProduct(args: FetchProductArgs): Promise<FetchProductResponse>
 }

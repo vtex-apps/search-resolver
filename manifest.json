@@ -25,6 +25,11 @@
         "title": "Set to slugify links. Uses default catalog slug instead",
         "type": "boolean",
         "default": false
+      },
+      "shouldUseNewPDPEndpoint": {
+        "title": "Feature flag to use the new PDP endpoint",
+        "type": "boolean",
+        "default": false
       }
     }
   },

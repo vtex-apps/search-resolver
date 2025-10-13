@@ -2,7 +2,7 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
 import { parseState } from '../utils/searchState'
-import type { FetchBannersArgs, IIntelligentSearchClient } from './intsch/types'
+import type { FetchBannersArgs, IIntelligentSearchClient, FetchProductArgs, FetchProductResponse  } from './intsch/types'
 
 const isPathTraversal = (str: string) => str.indexOf('..') >= 0
 
@@ -66,6 +66,10 @@ export class IntelligentSearchApi
     const { locale, tenant } = context
 
     this.locale = locale ?? tenant?.locale
+  }
+
+  fetchProduct(_: FetchProductArgs): Promise<FetchProductResponse> {
+    throw new Error('Method not implemented.')
   }
 
   public async fetchTopSearches() {
