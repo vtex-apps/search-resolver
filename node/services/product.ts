@@ -128,17 +128,17 @@ export function buildVtexSegment({
 }): string {
   const cookie = {
     regionId: regionId ?? vtexSegment?.regionId,
-    channel: salesChannel || vtexSegment?.channel,
-    utm_campaign: vtexSegment?.utm_campaign || '',
-    utm_source: vtexSegment?.utm_source || '',
-    utmi_campaign: vtexSegment?.utmi_campaign || '',
-    currencyCode: vtexSegment?.currencyCode || '',
-    currencySymbol: vtexSegment?.currencySymbol || '',
-    countryCode: vtexSegment?.countryCode || '',
-    cultureInfo: vtexSegment?.cultureInfo || '',
+    channel: salesChannel ?? vtexSegment?.channel,
+    utm_campaign: vtexSegment?.utm_campaign ?? null,
+    utm_source: vtexSegment?.utm_source ?? null,
+    utmi_campaign: vtexSegment?.utmi_campaign ?? null,
+    currencyCode: vtexSegment?.currencyCode ?? null,
+    currencySymbol: vtexSegment?.currencySymbol ?? null,
+    countryCode: vtexSegment?.countryCode ?? null,
+    cultureInfo: vtexSegment?.cultureInfo ?? null,
   }
 
-  return Buffer.from(JSON.stringify(cookie), 'base64').toString()
+  return Buffer.from(JSON.stringify(cookie)).toString('base64')
 }
 
 export async function fetchProduct(
