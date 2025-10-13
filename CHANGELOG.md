@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.85.0] - 2025-10-13
+
 ### Changed
 
 - Using a feature flag to route the PDP traffic to some specific accounts.
