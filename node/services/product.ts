@@ -151,8 +151,8 @@ export async function fetchProduct(
   const COMPARISON_SAMPLE_RATE = ctx.vtex.production ? 1 : 100 // 1% of requests will be compared in prod and 100% in dev
 
   // List of accounts that should use intsch directly without comparison
-  const INTSCH_ONLY_ACCOUNTS = ['b2bstoreqa', 'biggy', 'diegob2b', 'intelbras']
-  
+  const INTSCH_ONLY_ACCOUNTS = ['b2bstoreqa', 'biggy', 'diegob2b']
+
   // Check if current account should skip comparison and use intsch directly
   if (INTSCH_ONLY_ACCOUNTS.includes(ctx.vtex.account)) {
     return fetchProductFromIntsch(ctx, args)
