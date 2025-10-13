@@ -77,7 +77,9 @@ async function fetchProductFromIntsch(
   // Parse vtexSegment if available to extract locale and salesChannel
   if (vtexSegment) {
     try {
-      const segmentData: SegmentData = JSON.parse(atob(vtexSegment))
+      const segmentData: SegmentData = JSON.parse(
+        Buffer.from(vtexSegment, 'base64').toString()
+      )
 
       // Use segment's salesChannel if available, otherwise use the provided one
       if (segmentData.channel) {
