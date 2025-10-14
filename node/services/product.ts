@@ -1,4 +1,5 @@
 import { fetchAppSettings } from './settings'
+import type { SegmentData } from '../typings/Search'
 
 export type ProductIdentifier = {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -127,18 +128,12 @@ export function buildVtexSegment({
   regionId?: string
 }): string {
   const cookie = {
+    ...vtexSegment,
     regionId: regionId ?? vtexSegment?.regionId,
-    channel: salesChannel || vtexSegment?.channel,
-    utm_campaign: vtexSegment?.utm_campaign || '',
-    utm_source: vtexSegment?.utm_source || '',
-    utmi_campaign: vtexSegment?.utmi_campaign || '',
-    currencyCode: vtexSegment?.currencyCode || '',
-    currencySymbol: vtexSegment?.currencySymbol || '',
-    countryCode: vtexSegment?.countryCode || '',
-    cultureInfo: vtexSegment?.cultureInfo || '',
+    channel: salesChannel ?? vtexSegment?.channel,
   }
 
-  return Buffer.from(JSON.stringify(cookie), 'base64').toString()
+  return Buffer.from(JSON.stringify(cookie)).toString('base64')
 }
 
 export async function fetchProduct(

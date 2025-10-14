@@ -3,6 +3,7 @@ import { ExternalClient } from '@vtex/api'
 
 import { parseState } from '../utils/searchState'
 import type { FetchBannersArgs, IIntelligentSearchClient, FetchProductArgs, FetchProductResponse  } from './intsch/types'
+import { Options, SearchResultArgs } from '../typings/Search'
 
 const isPathTraversal = (str: string) => str.indexOf('..') >= 0
 

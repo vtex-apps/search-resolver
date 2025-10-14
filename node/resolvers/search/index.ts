@@ -46,6 +46,7 @@ import {
   fetchCorrection,
 } from '../../services/autocomplete'
 import { fetchBanners } from '../../services/banners'
+import { AdvertisementOptions, FacetsInput, ProductSearchInput, ProductsInput, SegmentData, SuggestionProductsArgs } from '../../typings/Search'
 
 enum CrossSellingInput {
   view = 'view',
