@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `state` parameter to `formatTranslatableStringV2` indicating if the label is already translated
+
 ## [1.88.7] - 2025-12-03
 
 ### Fixed
