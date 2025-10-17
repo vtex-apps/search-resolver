@@ -30,6 +30,11 @@
         "title": "Feature flag to use the new PDP endpoint",
         "type": "boolean",
         "default": false
+      },
+      "shouldUseNewPLPEndpoint": {
+        "title": "Feature flag to use the new PLP endpoint",
+        "type": "boolean",
+        "default": false
       }
     }
   },
