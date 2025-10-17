@@ -103,6 +103,113 @@ describe('fetchAutocompleteSuggestions', () => {
       locale: undefined,
     })
   })
+
+  it('should use locale from segment cultureInfo when available', async () => {
+    const fallbackResult = {
+      searches: [{ term: 'test-result', count: 1 }],
+    }
+
+    const ctx = createContext({
+      intelligentSearchApiSettings: {
+        fetchAutocompleteSuggestions: new Error(
+          'IntelligentSearchApi unavailable'
+        ),
+      },
+      intschSettings: {
+        fetchAutocompleteSuggestionsV1: fallbackResult,
+      },
+      segment: {
+        campaigns: null,
+        channel: '1',
+        priceTables: null,
+        utm_campaign: null,
+        utm_source: null,
+        utmi_campaign: null,
+        currencyCode: 'BRL',
+        currencySymbol: 'R$',
+        countryCode: 'BRA',
+        cultureInfo: 'pt-BR',
+      },
+      tenantLocale: 'en-US',
+      vtexLocale: 'es-ES',
+    })
+
+    await fetchAutocompleteSuggestions(ctx, 'test')
+
+    expect(
+      ctx.clients.intsch.fetchAutocompleteSuggestionsV1
+    ).toHaveBeenCalledWith({
+      query: 'test',
+      locale: 'pt-BR',
+    })
+  })
+
+  it('should fallback to tenant locale when segment cultureInfo is not available', async () => {
+    const fallbackResult = {
+      searches: [{ term: 'test-result', count: 1 }],
+    }
+
+    const ctx = createContext({
+      intelligentSearchApiSettings: {
+        fetchAutocompleteSuggestions: new Error(
+          'IntelligentSearchApi unavailable'
+        ),
+      },
+      intschSettings: {
+        fetchAutocompleteSuggestionsV1: fallbackResult,
+      },
+      segment: {
+        campaigns: null,
+        channel: '1',
+        priceTables: null,
+        utm_campaign: null,
+        utm_source: null,
+        utmi_campaign: null,
+        currencyCode: 'USD',
+        currencySymbol: '$',
+        countryCode: 'USA',
+        cultureInfo: '',
+      },
+      tenantLocale: 'en-US',
+      vtexLocale: 'es-ES',
+    })
+
+    await fetchAutocompleteSuggestions(ctx, 'test')
+
+    expect(
+      ctx.clients.intsch.fetchAutocompleteSuggestionsV1
+    ).toHaveBeenCalledWith({
+      query: 'test',
+      locale: 'en-US',
+    })
+  })
+
+  it('should fallback to vtex locale when both segment cultureInfo and tenant locale are not available', async () => {
+    const fallbackResult = {
+      searches: [{ term: 'test-result', count: 1 }],
+    }
+
+    const ctx = createContext({
+      intelligentSearchApiSettings: {
+        fetchAutocompleteSuggestions: new Error(
+          'IntelligentSearchApi unavailable'
+        ),
+      },
+      intschSettings: {
+        fetchAutocompleteSuggestionsV1: fallbackResult,
+      },
+      vtexLocale: 'es-ES',
+    })
+
+    await fetchAutocompleteSuggestions(ctx, 'test')
+
+    expect(
+      ctx.clients.intsch.fetchAutocompleteSuggestionsV1
+    ).toHaveBeenCalledWith({
+      query: 'test',
+      locale: 'es-ES',
+    })
+  })
 })
 
 describe('fetchTopSearches', () => {
