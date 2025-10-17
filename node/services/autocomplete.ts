@@ -1,53 +1,85 @@
+import { compareApiResults } from '../utils/compareResults'
 
-import { withFallback } from '../utils/with-fallback'
-
-export function fetchAutocompleteSuggestions(
-  ctx: Context,
-  query: string
-) {
+export function fetchAutocompleteSuggestions(ctx: Context, query: string) {
   const { intelligentSearchApi, intsch } = ctx.clients
 
-  return withFallback(
-    () => intsch.fetchAutocompleteSuggestions({ query }),
-    () => intelligentSearchApi.fetchAutocompleteSuggestions({ query }),
+  const args = { query }
+
+  const locale = (ctx.vtex.segment?.cultureInfo ||
+    ctx.vtex.tenant?.locale ||
+    ctx.vtex.locale) as string
+
+  return compareApiResults(
+    () => intelligentSearchApi.fetchAutocompleteSuggestions(args),
+    () => intsch.fetchAutocompleteSuggestionsV1({ ...args, locale }),
+    ctx.vtex.production ? 10 : 100,
     ctx.vtex.logger,
-    'Autocomplete Suggestions',
-    { query }
+    {
+      logPrefix: 'Autocomplete Suggestions',
+      args: { ...args, locale },
+    }
   )
 }
 
 export function fetchTopSearches(ctx: Context) {
   const { intelligentSearchApi, intsch } = ctx.clients
 
-  return withFallback(
-    () => intsch.fetchTopSearches(),
+  const locale = (ctx.vtex.segment?.cultureInfo ||
+    ctx.vtex.tenant?.locale ||
+    ctx.vtex.locale) as string
+
+  return compareApiResults(
     () => intelligentSearchApi.fetchTopSearches(),
+    () => intsch.fetchTopSearchesV1(locale),
+    ctx.vtex.production ? 10 : 100,
     ctx.vtex.logger,
-    'Top Searches',
-    {}
+    {
+      logPrefix: 'Top Searches',
+      args: {
+        locale,
+      },
+    }
   )
 }
 
 export function fetchSearchSuggestions(ctx: Context, query: string) {
   const { intelligentSearchApi, intsch } = ctx.clients
 
-  return withFallback(
-    () => intsch.fetchSearchSuggestions({ query }),
-    () => intelligentSearchApi.fetchSearchSuggestions({ query }),
+  const args = { query }
+
+  const locale = (ctx.vtex.segment?.cultureInfo ||
+    ctx.vtex.tenant?.locale ||
+    ctx.vtex.locale) as string
+
+  return compareApiResults(
+    () => intelligentSearchApi.fetchSearchSuggestions(args),
+    () => intsch.fetchSearchSuggestionsV1({ ...args, locale }),
+    ctx.vtex.production ? 10 : 100,
     ctx.vtex.logger,
-    'Search Suggestions',
-    { query }
+    {
+      logPrefix: 'Search Suggestions',
+      args: { ...args, locale },
+    }
   )
 }
 
 export function fetchCorrection(ctx: Context, query: string) {
   const { intelligentSearchApi, intsch } = ctx.clients
 
-  return withFallback(
-    () => intsch.fetchCorrection({ query }),
-    () => intelligentSearchApi.fetchCorrection({ query }),
+  const args = { query }
+
+  const locale = (ctx.vtex.segment?.cultureInfo ||
+    ctx.vtex.tenant?.locale ||
+    ctx.vtex.locale) as string
+
+  return compareApiResults(
+    () => intelligentSearchApi.fetchCorrection(args),
+    () => intsch.fetchCorrectionV1({ ...args, locale }),
+    ctx.vtex.production ? 10 : 100,
     ctx.vtex.logger,
-    'Correction',
-    { query }
+    {
+      logPrefix: 'Correction',
+      args: { ...args, locale },
+    }
   )
 }

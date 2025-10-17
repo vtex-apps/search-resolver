@@ -2,6 +2,11 @@ export type AutocompleteSuggestionsArgs = {
   query: string
 }
 
+export type AutocompleteSuggestionsArgsV1 = {
+  locale: string
+  query: string
+}
+
 export type AutocompleteSuggestionsResponse = {
   searches: Array<{
     term: string
@@ -26,6 +31,11 @@ export type SearchSuggestionsArgs = {
   query: string
 }
 
+export type SearchSuggestionsArgsV1 = {
+  query: string
+  locale: string
+}
+
 export type SearchSuggestionsResponse = {
   searches: Array<{
     term: string
@@ -35,6 +45,11 @@ export type SearchSuggestionsResponse = {
 
 export type CorrectionArgs = {
   query: string
+}
+
+export type CorrectionArgsV1 = {
+  query: string
+  locale: string
 }
 
 export type CorrectionResponse = {
@@ -47,6 +62,12 @@ export type CorrectionResponse = {
 }
 
 export type FetchBannersArgs = {
+  query: string
+  path: string
+}
+
+export type FetchBannersArgsV1 = {
+  locale: string
   query: string
   path: string
 }
@@ -82,12 +103,12 @@ export interface IIntelligentSearchClient {
   fetchBanners(args: FetchBannersArgs): Promise<FetchBannersResponse>
   fetchProduct(args: FetchProductArgs): Promise<FetchProductResponse>
   fetchAutocompleteSuggestionsV1(
-    args: AutocompleteSuggestionsArgs
+    args: AutocompleteSuggestionsArgsV1
   ): Promise<AutocompleteSuggestionsResponse>
-  fetchTopSearchesV1(): Promise<TopSearchesResponse>
+  fetchTopSearchesV1(locale: string): Promise<TopSearchesResponse>
   fetchSearchSuggestionsV1(
-    args: SearchSuggestionsArgs
+    args: SearchSuggestionsArgsV1
   ): Promise<SearchSuggestionsResponse>
-  fetchCorrectionV1(args: CorrectionArgs): Promise<CorrectionResponse>
-  fetchBannersV1(args: FetchBannersArgs): Promise<FetchBannersResponse>
+  fetchCorrectionV1(args: CorrectionArgsV1): Promise<CorrectionResponse>
+  fetchBannersV1(args: FetchBannersArgsV1): Promise<FetchBannersResponse>
 }

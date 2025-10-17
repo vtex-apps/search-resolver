@@ -3,15 +3,19 @@ import { JanusClient } from '@vtex/api'
 
 import type {
   AutocompleteSuggestionsArgs,
+  AutocompleteSuggestionsArgsV1,
   AutocompleteSuggestionsResponse,
   CorrectionArgs,
+  CorrectionArgsV1,
   CorrectionResponse,
   FetchBannersArgs,
+  FetchBannersArgsV1,
   FetchBannersResponse,
   FetchProductArgs,
   FetchProductResponse,
   IIntelligentSearchClient,
   SearchSuggestionsArgs,
+  SearchSuggestionsArgsV1,
   SearchSuggestionsResponse,
   TopSearchesResponse,
 } from './types'
@@ -85,43 +89,47 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
   }
 
   public fetchAutocompleteSuggestionsV1(
-    args: AutocompleteSuggestionsArgs
+    args: AutocompleteSuggestionsArgsV1
   ): Promise<AutocompleteSuggestionsResponse> {
     return this.http.get(
       '/api/intelligent-search/v1/autocomplete-suggestions',
       {
-        params: { query: args.query, locale: this.locale },
+        params: { query: args.query, locale: args.locale },
         metric: 'autocompleteSearchSuggestions-new-v1',
       }
     )
   }
 
-  public fetchTopSearchesV1(): Promise<TopSearchesResponse> {
+  public fetchTopSearchesV1(locale: string): Promise<TopSearchesResponse> {
     return this.http.get('/api/intelligent-search/v1/top-searches', {
-      params: { locale: this.locale },
+      params: { locale },
       metric: 'topSearches-new-v1',
     })
   }
 
   public fetchSearchSuggestionsV1(
-    args: SearchSuggestionsArgs
+    args: SearchSuggestionsArgsV1
   ): Promise<SearchSuggestionsResponse> {
     return this.http.get('/api/intelligent-search/v1/search-suggestions', {
-      params: { query: args.query, locale: this.locale },
+      params: { query: args.query, locale: args.locale },
       metric: 'searchSuggestions-new-v1',
     })
   }
 
-  public fetchCorrectionV1(args: CorrectionArgs): Promise<CorrectionResponse> {
+  public fetchCorrectionV1(
+    args: CorrectionArgsV1
+  ): Promise<CorrectionResponse> {
     return this.http.get('/api/intelligent-search/v1/correction-search', {
-      params: { query: args.query, locale: this.locale },
+      params: { query: args.query, locale: args.locale },
       metric: 'correction-new-v1',
     })
   }
 
-  public fetchBannersV1(args: FetchBannersArgs): Promise<FetchBannersResponse> {
+  public fetchBannersV1(
+    args: FetchBannersArgsV1
+  ): Promise<FetchBannersResponse> {
     return this.http.get(`/api/intelligent-search/v1/banners/${args.path}`, {
-      params: { query: args.query, locale: this.locale },
+      params: { query: args.query, locale: args.locale },
       metric: 'banners-new-v1',
     })
   }
