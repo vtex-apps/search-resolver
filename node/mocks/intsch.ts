@@ -45,10 +45,51 @@ export class MockedIntschClient implements IIntelligentSearchClient {
     } else {
       this.fetchBanners.mockResolvedValue(args?.fetchBanners ?? null)
     }
+
     if (args?.fetchProduct instanceof Error) {
       this.fetchProduct.mockRejectedValue(args.fetchProduct)
     } else {
       this.fetchProduct.mockResolvedValue(args?.fetchProduct ?? null)
+    }
+
+    if (args?.fetchAutocompleteSuggestionsV1 instanceof Error) {
+      this.fetchAutocompleteSuggestionsV1.mockRejectedValue(
+        args.fetchAutocompleteSuggestionsV1
+      )
+    } else {
+      this.fetchAutocompleteSuggestionsV1.mockResolvedValue(
+        args?.fetchAutocompleteSuggestionsV1 ?? null
+      )
+    }
+
+    if (args?.fetchTopSearchesV1 instanceof Error) {
+      this.fetchTopSearchesV1.mockRejectedValue(args.fetchTopSearchesV1)
+    } else {
+      this.fetchTopSearchesV1.mockResolvedValue(
+        args?.fetchTopSearchesV1 ?? null
+      )
+    }
+
+    if (args?.fetchSearchSuggestionsV1 instanceof Error) {
+      this.fetchSearchSuggestionsV1.mockRejectedValue(
+        args.fetchSearchSuggestionsV1
+      )
+    } else {
+      this.fetchSearchSuggestionsV1.mockResolvedValue(
+        args?.fetchSearchSuggestionsV1 ?? null
+      )
+    }
+
+    if (args?.fetchCorrectionV1 instanceof Error) {
+      this.fetchCorrectionV1.mockRejectedValue(args.fetchCorrectionV1)
+    } else {
+      this.fetchCorrectionV1.mockResolvedValue(args?.fetchCorrectionV1 ?? null)
+    }
+
+    if (args?.fetchBannersV1 instanceof Error) {
+      this.fetchBannersV1.mockRejectedValue(args.fetchBannersV1)
+    } else {
+      this.fetchBannersV1.mockResolvedValue(args?.fetchBannersV1 ?? null)
     }
   }
 
@@ -58,6 +99,11 @@ export class MockedIntschClient implements IIntelligentSearchClient {
   public fetchCorrection = jest.fn()
   public fetchBanners = jest.fn()
   public fetchProduct = jest.fn()
+  public fetchAutocompleteSuggestionsV1 = jest.fn()
+  public fetchTopSearchesV1 = jest.fn()
+  public fetchSearchSuggestionsV1 = jest.fn()
+  public fetchCorrectionV1 = jest.fn()
+  public fetchBannersV1 = jest.fn()
 }
 
 export type IntelligentSearchClientArgs = {
@@ -67,4 +113,9 @@ export type IntelligentSearchClientArgs = {
   fetchCorrection?: CorrectionResponse | Error
   fetchBanners?: FetchBannersResponse | Error
   fetchProduct?: FetchProductResponse | Error
+  fetchAutocompleteSuggestionsV1?: AutocompleteSuggestionsResponse | Error
+  fetchTopSearchesV1?: TopSearchesResponse | Error
+  fetchSearchSuggestionsV1?: SearchSuggestionsResponse | Error
+  fetchCorrectionV1?: CorrectionResponse | Error
+  fetchBannersV1?: FetchBannersResponse | Error
 }
