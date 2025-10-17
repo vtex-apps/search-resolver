@@ -7,10 +7,11 @@ import {
 } from '../../commons/compatibility-layer'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
 import {
-  buildVtexSegment,
   ProductArgs,
   ProductIdentifier,
+  ProductsByIdentifierArgs,
   resolveProduct,
+  resolveProductsByIdentifier,
 } from '../../services/product'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import { resolvers as assemblyOptionResolvers } from './assemblyOption'
@@ -46,7 +47,7 @@ import {
   fetchCorrection,
 } from '../../services/autocomplete'
 import { fetchBanners } from '../../services/banners'
-import { AdvertisementOptions, FacetsInput, ProductSearchInput, ProductsInput, SegmentData, SuggestionProductsArgs } from '../../typings/Search'
+import { AdvertisementOptions, FacetsInput, ProductSearchInput, ProductsInput, SuggestionProductsArgs } from '../../typings/Search'
 
 enum CrossSellingInput {
   view = 'view',
@@ -68,12 +69,6 @@ interface ProductRecommendationArg {
   groupBy?: CrossSellingGroupByInput
 }
 
-interface ProductsByIdentifierArgs {
-  field: 'id' | 'ean' | 'reference' | 'sku'
-  values: string[]
-  salesChannel?: string | null
-  regionId?: string | null
-}
 
 const inputToSearchCrossSelling = {
   [CrossSellingInput.buy]: SearchCrossSellingTypes.whoboughtalsobought,
@@ -441,48 +436,13 @@ export const queries = {
     args: ProductsByIdentifierArgs,
     ctx: Context
   ) => {
-    const {
-      clients: { search },
-    } = ctx
-
-    let products = [] as SearchProduct[]
-    const { field, values, salesChannel } = args
-
-    const vtexSegment =
-      !ctx.vtex.segment || (!ctx.vtex.segment?.regionId && args.regionId)
-        ? buildVtexSegment({
-            vtexSegment: ctx.vtex.segment as
-              | SegmentData
-              | undefined,
-            salesChannel: args.salesChannel?.toString(),
-            regionId: args.regionId ?? undefined,
-          })
-        : ctx.vtex.segmentToken
-
-    switch (field) {
-      case 'id':
-        products = await search.productsById(values, vtexSegment, salesChannel)
-        break
-      case 'ean':
-        products = await search.productsByEan(values, vtexSegment, salesChannel)
-        break
-      case 'reference':
-        products = await search.productsByReference(
-          values,
-          vtexSegment,
-          salesChannel
-        )
-        break
-      case 'sku':
-        products = await search.productsBySku(values, vtexSegment, salesChannel)
-        break
-    }
+    const products = await resolveProductsByIdentifier(ctx, args)
 
     if (products.length > 0) {
       return products
     }
 
-    throw new NotFoundError(`No products were found with requested ${field}`)
+    throw new NotFoundError(`No products were found with requested ${args.field}`)
   },
 
   productSearch: async (_: any, args: ProductSearchInput, ctx: any) => {
