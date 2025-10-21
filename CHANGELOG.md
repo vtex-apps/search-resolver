@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.86.0] - 2025-10-21
+
 ### Changed
 
 - Using shadow traffic to EKS to validate the v1 routes: banners, correction, suggestions.
