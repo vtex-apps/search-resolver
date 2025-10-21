@@ -1,42 +1,55 @@
-/* eslint-disable @typescript-eslint/prefer-interface */
-
 export type AutocompleteSuggestionsArgs = {
   query: string
 }
 
+export type AutocompleteSuggestionsArgsV1 = {
+  locale: string
+  query: string
+}
+
 export type AutocompleteSuggestionsResponse = {
-  searches: {
+  searches: Array<{
     term: string
     count: number
-    attributes?: {
+    attributes?: Array<{
       key: string
       value: string
       labelKey: string
       labelValue: string
-    }[]
-  }[]
+    }>
+  }>
 }
 
 export type TopSearchesResponse = {
-  searches: {
+  searches: Array<{
     term: string
     count: number
-  }[]
+  }>
 }
 
 export type SearchSuggestionsArgs = {
   query: string
 }
 
+export type SearchSuggestionsArgsV1 = {
+  query: string
+  locale: string
+}
+
 export type SearchSuggestionsResponse = {
-  searches: {
+  searches: Array<{
     term: string
     count: number
-  }[]
+  }>
 }
 
 export type CorrectionArgs = {
   query: string
+}
+
+export type CorrectionArgsV1 = {
+  query: string
+  locale: string
 }
 
 export type CorrectionResponse = {
@@ -53,13 +66,19 @@ export type FetchBannersArgs = {
   path: string
 }
 
+export type FetchBannersArgsV1 = {
+  locale: string
+  query: string
+  path: string
+}
+
 export type FetchBannersResponse = {
-  banners: {
+  banners: Array<{
     id: string
     name: string
     area: string
     html: string
-  }[]
+  }>
 }
 
 export type FetchProductArgs = {
@@ -67,11 +86,11 @@ export type FetchProductArgs = {
   value: string
   salesChannel?: string
   regionId?: string
-  locale?:string
+  locale?: string
 }
 
 export type FetchProductResponse = SearchProduct
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+
 export interface IIntelligentSearchClient {
   fetchAutocompleteSuggestions(
     args: AutocompleteSuggestionsArgs
@@ -83,4 +102,13 @@ export interface IIntelligentSearchClient {
   fetchCorrection(args: CorrectionArgs): Promise<CorrectionResponse>
   fetchBanners(args: FetchBannersArgs): Promise<FetchBannersResponse>
   fetchProduct(args: FetchProductArgs): Promise<FetchProductResponse>
+  fetchAutocompleteSuggestionsV1(
+    args: AutocompleteSuggestionsArgsV1
+  ): Promise<AutocompleteSuggestionsResponse>
+  fetchTopSearchesV1(locale: string): Promise<TopSearchesResponse>
+  fetchSearchSuggestionsV1(
+    args: SearchSuggestionsArgsV1
+  ): Promise<SearchSuggestionsResponse>
+  fetchCorrectionV1(args: CorrectionArgsV1): Promise<CorrectionResponse>
+  fetchBannersV1(args: FetchBannersArgsV1): Promise<FetchBannersResponse>
 }
