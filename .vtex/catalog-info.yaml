@@ -1,0 +1,22 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: search-resolver
+  description: This app is an implementation of the VTEX search protocol that
+    wraps the VTEX catalog searches related API calls.
+  tags:
+    - typescript
+    - express
+  annotations:
+    vtex.com/janus-acronym: ""
+    vtex.com/o11y-os-index: ""
+    grafana/dashboard-selector: ""
+    github.com/project-slug: vtex-apps/search-resolver
+    vtex.com/platform-flow-id: ""
+    backstage.io/techdocs-ref: dir:../
+    vtex.com/application-id: 6PIM3PYV
+spec:
+  lifecycle: stable
+  owner: te-0016
+  type: backend-api
+  dependsOn: []
