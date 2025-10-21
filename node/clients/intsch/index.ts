@@ -14,11 +14,15 @@ import type {
   FetchProductArgs,
   FetchProductResponse,
   IIntelligentSearchClient,
+  ProductSearchResponse,
   SearchSuggestionsArgs,
   SearchSuggestionsArgsV1,
   SearchSuggestionsResponse,
   TopSearchesResponse,
 } from './types'
+import type { SearchResultArgs } from '../../typings/Search'
+import { decodeQuery, isPathTraversal } from '../intelligent-search-api'
+import { parseState } from '../../utils/searchState'
 
 export class Intsch extends JanusClient implements IIntelligentSearchClient {
   private locale: string | undefined
@@ -131,6 +135,32 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     return this.http.get(`/api/intelligent-search/v1/banners/${args.path}`, {
       params: { query: args.query, locale: args.locale },
       metric: 'banners-new-v1',
+    })
+  }
+
+  public productSearch(
+    params: SearchResultArgs,
+    path: string,
+    shippingHeader?: string[]
+  ): Promise<ProductSearchResponse> {
+    const { query, leap, searchState } = params
+
+    if (isPathTraversal(path)) {
+      throw new Error('Malformed URL')
+    }
+
+    return this.http.get(`/api/intelligent-search/v0/product-search/${path}`, {
+      params: {
+        query: query && decodeQuery(query),
+        locale: this.locale,
+        bgy_leap: leap ? true : undefined,
+        ...parseState(searchState),
+        ...params,
+      },
+      metric: 'product-search-new',
+      headers: {
+        'x-vtex-shipping-options': shippingHeader ?? '',
+      },
     })
   }
 }
