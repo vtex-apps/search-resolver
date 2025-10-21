@@ -1,4 +1,5 @@
 import type { SearchResultArgs } from '../../typings/Search'
+import type { FacetsArgs } from '../intelligent-search-api'
 
 export type AutocompleteSuggestionsArgs = {
   query: string
@@ -97,6 +98,8 @@ export type ProductSearchResponse = {
   products: SearchProduct[]
 }
 
+export type FacetsResponse = any
+
 export interface IIntelligentSearchClient {
   fetchAutocompleteSuggestions(
     args: AutocompleteSuggestionsArgs
@@ -122,4 +125,9 @@ export interface IIntelligentSearchClient {
     path: string,
     shippingHeader?: string[]
   ): Promise<ProductSearchResponse>
+  facets(
+    params: FacetsArgs,
+    path: string,
+    shippingHeader?: string[]
+  ): Promise<FacetsResponse>
 }

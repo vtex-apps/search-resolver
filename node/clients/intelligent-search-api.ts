@@ -29,7 +29,7 @@ interface AutocompleteSearchSuggestionsParams {
   query: string
 }
 
-interface FacetsArgs {
+export type FacetsArgs = {
   query?: string
   page?: number
   count?: number

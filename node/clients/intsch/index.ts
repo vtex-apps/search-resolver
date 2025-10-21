@@ -8,6 +8,7 @@ import type {
   CorrectionArgs,
   CorrectionArgsV1,
   CorrectionResponse,
+  FacetsResponse,
   FetchBannersArgs,
   FetchBannersArgsV1,
   FetchBannersResponse,
@@ -21,6 +22,7 @@ import type {
   TopSearchesResponse,
 } from './types'
 import type { SearchResultArgs } from '../../typings/Search'
+import type { FacetsArgs } from '../intelligent-search-api'
 import { decodeQuery, isPathTraversal } from '../intelligent-search-api'
 import { parseState } from '../../utils/searchState'
 
@@ -158,6 +160,32 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
         ...params,
       },
       metric: 'product-search-new',
+      headers: {
+        'x-vtex-shipping-options': shippingHeader ?? '',
+      },
+    })
+  }
+
+  public facets(
+    params: FacetsArgs,
+    path: string,
+    shippingHeader?: string[]
+  ): Promise<FacetsResponse> {
+    if (isPathTraversal(path)) {
+      throw new Error('Malformed URL')
+    }
+
+    const { query, leap, searchState } = params
+
+    return this.http.get(`/api/intelligent-search/v0/facets/${path}`, {
+      params: {
+        ...params,
+        query: query && decodeQuery(query),
+        locale: this.locale,
+        bgy_leap: leap ? true : undefined,
+        ...parseState(searchState),
+      },
+      metric: 'facets-new',
       headers: {
         'x-vtex-shipping-options': shippingHeader ?? '',
       },
