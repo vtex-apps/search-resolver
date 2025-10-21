@@ -47,6 +47,8 @@ import {
   fetchCorrection,
 } from '../../services/autocomplete'
 import { fetchBanners } from '../../services/banners'
+import { fetchFacets } from '../../services/facets'
+import { fetchProductSearch } from '../../services/productSearch'
 import { AdvertisementOptions, FacetsInput, ProductSearchInput, ProductsInput, SuggestionProductsArgs } from '../../typings/Search'
 
 enum CrossSellingInput {
@@ -347,28 +349,7 @@ export const queries = {
 
     let { selectedFacets } = args
 
-    const {
-      clients: { intelligentSearchApi },
-    } = ctx
-
-    const biggyArgs: { [key: string]: any } = {
-      ...args,
-    }
-
-    // unnecessary field. It's is an object and breaks the @vtex/api cache
-    delete biggyArgs.selectedFacets
-
-    const result = await intelligentSearchApi.facets(
-      { ...biggyArgs, query: args.fullText },
-      buildAttributePath(selectedFacets),
-      shippingOptions
-    )
-
-    if (ctx.vtex.tenant) {
-      ctx.translated = result.translated
-    }
-
-    return result
+    return fetchFacets(ctx, args, selectedFacets, shippingOptions)
   },
 
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
@@ -464,41 +445,9 @@ export const queries = {
       })
     }
 
-    const { intelligentSearchApi } = ctx.clients
-    const {
-      selectedFacets,
-      fullText,
-      advertisementOptions = defaultAdvertisementOptions,
-    } = args
+    const { selectedFacets } = args
 
-    const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
-
-    const biggyArgs: { [key: string]: any } = {
-      ...advertisementOptions,
-      ...args,
-      query: fullText,
-      sort: convertOrderBy(args.orderBy),
-      ...args.options,
-      ...workspaceSearchParams,
-    }
-
-    // unnecessary field. It's is an object and breaks the @vtex/api cache
-    delete biggyArgs.selectedFacets
-
-    const result = await intelligentSearchApi.productSearch(
-      { ...biggyArgs },
-      buildAttributePath(selectedFacets),
-      shippingOptions
-    )
-
-    if (ctx.vtex.tenant && !args.productOriginVtex) {
-      ctx.translated = result.translated
-    }
-
-    return {
-      searchState: args.searchState,
-      ...result,
-    }
+    return fetchProductSearch(ctx, args, selectedFacets, shippingOptions)
   },
 
   sponsoredProducts: async (_: any, args: ProductSearchInput, ctx: any) => {
