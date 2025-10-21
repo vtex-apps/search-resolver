@@ -1,4 +1,5 @@
 import { buildAttributePath } from '../commons/compatibility-layer'
+import { compareApiResults } from '../utils/compareResults'
 import { fetchAppSettings } from './settings'
 import type { FacetsInput } from '../typings/Search'
 
@@ -69,8 +70,7 @@ async function fetchFacetsFromIntsch(
 }
 
 /**
- * Facets service that extracts facets fetching logic and implements flag-based routing
- * using intelligentSearchApi as primary and intsch as alternative based on shouldUseNewPLPEndpoint flag
+ * Facets service that extracts facets fetching logic and implements comparison or flag-based routing
  */
 export async function fetchFacets(
   ctx: Context,
@@ -80,11 +80,24 @@ export async function fetchFacets(
 ) {
   const { shouldUseNewPLPEndpoint } = await fetchAppSettings(ctx)
 
-  // Check if current account should use intsch directly
+  // If flag is explicitly true, use intsch
   if (shouldUseNewPLPEndpoint) {
     return fetchFacetsFromIntsch(ctx, args, selectedFacets, shippingOptions)
   }
 
-  return fetchFacetsFromBiggy(ctx, args, selectedFacets, shippingOptions)
+  // If flag is undefined, compare both APIs
+  return compareApiResults(
+    () => fetchFacetsFromBiggy(ctx, args, selectedFacets, shippingOptions),
+    () => fetchFacetsFromIntsch(ctx, args, selectedFacets, shippingOptions),
+    ctx.vtex.production ? 10 : 100,
+    ctx.vtex.logger,
+    {
+      logPrefix: 'Facets',
+      args: {
+        fullText: args.fullText,
+        selectedFacets,
+        shippingOptions,
+      },
+    }
+  )
 }
-

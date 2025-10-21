@@ -1,5 +1,9 @@
-import { buildAttributePath, convertOrderBy } from '../commons/compatibility-layer'
+import {
+  buildAttributePath,
+  convertOrderBy,
+} from '../commons/compatibility-layer'
 import { getWorkspaceSearchParamsFromStorage } from '../routes/workspaceSearchParams'
+import { compareApiResults } from '../utils/compareResults'
 import { fetchAppSettings } from './settings'
 import type { ProductSearchInput } from '../typings/Search'
 
@@ -19,10 +23,7 @@ async function fetchProductSearchFromBiggy(
   shippingOptions?: string[]
 ) {
   const { intelligentSearchApi } = ctx.clients
-  const {
-    fullText,
-    advertisementOptions = defaultAdvertisementOptions,
-  } = args
+  const { fullText, advertisementOptions = defaultAdvertisementOptions } = args
 
   const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
@@ -64,10 +65,7 @@ async function fetchProductSearchFromIntsch(
   shippingOptions?: string[]
 ) {
   const { intsch } = ctx.clients
-  const {
-    fullText,
-    advertisementOptions = defaultAdvertisementOptions,
-  } = args
+  const { fullText, advertisementOptions = defaultAdvertisementOptions } = args
 
   const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
@@ -100,8 +98,7 @@ async function fetchProductSearchFromIntsch(
 }
 
 /**
- * ProductSearch service that extracts product search fetching logic and implements flag-based routing
- * using intelligentSearchApi as primary and intsch as alternative based on shouldUseNewPLPEndpoint flag
+ * ProductSearch service that extracts product search fetching logic and implements comparison or flag-based routing
  */
 export async function fetchProductSearch(
   ctx: Context,
@@ -111,11 +108,32 @@ export async function fetchProductSearch(
 ) {
   const { shouldUseNewPLPEndpoint } = await fetchAppSettings(ctx)
 
-  // Check if current account should use intsch directly
   if (shouldUseNewPLPEndpoint) {
-    return fetchProductSearchFromIntsch(ctx, args, selectedFacets, shippingOptions)
+    return fetchProductSearchFromIntsch(
+      ctx,
+      args,
+      selectedFacets,
+      shippingOptions
+    )
   }
 
-  return fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions)
+  return compareApiResults(
+    () =>
+      fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions),
+    () =>
+      fetchProductSearchFromIntsch(ctx, args, selectedFacets, shippingOptions),
+    ctx.vtex.production ? 10 : 100,
+    ctx.vtex.logger,
+    {
+      logPrefix: 'ProductSearch',
+      args: {
+        fullText: args.fullText,
+        query: args.query,
+        from: args.from,
+        to: args.to,
+        selectedFacets,
+        shippingOptions,
+      },
+    }
+  )
 }
-
