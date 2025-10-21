@@ -1,7 +1,7 @@
 import {
+  createMessagesLoader,
   formatTranslatableStringV2,
   parseTranslatableStringV2,
-  createMessagesLoader,
 } from '@vtex/api'
 import { logDegradedSearchError } from '../resolvers/search/utils'
 
@@ -28,12 +28,14 @@ export interface Message extends BaseMessage {
 }
 
 export const addContextToTranslatableString = (message: Message, ctx: Context) => {
-  const { vtex: { tenant } } = ctx
+  const { vtex: { tenant }, translated } = ctx
   const { locale } = tenant!
 
   if (!message.content) {
     return message.content
   }
+
+  const state = translated ? 'translated' : 'original'
 
 
   try {
@@ -45,7 +47,7 @@ export const addContextToTranslatableString = (message: Message, ctx: Context) =
 
     const context = (originalContext || message.context)?.toString()
     const from = originalFrom || message.from || locale
-    return formatTranslatableStringV2({ content, context, from })
+    return formatTranslatableStringV2({ content, context, from, state })
   } catch (e) {
     logDegradedSearchError(ctx.vtex.logger, {
       service: 'node-vtex-api translation',
