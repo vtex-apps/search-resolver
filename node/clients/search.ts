@@ -1,16 +1,16 @@
 import {
   AppClient,
+  CacheType,
   InstanceOptions,
   IOContext,
   RequestConfig,
   SegmentData,
-  CacheType,
 } from '@vtex/api'
 import { stringify } from 'qs'
 
 import {
-  searchEncodeURI,
   SearchCrossSellingTypes,
+  searchEncodeURI,
 } from '../resolvers/search/utils'
 
 interface AutocompleteArgs {
@@ -308,11 +308,13 @@ export class Search extends AppClient {
       metric: 'search-category',
     })
 
-  public crossSelling = (id: string, type: SearchCrossSellingTypes, groupByProduct = true) =>
+  public crossSelling = (id: string, type: SearchCrossSellingTypes, groupByProduct = true, acceptLanguage?: string) =>
     this.get<SearchProduct[]>(
       `/pub/products/crossselling/${type}/${id}?groupByProduct=${groupByProduct}`,
       {
         metric: 'search-crossSelling',
+        // This Accept Language header is used to request the cross selling products in the desired language from new dataplane endpoint
+        headers: acceptLanguage ? { 'Accept-Language': acceptLanguage } : {}
       }
     )
 

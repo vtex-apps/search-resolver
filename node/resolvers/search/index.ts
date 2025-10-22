@@ -7,12 +7,23 @@ import {
 } from '../../commons/compatibility-layer'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
 import {
+  fetchAutocompleteSuggestions,
+  fetchCorrection,
+  fetchSearchSuggestions,
+  fetchTopSearches,
+} from '../../services/autocomplete'
+import { fetchBanners } from '../../services/banners'
+import { fetchFacets } from '../../services/facets'
+import {
   ProductArgs,
   ProductIdentifier,
   ProductsByIdentifierArgs,
   resolveProduct,
-  resolveProductsByIdentifier,
+  resolveProductsByIdentifier
 } from '../../services/product'
+import { fetchProductSearch } from '../../services/productSearch'
+import { fetchAppSettings } from '../../services/settings'
+import { AdvertisementOptions, FacetsInput, ProductSearchInput, ProductsInput, SuggestionProductsArgs } from '../../typings/Search'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import { resolvers as assemblyOptionResolvers } from './assemblyOption'
 import { resolvers as autocompleteResolvers } from './autocomplete'
@@ -40,22 +51,7 @@ import {
   getShippingOptionsFromSelectedFacets,
   validMapAndQuery,
 } from './utils'
-import {
-  fetchAutocompleteSuggestions,
-  fetchTopSearches,
-  fetchSearchSuggestions,
-  fetchCorrection,
-} from '../../services/autocomplete'
-import { fetchBanners } from '../../services/banners'
-import { fetchFacets } from '../../services/facets'
-import { fetchProductSearch } from '../../services/productSearch'
-import type {
-  AdvertisementOptions,
-  FacetsInput,
-  ProductSearchInput,
-  ProductsInput,
-  SuggestionProductsArgs,
-} from '../../typings/Search'
+
 
 enum CrossSellingInput {
   view = 'view',
@@ -531,6 +527,7 @@ export const queries = {
       throw new UserInputError('Wrong input provided')
     }
 
+  const { shouldUseNewPDPEndpoint } = await fetchAppSettings(ctx)
     const searchType = inputToSearchCrossSelling[type]
     let productId = identifier.value
 
@@ -543,10 +540,15 @@ export const queries = {
     const groupByProduct =
       groupBy === CrossSellingGroupByInput.PRODUCT ? true : false
 
+    if (shouldUseNewPDPEndpoint) {
+      ctx.translated = true
+    }
+
     const products = await ctx.clients.search.crossSelling(
       productId,
       searchType,
-      groupByProduct
+      groupByProduct,
+      shouldUseNewPDPEndpoint ? ctx.vtex.locale : undefined
     )
 
     searchFirstElements(products, 0, ctx.clients.search)
