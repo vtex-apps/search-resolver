@@ -1,5 +1,6 @@
 type AppSettings = {
   shouldUseNewPDPEndpoint: boolean
+  shouldUseNewPLPEndpoint: boolean
 }
 
 export async function fetchAppSettings(ctx: Context): Promise<AppSettings> {
@@ -8,12 +9,12 @@ export async function fetchAppSettings(ctx: Context): Promise<AppSettings> {
   } = ctx
 
   try {
-    const { shouldUseNewPDPEndpoint }: AppSettings = await apps.getAppSettings(
-      'vtex.search-resolver@1.x'
-    )
+    const { shouldUseNewPDPEndpoint, shouldUseNewPLPEndpoint }: AppSettings =
+      await apps.getAppSettings('vtex.search-resolver@1.x')
 
     return {
       shouldUseNewPDPEndpoint,
+      shouldUseNewPLPEndpoint,
     }
   } catch (error) {
     ctx.vtex.logger.error({
@@ -23,6 +24,7 @@ export async function fetchAppSettings(ctx: Context): Promise<AppSettings> {
 
     return {
       shouldUseNewPDPEndpoint: false,
+      shouldUseNewPLPEndpoint: false,
     }
   }
 }
