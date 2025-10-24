@@ -69,7 +69,7 @@ async function fetchProductFromIntsch(
   const { field, value } = identifier
 
   // Get locale from context (fallback)
-  const defaultLocale = ctx.vtex.tenant?.locale || ctx.vtex.locale
+  const defaultLocale = ctx.vtex.tenant?.locale ?? ctx.vtex.locale
 
   // Default salesChannel from args
   let finalSalesChannel = salesChannel ? `${salesChannel}` : undefined
@@ -170,9 +170,9 @@ export async function resolveProduct(
   const args =
     rawArgs && isValidProductIdentifier(rawArgs.identifier)
       ? rawArgs
-      : { identifier: { field: 'slug', value: rawArgs.slug! } }
+      : { identifier: { field: 'slug', value: rawArgs.slug ?? '' } }
 
-  if (!args.identifier) {
+  if (!args.identifier?.value) {
     throw new Error('No product identifier provided')
   }
 
@@ -205,7 +205,7 @@ export async function resolveProduct(
       return null
     }
 
-    const product = products[0]
+    const [product] = products
 
     return product
   } catch (error) {
@@ -266,7 +266,7 @@ async function fetchProductsByIdentifierFromIntsch(
   const { field, values, salesChannel, regionId } = args
 
   // Get locale from context (fallback)
-  const defaultLocale = ctx.vtex.tenant?.locale || ctx.vtex.locale
+  const defaultLocale = ctx.vtex.tenant?.locale ?? ctx.vtex.locale
 
   // Default salesChannel from args
   let finalSalesChannel = salesChannel ? `${salesChannel}` : undefined
@@ -334,12 +334,20 @@ export async function resolveProductsByIdentifier(
 
     // Check if current account should use intsch directly
     if (shouldUseNewPDPEndpoint) {
-      products = await fetchProductsByIdentifierFromIntsch(ctx, args, vtexSegment)
+      products = await fetchProductsByIdentifierFromIntsch(
+        ctx,
+        args,
+        vtexSegment
+      )
     } else {
-      products = await fetchProductsByIdentifierFromSearch(ctx, args, vtexSegment)
+      products = await fetchProductsByIdentifierFromSearch(
+        ctx,
+        args,
+        vtexSegment
+      )
     }
 
-    return products 
+    return products
   } catch (error) {
     ctx.vtex.logger.error({
       message: 'Error fetching products by identifier',

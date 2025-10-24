@@ -16,6 +16,7 @@ const defaultAdvertisementOptions = {
 /**
  * Fetches product search results using the intelligentSearchApi client (Biggy)
  */
+// eslint-disable-next-line max-params
 async function fetchProductSearchFromBiggy(
   ctx: Context,
   args: ProductSearchInput,
@@ -58,6 +59,7 @@ async function fetchProductSearchFromBiggy(
 /**
  * Fetches product search results using the intsch client (Intelligent Search)
  */
+// eslint-disable-next-line max-params
 async function fetchProductSearchFromIntsch(
   ctx: Context,
   args: ProductSearchInput,
@@ -100,6 +102,7 @@ async function fetchProductSearchFromIntsch(
 /**
  * ProductSearch service that extracts product search fetching logic and implements comparison or flag-based routing
  */
+// eslint-disable-next-line max-params
 export async function fetchProductSearch(
   ctx: Context,
   args: ProductSearchInput,
