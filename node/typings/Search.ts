@@ -40,7 +40,7 @@ export interface SearchResultArgs extends AdvertisementOptions {
   showSponsored?: boolean
 }
 
-interface RegionSeller {
+export type RegionSeller = {
   id: string
   name: string
 }

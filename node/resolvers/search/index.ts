@@ -7,10 +7,11 @@ import {
 } from '../../commons/compatibility-layer'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
 import {
-  buildVtexSegment,
   ProductArgs,
   ProductIdentifier,
+  ProductsByIdentifierArgs,
   resolveProduct,
+  resolveProductsByIdentifier,
 } from '../../services/product'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import { resolvers as assemblyOptionResolvers } from './assemblyOption'
@@ -46,7 +47,9 @@ import {
   fetchCorrection,
 } from '../../services/autocomplete'
 import { fetchBanners } from '../../services/banners'
-import { AdvertisementOptions, FacetsInput, ProductSearchInput, ProductsInput, SegmentData, SuggestionProductsArgs } from '../../typings/Search'
+import { fetchFacets } from '../../services/facets'
+import { fetchProductSearch } from '../../services/productSearch'
+import { AdvertisementOptions, FacetsInput, ProductSearchInput, ProductsInput, SuggestionProductsArgs } from '../../typings/Search'
 
 enum CrossSellingInput {
   view = 'view',
@@ -68,12 +71,6 @@ interface ProductRecommendationArg {
   groupBy?: CrossSellingGroupByInput
 }
 
-interface ProductsByIdentifierArgs {
-  field: 'id' | 'ean' | 'reference' | 'sku'
-  values: string[]
-  salesChannel?: string | null
-  regionId?: string | null
-}
 
 const inputToSearchCrossSelling = {
   [CrossSellingInput.buy]: SearchCrossSellingTypes.whoboughtalsobought,
@@ -352,28 +349,7 @@ export const queries = {
 
     let { selectedFacets } = args
 
-    const {
-      clients: { intelligentSearchApi },
-    } = ctx
-
-    const biggyArgs: { [key: string]: any } = {
-      ...args,
-    }
-
-    // unnecessary field. It's is an object and breaks the @vtex/api cache
-    delete biggyArgs.selectedFacets
-
-    const result = await intelligentSearchApi.facets(
-      { ...biggyArgs, query: args.fullText },
-      buildAttributePath(selectedFacets),
-      shippingOptions
-    )
-
-    if (ctx.vtex.tenant) {
-      ctx.translated = result.translated
-    }
-
-    return result
+    return fetchFacets(ctx, args, selectedFacets, shippingOptions)
   },
 
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
@@ -441,48 +417,13 @@ export const queries = {
     args: ProductsByIdentifierArgs,
     ctx: Context
   ) => {
-    const {
-      clients: { search },
-    } = ctx
-
-    let products = [] as SearchProduct[]
-    const { field, values, salesChannel } = args
-
-    const vtexSegment =
-      !ctx.vtex.segment || (!ctx.vtex.segment?.regionId && args.regionId)
-        ? buildVtexSegment({
-            vtexSegment: ctx.vtex.segment as
-              | SegmentData
-              | undefined,
-            salesChannel: args.salesChannel?.toString(),
-            regionId: args.regionId ?? undefined,
-          })
-        : ctx.vtex.segmentToken
-
-    switch (field) {
-      case 'id':
-        products = await search.productsById(values, vtexSegment, salesChannel)
-        break
-      case 'ean':
-        products = await search.productsByEan(values, vtexSegment, salesChannel)
-        break
-      case 'reference':
-        products = await search.productsByReference(
-          values,
-          vtexSegment,
-          salesChannel
-        )
-        break
-      case 'sku':
-        products = await search.productsBySku(values, vtexSegment, salesChannel)
-        break
-    }
+    const products = await resolveProductsByIdentifier(ctx, args)
 
     if (products.length > 0) {
       return products
     }
 
-    throw new NotFoundError(`No products were found with requested ${field}`)
+    throw new NotFoundError(`No products were found with requested ${args.field}`)
   },
 
   productSearch: async (_: any, args: ProductSearchInput, ctx: any) => {
@@ -504,41 +445,9 @@ export const queries = {
       })
     }
 
-    const { intelligentSearchApi } = ctx.clients
-    const {
-      selectedFacets,
-      fullText,
-      advertisementOptions = defaultAdvertisementOptions,
-    } = args
+    const { selectedFacets } = args
 
-    const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
-
-    const biggyArgs: { [key: string]: any } = {
-      ...advertisementOptions,
-      ...args,
-      query: fullText,
-      sort: convertOrderBy(args.orderBy),
-      ...args.options,
-      ...workspaceSearchParams,
-    }
-
-    // unnecessary field. It's is an object and breaks the @vtex/api cache
-    delete biggyArgs.selectedFacets
-
-    const result = await intelligentSearchApi.productSearch(
-      { ...biggyArgs },
-      buildAttributePath(selectedFacets),
-      shippingOptions
-    )
-
-    if (ctx.vtex.tenant && !args.productOriginVtex) {
-      ctx.translated = result.translated
-    }
-
-    return {
-      searchState: args.searchState,
-      ...result,
-    }
+    return fetchProductSearch(ctx, args, selectedFacets, shippingOptions)
   },
 
   sponsoredProducts: async (_: any, args: ProductSearchInput, ctx: any) => {

@@ -15,7 +15,7 @@ import type {
 } from './intsch/types'
 import type { Options, SearchResultArgs } from '../typings/Search'
 
-const isPathTraversal = (str: string) => str.indexOf('..') >= 0
+export const isPathTraversal = (str: string) => str.indexOf('..') >= 0
 
 interface CorrectionParams {
   query: string
@@ -29,7 +29,7 @@ interface AutocompleteSearchSuggestionsParams {
   query: string
 }
 
-interface FacetsArgs {
+export type FacetsArgs = {
   query?: string
   page?: number
   count?: number
@@ -47,7 +47,7 @@ interface FacetsArgs {
   regionId?: string | null
 }
 
-const decodeQuery = (query: string) => {
+export const decodeQuery = (query: string) => {
   try {
     return decodeURIComponent(query)
   } catch (e) {

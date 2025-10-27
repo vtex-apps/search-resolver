@@ -69,7 +69,7 @@ async function fetchProductFromIntsch(
   const { field, value } = identifier
 
   // Get locale from context (fallback)
-  const defaultLocale = ctx.vtex.tenant?.locale || ctx.vtex.locale
+  const defaultLocale = ctx.vtex.tenant?.locale ?? ctx.vtex.locale
 
   // Default salesChannel from args
   let finalSalesChannel = salesChannel ? `${salesChannel}` : undefined
@@ -170,9 +170,9 @@ export async function resolveProduct(
   const args =
     rawArgs && isValidProductIdentifier(rawArgs.identifier)
       ? rawArgs
-      : { identifier: { field: 'slug', value: rawArgs.slug! } }
+      : { identifier: { field: 'slug', value: rawArgs.slug ?? '' } }
 
-  if (!args.identifier) {
+  if (!args.identifier?.value) {
     throw new Error('No product identifier provided')
   }
 
@@ -205,7 +205,7 @@ export async function resolveProduct(
       return null
     }
 
-    const product = products[0]
+    const [product] = products
 
     return product
   } catch (error) {
@@ -213,6 +213,146 @@ export async function resolveProduct(
       message: 'Error fetching product',
       error: error.message,
       args: fetchArgs,
+    })
+    throw error
+  }
+}
+
+export type ProductsByIdentifierArgs = {
+  field: 'id' | 'ean' | 'reference' | 'sku'
+  values: string[]
+  salesChannel?: string | null
+  regionId?: string | null
+}
+
+/**
+ * Fetches multiple products by identifier using the search client
+ */
+async function fetchProductsByIdentifierFromSearch(
+  ctx: Context,
+  args: ProductsByIdentifierArgs,
+  vtexSegment?: string
+): Promise<SearchProduct[]> {
+  const { search } = ctx.clients
+  const { field, values, salesChannel } = args
+
+  switch (field) {
+    case 'id':
+      return search.productsById(values, vtexSegment, salesChannel)
+
+    case 'ean':
+      return search.productsByEan(values, vtexSegment, salesChannel)
+
+    case 'reference':
+      return search.productsByReference(values, vtexSegment, salesChannel)
+
+    case 'sku':
+      return search.productsBySku(values, vtexSegment, salesChannel)
+
+    default:
+      throw new Error(`Unsupported product identifier field: ${field}`)
+  }
+}
+
+/**
+ * Fetches multiple products by identifier using the intsch client
+ */
+async function fetchProductsByIdentifierFromIntsch(
+  ctx: Context,
+  args: ProductsByIdentifierArgs,
+  vtexSegment?: string
+): Promise<SearchProduct[]> {
+  const { intsch } = ctx.clients
+  const { field, values, salesChannel, regionId } = args
+
+  // Get locale from context (fallback)
+  const defaultLocale = ctx.vtex.tenant?.locale ?? ctx.vtex.locale
+
+  // Default salesChannel from args
+  let finalSalesChannel = salesChannel ? `${salesChannel}` : undefined
+  let finalLocale = defaultLocale
+
+  // Parse vtexSegment if available to extract locale and salesChannel
+  if (vtexSegment) {
+    try {
+      const segmentData: SegmentData = JSON.parse(
+        Buffer.from(vtexSegment, 'base64').toString()
+      )
+
+      // Use segment's salesChannel if available, otherwise use the provided one
+      if (segmentData.channel) {
+        finalSalesChannel = segmentData.channel
+      }
+
+      // Use segment's locale (cultureInfo) if available, otherwise use default
+      if (segmentData.cultureInfo) {
+        finalLocale = segmentData.cultureInfo
+      }
+    } catch (error) {
+      // If parsing fails, continue with defaults
+      ctx.vtex.logger.warn({
+        message: 'Failed to parse vtexSegment token, using defaults',
+        error: error.message,
+        vtexSegment,
+      })
+    }
+  }
+
+  // Fetch all products in parallel
+  const productPromises = values.map((value) =>
+    intsch.fetchProduct({
+      field,
+      value,
+      salesChannel: finalSalesChannel?.toString(),
+      regionId: regionId ?? undefined,
+      locale: finalLocale,
+    })
+  )
+
+  const products = await Promise.all(productPromises)
+
+  return products as SearchProduct[]
+}
+
+export async function resolveProductsByIdentifier(
+  ctx: Context,
+  args: ProductsByIdentifierArgs
+): Promise<SearchProduct[]> {
+  const vtexSegment =
+    !ctx.vtex.segment || (!ctx.vtex.segment?.regionId && args.regionId)
+      ? buildVtexSegment({
+          vtexSegment: ctx.vtex.segment as SegmentData | undefined,
+          salesChannel: args.salesChannel?.toString(),
+          regionId: args.regionId ?? undefined,
+        })
+      : ctx.vtex.segmentToken
+
+  const { shouldUseNewPDPEndpoint } = await fetchAppSettings(ctx)
+
+  try {
+    let products: SearchProduct[]
+
+    // Check if current account should use intsch directly
+    if (shouldUseNewPDPEndpoint) {
+      products = await fetchProductsByIdentifierFromIntsch(
+        ctx,
+        args,
+        vtexSegment
+      )
+    } else {
+      products = await fetchProductsByIdentifierFromSearch(
+        ctx,
+        args,
+        vtexSegment
+      )
+    }
+
+    return products
+  } catch (error) {
+    ctx.vtex.logger.error({
+      message: 'Error fetching products by identifier',
+      error: error.message,
+      args,
     })
     throw error
   }

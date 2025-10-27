@@ -1,0 +1,142 @@
+import {
+  buildAttributePath,
+  convertOrderBy,
+} from '../commons/compatibility-layer'
+import { getWorkspaceSearchParamsFromStorage } from '../routes/workspaceSearchParams'
+import { compareApiResults } from '../utils/compareResults'
+import { fetchAppSettings } from './settings'
+import type { ProductSearchInput } from '../typings/Search'
+
+const defaultAdvertisementOptions = {
+  showSponsored: false,
+  sponsoredCount: 3,
+  repeatSponsoredProducts: true,
+}
+
+/**
+ * Fetches product search results using the intelligentSearchApi client (Biggy)
+ */
+// eslint-disable-next-line max-params
+async function fetchProductSearchFromBiggy(
+  ctx: Context,
+  args: ProductSearchInput,
+  selectedFacets: SelectedFacet[],
+  shippingOptions?: string[]
+) {
+  const { intelligentSearchApi } = ctx.clients
+  const { fullText, advertisementOptions = defaultAdvertisementOptions } = args
+
+  const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+
+  const biggyArgs: { [key: string]: any } = {
+    ...advertisementOptions,
+    ...args,
+    query: fullText,
+    sort: convertOrderBy(args.orderBy),
+    ...args.options,
+    ...workspaceSearchParams,
+  }
+
+  // unnecessary field. It's is an object and breaks the @vtex/api cache
+  delete biggyArgs.selectedFacets
+
+  const result: any = await intelligentSearchApi.productSearch(
+    { ...biggyArgs },
+    buildAttributePath(selectedFacets),
+    shippingOptions
+  )
+
+  if (ctx.vtex.tenant && !args.productOriginVtex) {
+    ctx.translated = result.translated
+  }
+
+  return {
+    searchState: args.searchState,
+    ...result,
+  }
+}
+
+/**
+ * Fetches product search results using the intsch client (Intelligent Search)
+ */
+// eslint-disable-next-line max-params
+async function fetchProductSearchFromIntsch(
+  ctx: Context,
+  args: ProductSearchInput,
+  selectedFacets: SelectedFacet[],
+  shippingOptions?: string[]
+) {
+  const { intsch } = ctx.clients
+  const { fullText, advertisementOptions = defaultAdvertisementOptions } = args
+
+  const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+
+  const intschArgs: { [key: string]: any } = {
+    ...advertisementOptions,
+    ...args,
+    query: fullText,
+    sort: convertOrderBy(args.orderBy),
+    ...args.options,
+    ...workspaceSearchParams,
+  }
+
+  // unnecessary field. It's is an object and breaks the @vtex/api cache
+  delete intschArgs.selectedFacets
+
+  const result: any = await intsch.productSearch(
+    { ...intschArgs },
+    buildAttributePath(selectedFacets),
+    shippingOptions
+  )
+
+  if (ctx.vtex.tenant && !args.productOriginVtex) {
+    ctx.translated = result.translated
+  }
+
+  return {
+    searchState: args.searchState,
+    ...result,
+  }
+}
+
+/**
+ * ProductSearch service that extracts product search fetching logic and implements comparison or flag-based routing
+ */
+// eslint-disable-next-line max-params
+export async function fetchProductSearch(
+  ctx: Context,
+  args: ProductSearchInput,
+  selectedFacets: SelectedFacet[],
+  shippingOptions?: string[]
+) {
+  const { shouldUseNewPLPEndpoint } = await fetchAppSettings(ctx)
+
+  if (shouldUseNewPLPEndpoint) {
+    return fetchProductSearchFromIntsch(
+      ctx,
+      args,
+      selectedFacets,
+      shippingOptions
+    )
+  }
+
+  return compareApiResults(
+    () =>
+      fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions),
+    () =>
+      fetchProductSearchFromIntsch(ctx, args, selectedFacets, shippingOptions),
+    ctx.vtex.production ? 10 : 100,
+    ctx.vtex.logger,
+    {
+      logPrefix: 'ProductSearch',
+      args: {
+        fullText: args.fullText,
+        query: args.query,
+        from: args.from,
+        to: args.to,
+        selectedFacets,
+        shippingOptions,
+      },
+    }
+  )
+}
