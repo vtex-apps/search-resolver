@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Disable shadow traffic to prepare for Black Friday.
+
 ## [1.87.0] - 2025-10-27
 
 ### Added

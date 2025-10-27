@@ -1,5 +1,5 @@
 import { buildAttributePath } from '../commons/compatibility-layer'
-import { compareApiResults } from '../utils/compareResults'
+import { compareApiResults, NO_TRAFFIC } from '../utils/compareResults'
 import { fetchAppSettings } from './settings'
 import type { FacetsInput } from '../typings/Search'
 
@@ -89,7 +89,7 @@ export async function fetchFacets(
   return compareApiResults(
     () => fetchFacetsFromBiggy(ctx, args, selectedFacets, shippingOptions),
     () => fetchFacetsFromIntsch(ctx, args, selectedFacets, shippingOptions),
-    ctx.vtex.production ? 10 : 100,
+    ctx.vtex.production ? NO_TRAFFIC : 100,
     ctx.vtex.logger,
     {
       logPrefix: 'Facets',

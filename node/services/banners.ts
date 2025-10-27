@@ -1,4 +1,4 @@
-import { compareApiResults } from '../utils/compareResults'
+import { compareApiResults, NO_TRAFFIC } from '../utils/compareResults'
 import { buildAttributePath } from '../commons/compatibility-layer'
 
 export async function fetchBanners(
@@ -19,7 +19,7 @@ export async function fetchBanners(
   return compareApiResults(
     () => intelligentSearchApi.fetchBanners(argumentsToFetchBanners),
     () => intsch.fetchBannersV1({ ...argumentsToFetchBanners, locale }),
-    ctx.vtex.production ? 10 : 100,
+    ctx.vtex.production ? NO_TRAFFIC : 100,
     ctx.vtex.logger,
     {
       logPrefix: 'Banners',
