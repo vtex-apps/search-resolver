@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- Added log to `productCategoriesToCategoryTree` fallback return if the platform is not `vtex` to detect if it is used
+
 ## [1.82.0] - 2025-10-01
 
 ### Changed
