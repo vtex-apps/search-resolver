@@ -1,5 +1,6 @@
-import { compose, last, omit, pathOr, split, flatten } from 'ramda'
+import { compose, flatten, last, omit, pathOr, split } from 'ramda'
 
+import { fetchAppSettings } from '../../services/settings'
 import {
   addContextToTranslatableString,
   formatTranslatableProp,
@@ -7,6 +8,7 @@ import {
   shouldTranslateToUserLocale,
 } from '../../utils/i18n'
 import { getBenefits } from '../benefits'
+import { mountHrefRewritter } from './category'
 import { buildCategoryMap, logDegradedSearchError } from './utils'
 
 type DynamicKey<T> = Record<string, T>
@@ -121,10 +123,13 @@ const findMainTree = (categoriesIds: string[], prodCategoryId: string) => {
 }
 
 const productCategoriesToCategoryTree = async (
-  { categories, categoriesIds, categoryId: prodCategoryId }: SearchProduct,
+  // TODO categoryTree will be added
+  { categories, categoriesIds, categoryId: prodCategoryId, categoryTree }: SearchProduct & { categoryTree: Array<{ id: number, name: string, href: string }> },
   _: any,
-  { clients: { search }, vtex: { platform } }: Context
+  ctx: Context
 ) => {
+  const { clients: { search }, vtex: { platform } } = ctx
+  const { shouldUseNewPDPEndpoint } = await fetchAppSettings(ctx)
   if (!categories || !categoriesIds) {
     return []
   }
@@ -132,7 +137,13 @@ const productCategoriesToCategoryTree = async (
   const mainTreeIds = findMainTree(categoriesIds, prodCategoryId)
 
   if (platform === 'vtex') {
-    return mainTreeIds.map(categoryId => search.category(Number(categoryId)))
+    if (shouldUseNewPDPEndpoint) {
+      return categoryTree.map(category => ({ ...category, href: mountHrefRewritter(category, _, ctx) }))
+    }
+    return mainTreeIds.map(async categoryId => {
+      const category = await search.category(Number(categoryId))
+      return {...category,}
+    })
   }
   const categoriesTree = await search.categories(mainTreeIds.length)
   const categoryMap = buildCategoryMap(categoriesTree)
