@@ -1,4 +1,4 @@
-import { compareApiResults } from '../utils/compareResults'
+import { compareApiResults, NO_TRAFFIC } from '../utils/compareResults'
 
 export function fetchAutocompleteSuggestions(ctx: Context, query: string) {
   const { intelligentSearchApi, intsch } = ctx.clients
@@ -12,7 +12,7 @@ export function fetchAutocompleteSuggestions(ctx: Context, query: string) {
   return compareApiResults(
     () => intelligentSearchApi.fetchAutocompleteSuggestions(args),
     () => intsch.fetchAutocompleteSuggestionsV1({ ...args, locale }),
-    ctx.vtex.production ? 10 : 100,
+    ctx.vtex.production ? NO_TRAFFIC : 100,
     ctx.vtex.logger,
     {
       logPrefix: 'Autocomplete Suggestions',
@@ -31,7 +31,7 @@ export function fetchTopSearches(ctx: Context) {
   return compareApiResults(
     () => intelligentSearchApi.fetchTopSearches(),
     () => intsch.fetchTopSearchesV1(locale),
-    ctx.vtex.production ? 10 : 100,
+    ctx.vtex.production ? NO_TRAFFIC : 100,
     ctx.vtex.logger,
     {
       logPrefix: 'Top Searches',
@@ -54,7 +54,7 @@ export function fetchSearchSuggestions(ctx: Context, query: string) {
   return compareApiResults(
     () => intelligentSearchApi.fetchSearchSuggestions(args),
     () => intsch.fetchSearchSuggestionsV1({ ...args, locale }),
-    ctx.vtex.production ? 10 : 100,
+    ctx.vtex.production ? NO_TRAFFIC : 100,
     ctx.vtex.logger,
     {
       logPrefix: 'Search Suggestions',
@@ -75,7 +75,7 @@ export function fetchCorrection(ctx: Context, query: string) {
   return compareApiResults(
     () => intelligentSearchApi.fetchCorrection(args),
     () => intsch.fetchCorrectionV1({ ...args, locale }),
-    ctx.vtex.production ? 10 : 100,
+    ctx.vtex.production ? NO_TRAFFIC : 100,
     ctx.vtex.logger,
     {
       logPrefix: 'Correction',
