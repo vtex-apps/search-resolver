@@ -1,4 +1,4 @@
-import { compose, last, omit, pathOr, split, flatten } from 'ramda'
+import { compose, flatten, last, omit, pathOr, split } from 'ramda'
 
 import {
   addContextToTranslatableString,
@@ -123,7 +123,7 @@ const findMainTree = (categoriesIds: string[], prodCategoryId: string) => {
 const productCategoriesToCategoryTree = async (
   { categories, categoriesIds, categoryId: prodCategoryId }: SearchProduct,
   _: any,
-  { clients: { search }, vtex: { platform } }: Context
+  { clients: { search }, vtex: { platform, logger } }: Context
 ) => {
   if (!categories || !categoriesIds) {
     return []
@@ -134,6 +134,8 @@ const productCategoriesToCategoryTree = async (
   if (platform === 'vtex') {
     return mainTreeIds.map(categoryId => search.category(Number(categoryId)))
   }
+
+  logger.info({ message: 'productCategoriesToCategoryTree: not vtex platform', platform })
   const categoriesTree = await search.categories(mainTreeIds.length)
   const categoryMap = buildCategoryMap(categoriesTree)
   const mappedCategories = mainTreeIds
