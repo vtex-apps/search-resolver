@@ -47,6 +47,7 @@ export const addContextToTranslatableString = (message: Message, ctx: Context) =
 
     const context = (originalContext || message.context)?.toString()
     const from = originalFrom || message.from || locale
+    // @ts-expect-error
     return formatTranslatableStringV2({ content, context, from, state })
   } catch (e) {
     logDegradedSearchError(ctx.vtex.logger, {
