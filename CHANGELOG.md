@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed
+
+- Remove invalid character validation from `searchMetadata` query.
+
 ## [1.88.1] - 2025-10-29
 
 ### Added
