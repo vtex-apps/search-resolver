@@ -1,5 +1,7 @@
 import type { Logger } from '@vtex/api'
 
+export const NO_TRAFFIC = 0
+
 /**
  * Utility to compare the results of two functions in parallel
  * Used primarily for comparing the results of two API implementations
@@ -43,7 +45,7 @@ export function findDifferences(
   a: unknown,
   b: unknown,
   path = '',
-  maxDepth = 20,
+  maxDepth = 50,
   currentDepth = 0
 ): ObjectDifference[] {
   const differences: ObjectDifference[] = []
@@ -200,11 +202,48 @@ export function isDeepEqual(
 }
 
 /**
+ * Filters out differences that should be ignored based on path and type
+ * @param differences Array of differences to filter
+ * @param ignoredDifferences Array of ignored difference configurations
+ * @returns Filtered array of differences
+ */
+export function filterIgnoredDifferences(
+  differences: ObjectDifference[],
+  ignoredDifferences: IgnoredDifference[] = []
+): ObjectDifference[] {
+  if (ignoredDifferences.length === 0) {
+    return differences
+  }
+
+  return differences.filter((difference) => {
+    // Check if this difference should be ignored
+    return !ignoredDifferences.some(
+      (ignored) =>
+        ignored.path === difference.path && ignored.type === difference.type
+    )
+  })
+}
+
+/**
+ * Configuration for ignoring expected differences
+ */
+export interface IgnoredDifference {
+  path: string
+  type:
+    | 'missing_key'
+    | 'extra_key'
+    | 'different_value'
+    | 'different_type'
+    | 'array_length_mismatch'
+}
+
+/**
  * Options for the compareApiResults function
  */
 export interface CompareApiResultsOptions {
   args?: unknown
   logPrefix?: string
+  ignoredDifferences?: IgnoredDifference[]
 }
 
 /**
@@ -223,7 +262,7 @@ export async function compareApiResults<T>(
   logger: Logger,
   options: CompareApiResultsOptions = {}
 ): Promise<T> {
-  const { logPrefix = 'API Comparison' } = options
+  const { logPrefix = 'API Comparison', ignoredDifferences = [] } = options
 
   // Check if we should perform comparison based on sample percentage
   const shouldCompare = Math.random() * 100 < sample
@@ -248,13 +287,18 @@ export async function compareApiResults<T>(
 
   let areEqual = false
   let differences: ObjectDifference[] = []
+  let filteredDifferences: ObjectDifference[] = []
 
   try {
     if (!hasError1 && !hasError2) {
       const comparisonResult = isDeepEqual(result1, result2)
 
-      areEqual = comparisonResult.isEqual
       differences = comparisonResult.differences
+      filteredDifferences = filterIgnoredDifferences(
+        differences,
+        ignoredDifferences
+      )
+      areEqual = filteredDifferences.length === 0
     }
   } catch (error) {
     logger.error({
@@ -267,14 +311,18 @@ export async function compareApiResults<T>(
     logger.error({
       message: `${logPrefix}: Results differ`,
       params: JSON.stringify(options.args),
-      differences: differences.slice(0, 10), // Limit to first 10 differences to avoid log overflow
-      differenceCount: differences.length,
+      differences: filteredDifferences.slice(0, 10), // Limit to first 10 differences to avoid log overflow
+      differenceCount: filteredDifferences.length,
+      totalDifferences: differences.length,
+      ignoredDifferences: differences.length - filteredDifferences.length,
     })
   } else if (areEqual) {
     logger.info({
       //  Since the log level is indexed we are using it to get a sense of the % of results that are equal.
       message: `${logPrefix}: Results are equal`,
       params: JSON.stringify(options.args),
+      totalDifferences: differences.length,
+      ignoredDifferences: differences.length - filteredDifferences.length,
     })
   }
 

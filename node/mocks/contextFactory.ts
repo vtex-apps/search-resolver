@@ -2,6 +2,7 @@ import parse from 'co-body'
 
 import type { IntelligentSearchClientArgs } from './intsch'
 import { MockedIntschClient } from './intsch'
+import type { SegmentData } from '../typings/Search'
 
 export function createContext<Ctx = Context>({
   accountName,
@@ -12,6 +13,10 @@ export function createContext<Ctx = Context>({
   req,
   query,
   production,
+  appSettings,
+  segment,
+  tenantLocale,
+  vtexLocale,
 }: {
   production?: boolean
   appSettings?: Record<string, any>
@@ -24,6 +29,9 @@ export function createContext<Ctx = Context>({
   body?: any
   cookies?: Record<string, string>
   accountName?: string
+  segment?: SegmentData
+  tenantLocale?: string
+  vtexLocale?: string
 }) {
   if (req?.body instanceof Error) {
     jest.spyOn(parse, 'json').mockRejectedValue(req.body)
@@ -47,8 +55,11 @@ export function createContext<Ctx = Context>({
         intelligentSearchApiSettings
       ),
       apps: {
-        getAppSettings: jest.fn().mockReturnValue({}),
+        getAppSettings: jest.fn().mockReturnValue(appSettings ?? {}),
       },
+      vbase: {
+        getJSON: jest.fn().mockResolvedValue({}),
+      }
     },
     vtex: {
       production: production ?? false,
@@ -58,6 +69,11 @@ export function createContext<Ctx = Context>({
         warn: jest.fn(),
         error: jest.fn(),
       },
+      segment,
+      tenant: {
+        locale: tenantLocale,
+      },
+      locale: vtexLocale,
     },
     query: query ?? {},
   } as unknown as Ctx

@@ -1,11 +1,18 @@
 import { NotFoundError, UserInputError, createMessagesLoader } from '@vtex/api'
-import { head, isEmpty, isNil, pathOr, test } from 'ramda'
+import { pathOr, test } from 'ramda'
 
 import {
   buildAttributePath,
   convertOrderBy,
 } from '../../commons/compatibility-layer'
 import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
+import {
+  ProductArgs,
+  ProductIdentifier,
+  ProductsByIdentifierArgs,
+  resolveProduct,
+  resolveProductsByIdentifier,
+} from '../../services/product'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import { resolvers as assemblyOptionResolvers } from './assemblyOption'
 import { resolvers as autocompleteResolvers } from './autocomplete'
@@ -33,23 +40,16 @@ import {
   getShippingOptionsFromSelectedFacets,
   validMapAndQuery,
 } from './utils'
-import { 
+import {
   fetchAutocompleteSuggestions,
   fetchTopSearches,
   fetchSearchSuggestions,
   fetchCorrection,
 } from '../../services/autocomplete'
-interface ProductIndentifier {
-  field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
-  value: string
-}
-
-interface ProductArgs {
-  slug?: string
-  identifier?: ProductIndentifier
-  regionId?: string
-  salesChannel?: number
-}
+import { fetchBanners } from '../../services/banners'
+import { fetchFacets } from '../../services/facets'
+import { fetchProductSearch } from '../../services/productSearch'
+import { AdvertisementOptions, FacetsInput, ProductSearchInput, ProductsInput, SuggestionProductsArgs } from '../../typings/Search'
 
 enum CrossSellingInput {
   view = 'view',
@@ -66,17 +66,11 @@ enum CrossSellingGroupByInput {
 }
 
 interface ProductRecommendationArg {
-  identifier?: ProductIndentifier
+  identifier?: ProductIdentifier
   type?: CrossSellingInput
   groupBy?: CrossSellingGroupByInput
 }
 
-interface ProductsByIdentifierArgs {
-  field: 'id' | 'ean' | 'reference' | 'sku'
-  values: string[]
-  salesChannel?: string | null
-  regionId?: string | null
-}
 
 const inputToSearchCrossSelling = {
   [CrossSellingInput.buy]: SearchCrossSellingTypes.whoboughtalsobought,
@@ -85,25 +79,6 @@ const inputToSearchCrossSelling = {
   [CrossSellingInput.viewAndBought]: SearchCrossSellingTypes.whosawalsobought,
   [CrossSellingInput.accessories]: SearchCrossSellingTypes.accessories,
   [CrossSellingInput.suggestions]: SearchCrossSellingTypes.suggestions,
-}
-
-const buildVtexSegment = (
-  vtexSegment?: SegmentData,
-  tradePolicy?: number,
-  regionId?: string | null
-): string => {
-  const cookie = {
-    regionId: regionId,
-    channel: tradePolicy,
-    utm_campaign: vtexSegment?.utm_campaign || '',
-    utm_source: vtexSegment?.utm_source || '',
-    utmi_campaign: vtexSegment?.utmi_campaign || '',
-    currencyCode: vtexSegment?.currencyCode || '',
-    currencySymbol: vtexSegment?.currencySymbol || '',
-    countryCode: vtexSegment?.countryCode || '',
-    cultureInfo: vtexSegment?.cultureInfo || '',
-  }
-  return new Buffer(JSON.stringify(cookie)).toString('base64')
 }
 
 /**
@@ -260,9 +235,6 @@ const isLegacySearchFormat = ({
   return map.split(MAP_VALUES_SEP).length === query.split(PATH_SEPARATOR).length
 }
 
-const isValidProductIdentifier = (identifier: ProductIndentifier | undefined) =>
-  !!identifier && !isNil(identifier.value) && !isEmpty(identifier.value)
-
 const getTranslatedSearchTerm = async (
   query: SearchArgs['query'],
   map: SearchArgs['map'],
@@ -377,86 +349,25 @@ export const queries = {
 
     let { selectedFacets } = args
 
-    const {
-      clients: { intelligentSearchApi },
-    } = ctx
-
-    const biggyArgs: { [key: string]: any } = {
-      ...args,
-    }
-
-    // unnecessary field. It's is an object and breaks the @vtex/api cache
-    delete biggyArgs.selectedFacets
-
-    const result = await intelligentSearchApi.facets(
-      { ...biggyArgs, query: args.fullText },
-      buildAttributePath(selectedFacets),
-      shippingOptions
-    )
-
-    if (ctx.vtex.tenant) {
-      ctx.translated = result.translated
-    }
-
-    return result
+    return fetchFacets(ctx, args, selectedFacets, shippingOptions)
   },
 
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
-    const {
-      clients: { search },
-    } = ctx
+    const product = await resolveProduct(ctx, rawArgs)
 
-    const args =
-      rawArgs && isValidProductIdentifier(rawArgs.identifier)
-        ? rawArgs
-        : { identifier: { field: 'slug', value: rawArgs.slug! } }
-
-    if (!args.identifier) {
-      throw new UserInputError('No product identifier provided')
+    if (!product) {
+      const identifier = rawArgs?.identifier || {
+        field: 'slug',
+        value: rawArgs.slug!,
+      }
+      throw new NotFoundError(
+        `No product was found with requested ${
+          identifier.field
+        } ${JSON.stringify({ identifier })}`
+      )
     }
 
-    let cookie: SegmentData | undefined = ctx.vtex.segment
-
-    const salesChannel = rawArgs.salesChannel || cookie?.channel || 1
-
-    const { field, value } = args.identifier
-
-    let products = [] as SearchProduct[]
-
-    const vtexSegment =
-      !cookie || (!cookie?.regionId && rawArgs.regionId)
-        ? buildVtexSegment(cookie, salesChannel, rawArgs.regionId)
-        : ctx.vtex.segmentToken
-
-    switch (field) {
-      case 'id':
-        products = await search.productById(value, vtexSegment, salesChannel)
-        break
-      case 'slug':
-        products = await search.product(value, vtexSegment, salesChannel)
-        break
-      case 'ean':
-        products = await search.productByEan(value, vtexSegment, salesChannel)
-        break
-      case 'reference':
-        products = await search.productByReference(
-          value,
-          vtexSegment,
-          salesChannel
-        )
-        break
-      case 'sku':
-        products = await search.productBySku(value, vtexSegment, salesChannel)
-        break
-    }
-
-    if (products.length > 0) {
-      return head(products)
-    }
-
-    throw new NotFoundError(
-      `No product was found with requested ${field} ${JSON.stringify(args)}`
-    )
+    return product
   },
 
   products: async (_: any, args: ProductsInput, ctx: Context) => {
@@ -506,46 +417,13 @@ export const queries = {
     args: ProductsByIdentifierArgs,
     ctx: Context
   ) => {
-    const {
-      clients: { search },
-    } = ctx
-
-    let products = [] as SearchProduct[]
-    const { field, values, salesChannel } = args
-
-    const vtexSegment =
-      !ctx.vtex.segment || (!ctx.vtex.segment?.regionId && args.regionId)
-        ? buildVtexSegment(
-            ctx.vtex.segment,
-            Number(args.salesChannel),
-            args.regionId
-          )
-        : ctx.vtex.segmentToken
-
-    switch (field) {
-      case 'id':
-        products = await search.productsById(values, vtexSegment, salesChannel)
-        break
-      case 'ean':
-        products = await search.productsByEan(values, vtexSegment, salesChannel)
-        break
-      case 'reference':
-        products = await search.productsByReference(
-          values,
-          vtexSegment,
-          salesChannel
-        )
-        break
-      case 'sku':
-        products = await search.productsBySku(values, vtexSegment, salesChannel)
-        break
-    }
+    const products = await resolveProductsByIdentifier(ctx, args)
 
     if (products.length > 0) {
       return products
     }
 
-    throw new NotFoundError(`No products were found with requested ${field}`)
+    throw new NotFoundError(`No products were found with requested ${args.field}`)
   },
 
   productSearch: async (_: any, args: ProductSearchInput, ctx: any) => {
@@ -567,41 +445,9 @@ export const queries = {
       })
     }
 
-    const { intelligentSearchApi } = ctx.clients
-    const {
-      selectedFacets,
-      fullText,
-      advertisementOptions = defaultAdvertisementOptions,
-    } = args
+    const { selectedFacets } = args
 
-    const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
-
-    const biggyArgs: { [key: string]: any } = {
-      ...advertisementOptions,
-      ...args,
-      query: fullText,
-      sort: convertOrderBy(args.orderBy),
-      ...args.options,
-      ...workspaceSearchParams,
-    }
-
-    // unnecessary field. It's is an object and breaks the @vtex/api cache
-    delete biggyArgs.selectedFacets
-
-    const result = await intelligentSearchApi.productSearch(
-      { ...biggyArgs },
-      buildAttributePath(selectedFacets),
-      shippingOptions
-    )
-
-    if (ctx.vtex.tenant && !args.productOriginVtex) {
-      ctx.translated = result.translated
-    }
-
-    return {
-      searchState: args.searchState,
-      ...result,
-    }
+    return fetchProductSearch(ctx, args, selectedFacets, shippingOptions)
   },
 
   sponsoredProducts: async (_: any, args: ProductSearchInput, ctx: any) => {
@@ -791,14 +637,7 @@ export const queries = {
     args: { fullText: string; selectedFacets: SelectedFacet[] },
     ctx: Context
   ) => {
-    const { intelligentSearchApi } = ctx.clients
-
-    return intelligentSearchApi.banners(
-      {
-        query: args.fullText,
-      },
-      buildAttributePath(args.selectedFacets)
-    )
+    return fetchBanners(ctx, args)
   },
   correction: (_: any, args: { fullText: string }, ctx: Context) => {
     return fetchCorrection(ctx, args.fullText)

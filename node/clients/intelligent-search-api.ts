@@ -2,9 +2,20 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
 import { parseState } from '../utils/searchState'
-import type { IIntelligentSearchClient } from './intsch/types'
+import type {
+  FetchBannersArgs,
+  IIntelligentSearchClient,
+  FetchProductArgs,
+  FetchProductResponse,
+  AutocompleteSuggestionsResponse,
+  CorrectionResponse,
+  FetchBannersResponse,
+  SearchSuggestionsResponse,
+  TopSearchesResponse,
+} from './intsch/types'
+import type { Options, SearchResultArgs } from '../typings/Search'
 
-const isPathTraversal = (str: string) => str.indexOf('..') >= 0
+export const isPathTraversal = (str: string) => str.indexOf('..') >= 0
 
 interface CorrectionParams {
   query: string
@@ -18,11 +29,7 @@ interface AutocompleteSearchSuggestionsParams {
   query: string
 }
 
-interface BannersArgs {
-  query: string
-}
-
-interface FacetsArgs {
+export type FacetsArgs = {
   query?: string
   page?: number
   count?: number
@@ -40,7 +47,7 @@ interface FacetsArgs {
   regionId?: string | null
 }
 
-const decodeQuery = (query: string) => {
+export const decodeQuery = (query: string) => {
   try {
     return decodeURIComponent(query)
   } catch (e) {
@@ -54,7 +61,7 @@ export class IntelligentSearchApi
 {
   private locale: string | undefined
 
-  public constructor(context: IOContext, options?: InstanceOptions) {
+  constructor(context: IOContext, options?: InstanceOptions) {
     super(
       `http://${context.workspace}--${context.account}.myvtex.com/_v/api/intelligent-search`,
       context,
@@ -103,13 +110,13 @@ export class IntelligentSearchApi
     })
   }
 
-  public async banners(params: BannersArgs, path: string) {
-    if (isPathTraversal(path)) {
+  public async fetchBanners(params: FetchBannersArgs) {
+    if (isPathTraversal(params.path)) {
       throw new Error('Malformed URL')
     }
 
-    return this.http.get(`/banners/${path}`, {
-      params: { ...params, query: params.query, locale: this.locale },
+    return this.http.get(`/banners/${params.path}`, {
+      params: { query: params.query, locale: this.locale },
       metric: 'banners',
     })
   }
@@ -130,7 +137,6 @@ export class IntelligentSearchApi
         ...params,
         query: query && decodeQuery(query),
         locale: this.locale,
-        // eslint-disable-next-line @typescript-eslint/camelcase
         bgy_leap: leap ? true : undefined,
         ...parseState(searchState),
       },
@@ -156,7 +162,6 @@ export class IntelligentSearchApi
       params: {
         query: query && decodeQuery(query),
         locale: this.locale,
-        // eslint-disable-next-line @typescript-eslint/camelcase
         bgy_leap: leap ? true : undefined,
         ...parseState(searchState),
         ...params,
@@ -183,7 +188,6 @@ export class IntelligentSearchApi
       params: {
         query: query && decodeQuery(query),
         locale: this.locale,
-        // eslint-disable-next-line @typescript-eslint/camelcase
         bgy_leap: leap ? true : undefined,
         ...parseState(searchState),
         ...params,
@@ -193,5 +197,31 @@ export class IntelligentSearchApi
         'x-vtex-shipping-options': shippingHeader ?? '',
       },
     })
+  }
+
+  public async fetchAutocompleteSuggestionsV1(): Promise<AutocompleteSuggestionsResponse> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async fetchTopSearchesV1(): Promise<TopSearchesResponse> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async fetchSearchSuggestionsV1(): Promise<SearchSuggestionsResponse> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async fetchCorrectionV1(): Promise<CorrectionResponse> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async fetchBannersV1(): Promise<FetchBannersResponse> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async fetchProduct(
+    _: FetchProductArgs
+  ): Promise<FetchProductResponse> {
+    throw new Error('Method not implemented.')
   }
 }

@@ -11,6 +11,56 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Added log to `productCategoriesToCategoryTree` fallback return if the platform is not `vtex` to detect if it is used
 
+## [1.88.0] - 2025-10-27
+
+### Changed
+
+- Disable shadow traffic to prepare for Black Friday.
+
+## [1.87.0] - 2025-10-27 [YANKED]
+
+### Added
+
+- Feature flag to call the productSearch and facets using the intsch api.
+
+### Changed 
+
+- Make productSearch and facets send a % of the traffic to our routes on intsch.
+
+### Fixed
+
+- Make the productIdentifier call the intsch when the feature flag is on.
+
+## [1.86.0] - 2025-10-21
+
+### Changed
+
+- Using shadow traffic to EKS to validate the v1 routes: banners, correction, suggestions.
+
+## [1.85.1] - 2025-10-14
+
+### Fixed
+
+- Segment enconding while making PDP requests.
+
+## [1.85.0] - 2025-10-13 [YANKED]
+
+### Changed
+
+- Using a feature flag to route the PDP traffic to some specific accounts.
+
+## [1.84.0] - 2025-10-07
+
+### Changed
+
+- Switch banners endpoint to use intsch as primary with intelligentSearchApi as fallback.
+
+## [1.83.0] - 2025-10-06
+
+### Changed
+
+- Start testing 10% of the fetchBanners traffic to intsch and compare the result against the VTEX /IO version.
+
 ## [1.82.0] - 2025-10-01
 
 ### Changed
