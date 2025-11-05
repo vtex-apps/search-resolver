@@ -49,6 +49,11 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
         locale: args.locale,
       },
       metric: 'search-product-new',
+      headers: {
+        ...(this.context.storeUserAuthToken
+          ? { VtexIdclientAutCookie: this.context.storeUserAuthToken }
+          : {}), // This is required when the sales channel is private
+      },
     })
   }
 
@@ -162,6 +167,9 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       metric: 'product-search-new',
       headers: {
         'x-vtex-shipping-options': shippingHeader ?? '',
+        ...(this.context.storeUserAuthToken
+          ? { VtexIdclientAutCookie: this.context.storeUserAuthToken }
+          : {}), // This is required when the sales channel is private
       },
     })
   }
@@ -188,6 +196,9 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       metric: 'facets-new',
       headers: {
         'x-vtex-shipping-options': shippingHeader ?? '',
+        ...(this.context.storeUserAuthToken
+          ? { VtexIdclientAutCookie: this.context.storeUserAuthToken }
+          : {}), // This is required when the sales channel is private
       },
     })
   }
