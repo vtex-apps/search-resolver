@@ -1,9 +1,53 @@
 name: PR actions
-on:
+'on':
   pull_request:
-    branches:
-      - v1.x
+    types: [opened, reopened, synchronize, edited]
+
 jobs:
+  io-app-test:
+    name: IO app test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+        env:
+          RUNNER_TEMP: /tmp
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: 'echo "::set-output name=dir::$(yarn cache dir)"'
+      - uses: actions/cache@v4
+        id: yarn-cache
+        with:
+          path: '${{ steps.yarn-cache-dir-path.outputs.dir }}'
+          key: "${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}"
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Run test on every builder directory
+        uses: vtex/action-io-app-test@master
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+        env:
+          RUNNER_TEMP: /tmp
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: 'echo "::set-output name=dir::$(yarn cache dir)"'
+      - uses: actions/cache@v4
+        id: yarn-cache
+        with:
+          path: '${{ steps.yarn-cache-dir-path.outputs.dir }}'
+          key: "${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}"
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Lint project
+        uses: vtex/action-lint@master
   Cypress:
     uses: vtex/action-io-app-cypress/.github/workflows/cypress.yml@v1
     with:
