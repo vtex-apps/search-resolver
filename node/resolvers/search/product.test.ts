@@ -75,6 +75,7 @@ describe('tests related to product resolver', () => {
       const searchProduct = getProduct()
 
       mockContext.vtex.platform = 'gocommerce'
+      mockContext.vtex.logger = { info: jest.fn() } as any
       mockContext.clients.search.categories.mockImplementation(() => [
         {
           id: '10',
