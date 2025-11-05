@@ -1,4 +1,6 @@
 name: PR actions
+permissions:
+  contents: read
 'on':
   pull_request:
     types: [opened, reopened, synchronize, edited]
