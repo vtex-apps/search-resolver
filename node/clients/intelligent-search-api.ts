@@ -143,6 +143,9 @@ export class IntelligentSearchApi
       metric: 'facets',
       headers: {
         'x-vtex-shipping-options': shippingHeader ?? '',
+        ...(this.context.storeUserAuthToken
+          ? { VtexIdclientAutCookie: this.context.storeUserAuthToken }
+          : {}), // This is required when the sales channel is private
       },
     })
   }
@@ -169,6 +172,9 @@ export class IntelligentSearchApi
       metric: 'product-search',
       headers: {
         'x-vtex-shipping-options': shippingHeader ?? '',
+        ...(this.context.storeUserAuthToken
+          ? { VtexIdclientAutCookie: this.context.storeUserAuthToken }
+          : {}), // This is required when the sales channel is private
       },
     })
   }
