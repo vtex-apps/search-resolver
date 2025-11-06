@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Send User auth token to intsch since it might be required for private sales channels.
+
 ## [1.88.2] - 2025-10-29
 
 ### Removed
