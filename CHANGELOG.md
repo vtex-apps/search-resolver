@@ -11,7 +11,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Send User auth token to intelligent-search-api since it might be required for private sales channels.
 
-
 ## [1.88.3] - 2025-11-06
 
 ### Fixed
