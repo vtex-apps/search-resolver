@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Send also the Admin auth tokens to intelligent-search-api and intcsh since it might be required for private sales channels, specially for Call-center users.
+
 ## [1.88.4] - 2025-11-06
 
 ### Fixed
