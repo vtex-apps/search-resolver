@@ -40,6 +40,10 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
   }
 
   public fetchProduct(args: FetchProductArgs): Promise<FetchProductResponse> {
+    // The admin auth token is releavant for CallCenter users when the sales channel is private.
+    const authToken =
+      this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
+
     return this.http.get('/api/intelligent-search/v1/products', {
       params: {
         field: args.field,
@@ -50,9 +54,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       },
       metric: 'search-product-new',
       headers: {
-        ...(this.context.storeUserAuthToken
-          ? { VtexIdclientAutCookie: this.context.storeUserAuthToken }
-          : {}), // This is required when the sales channel is private
+        ...(authToken ? { VtexIdclientAutCookie: authToken } : {}),
       },
     })
   }
@@ -156,6 +158,10 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       throw new Error('Malformed URL')
     }
 
+    // The admin auth token is releavant for CallCenter users when the sales channel is private.
+    const authToken =
+      this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
+
     return this.http.get(`/api/intelligent-search/v0/product-search/${path}`, {
       params: {
         query: query && decodeQuery(query),
@@ -167,9 +173,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       metric: 'product-search-new',
       headers: {
         'x-vtex-shipping-options': shippingHeader ?? '',
-        ...(this.context.storeUserAuthToken
-          ? { VtexIdclientAutCookie: this.context.storeUserAuthToken }
-          : {}), // This is required when the sales channel is private
+        ...(authToken ? { VtexIdclientAutCookie: authToken } : {}),
       },
     })
   }
@@ -185,6 +189,10 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
 
     const { query, leap, searchState } = params
 
+    // The admin auth token is releavant for CallCenter users when the sales channel is private.
+    const authToken =
+      this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
+
     return this.http.get(`/api/intelligent-search/v0/facets/${path}`, {
       params: {
         ...params,
@@ -196,9 +204,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       metric: 'facets-new',
       headers: {
         'x-vtex-shipping-options': shippingHeader ?? '',
-        ...(this.context.storeUserAuthToken
-          ? { VtexIdclientAutCookie: this.context.storeUserAuthToken }
-          : {}), // This is required when the sales channel is private
+        ...(authToken ? { VtexIdclientAutCookie: authToken } : {}),
       },
     })
   }

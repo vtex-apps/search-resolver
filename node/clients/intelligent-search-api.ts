@@ -132,6 +132,9 @@ export class IntelligentSearchApi
 
     const { query, leap, searchState } = params
 
+    const authToken =
+      this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
+
     return this.http.get(`/facets/${path}`, {
       params: {
         ...params,
@@ -143,9 +146,7 @@ export class IntelligentSearchApi
       metric: 'facets',
       headers: {
         'x-vtex-shipping-options': shippingHeader ?? '',
-        ...(this.context.storeUserAuthToken
-          ? { VtexIdclientAutCookie: this.context.storeUserAuthToken }
-          : {}), // This is required when the sales channel is private
+        ...(authToken ? { VtexIdclientAutCookie: authToken } : {}), // This is required when the sales channel is private
       },
     })
   }
@@ -161,6 +162,9 @@ export class IntelligentSearchApi
       throw new Error('Malformed URL')
     }
 
+    const authToken =
+      this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
+
     return this.http.get(`/product_search/${path}`, {
       params: {
         query: query && decodeQuery(query),
@@ -172,9 +176,7 @@ export class IntelligentSearchApi
       metric: 'product-search',
       headers: {
         'x-vtex-shipping-options': shippingHeader ?? '',
-        ...(this.context.storeUserAuthToken
-          ? { VtexIdclientAutCookie: this.context.storeUserAuthToken }
-          : {}), // This is required when the sales channel is private
+        ...(authToken ? { VtexIdclientAutCookie: authToken } : {}), // This is required when the sales channel is private
       },
     })
   }
