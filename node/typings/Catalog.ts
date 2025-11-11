@@ -134,6 +134,7 @@ interface SearchItem {
     id: number
     name: string
     required: boolean
+    isRequired?: boolean // Response from intsch
     domainValues?: string
     fields?: { // Response from intsch
       fieldName: string

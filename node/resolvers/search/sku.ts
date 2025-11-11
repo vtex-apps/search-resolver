@@ -38,6 +38,7 @@ export const resolvers = {
         if (typeof attachment.domainValues === 'string') {
           attachmentsResults.push({
             ...attachment,
+            required: attachment.required ?? false,
             domainValues: JSON.parse(attachment.domainValues) as DomainValue[],
           })
         }
@@ -46,6 +47,7 @@ export const resolvers = {
         if (attachment.fields) {
           attachmentsResults.push({
             ...attachment,
+            required: attachment.isRequired ?? false,
             domainValues: attachment.fields.map((field) => ({
               FieldName: field.fieldName,
               MaxCaracters: field.maxCharacters,
