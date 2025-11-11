@@ -87,15 +87,19 @@ export const resolvers = {
       if (!sku) {
         return sku
       }
+
       const variations = (sku.variations || []).map((variationObj) => {
         const variationName =
           typeof variationObj === 'string'
             ? variationObj
             : (variationObj as { name: string }).name
+
         const fieldId = (sku.skuSpecifications || []).find(
           (specification) => specification.field.name === variationName
         )?.field?.id
+
         const variationsValues = (sku as any)[variationName] as string[]
+
         return {
           name: addContextToTranslatableString(
             { content: variationName, context: fieldId },
@@ -109,11 +113,12 @@ export const resolvers = {
           ),
         }
       })
+
       return variations
     },
 
     videos: ({ Videos, videos }: SearchItem) => {
-      let sanitizedVideo = Videos ? Videos : videos
+      const sanitizedVideo = Videos ?? videos
 
       const formattedVideo = sanitizedVideo.map((video: string) => ({
         videoUrl: video,
