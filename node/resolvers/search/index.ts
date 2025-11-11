@@ -355,6 +355,8 @@ export const queries = {
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
     const product = await resolveProduct(ctx, rawArgs)
 
+    console.log("Prooduct", product);
+
     if (!product) {
       const identifier = rawArgs?.identifier || {
         field: 'slug',
