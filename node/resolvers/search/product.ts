@@ -43,13 +43,9 @@ const objToNameValue = (
 }
 
 type SearchProductWithCache = SearchProduct & { cacheId?: string }
-enum ItemsFilterEnum {
-  ALL = 'ALL',
-  FIRST_AVAILABLE = 'FIRST_AVAILABLE',
-  ALL_AVAILABLE = 'ALL_AVAILABLE',
-}
-interface ItemArg {
-  filter?: ItemsFilterEnum
+type ItemsFilter = 'ALL' | 'FIRST_AVAILABLE' | 'ALL_AVAILABLE'
+type ItemArg = {
+  filter?: ItemsFilter
 }
 
 const isSellerAvailable = (seller: Seller) =>
@@ -434,11 +430,11 @@ export const resolvers = {
         skuSpecifications,
       }))
 
-      if (filter === ItemsFilterEnum.ALL) {
+      if (filter === 'ALL') {
         return searchItemsWithVariations
       }
 
-      if (filter === ItemsFilterEnum.FIRST_AVAILABLE) {
+      if (filter === 'FIRST_AVAILABLE') {
         const firstAvailable = searchItemsWithVariations.find(isAvailable)
 
         return firstAvailable
@@ -446,7 +442,7 @@ export const resolvers = {
           : [searchItemsWithVariations[0]]
       }
 
-      if (filter === ItemsFilterEnum.ALL_AVAILABLE) {
+      if (filter === 'ALL_AVAILABLE') {
         const onlyAvailable = searchItemsWithVariations.filter(isAvailable)
 
         return onlyAvailable.length > 0
@@ -471,6 +467,81 @@ export const resolvers = {
       )
 
       return { offers }
+    },
+
+    itemMetadata: ({
+      items,
+      origin,
+      itemMetadata,
+      brand,
+      categoryId,
+      productId,
+    }: SearchProduct) => {
+      // Since the IS doesn't return the itemMetadata, we need to build it from the items.attachments
+      if (origin === 'intelligent-search') {
+        // Build itemMetadata from items.attachments
+        const metadataItems = items.map((item) => {
+          // Build assemblyOptions from attachments
+          const assemblyOptions = (item.attachments || []).map((attachment) => {
+            // Build inputValues from attachment fields
+            const inputValues: Record<
+              string,
+              { maximumNumberOfCharacters: number; domain: string[] }
+            > = {}
+
+            if (attachment.fields) {
+              attachment.fields.forEach((field) => {
+                const domain = field.domainValues
+                  ? field.domainValues
+                      .split(',')
+                      .map((v) => v.trim())
+                      .filter(Boolean)
+                  : []
+
+                inputValues[field.fieldName] = {
+                  maximumNumberOfCharacters:
+                    parseInt(field.maxCharacters, 10) || 0,
+                  domain,
+                }
+              })
+            }
+
+            return {
+              id: attachment.name,
+              name: attachment.name,
+              required: attachment.required || attachment.isRequired || false,
+              inputValues,
+              composition: null,
+            }
+          })
+
+          // Get the first available seller or default to '1'
+          const firstSeller =
+            item.sellers && item.sellers[0] ? item.sellers[0].sellerId : '1'
+
+          // Get the main image URL
+          const mainImage =
+            item.images && item.images[0] ? item.images[0].imageUrl : ''
+
+          return {
+            Name: item.name,
+            NameComplete: item.nameComplete,
+            MainImage: mainImage,
+            BrandName: brand,
+            CategoryId: parseInt(categoryId, 10),
+            ProductId: parseInt(productId, 10),
+            id: item.itemId,
+            seller: firstSeller,
+            assemblyOptions,
+          }
+        })
+
+        return {
+          items: metadataItems,
+        }
+      }
+
+      return itemMetadata
     },
   },
   OnlyProduct: {
