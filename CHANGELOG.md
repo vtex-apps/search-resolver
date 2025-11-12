@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Field resolver `Product.attachments`, adjust response to the new endpoint from intsch.
+- Create a new field resolver `Product.itemMetadata` to build the response if the request comes from intsch.
+
 ## [1.88.5] - 2025-11-10
 
 ### Fixed
