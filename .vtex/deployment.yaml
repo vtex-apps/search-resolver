@@ -1,0 +1,16 @@
+- name: search-resolver
+  referenceId: 6PIM3PYV
+  pipelines:
+    - name: techdocs-v1
+      parameters:
+        entityReference: default/component/search-resolver
+        indexFile: README.md
+      when:
+        - event: push
+          source: branch
+          regex: main
+          path:
+            - "docs/**"
+            - ".vtex/deployment.yaml"
+            - ".vtex/deployment.json"
+            - "README.md"
