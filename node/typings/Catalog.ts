@@ -134,7 +134,13 @@ interface SearchItem {
     id: number
     name: string
     required: boolean
-    domainValues: string
+    isRequired?: boolean // Response from intsch
+    domainValues?: string
+    fields?: { // Response from intsch
+      fieldName: string
+      maxCharacters: string
+      domainValues: string
+    }[]
   }[]
   isKit: boolean
   kitItems?: {
