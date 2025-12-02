@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.88.6] - 2025-12-02
+
 ### Fixed
 
 - Field resolver `Product.attachments`, adjust response to the new endpoint from intsch.
