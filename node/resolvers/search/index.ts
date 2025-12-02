@@ -49,7 +49,13 @@ import {
 import { fetchBanners } from '../../services/banners'
 import { fetchFacets } from '../../services/facets'
 import { fetchProductSearch } from '../../services/productSearch'
-import { AdvertisementOptions, FacetsInput, ProductSearchInput, ProductsInput, SuggestionProductsArgs } from '../../typings/Search'
+import type {
+  AdvertisementOptions,
+  FacetsInput,
+  ProductSearchInput,
+  ProductsInput,
+  SuggestionProductsArgs,
+} from '../../typings/Search'
 
 enum CrossSellingInput {
   view = 'view',
@@ -63,6 +69,45 @@ enum CrossSellingInput {
 enum CrossSellingGroupByInput {
   PRODUCT = 'PRODUCT',
   NONE = 'NONE',
+}
+
+// Legacy search format is our search with path?map=c,c,specificationFilter
+// Where it has specificationFilters and all segments in path are mapped in `map` querystring
+const isLegacySearchFormat = ({
+  query,
+  map,
+}: {
+  query: string
+  map?: string
+}) => {
+  if (!map) {
+    return false
+  }
+
+  return map.split(MAP_VALUES_SEP).length === query.split(PATH_SEPARATOR).length
+}
+
+export const getCompatibilityArgs = async <T extends QueryArgs>(
+  ctx: Context,
+  args: T
+) => {
+  const {
+    clients: { vbase, search },
+  } = ctx
+
+  const compatArgs = isLegacySearchFormat(args)
+    ? args
+    : await toCompatibilityArgs(vbase, search, args)
+
+  const formattedArgs = compatArgs ? { ...args, ...compatArgs } : args
+
+  // VTEX search does not understand brand/category/department and fails with error:
+  //  Query contains something not suited for search
+  formattedArgs.map = formattedArgs.map
+    ?.replace(/brand/g, 'b')
+    ?.replace(/category(-[0-9]*)?/g, 'c')
+
+  return formattedArgs
 }
 
 interface ProductRecommendationArg {
@@ -140,6 +185,7 @@ const translateToStoreDefaultLanguage = async (
     state,
     vtex: { locale: from, tenant },
   } = ctx
+
   const { locale: to } = tenant!
 
   if (!shouldTranslateToTenantLocale(ctx)) {
@@ -169,6 +215,7 @@ const searchFirstElements = (
     // We do not want this for pages other than the first
     return
   }
+
   products
     .slice(0, Math.min(10, products.length))
     .forEach((product) =>
@@ -198,43 +245,6 @@ export const fieldResolvers = {
   ...searchBreadcrumbResolvers,
 }
 
-export const getCompatibilityArgs = async <T extends QueryArgs>(
-  ctx: Context,
-  args: T
-) => {
-  const {
-    clients: { vbase, search },
-  } = ctx
-  const compatArgs = isLegacySearchFormat(args)
-    ? args
-    : await toCompatibilityArgs(vbase, search, args)
-
-  const formattedArgs = compatArgs ? { ...args, ...compatArgs } : args
-
-  // VTEX search does not understand brand/category/department and fails with error:
-  //  Query contains something not suited for search
-  formattedArgs.map = formattedArgs.map
-    ?.replace(/brand/g, 'b')
-    ?.replace(/category(-[0-9]*)?/g, 'c')
-
-  return formattedArgs
-}
-
-// Legacy search format is our search with path?map=c,c,specificationFilter
-// Where it has specificationFilters and all segments in path are mapped in `map` querystring
-const isLegacySearchFormat = ({
-  query,
-  map,
-}: {
-  query: string
-  map?: string
-}) => {
-  if (!map) {
-    return false
-  }
-  return map.split(MAP_VALUES_SEP).length === query.split(PATH_SEPARATOR).length
-}
-
 const getTranslatedSearchTerm = async (
   query: SearchArgs['query'],
   map: SearchArgs['map'],
@@ -243,10 +253,13 @@ const getTranslatedSearchTerm = async (
   if (!query || !map || !shouldTranslateToTenantLocale(ctx)) {
     return query
   }
+
   const ftSearchIndex = map.split(',').findIndex((m) => m === 'ft')
+
   if (ftSearchIndex === -1) {
     return query
   }
+
   const queryArray = query.split('/')
   const queryUnit = queryArray[ftSearchIndex]
   const translated = await translateToStoreDefaultLanguage(ctx, queryUnit)
@@ -255,6 +268,7 @@ const getTranslatedSearchTerm = async (
     translated,
     ...queryArray.slice(ftSearchIndex + 1),
   ]
+
   return queryTranslated.join('/')
 }
 
@@ -263,6 +277,7 @@ const buildSpecificationFiltersAsFacets = (
 ): SelectedFacet[] => {
   return specificationFilters.map((specificationFilter: string) => {
     const [key, value] = specificationFilter.split(':')
+
     return { key, value }
   })
 }
@@ -271,6 +286,7 @@ const buildCategoriesAndSubcategoriesAsFacets = (
   categories: string
 ): SelectedFacet[] => {
   const categoriesAndSubcategories = categories.split('/')
+
   return categoriesAndSubcategories.map((c: string) => {
     return { key: 'c', value: c }
   })
@@ -326,10 +342,12 @@ export const queries = {
       ctx,
       args.searchTerm
     )
+
     const { itemsReturned } = await search.autocomplete({
       maxRows: args.maxRows,
       searchTerm: translatedTerm,
     })
+
     return {
       cacheId: args.searchTerm,
       itemsReturned,
@@ -347,7 +365,7 @@ export const queries = {
       args
     )) as FacetsInput
 
-    let { selectedFacets } = args
+    const { selectedFacets } = args
 
     return fetchFacets(ctx, args, selectedFacets, shippingOptions)
   },
@@ -360,6 +378,7 @@ export const queries = {
         field: 'slug',
         value: rawArgs.slug!,
       }
+
       throw new NotFoundError(
         `No product was found with requested ${
           identifier.field
@@ -374,6 +393,7 @@ export const queries = {
     const {
       clients: { intelligentSearchApi },
     } = ctx
+
     const {
       to,
       orderBy,
@@ -423,13 +443,16 @@ export const queries = {
       return products
     }
 
-    throw new NotFoundError(`No products were found with requested ${args.field}`)
+    throw new NotFoundError(
+      `No products were found with requested ${args.field}`
+    )
   },
 
   productSearch: async (_: any, args: ProductSearchInput, ctx: any) => {
     const [shippingOptions, facets] = getShippingOptionsFromSelectedFacets(
       args.selectedFacets
     )
+
     args.selectedFacets = facets
 
     args = (await getCompatibilityArgsFromSelectedFacets(
@@ -454,6 +477,7 @@ export const queries = {
     const [shippingOptions, facets] = getShippingOptionsFromSelectedFacets(
       args.selectedFacets
     )
+
     args.selectedFacets = facets
 
     args = (await getCompatibilityArgsFromSelectedFacets(
@@ -506,10 +530,13 @@ export const queries = {
     if (identifier == null || type == null) {
       throw new UserInputError('Wrong input provided')
     }
+
     const searchType = inputToSearchCrossSelling[type]
     let productId = identifier.value
+
     if (identifier.field !== 'id') {
       const product = await queries.product(_, { identifier }, ctx)
+
       productId = product!.productId
     }
 
@@ -525,8 +552,10 @@ export const queries = {
     searchFirstElements(products, 0, ctx.clients.search)
     // We add a custom cacheId because these products are not exactly like the other products from search apis.
     // Each product is basically a SKU and you may have two products in response with same ID but each one representing a SKU.
+
     return products.map((product) => {
       const skuId = pathOr('', ['items', '0', 'itemId'], product)
+
       return {
         ...product,
         cacheId: `${product.linkText}-${skuId}`,
@@ -547,6 +576,7 @@ export const queries = {
         },
         { maps: [] as string[], queries: [] as string[] }
       )
+
       const map = maps.join(',')
       const query = queries.join('/')
 
@@ -559,14 +589,17 @@ export const queries = {
       args.map ?? '',
       ctx
     )
+
     const translatedArgs = {
       ...args,
       query,
     }
+
     const compatibilityArgs = await getCompatibilityArgs<SearchArgs>(
       ctx,
       translatedArgs as SearchArgs
     )
+
     return getSearchMetaData(_, compatibilityArgs, ctx)
   },
   topSearches: (_: any, __: any, ctx: Context) => {

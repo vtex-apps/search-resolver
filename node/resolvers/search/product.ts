@@ -15,8 +15,10 @@ const urlToSlug = (slug: string | undefined) => {
   if (!slug) {
     return slug
   }
-  const erasedSlash = slug.replace(/^\//g, '') //removing starting / char
-  const finalSlug = erasedSlash.replace(/(\/p)$/g, '') //remove ending /p chars
+
+  const erasedSlash = slug.replace(/^\//g, '') // removing starting / char
+  const finalSlug = erasedSlash.replace(/(\/p)$/g, '') // remove ending /p chars
+
   return finalSlug
 }
 
@@ -28,26 +30,22 @@ const objToNameValue = (
   if (!record) {
     return []
   }
-  return Object.keys(record).reduce(
-    (acc, key: any) => {
-      const value = record[key]
-      if (typeof value === 'string') {
-        acc.push({ [keyName]: key, [valueName]: value })
-      }
-      return acc
-    },
-    [] as Record<string, string>[]
-  )
+
+  return Object.keys(record).reduce((acc, key: any) => {
+    const value = record[key]
+
+    if (typeof value === 'string') {
+      acc.push({ [keyName]: key, [valueName]: value })
+    }
+
+    return acc
+  }, [] as Array<Record<string, string>>)
 }
 
 type SearchProductWithCache = SearchProduct & { cacheId?: string }
-enum ItemsFilterEnum {
-  ALL = 'ALL',
-  FIRST_AVAILABLE = 'FIRST_AVAILABLE',
-  ALL_AVAILABLE = 'ALL_AVAILABLE',
-}
-interface ItemArg {
-  filter?: ItemsFilterEnum
+type ItemsFilter = 'ALL' | 'FIRST_AVAILABLE' | 'ALL_AVAILABLE'
+type ItemArg = {
+  filter?: ItemsFilter
 }
 
 const isSellerAvailable = (seller: Seller) =>
@@ -78,14 +76,16 @@ const removeStartingSlashes = (str: string) =>
   str.startsWith('/') ? str.slice(1) : str
 
 const getProductFilterIdMap = async (product: SearchProduct, ctx: Context) => {
-  const filters = await ctx.clients.search.filtersInCategoryFromId(product.categoryId)
-  const filterMapFromName = filters.reduce(
-    (acc, curr) => {
-      acc[curr.Name] = curr.FieldId.toString()
-      return acc
-    },
-    {} as Record<string, string>
+  const filters = await ctx.clients.search.filtersInCategoryFromId(
+    product.categoryId
   )
+
+  const filterMapFromName = filters.reduce((acc, curr) => {
+    acc[curr.Name] = curr.FieldId.toString()
+
+    return acc
+  }, {} as Record<string, string>)
+
   return filterMapFromName
 }
 
@@ -103,8 +103,9 @@ const treeStringToArray = compose(
 
 const findMainTree = (categoriesIds: string[], prodCategoryId: string) => {
   const mainTree = categoriesIds.find(
-    treeIdString => getLastCategory(treeIdString) === prodCategoryId
+    (treeIdString) => getLastCategory(treeIdString) === prodCategoryId
   )
+
   if (mainTree) {
     return treeStringToArray(mainTree)
   }
@@ -132,28 +133,42 @@ const productCategoriesToCategoryTree = async (
   const mainTreeIds = findMainTree(categoriesIds, prodCategoryId)
 
   if (platform === 'vtex') {
-    return mainTreeIds.map(categoryId => search.category(Number(categoryId)))
+    return mainTreeIds.map((categoryId) => search.category(Number(categoryId)))
   }
 
-  logger.info({ message: 'productCategoriesToCategoryTree: not vtex platform', platform })
+  logger.info({
+    message: 'productCategoriesToCategoryTree: not vtex platform',
+    platform,
+  })
   const categoriesTree = await search.categories(mainTreeIds.length)
   const categoryMap = buildCategoryMap(categoriesTree)
   const mappedCategories = mainTreeIds
-    .map(id => categoryMap[id])
+    .map((id) => categoryMap[id])
     .filter(Boolean)
 
   return mappedCategories.length ? mappedCategories : null
 }
 
-const addTranslationParamsToSpecification = (filterIdFromNameMap: Record<string, string>, ctx: Context) => (specification: { name: string, values: string[] }) => {
-  const { name, values } = specification
-  const filterId = filterIdFromNameMap[name]
-  return {
-    originalName: name,
-    name: addContextToTranslatableString({ content: name, context: filterId }, ctx),
-    values: values.map(value => addContextToTranslatableString({ content: value, context: filterId }, ctx))
+const addTranslationParamsToSpecification =
+  (filterIdFromNameMap: Record<string, string>, ctx: Context) =>
+  (specification: { name: string; values: string[] }) => {
+    const { name, values } = specification
+    const filterId = filterIdFromNameMap[name]
+
+    return {
+      originalName: name,
+      name: addContextToTranslatableString(
+        { content: name, context: filterId },
+        ctx
+      ),
+      values: values.map((value) =>
+        addContextToTranslatableString(
+          { content: value, context: filterId },
+          ctx
+        )
+      ),
+    }
   }
-}
 
 export const resolvers = {
   Product: {
@@ -162,10 +177,19 @@ export const resolvers = {
       'brandId'
     ),
 
-    benefits: async ({ items, productId }: SearchProduct, _: any, ctx: Context) => {
-      const promises = items?.map(item => getBenefits(item.itemId, ctx))
-      const promisesResult = flatten(await Promise.all(promises.map((p) => p.catch(error => error))))
-      const benefitsWithoutError = promisesResult.filter(result => !(result instanceof Error))
+    benefits: async (
+      { items, productId }: SearchProduct,
+      _: any,
+      ctx: Context
+    ) => {
+      const promises = items?.map((item) => getBenefits(item.itemId, ctx))
+      const promisesResult = flatten(
+        await Promise.all(promises.map((p) => p.catch((error) => error)))
+      )
+
+      const benefitsWithoutError = promisesResult.filter(
+        (result) => !(result instanceof Error)
+      )
 
       if (benefitsWithoutError.length !== promisesResult.length) {
         logDegradedSearchError(ctx.vtex.logger, {
@@ -174,15 +198,16 @@ export const resolvers = {
             Simulation will be skipped for one or more items and the benefits list may be incomplete.`,
         })
       }
+
       return benefitsWithoutError
     },
 
     categoryTree: productCategoriesToCategoryTree,
 
     cacheId: ({ linkText, cacheId }: SearchProductWithCache) =>
-      cacheId || linkText,
+      cacheId ?? linkText,
 
-    clusterHighlights: ({origin, clusterHighlights }: SearchProduct) => {
+    clusterHighlights: ({ origin, clusterHighlights }: SearchProduct) => {
       if (origin === 'intelligent-search') {
         return clusterHighlights
       }
@@ -195,14 +220,16 @@ export const resolvers = {
       const specificationsMap = Specifications.reduce(
         (acc: Record<string, string>, key: string) => {
           acc[key] = (product as any)[key]
+
           return acc
         },
         {}
       )
+
       return JSON.stringify(specificationsMap)
     },
 
-    productClusters: ({origin, productClusters }: SearchProduct) => {
+    productClusters: ({ origin, productClusters }: SearchProduct) => {
       if (origin === 'intelligent-search') {
         return productClusters
       }
@@ -216,10 +243,13 @@ export const resolvers = {
       if (product.origin === 'intelligent-search') {
         valuesUntranslated = product.properties ?? []
       } else {
-        valuesUntranslated = (product.allSpecifications ?? []).map((name: string) => {
-          const value = (product as unknown as DynamicKey<string[]>)[name]
-          return { name, originalName: name, values: value }
-        })
+        valuesUntranslated = (product.allSpecifications ?? []).map(
+          (name: string) => {
+            const value = (product as unknown as DynamicKey<string[]>)[name]
+
+            return { name, originalName: name, values: value }
+          }
+        )
       }
 
       if (!shouldTranslateToUserLocale(ctx)) {
@@ -227,54 +257,78 @@ export const resolvers = {
       }
 
       const filterIdFromNameMap = await getProductFilterIdMap(product, ctx)
-      const valuesWithTranslations = valuesUntranslated.map(addTranslationParamsToSpecification(filterIdFromNameMap, ctx))
+      const valuesWithTranslations = valuesUntranslated.map(
+        addTranslationParamsToSpecification(filterIdFromNameMap, ctx)
+      )
+
       return valuesWithTranslations
     },
 
     propertyGroups: (product: SearchProduct) => {
       const { allSpecifications = [] } = product
       const notPG = knownNotPG.concat(allSpecifications)
+
       return objToNameValue('name', 'values', omit(notPG, product))
     },
 
     recommendations: (product: SearchProduct, args: any) => {
       const { groupBy } = args
+
       return { product, groupBy }
     },
 
-    description: formatTranslatableProp<SearchProduct, 'description', 'productId'>(
+    description: formatTranslatableProp<
+      SearchProduct,
       'description',
       'productId'
-    ),
+    >('description', 'productId'),
 
-    metaTagDescription: formatTranslatableProp<SearchProduct, 'metaTagDescription', 'productId'>(
+    metaTagDescription: formatTranslatableProp<
+      SearchProduct,
       'metaTagDescription',
       'productId'
-    ),
+    >('metaTagDescription', 'productId'),
 
-    titleTag: ({ productId, productTitle, productName }: SearchProduct, _: unknown, ctx: Context) =>
+    titleTag: (
+      { productId, productTitle, productName }: SearchProduct,
+      _: unknown,
+      ctx: Context
+    ) =>
       addContextToTranslatableString(
         {
           content: productTitle ?? productName ?? '',
-          context: productId
+          context: productId,
         },
         ctx
       ),
 
-    productName: formatTranslatableProp<SearchProduct, 'productName', 'productId'>(
+    productName: formatTranslatableProp<
+      SearchProduct,
       'productName',
       'productId'
-    ),
+    >('productName', 'productId'),
 
-    linkText: async ({ productId, linkText, origin }: SearchProduct, _: unknown, ctx: Context) => {
-      const { clients: { rewriter }, vtex: { binding } } = ctx
+    linkText: async (
+      { productId, linkText, origin }: SearchProduct,
+      _: unknown,
+      ctx: Context
+    ) => {
+      const {
+        clients: { rewriter },
+        vtex: { binding },
+      } = ctx
 
       if (origin === 'intelligent-search' || !shouldTranslateToBinding(ctx)) {
         return linkText
       }
 
       try {
-        const route = await rewriter.getRoute(productId, 'product', binding!.id!)
+        const route = await rewriter.getRoute(
+          productId,
+          'product',
+          binding!.id!
+        )
+
         return urlToSlug(route) ?? linkText
       } catch (e) {
         logDegradedSearchError(ctx.vtex.logger, {
@@ -287,76 +341,115 @@ export const resolvers = {
       return linkText
     },
 
-    specificationGroups: async (product: SearchProduct, _: unknown, ctx: Context) => {
+    specificationGroups: async (
+      product: SearchProduct,
+      _: unknown,
+      ctx: Context
+    ) => {
       if (product.origin === 'intelligent-search') {
         return product.specificationGroups
       }
 
-      const allSpecificationsGroups = (product.allSpecificationsGroups ?? []).concat(['allSpecifications'])
+      const allSpecificationsGroups = (
+        product.allSpecificationsGroups ?? []
+      ).concat(['allSpecifications'])
 
       const visibleSpecifications = product.completeSpecifications
-        ? product.completeSpecifications.reduce<Record<string, boolean>>((acc, specification) => {
-            acc[specification.Name] = specification.IsOnProductDetails
-            return acc
-          }, {})
+        ? product.completeSpecifications.reduce<Record<string, boolean>>(
+            (acc, specification) => {
+              acc[specification.Name] = specification.IsOnProductDetails
+
+              return acc
+            },
+            {}
+          )
         : null
 
       let noTranslationSpecificationGroups = allSpecificationsGroups.map(
         (groupName: string) => {
-          let groupSpecifications = (product as unknown as DynamicKey<string[]>)?.[groupName] ?? []
+          let groupSpecifications =
+            (product as unknown as DynamicKey<string[]>)?.[groupName] ?? []
 
-          groupSpecifications = groupSpecifications.filter(specificationName => {
-            if (visibleSpecifications && visibleSpecifications[specificationName] != null)
-              return visibleSpecifications[specificationName]
-            return true
-          })
+          groupSpecifications = groupSpecifications.filter(
+            (specificationName) => {
+              if (visibleSpecifications?.[specificationName] != null)
+                return visibleSpecifications[specificationName]
+
+              return true
+            }
+          )
 
           return {
             originalName: groupName,
             name: groupName,
             specifications: groupSpecifications.map((name) => {
-                const values = (product as unknown as DynamicKey<string[]>)[name] || []
-                return {
-                  originalName: name,
-                  name,
-                  values,
-                }
+              const values =
+                (product as unknown as DynamicKey<string[]>)[name] || []
+
+              return {
+                originalName: name,
+                name,
+                values,
               }
-            ),
+            }),
           }
         }
       )
 
-      noTranslationSpecificationGroups = noTranslationSpecificationGroups.filter(group => group.specifications.length > 0)
+      noTranslationSpecificationGroups =
+        noTranslationSpecificationGroups.filter(
+          (group) => group.specifications.length > 0
+        )
 
       if (!shouldTranslateToUserLocale(ctx)) {
         return noTranslationSpecificationGroups
       }
 
       const filterIdFromNameMap = await getProductFilterIdMap(product, ctx)
-      const translatedGroups = noTranslationSpecificationGroups.map(group => {
+      const translatedGroups = noTranslationSpecificationGroups.map((group) => {
         return {
           originalName: group.name,
-          name: addContextToTranslatableString({ content: group.name, context: product.productId }, ctx),
-          specifications: group.specifications.map(addTranslationParamsToSpecification(filterIdFromNameMap, ctx))
+          name: addContextToTranslatableString(
+            { content: group.name, context: product.productId },
+            ctx
+          ),
+          specifications: group.specifications.map(
+            addTranslationParamsToSpecification(filterIdFromNameMap, ctx)
+          ),
         }
       })
 
       return translatedGroups
     },
-    items: ({ items: searchItems, skuSpecifications = [] }: SearchProduct, { filter }: ItemArg) => {
-      const searchItemsWithVariations = searchItems.map(item => ({ ...item, skuSpecifications }))
-      if (filter === ItemsFilterEnum.ALL) {
+    items: (
+      { items: searchItems, skuSpecifications = [] }: SearchProduct,
+      { filter }: ItemArg
+    ) => {
+      const searchItemsWithVariations = searchItems.map((item) => ({
+        ...item,
+        skuSpecifications,
+      }))
+
+      if (filter === 'ALL') {
         return searchItemsWithVariations
       }
-      if (filter === ItemsFilterEnum.FIRST_AVAILABLE) {
+
+      if (filter === 'FIRST_AVAILABLE') {
         const firstAvailable = searchItemsWithVariations.find(isAvailable)
-        return firstAvailable ? [firstAvailable] : [searchItemsWithVariations[0]]
+
+        return firstAvailable
+          ? [firstAvailable]
+          : [searchItemsWithVariations[0]]
       }
-      if (filter === ItemsFilterEnum.ALL_AVAILABLE) {
+
+      if (filter === 'ALL_AVAILABLE') {
         const onlyAvailable = searchItemsWithVariations.filter(isAvailable)
-        return onlyAvailable.length > 0 ? onlyAvailable : [searchItemsWithVariations[0]]
+
+        return onlyAvailable.length > 0
+          ? onlyAvailable
+          : [searchItemsWithVariations[0]]
       }
+
       return searchItemsWithVariations
     },
     priceRange: ({ items: searchItems }: SearchProduct) => {
@@ -367,6 +460,7 @@ export const resolvers = {
               acc.push(seller.commertialOffer)
             }
           }
+
           return acc
         },
         []
@@ -374,10 +468,87 @@ export const resolvers = {
 
       return { offers }
     },
+
+    itemMetadata: ({
+      items,
+      origin,
+      itemMetadata,
+      brand,
+      categoryId,
+      productId,
+    }: SearchProduct) => {
+      // Since the IS doesn't return the itemMetadata, we need to build it from the items.attachments
+      if (origin === 'intelligent-search') {
+        // Build itemMetadata from items.attachments
+        const metadataItems = items.map((item) => {
+          // Build assemblyOptions from attachments
+          const assemblyOptions = (item.attachments || []).map((attachment) => {
+            // Build inputValues from attachment fields
+            const inputValues: Record<
+              string,
+              { maximumNumberOfCharacters: number; domain: string[] }
+            > = {}
+
+            if (attachment.fields) {
+              attachment.fields.forEach((field) => {
+                const domain = field.domainValues
+                  ? field.domainValues
+                      .split(',')
+                      .map((v) => v.trim())
+                      .filter(Boolean)
+                  : []
+
+                inputValues[field.fieldName] = {
+                  maximumNumberOfCharacters:
+                    parseInt(field.maxCharacters, 10) || 0,
+                  domain,
+                }
+              })
+            }
+
+            return {
+              id: attachment.name,
+              name: attachment.name,
+              required: attachment.required || attachment.isRequired || false,
+              inputValues,
+              composition: null,
+            }
+          })
+
+          // Get the first available seller or default to '1'
+          const firstSeller =
+            item.sellers && item.sellers[0] ? item.sellers[0].sellerId : '1'
+
+          // Get the main image URL
+          const mainImage =
+            item.images && item.images[0] ? item.images[0].imageUrl : ''
+
+          return {
+            Name: item.name,
+            NameComplete: item.nameComplete,
+            MainImage: mainImage,
+            BrandName: brand,
+            CategoryId: parseInt(categoryId, 10),
+            ProductId: parseInt(productId, 10),
+            id: item.itemId,
+            seller: firstSeller,
+            assemblyOptions,
+          }
+        })
+
+        return {
+          items: metadataItems,
+        }
+      }
+
+      return itemMetadata
+    },
   },
   OnlyProduct: {
     categoryTree: productCategoriesToCategoryTree,
-    productClusters: ({ productClusters }: any) => ([] as any[]).concat(productClusters ?? []),
-    clusterHighlights: ({ clusterHighlights }: any) => ([] as any[]).concat(clusterHighlights ?? []),
+    productClusters: ({ productClusters }: any) =>
+      ([] as any[]).concat(productClusters ?? []),
+    clusterHighlights: ({ clusterHighlights }: any) =>
+      ([] as any[]).concat(clusterHighlights ?? []),
   },
 }
