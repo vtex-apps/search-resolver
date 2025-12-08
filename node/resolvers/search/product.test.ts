@@ -1,14 +1,14 @@
 /* eslint-disable jest/no-mocks-import */
 /* eslint-disable jest/no-identical-title */
 
-import { resolvers } from './product'
 import {
-  mockContext,
   getBindingLocale,
+  mockContext,
   resetContext,
 } from '../../__mocks__/helpers'
 import { getProduct } from '../../__mocks__/product'
 import productSpecs from '../../__mocks__/productSpecs'
+import { resolvers } from './product'
 
 describe('tests related to product resolver', () => {
   beforeEach(() => {
@@ -280,20 +280,20 @@ describe('tests related to product resolver', () => {
       )) as any
 
       expect(result[0]).toMatchObject({
-        name: 'Tamanho (((16))) <<<pt-BR>>>',
+        name: 'Tamanho (((16))) <<<pt-BR>>> [[[original]]]',
         specifications: [
           {
-            name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>',
-            values: ['35 (((specification-Id))) <<<pt-BR>>>'],
+            name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>> [[[original]]]',
+            values: ['35 (((specification-Id))) <<<pt-BR>>> [[[original]]]'],
           },
         ],
       })
       expect(result[1]).toMatchObject({
-        name: 'allSpecifications (((16))) <<<pt-BR>>>',
+        name: 'allSpecifications (((16))) <<<pt-BR>>> [[[original]]]',
         specifications: [
           {
-            name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>',
-            values: ['35 (((specification-Id))) <<<pt-BR>>>'],
+            name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>> [[[original]]]',
+            values: ['35 (((specification-Id))) <<<pt-BR>>> [[[original]]]'],
           },
         ],
       })
@@ -357,12 +357,12 @@ describe('tests related to product resolver', () => {
 
       expect(result).toMatchObject([
         {
-          name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>>',
-          values: ['35 (((specification-Id))) <<<pt-BR>>>'],
+          name: 'Numero do calçado (((specification-Id))) <<<pt-BR>>> [[[original]]]',
+          values: ['35 (((specification-Id))) <<<pt-BR>>> [[[original]]]'],
         },
         {
-          name: 'testeName (((teste-id))) <<<pt-BR>>>',
-          values: ['teste value (((teste-id))) <<<pt-BR>>>'],
+          name: 'testeName (((teste-id))) <<<pt-BR>>> [[[original]]]',
+          values: ['teste value (((teste-id))) <<<pt-BR>>> [[[original]]]'],
         },
       ])
     })

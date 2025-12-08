@@ -68,6 +68,11 @@ const initialCtxState = {
 export const mockContext: any = {
   vtex: {
     ...generateDeepCopy(initialCtxState),
+    logger: {
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    },
   },
   clients: {
     search: searchClientMock,
@@ -76,6 +81,9 @@ export const mockContext: any = {
     rewriter: rewriterClientMock,
     vbase: { getJSON: jest.fn() },
     intelligentSearchApi: isClientMock,
+    apps: {
+      getAppSettings: jest.fn().mockResolvedValue({}),
+    },
   },
   state: {
     messagesBindingLanguage: {
