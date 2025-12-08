@@ -18,7 +18,7 @@ describe('tests related to the searchMetadata query', () => {
 
     expect(result.titleTag).toBe('department/category-title')
     expect(result.metaTagDescription).toBe(
-      'department/category-metaTagDescription (((1))) <<<pt-BR>>>'
+      'department/category-metaTagDescription (((1))) <<<pt-BR>>> [[[original]]]'
     )
     expect(mockContext.clients.search.pageType).toBeCalledTimes(1)
   })
@@ -30,7 +30,7 @@ describe('tests related to the searchMetadata query', () => {
 
     expect(result.titleTag).toBe('Brand-title')
     expect(result.metaTagDescription).toBe(
-      'Brand-metaTagDescription (((1))) <<<pt-BR>>>'
+      'Brand-metaTagDescription (((1))) <<<pt-BR>>> [[[original]]]'
     )
     expect(mockContext.clients.search.pageType).toBeCalledTimes(1)
   })
@@ -62,7 +62,7 @@ describe('tests related to the searchMetadata query', () => {
 
     expect(result.titleTag).toBe('brand - department/category-title')
     expect(result.metaTagDescription).toBe(
-      'department/category-metaTagDescription (((1))) <<<pt-BR>>>'
+      'department/category-metaTagDescription (((1))) <<<pt-BR>>> [[[original]]]'
     )
     expect(mockContext.clients.search.pageType).toBeCalledTimes(2)
   })
@@ -74,7 +74,7 @@ describe('tests related to the searchMetadata query', () => {
 
     expect(result.titleTag).toBe('department/category - Brand-title')
     expect(result.metaTagDescription).toBe(
-      'Brand-metaTagDescription (((1))) <<<pt-BR>>>'
+      'Brand-metaTagDescription (((1))) <<<pt-BR>>> [[[original]]]'
     )
     expect(mockContext.clients.search.pageType).toBeCalledTimes(2)
   })
@@ -89,7 +89,7 @@ describe('tests related to the searchMetadata query', () => {
 
     expect(result.titleTag).toBe('Large - brand - department/category-title')
     expect(result.metaTagDescription).toBe(
-      'department/category-metaTagDescription (((1))) <<<pt-BR>>>'
+      'department/category-metaTagDescription (((1))) <<<pt-BR>>> [[[original]]]'
     )
     expect(mockContext.clients.search.pageType).toBeCalledTimes(2)
   })
@@ -106,7 +106,7 @@ describe('tests related to the searchMetadata query', () => {
       'brand - department/category/subcategory-title'
     )
     expect(result.metaTagDescription).toBe(
-      'department/category/subcategory-metaTagDescription (((1))) <<<pt-BR>>>'
+      'department/category/subcategory-metaTagDescription (((1))) <<<pt-BR>>> [[[original]]]'
     )
     expect(mockContext.clients.search.pageType).toBeCalledTimes(2)
   })
@@ -159,12 +159,41 @@ describe('tests related to the searchMetadata query', () => {
 
     expect(result.titleTag).toBe('department/category-title-es-ES')
     expect(result.metaTagDescription).toBe(
-      'department/category-metaTagDescription (((1))) <<<fr-FR>>>'
+      'department/category-metaTagDescription (((1))) <<<fr-FR>>> [[[original]]]'
     )
     expect(mockContext.clients.search.pageType).toBeCalledTimes(1)
     expect(mockContext.state.messagesBindingLanguage.loadMany).toBeCalledTimes(
       1
     )
+  })
+
+  it('get search metadata from pageType for category with translated flag true', async () => {
+    const args = { query: 'Department/Category', map: 'c,c' }
+
+    mockContext.translated = true
+
+    const result = await queries.searchMetadata({}, args, mockContext as any)
+
+    expect(result.titleTag).toBe('department/category-title')
+    expect(result.metaTagDescription).toBe(
+      'department/category-metaTagDescription (((1))) <<<pt-BR>>> [[[translated]]]'
+    )
+    expect(result.metaTagDescription).not.toContain('[[[original]]]')
+    expect(mockContext.clients.search.pageType).toBeCalledTimes(1)
+  })
+
+  it('get search metadata from pageType for category with translated flag false', async () => {
+    const args = { query: 'Department/Category', map: 'c,c' }
+
+    mockContext.translated = false
+
+    const result = await queries.searchMetadata({}, args, mockContext as any)
+
+    expect(result.titleTag).toBe('department/category-title')
+    expect(result.metaTagDescription).toBe(
+      'department/category-metaTagDescription (((1))) <<<pt-BR>>> [[[original]]]'
+    )
+    expect(mockContext.clients.search.pageType).toBeCalledTimes(1)
   })
 })
 

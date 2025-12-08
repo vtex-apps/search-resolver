@@ -1290,10 +1290,10 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@vtex/api@^7.0.0":
-  version "7.2.1"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-7.2.1.tgz#0dd23f00deb37ba2ce40ba6855a90ca64da0a17a"
-  integrity sha512-ZJQttor2CismFbJZSG94o3TYUb66D1pQYew2Pr1o87j6v+YfyyIA5qPFrLX6Ax/755gUPwwi8Izko7cVijlDIw==
+"@vtex/api@^7.2.7":
+  version "7.2.7"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-7.2.7.tgz#c22dc034a36fc9b586a450345cfd95d764325d14"
+  integrity sha512-MIrTNRr5ijTVRsXQAxLkkp3M6P1afpLIds+LLcMqxq4H8rXqLsHC0G8Wr3G5QVTN6kbTtE+WbriFdHe396h8lQ==
   dependencies:
     "@opentelemetry/api" "^1.9.0"
     "@opentelemetry/host-metrics" "0.35.5"
@@ -1302,6 +1302,7 @@
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"
     "@vtex/diagnostics-nodejs" "0.1.0-io-beta.20"
+    "@vtex/diagnostics-semconv" "^1.1.2"
     "@vtex/node-error-report" "^0.0.3"
     "@wry/equality" "^0.1.9"
     agentkeepalive "^4.0.2"
@@ -1376,6 +1377,11 @@
   version "0.1.0-beta.11"
   resolved "https://registry.yarnpkg.com/@vtex/diagnostics-semconv/-/diagnostics-semconv-0.1.0-beta.11.tgz#2ddfff7dffdc1c052d23b335f914de91653d9659"
   integrity sha512-H3KM5fYAFmcxhlA4wT5iPgWJtgKsumFqGkkxjcA/BSwC5tgSWezN82sZDKvBsVo24EoZxVGgLlsjNw1tsp9U3Q==
+
+"@vtex/diagnostics-semconv@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@vtex/diagnostics-semconv/-/diagnostics-semconv-1.1.2.tgz#ed58b4c0f403cf5d9ff5e3d487e959ff9c1802e2"
+  integrity sha512-CUz58FTeYHC6z5n0qJKcHesJK00ykwDAFKXUaBKjzI166lm/LqMkdPJA8KE2h4RWGDdSaPDIUDdkueSD76oUfw==
 
 "@vtex/node-error-report@^0.0.3":
   version "0.0.3"
@@ -3991,7 +3997,7 @@ stack-utils@^2.0.3:
   dependencies:
     escape-string-regexp "^2.0.0"
 
-stats-lite@vtex/node-stats-lite#dist:
+"stats-lite@github:vtex/node-stats-lite#dist":
   version "2.2.0"
   resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/1b0d39cc41ef7aaecfd541191f877887a2044797"
   dependencies:

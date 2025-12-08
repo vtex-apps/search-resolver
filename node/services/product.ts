@@ -1,5 +1,5 @@
-import { fetchAppSettings } from './settings'
 import type { SegmentData } from '../typings/Search'
+import { fetchAppSettings } from './settings'
 
 export type ProductIdentifier = {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -144,6 +144,7 @@ export async function fetchProduct(
 
   // Check if current account should skip comparison and use intsch directly
   if (shouldUseNewPDPEndpoint) {
+    ctx.translated = true
     return fetchProductFromIntsch(ctx, args)
   }
 
