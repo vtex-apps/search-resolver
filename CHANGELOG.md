@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Route traffic to intsch instead of the IO version. For: correction, banners, suggestions and top-searches routes.
+
 ## [1.89.0] - 2025-12-08
 
 ### Added

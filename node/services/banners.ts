@@ -1,11 +1,10 @@
-import { compareApiResults, NO_TRAFFIC } from '../utils/compareResults'
 import { buildAttributePath } from '../commons/compatibility-layer'
 
 export async function fetchBanners(
   ctx: Context,
   args: { fullText: string; selectedFacets: SelectedFacet[] }
 ) {
-  const { intelligentSearchApi, intsch } = ctx.clients
+  const { intsch } = ctx.clients
 
   const argumentsToFetchBanners = {
     query: args.fullText,
@@ -16,14 +15,5 @@ export async function fetchBanners(
     ctx.vtex.tenant?.locale ||
     ctx.vtex.locale) as string
 
-  return compareApiResults(
-    () => intelligentSearchApi.fetchBanners(argumentsToFetchBanners),
-    () => intsch.fetchBannersV1({ ...argumentsToFetchBanners, locale }),
-    ctx.vtex.production ? NO_TRAFFIC : 100,
-    ctx.vtex.logger,
-    {
-      logPrefix: 'Banners',
-      args: argumentsToFetchBanners,
-    }
-  )
+  return intsch.fetchBannersV1({ ...argumentsToFetchBanners, locale })
 }
