@@ -11,60 +11,19 @@ describe('fetchAutocompleteSuggestions', () => {
     jest.clearAllMocks()
   })
 
-  it.skip('should call intsch as primary and return its result when successful', async () => {
+  it('should call intsch and return its result when successful', async () => {
     const intschResult = {
       searches: [{ term: 'test', count: 1 }],
     }
 
     const ctx = createContext({
-      intelligentSearchApiSettings: {
-        fetchAutocompleteSuggestions: {
-          searches: [{ term: 'fallback', count: 2 }],
-        },
-      },
       intschSettings: {
-        fetchAutocompleteSuggestions: intschResult,
+        fetchAutocompleteSuggestionsV1: intschResult,
       },
     })
 
     const result = await fetchAutocompleteSuggestions(ctx, 'test')
 
-    expect(
-      ctx.clients.intsch.fetchAutocompleteSuggestions
-    ).toHaveBeenCalledWith({
-      query: 'test',
-    })
-    expect(
-      ctx.clients.intelligentSearchApi.fetchAutocompleteSuggestions
-    ).not.toHaveBeenCalled()
-
-    expect(result).toEqual(intschResult)
-    expect(ctx.vtex.logger.warn).not.toHaveBeenCalled()
-  })
-
-  it('should use fallback when intelligentSearchApi fails', async () => {
-    const fallbackResult = {
-      searches: [{ term: 'fallback-result', count: 1 }],
-    }
-
-    const ctx = createContext({
-      intelligentSearchApiSettings: {
-        fetchAutocompleteSuggestions: new Error(
-          'IntelligentSearchApi service unavailable'
-        ),
-      },
-      intschSettings: {
-        fetchAutocompleteSuggestionsV1: fallbackResult,
-      },
-    })
-
-    const response = await fetchAutocompleteSuggestions(ctx, 'test')
-
-    expect(
-      ctx.clients.intelligentSearchApi.fetchAutocompleteSuggestions
-    ).toHaveBeenCalledWith({
-      query: 'test',
-    })
     expect(
       ctx.clients.intsch.fetchAutocompleteSuggestionsV1
     ).toHaveBeenCalledWith({
@@ -72,30 +31,20 @@ describe('fetchAutocompleteSuggestions', () => {
       locale: undefined,
     })
 
-    expect(response).toEqual(fallbackResult)
+    expect(result).toEqual(intschResult)
   })
 
-  it('should throw error when both services fail', async () => {
+  it('should throw error when intsch fails', async () => {
     const ctx = createContext({
-      intelligentSearchApiSettings: {
-        fetchAutocompleteSuggestions: new Error('Primary service unavailable'),
-      },
       intschSettings: {
-        fetchAutocompleteSuggestionsV1: new Error(
-          'Fallback service also unavailable'
-        ),
+        fetchAutocompleteSuggestionsV1: new Error('Service unavailable'),
       },
     })
 
     await expect(fetchAutocompleteSuggestions(ctx, 'test')).rejects.toThrow(
-      'Both calls resulted in errors'
+      'Service unavailable'
     )
 
-    expect(
-      ctx.clients.intelligentSearchApi.fetchAutocompleteSuggestions
-    ).toHaveBeenCalledWith({
-      query: 'test',
-    })
     expect(
       ctx.clients.intsch.fetchAutocompleteSuggestionsV1
     ).toHaveBeenCalledWith({
@@ -105,18 +54,13 @@ describe('fetchAutocompleteSuggestions', () => {
   })
 
   it('should use locale from segment cultureInfo when available', async () => {
-    const fallbackResult = {
+    const intschResult = {
       searches: [{ term: 'test-result', count: 1 }],
     }
 
     const ctx = createContext({
-      intelligentSearchApiSettings: {
-        fetchAutocompleteSuggestions: new Error(
-          'IntelligentSearchApi unavailable'
-        ),
-      },
       intschSettings: {
-        fetchAutocompleteSuggestionsV1: fallbackResult,
+        fetchAutocompleteSuggestionsV1: intschResult,
       },
       segment: {
         campaigns: null,
@@ -150,25 +94,8 @@ describe('fetchAutocompleteSuggestions', () => {
     }
 
     const ctx = createContext({
-      intelligentSearchApiSettings: {
-        fetchAutocompleteSuggestions: new Error(
-          'IntelligentSearchApi unavailable'
-        ),
-      },
       intschSettings: {
         fetchAutocompleteSuggestionsV1: fallbackResult,
-      },
-      segment: {
-        campaigns: null,
-        channel: '1',
-        priceTables: null,
-        utm_campaign: null,
-        utm_source: null,
-        utmi_campaign: null,
-        currencyCode: 'USD',
-        currencySymbol: '$',
-        countryCode: 'USA',
-        cultureInfo: '',
       },
       tenantLocale: 'en-US',
       vtexLocale: 'es-ES',
@@ -185,18 +112,13 @@ describe('fetchAutocompleteSuggestions', () => {
   })
 
   it('should fallback to vtex locale when both segment cultureInfo and tenant locale are not available', async () => {
-    const fallbackResult = {
+    const intschResult = {
       searches: [{ term: 'test-result', count: 1 }],
     }
 
     const ctx = createContext({
-      intelligentSearchApiSettings: {
-        fetchAutocompleteSuggestions: new Error(
-          'IntelligentSearchApi unavailable'
-        ),
-      },
       intschSettings: {
-        fetchAutocompleteSuggestionsV1: fallbackResult,
+        fetchAutocompleteSuggestionsV1: intschResult,
       },
       vtexLocale: 'es-ES',
     })
@@ -217,58 +139,38 @@ describe('fetchTopSearches', () => {
     jest.clearAllMocks()
   })
 
-  it('should call intelligentSearchApi as primary and return its result when successful', async () => {
-    const apiResult = {
+  it('should call intsch and return its result when successful', async () => {
+    const intschResult = {
       searches: [{ term: 'popular', count: 10 }],
     }
 
     const ctx = createContext({
-      intelligentSearchApiSettings: {
-        fetchTopSearches: apiResult,
-      },
       intschSettings: {
-        fetchTopSearchesV1: {
-          searches: [{ term: 'comparison', count: 5 }],
-        },
+        fetchTopSearchesV1: intschResult,
       },
     })
 
     const result = await fetchTopSearches(ctx)
 
-    expect(
-      ctx.clients.intelligentSearchApi.fetchTopSearches
-    ).toHaveBeenCalledWith()
     expect(ctx.clients.intsch.fetchTopSearchesV1).toHaveBeenCalledWith(
       undefined
     )
 
-    expect(result).toEqual(apiResult)
+    expect(result).toEqual(intschResult)
   })
 
-  it('should use fallback when intelligentSearchApi fails', async () => {
-    const fallbackResult = {
-      searches: [{ term: 'fallback-top', count: 3 }],
-    }
-
+  it('should throw error when intsch fails', async () => {
     const ctx = createContext({
-      intelligentSearchApiSettings: {
-        fetchTopSearches: new Error('IntelligentSearchApi unavailable'),
-      },
       intschSettings: {
-        fetchTopSearchesV1: fallbackResult,
+        fetchTopSearchesV1: new Error('Service unavailable'),
       },
     })
 
-    const response = await fetchTopSearches(ctx)
+    await expect(fetchTopSearches(ctx)).rejects.toThrow('Service unavailable')
 
-    expect(
-      ctx.clients.intelligentSearchApi.fetchTopSearches
-    ).toHaveBeenCalledWith()
     expect(ctx.clients.intsch.fetchTopSearchesV1).toHaveBeenCalledWith(
       undefined
     )
-
-    expect(response).toEqual(fallbackResult)
   })
 })
 
@@ -277,64 +179,42 @@ describe('fetchSearchSuggestions', () => {
     jest.clearAllMocks()
   })
 
-  it('should call intelligentSearchApi as primary and return its result when successful', async () => {
-    const apiResult = {
+  it('should call intsch and return its result when successful', async () => {
+    const intschResult = {
       searches: [{ term: 'suggestion', count: 5 }],
     }
 
     const ctx = createContext({
-      intelligentSearchApiSettings: {
-        fetchSearchSuggestions: apiResult,
-      },
       intschSettings: {
-        fetchSearchSuggestionsV1: {
-          searches: [{ term: 'comparison-suggestion', count: 2 }],
-        },
+        fetchSearchSuggestionsV1: intschResult,
       },
     })
 
     const result = await fetchSearchSuggestions(ctx, 'search')
 
-    expect(
-      ctx.clients.intelligentSearchApi.fetchSearchSuggestions
-    ).toHaveBeenCalledWith({
-      query: 'search',
-    })
     expect(ctx.clients.intsch.fetchSearchSuggestionsV1).toHaveBeenCalledWith({
       query: 'search',
       locale: undefined,
     })
 
-    expect(result).toEqual(apiResult)
+    expect(result).toEqual(intschResult)
   })
 
-  it('should use fallback when intelligentSearchApi fails', async () => {
-    const fallbackResult = {
-      searches: [{ term: 'fallback-suggestion', count: 2 }],
-    }
-
+  it('should throw error when intsch fails', async () => {
     const ctx = createContext({
-      intelligentSearchApiSettings: {
-        fetchSearchSuggestions: new Error('IntelligentSearchApi unavailable'),
-      },
       intschSettings: {
-        fetchSearchSuggestionsV1: fallbackResult,
+        fetchSearchSuggestionsV1: new Error('Service unavailable'),
       },
     })
 
-    const response = await fetchSearchSuggestions(ctx, 'search')
+    await expect(fetchSearchSuggestions(ctx, 'search')).rejects.toThrow(
+      'Service unavailable'
+    )
 
-    expect(
-      ctx.clients.intelligentSearchApi.fetchSearchSuggestions
-    ).toHaveBeenCalledWith({
-      query: 'search',
-    })
     expect(ctx.clients.intsch.fetchSearchSuggestionsV1).toHaveBeenCalledWith({
       query: 'search',
       locale: undefined,
     })
-
-    expect(response).toEqual(fallbackResult)
   })
 })
 
@@ -343,8 +223,8 @@ describe('fetchCorrection', () => {
     jest.clearAllMocks()
   })
 
-  it('should call intelligentSearchApi as primary and return its result when successful', async () => {
-    const apiResult = {
+  it('should call intsch and return its result when successful', async () => {
+    const intschResult = {
       correction: {
         text: 'text',
         highlighted: '<b>text</b>',
@@ -354,89 +234,32 @@ describe('fetchCorrection', () => {
     }
 
     const ctx = createContext({
-      intelligentSearchApiSettings: {
-        fetchCorrection: apiResult,
-      },
       intschSettings: {
-        fetchCorrectionV1: {
-          correction: {
-            text: 'comparison',
-            highlighted: '<b>comparison</b>',
-            misspelled: true,
-            correction: true,
-          },
-        },
+        fetchCorrectionV1: intschResult,
       },
     })
 
     const result = await fetchCorrection(ctx, 'test')
 
-    expect(
-      ctx.clients.intelligentSearchApi.fetchCorrection
-    ).toHaveBeenCalledWith({
-      query: 'test',
-    })
     expect(ctx.clients.intsch.fetchCorrectionV1).toHaveBeenCalledWith({
       query: 'test',
       locale: undefined,
     })
 
-    expect(result).toEqual(apiResult)
+    expect(result).toEqual(intschResult)
   })
 
-  it('should use fallback when intelligentSearchApi fails', async () => {
-    const fallbackResult = {
-      correction: {
-        text: 'fallback-correction',
-        highlighted: '<b>fallback-correction</b>',
-        misspelled: true,
-        correction: true,
-      },
-    }
-
+  it('should throw error when intsch fails', async () => {
     const ctx = createContext({
-      intelligentSearchApiSettings: {
-        fetchCorrection: new Error('IntelligentSearchApi unavailable'),
-      },
       intschSettings: {
-        fetchCorrectionV1: fallbackResult,
-      },
-    })
-
-    const response = await fetchCorrection(ctx, 'test')
-
-    expect(
-      ctx.clients.intelligentSearchApi.fetchCorrection
-    ).toHaveBeenCalledWith({
-      query: 'test',
-    })
-    expect(ctx.clients.intsch.fetchCorrectionV1).toHaveBeenCalledWith({
-      query: 'test',
-      locale: undefined,
-    })
-
-    expect(response).toEqual(fallbackResult)
-  })
-
-  it('should throw error when both services fail', async () => {
-    const ctx = createContext({
-      intelligentSearchApiSettings: {
-        fetchCorrection: new Error('Primary correction unavailable'),
-      },
-      intschSettings: {
-        fetchCorrectionV1: new Error('Fallback correction also unavailable'),
+        fetchCorrectionV1: new Error('Service unavailable'),
       },
     })
 
     await expect(fetchCorrection(ctx, 'test')).rejects.toThrow(
-      'Both calls resulted in errors'
+      'Service unavailable'
     )
 
-    expect(
-      ctx.clients.intelligentSearchApi.fetchCorrection
-    ).toHaveBeenCalledWith({
-      query: 'test',
-    })
     expect(ctx.clients.intsch.fetchCorrectionV1).toHaveBeenCalledWith({
       query: 'test',
       locale: undefined,
