@@ -1,7 +1,5 @@
 import type { Logger } from '@vtex/api'
 
-export const NO_TRAFFIC = 0
-
 /**
  * Utility to compare the results of two functions in parallel
  * Used primarily for comparing the results of two API implementations

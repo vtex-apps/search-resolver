@@ -3,7 +3,7 @@ import {
   convertOrderBy,
 } from '../commons/compatibility-layer'
 import { getWorkspaceSearchParamsFromStorage } from '../routes/workspaceSearchParams'
-import { compareApiResults, NO_TRAFFIC } from '../utils/compareResults'
+import { compareApiResults } from '../utils/compareResults'
 import { fetchAppSettings } from './settings'
 import type { ProductSearchInput } from '../typings/Search'
 import { decodeQuery } from '../clients/intelligent-search-api'
@@ -196,7 +196,7 @@ export async function fetchProductSearch(
       fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions),
     () =>
       fetchProductSearchFromIntsch(ctx, args, selectedFacets, shippingOptions),
-    ctx.vtex.production ? NO_TRAFFIC : 100,
+    ctx.vtex.production ? 1 : 100,
     ctx.vtex.logger,
     {
       logPrefix: 'ProductSearch',
