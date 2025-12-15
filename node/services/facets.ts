@@ -5,6 +5,42 @@ import type { FacetsInput } from '../typings/Search'
 import { decodeQuery } from '../clients/intelligent-search-api'
 import { parseState } from '../utils/searchState'
 
+/**
+ * Builds a query string from an object of params, filtering out undefined/null values
+ */
+function buildQueryString(params: Record<string, any>): string {
+  const searchParams = new URLSearchParams()
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== '') {
+      searchParams.append(key, String(value))
+    }
+  }
+
+  return searchParams.toString()
+}
+
+/**
+ * Builds curl commands for debugging API requests
+ */
+function buildCurlCommands(
+  ctx: Context,
+  path: string,
+  params: Record<string, any>,
+  shippingOptions?: string[]
+): { biggyCurl: string; intschCurl: string } {
+  const { workspace, account } = ctx.vtex
+  const queryString = buildQueryString(params)
+  const shippingHeader = shippingOptions?.length
+    ? ` -H "x-vtex-shipping-options: ${shippingOptions.join(',')}"`
+    : ''
+
+  const biggyCurl = `curl "https://${workspace}--${account}.myvtex.com/_v/api/intelligent-search/facets/${path}?${queryString}"${shippingHeader}`
+  const intschCurl = `curl "https://${account}.myvtex.com/api/intelligent-search/v0/facets/${path}?${queryString}"${shippingHeader}`
+
+  return { biggyCurl, intschCurl }
+}
+
 type FetchFacetsOptions = {
   args: FacetsInput
   selectedFacets: SelectedFacet[]
@@ -101,6 +137,13 @@ export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
     ...parseState(searchState),
   }
 
+  const { biggyCurl, intschCurl } = buildCurlCommands(
+    ctx,
+    path,
+    requestParams,
+    shippingOptions
+  )
+
   // If flag is undefined, compare both APIs
   return compareApiResults(
     () => fetchFacetsFromBiggy(ctx, options),
@@ -110,12 +153,8 @@ export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
     {
       logPrefix: 'Facets',
       args: {
-        biggyPath: `/_v/api/intelligent-search/facets/${path}`,
-        intschPath: `/api/intelligent-search/v0/facets/${path}`,
-        queryParams: requestParams,
-        headers: {
-          'x-vtex-shipping-options': shippingOptions ?? '',
-        },
+        biggyCurl,
+        intschCurl,
       },
     }
   )
