@@ -44,7 +44,10 @@ describe('fetchFacets service', () => {
       },
     })
 
-    const result = await fetchFacets(ctx, mockArgs, mockSelectedFacets)
+    const result = await fetchFacets(ctx, {
+      args: mockArgs,
+      selectedFacets: mockSelectedFacets,
+    })
 
     expect(ctx.clients.intsch.facets).toHaveBeenCalled()
     expect(ctx.clients.intelligentSearchApi.facets).not.toHaveBeenCalled()
@@ -69,7 +72,10 @@ describe('fetchFacets service', () => {
       .spyOn(compareResultsModule, 'compareApiResults')
       .mockResolvedValue(mockFacetsResponse)
 
-    const result = await fetchFacets(ctx, mockArgs, mockSelectedFacets)
+    const result = await fetchFacets(ctx, {
+      args: mockArgs,
+      selectedFacets: mockSelectedFacets,
+    })
 
     expect(compareApiResultsSpy).toHaveBeenCalled()
     expect(result).toEqual(mockFacetsResponse)
@@ -90,7 +96,11 @@ describe('fetchFacets service', () => {
 
     const shippingOptions = ['delivery', 'pickup']
 
-    await fetchFacets(ctx, mockArgs, mockSelectedFacets, shippingOptions)
+    await fetchFacets(ctx, {
+      args: mockArgs,
+      selectedFacets: mockSelectedFacets,
+      shippingOptions,
+    })
 
     expect(ctx.clients.intelligentSearchApi.facets).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'test query' }),
@@ -111,7 +121,10 @@ describe('fetchFacets service', () => {
       tenantLocale: 'en-US',
     })
 
-    await fetchFacets(ctx, mockArgs, mockSelectedFacets)
+    await fetchFacets(ctx, {
+      args: mockArgs,
+      selectedFacets: mockSelectedFacets,
+    })
 
     expect(ctx.translated).toBe(true)
   })

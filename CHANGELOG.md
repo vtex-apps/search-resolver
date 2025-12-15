@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Enhanced comparisson logs for Facets and Product Search
+- Sending 1% of production traffict to test both search and facets endpoint.
+
 ## [1.90.0] - 2025-12-09
 
 ### Changed

@@ -3,9 +3,48 @@ import {
   convertOrderBy,
 } from '../commons/compatibility-layer'
 import { getWorkspaceSearchParamsFromStorage } from '../routes/workspaceSearchParams'
-import { compareApiResults, NO_TRAFFIC } from '../utils/compareResults'
+import { compareApiResults } from '../utils/compareResults'
 import { fetchAppSettings } from './settings'
 import type { ProductSearchInput } from '../typings/Search'
+import { decodeQuery } from '../clients/intelligent-search-api'
+import { parseState } from '../utils/searchState'
+
+/**
+ * Builds a query string from an object of params, filtering out undefined/null values
+ */
+function buildQueryString(params: Record<string, any>): string {
+  const searchParams = new URLSearchParams()
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== '') {
+      searchParams.append(key, String(value))
+    }
+  }
+
+  return searchParams.toString()
+}
+
+/**
+ * Builds curl commands for debugging API requests
+ */
+function buildCurlCommands(
+  ctx: Context,
+  path: string,
+  params: Record<string, any>,
+  shippingOptions?: string[]
+): { biggyCurl: string; intschCurl: string } {
+  const { workspace, account } = ctx.vtex
+  const queryString = buildQueryString(params)
+
+  const shippingHeader = shippingOptions?.length
+    ? ` -H "x-vtex-shipping-options: ${shippingOptions.join(',')}"`
+    : ''
+
+  const biggyCurl = `curl "https://${workspace}--${account}.myvtex.com/_v/api/intelligent-search/product_search/${path}?${queryString}"${shippingHeader}`
+  const intschCurl = `curl "https://${account}.myvtex.com/api/intelligent-search/v0/product-search/${path}?${queryString}"${shippingHeader}`
+
+  return { biggyCurl, intschCurl }
+}
 
 const defaultAdvertisementOptions = {
   showSponsored: false,
@@ -39,6 +78,7 @@ async function fetchProductSearchFromBiggy(
 
   // unnecessary field. It's is an object and breaks the @vtex/api cache
   delete biggyArgs.selectedFacets
+  delete biggyArgs.advertisementOptions
 
   const result: any = await intelligentSearchApi.productSearch(
     { ...biggyArgs },
@@ -82,6 +122,7 @@ async function fetchProductSearchFromIntsch(
 
   // unnecessary field. It's is an object and breaks the @vtex/api cache
   delete intschArgs.selectedFacets
+  delete intschArgs.advertisementOptions
 
   const result: any = await intsch.productSearch(
     { ...intschArgs },
@@ -120,22 +161,52 @@ export async function fetchProductSearch(
     )
   }
 
+  // Build the exact request params as the clients do for debugging
+  const path = buildAttributePath(selectedFacets)
+  const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+  const { advertisementOptions = defaultAdvertisementOptions } = args
+
+  const clientArgs: { [key: string]: any } = {
+    ...advertisementOptions,
+    ...args,
+    query: args.fullText,
+    sort: convertOrderBy(args.orderBy),
+    ...args.options,
+    ...workspaceSearchParams,
+  }
+
+  delete clientArgs.selectedFacets
+  delete clientArgs.advertisementOptions
+
+  const { leap, searchState } = args as { leap?: boolean; searchState?: string }
+
+  const requestParams = {
+    query: args.fullText && decodeQuery(args.fullText),
+    locale: ctx.vtex.locale ?? ctx.vtex.tenant?.locale,
+    bgy_leap: leap ? true : undefined,
+    ...parseState(searchState),
+    ...clientArgs,
+  }
+
+  const { biggyCurl, intschCurl } = buildCurlCommands(
+    ctx,
+    path,
+    requestParams,
+    shippingOptions
+  )
+
   return compareApiResults(
     () =>
       fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions),
     () =>
       fetchProductSearchFromIntsch(ctx, args, selectedFacets, shippingOptions),
-    ctx.vtex.production ? NO_TRAFFIC : 100,
+    ctx.vtex.production ? 1 : 100,
     ctx.vtex.logger,
     {
       logPrefix: 'ProductSearch',
       args: {
-        fullText: args.fullText,
-        query: args.query,
-        from: args.from,
-        to: args.to,
-        selectedFacets,
-        shippingOptions,
+        biggyCurl,
+        intschCurl,
       },
     }
   )
