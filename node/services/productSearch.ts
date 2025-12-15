@@ -6,6 +6,8 @@ import { getWorkspaceSearchParamsFromStorage } from '../routes/workspaceSearchPa
 import { compareApiResults, NO_TRAFFIC } from '../utils/compareResults'
 import { fetchAppSettings } from './settings'
 import type { ProductSearchInput } from '../typings/Search'
+import { decodeQuery } from '../clients/intelligent-search-api'
+import { parseState } from '../utils/searchState'
 
 const defaultAdvertisementOptions = {
   showSponsored: false,
@@ -120,6 +122,32 @@ export async function fetchProductSearch(
     )
   }
 
+  // Build the exact request params as the clients do for debugging
+  const path = buildAttributePath(selectedFacets)
+  const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
+  const { advertisementOptions = defaultAdvertisementOptions } = args
+
+  const clientArgs: { [key: string]: any } = {
+    ...advertisementOptions,
+    ...args,
+    query: args.fullText,
+    sort: convertOrderBy(args.orderBy),
+    ...args.options,
+    ...workspaceSearchParams,
+  }
+
+  delete clientArgs.selectedFacets
+
+  const { leap, searchState } = args as { leap?: boolean; searchState?: string }
+
+  const requestParams = {
+    query: args.fullText && decodeQuery(args.fullText),
+    locale: ctx.vtex.locale ?? ctx.vtex.tenant?.locale,
+    bgy_leap: leap ? true : undefined,
+    ...parseState(searchState),
+    ...clientArgs,
+  }
+
   return compareApiResults(
     () =>
       fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions),
@@ -130,12 +158,12 @@ export async function fetchProductSearch(
     {
       logPrefix: 'ProductSearch',
       args: {
-        fullText: args.fullText,
-        query: args.query,
-        from: args.from,
-        to: args.to,
-        selectedFacets,
-        shippingOptions,
+        biggyPath: `/_v/api/intelligent-search/product_search/${path}`,
+        intschPath: `/api/intelligent-search/v0/product-search/${path}`,
+        queryParams: requestParams,
+        headers: {
+          'x-vtex-shipping-options': shippingOptions ?? '',
+        },
       },
     }
   )

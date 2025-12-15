@@ -2,6 +2,8 @@ import { buildAttributePath } from '../commons/compatibility-layer'
 import { compareApiResults, NO_TRAFFIC } from '../utils/compareResults'
 import { fetchAppSettings } from './settings'
 import type { FacetsInput } from '../typings/Search'
+import { decodeQuery } from '../clients/intelligent-search-api'
+import { parseState } from '../utils/searchState'
 
 type FetchFacetsOptions = {
   args: FacetsInput
@@ -82,6 +84,23 @@ export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
     return fetchFacetsFromIntsch(ctx, options)
   }
 
+  // Build the exact request params as the clients do for debugging
+  const path = buildAttributePath(selectedFacets)
+  const clientArgs: { [key: string]: any } = { ...args }
+
+  delete clientArgs.selectedFacets
+
+  const query = args.fullText
+  const { leap, searchState } = args as { leap?: boolean; searchState?: string }
+
+  const requestParams = {
+    ...clientArgs,
+    query: query && decodeQuery(query),
+    locale: ctx.vtex.locale ?? ctx.vtex.tenant?.locale,
+    bgy_leap: leap ? true : undefined,
+    ...parseState(searchState),
+  }
+
   // If flag is undefined, compare both APIs
   return compareApiResults(
     () => fetchFacetsFromBiggy(ctx, options),
@@ -91,9 +110,12 @@ export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
     {
       logPrefix: 'Facets',
       args: {
-        fullText: args.fullText,
-        selectedFacets,
-        shippingOptions,
+        biggyPath: `/_v/api/intelligent-search/facets/${path}`,
+        intschPath: `/api/intelligent-search/v0/facets/${path}`,
+        queryParams: requestParams,
+        headers: {
+          'x-vtex-shipping-options': shippingOptions ?? '',
+        },
       },
     }
   )
