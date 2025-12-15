@@ -35,6 +35,7 @@ function buildCurlCommands(
 ): { biggyCurl: string; intschCurl: string } {
   const { workspace, account } = ctx.vtex
   const queryString = buildQueryString(params)
+
   const shippingHeader = shippingOptions?.length
     ? ` -H "x-vtex-shipping-options: ${shippingOptions.join(',')}"`
     : ''
@@ -77,6 +78,7 @@ async function fetchProductSearchFromBiggy(
 
   // unnecessary field. It's is an object and breaks the @vtex/api cache
   delete biggyArgs.selectedFacets
+  delete biggyArgs.advertisementOptions
 
   const result: any = await intelligentSearchApi.productSearch(
     { ...biggyArgs },
@@ -120,6 +122,7 @@ async function fetchProductSearchFromIntsch(
 
   // unnecessary field. It's is an object and breaks the @vtex/api cache
   delete intschArgs.selectedFacets
+  delete intschArgs.advertisementOptions
 
   const result: any = await intsch.productSearch(
     { ...intschArgs },
@@ -173,6 +176,7 @@ export async function fetchProductSearch(
   }
 
   delete clientArgs.selectedFacets
+  delete clientArgs.advertisementOptions
 
   const { leap, searchState } = args as { leap?: boolean; searchState?: string }
 
