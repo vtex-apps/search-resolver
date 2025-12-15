@@ -3,15 +3,17 @@ import { compareApiResults, NO_TRAFFIC } from '../utils/compareResults'
 import { fetchAppSettings } from './settings'
 import type { FacetsInput } from '../typings/Search'
 
+type FetchFacetsOptions = {
+  args: FacetsInput
+  selectedFacets: SelectedFacet[]
+  shippingOptions?: string[]
+}
+
 /**
  * Fetches facets using the intelligentSearchApi client (Biggy)
  */
-async function fetchFacetsFromBiggy(
-  ctx: Context,
-  args: FacetsInput,
-  selectedFacets: SelectedFacet[],
-  shippingOptions?: string[]
-) {
+async function fetchFacetsFromBiggy(ctx: Context, options: FetchFacetsOptions) {
+  const { args, selectedFacets, shippingOptions } = options
   const {
     clients: { intelligentSearchApi },
   } = ctx
@@ -41,10 +43,9 @@ async function fetchFacetsFromBiggy(
  */
 async function fetchFacetsFromIntsch(
   ctx: Context,
-  args: FacetsInput,
-  selectedFacets: SelectedFacet[],
-  shippingOptions?: string[]
+  options: FetchFacetsOptions
 ) {
+  const { args, selectedFacets, shippingOptions } = options
   const {
     clients: { intsch },
   } = ctx
@@ -72,23 +73,19 @@ async function fetchFacetsFromIntsch(
 /**
  * Facets service that extracts facets fetching logic and implements comparison or flag-based routing
  */
-export async function fetchFacets(
-  ctx: Context,
-  args: FacetsInput,
-  selectedFacets: SelectedFacet[],
-  shippingOptions?: string[]
-) {
+export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
+  const { args, selectedFacets, shippingOptions } = options
   const { shouldUseNewPLPEndpoint } = await fetchAppSettings(ctx)
 
   // If flag is explicitly true, use intsch
   if (shouldUseNewPLPEndpoint) {
-    return fetchFacetsFromIntsch(ctx, args, selectedFacets, shippingOptions)
+    return fetchFacetsFromIntsch(ctx, options)
   }
 
   // If flag is undefined, compare both APIs
   return compareApiResults(
-    () => fetchFacetsFromBiggy(ctx, args, selectedFacets, shippingOptions),
-    () => fetchFacetsFromIntsch(ctx, args, selectedFacets, shippingOptions),
+    () => fetchFacetsFromBiggy(ctx, options),
+    () => fetchFacetsFromIntsch(ctx, options),
     ctx.vtex.production ? NO_TRAFFIC : 100,
     ctx.vtex.logger,
     {

@@ -363,7 +363,7 @@ export const queries = {
 
     const { selectedFacets } = args
 
-    return fetchFacets(ctx, args, selectedFacets, shippingOptions)
+    return fetchFacets(ctx, { args, selectedFacets, shippingOptions })
   },
 
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
