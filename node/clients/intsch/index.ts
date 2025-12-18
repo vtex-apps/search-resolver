@@ -172,6 +172,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       },
       metric: 'product-search-new',
       headers: {
+        'x-vtex-segment': this.context.segmentToken,
         'x-vtex-shipping-options': shippingHeader ?? '',
         ...(authToken ? { VtexIdclientAutCookie: authToken } : {}),
       },
@@ -203,6 +204,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       },
       metric: 'facets-new',
       headers: {
+        'x-vtex-segment': this.context.segmentToken,
         'x-vtex-shipping-options': shippingHeader ?? '',
         ...(authToken ? { VtexIdclientAutCookie: authToken } : {}),
       },
