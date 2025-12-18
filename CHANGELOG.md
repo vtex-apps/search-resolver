@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Enhanced comparisson logs for Facets and Product Search by including the vtex-segment  in the curl.
+- Forward the segment in the headers for facets and search request to intsch.
+
 ## [1.91.0] - 2025-12-15
 
 ### Changed

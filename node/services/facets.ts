@@ -23,20 +23,25 @@ function buildQueryString(params: Record<string, any>): string {
 /**
  * Builds curl commands for debugging API requests
  */
+// eslint-disable-next-line max-params
 function buildCurlCommands(
   ctx: Context,
   path: string,
   params: Record<string, any>,
   shippingOptions?: string[]
 ): { biggyCurl: string; intschCurl: string } {
-  const { workspace, account } = ctx.vtex
+  const { account } = ctx.vtex
   const queryString = buildQueryString(params)
   const shippingHeader = shippingOptions?.length
     ? ` -H "x-vtex-shipping-options: ${shippingOptions.join(',')}"`
     : ''
 
-  const biggyCurl = `curl "https://${workspace}--${account}.myvtex.com/_v/api/intelligent-search/facets/${path}?${queryString}"${shippingHeader}`
-  const intschCurl = `curl "https://${account}.myvtex.com/api/intelligent-search/v0/facets/${path}?${queryString}"${shippingHeader}`
+  const segmentHeader = ctx.vtex.segmentToken
+    ? ` -H "x-vtex-segment: ${ctx.vtex.segmentToken}"`
+    : ''
+
+  const biggyCurl = `curl "https://${account}.myvtex.com/_v/api/intelligent-search/facets/${path}?${queryString}"${shippingHeader}${segmentHeader}`
+  const intschCurl = `curl "https://${account}.myvtex.com/api/intelligent-search/v0/facets/${path}?${queryString}"${shippingHeader}${segmentHeader}`
 
   return { biggyCurl, intschCurl }
 }
