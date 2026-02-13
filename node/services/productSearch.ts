@@ -3,11 +3,97 @@ import {
   convertOrderBy,
 } from '../commons/compatibility-layer'
 import { getWorkspaceSearchParamsFromStorage } from '../routes/workspaceSearchParams'
-import { compareApiResults } from '../utils/compareResults'
+import {
+  compareApiResults,
+  type ExistenceComparePattern,
+  type IgnoredDifference,
+} from '../utils/compareResults'
 import { fetchAppSettings } from './settings'
 import type { ProductSearchInput } from '../typings/Search'
 import { decodeQuery } from '../clients/intelligent-search-api'
 import { parseState } from '../utils/searchState'
+
+/**
+ * Fields that should use existence-based (key-based) comparison instead of
+ * position-based comparison when diffing product_search responses.
+ * Must match the config used in intelligent-search/test-local-product-search-api.js.
+ */
+export const PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS: ExistenceComparePattern[] =
+  [
+    'products[*].categories',
+    'products[*].categoriesIds',
+    { path: 'products[*].specificationGroups', key: 'name' },
+    { path: 'products[*].properties', key: 'name' },
+    { path: 'products[*].skuSpecifications', key: 'field.name' },
+  ]
+
+/**
+ * Known expected differences to ignore when comparing product_search responses.
+ * Must match the IGNORED_PATHS in intelligent-search/test-local-product-search-api.js.
+ *
+ * Type mapping from intelligent-search → search-resolver:
+ *   value_mismatch       → different_value
+ *   missing_in_production → missing_key   (exists in b/intsch but not in a/biggy)
+ *   missing_in_local      → extra_key     (exists in a/biggy but not in b/intsch)
+ *   null_mismatch         → null_mismatch
+ *   array_length_mismatch → array_length_mismatch
+ */
+export const PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
+  // recordsFiltered can differ because the request might go to different nodes
+  { path: 'recordsFiltered', type: 'different_value' },
+  // Pagination proxy URLs are assembled differently
+  { path: 'pagination.before[*].proxyUrl', type: 'different_value' },
+  { path: 'pagination.after[*].proxyUrl', type: 'different_value' },
+  { path: 'pagination.next.proxyUrl', type: 'different_value' },
+  { path: 'pagination.last.proxyUrl', type: 'different_value' },
+  { path: 'pagination.current.proxyUrl', type: 'different_value' },
+  // cacheId differs because of sponsored products middleware on node
+  { path: 'products[*].cacheId', type: 'different_value' },
+  // productReference: intsch sends this but biggy always returns ""
+  { path: 'products[*].productReference', type: 'different_value' },
+  { path: 'products[*].productReference', type: 'missing_key' },
+  // metaTagDescription: intsch sends this but biggy always returns ""
+  { path: 'products[*].metaTagDescription', type: 'different_value' },
+  // isKit: intsch sends this but biggy always returns "false"
+  { path: 'products[*].items[*].isKit', type: 'different_value' },
+  // modalType: intsch sends this but biggy always returns ""
+  { path: 'products[*].items[*].modalType', type: 'different_value' },
+  // PriceValidUntil changes with each request
+  {
+    path: 'products[*].items[*].sellers[*].commertialOffer.PriceValidUntil',
+    type: 'different_value',
+  },
+  // imageText: intsch sends this but biggy always returns ""
+  { path: 'products[*].items[*].images[*].imageText', type: 'different_value' },
+  // attachments: intsch sends this but biggy always returns an empty array
+  {
+    path: 'products[*].items[*].attachments',
+    type: 'array_length_mismatch',
+  },
+  { path: 'products[*].items[*].attachments[*]', type: 'missing_key' },
+  // sellerId in specificationGroups/properties: no longer sent by intsch
+  {
+    path: 'products[*].specificationGroups[name:allSpecifications].specifications[name:sellerId]',
+    type: 'extra_key',
+  },
+  { path: 'products[*].properties[name:sellerId]', type: 'extra_key' },
+  // productTitle: no longer sent by intsch because it is always empty
+  { path: 'products[*].productTitle', type: 'extra_key' },
+  // description: differs because intsch gets the raw value from catalog without cropping
+  { path: 'products[*].description', type: 'different_value' },
+  // taxPercentage: biggy sends 0 or null, intsch always sends 0
+  {
+    path: 'products[*].items[*].sellers[*].commertialOffer.taxPercentage',
+    type: 'null_mismatch',
+  },
+  // searchId is always different
+  { path: 'searchId', type: 'different_value' },
+  // allSpecifications group can be missing when product has no specs (biggy always returns sellerId there)
+  {
+    path: 'products[*].specificationGroups[name:allSpecifications]',
+    type: 'extra_key',
+  },
+]
 
 /**
  * Builds a query string from an object of params, filtering out undefined/null values
@@ -213,6 +299,8 @@ export async function fetchProductSearch(
         biggyCurl,
         intschCurl,
       },
+      existenceCompareFields: PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS,
+      ignoredDifferences: PRODUCT_SEARCH_IGNORED_DIFFERENCES,
     }
   )
 }
