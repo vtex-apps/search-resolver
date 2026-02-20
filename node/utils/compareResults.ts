@@ -92,12 +92,15 @@ function matchesExistencePattern(path: string, pattern: string): boolean {
     return fieldName === pattern
   }
 
-  // Convert wildcard pattern to regex
-  const regexPattern = pattern
-    .replace(/\\/g, '\\\\')
-    .replace(/\./g, '\\.')
-    .replace(/\[\*\]/g, '(?:\\[\\d+\\]|\\[name:[^\\]]+\\])')
-    .replace(/\*/g, '[^.\\[\\]]*')
+  // Escape all regex special characters first, then un-escape wildcard tokens
+  let regexPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+  regexPattern = regexPattern.replace(
+    /\\\[\\\*\\\]/g,
+    '(?:\\[\\d+\\]|\\[name:[^\\]]+\\])'
+  )
+
+  regexPattern = regexPattern.replace(/\\\*/g, '[^.\\[\\]]*')
 
   const regex = new RegExp(`^${regexPattern}$`)
 
