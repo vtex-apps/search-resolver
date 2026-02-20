@@ -94,6 +94,7 @@ function matchesExistencePattern(path: string, pattern: string): boolean {
 
   // Convert wildcard pattern to regex
   const regexPattern = pattern
+    .replace(/\\/g, '\\\\')
     .replace(/\./g, '\\.')
     .replace(/\[\*\]/g, '(?:\\[\\d+\\]|\\[name:[^\\]]+\\])')
     .replace(/\*/g, '[^.\\[\\]]*')
