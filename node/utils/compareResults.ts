@@ -199,7 +199,7 @@ function compareArraysByExistence(
   )
 
   for (let i = 0; i < maxNoKeyLength; i++) {
-    const currentPath = path ? `${path}[${i}]` : `[${i}]`
+    const currentPath = path ? `${path}[no-name:${i}]` : `[no-name:${i}]`
 
     if (i >= itemsWithoutKey1.length) {
       differences.push({
@@ -290,12 +290,14 @@ export function findDifferences(
 
   // Check for null/undefined values (one is null/undefined but not the other)
   if (a === null || a === undefined || b === null || b === undefined) {
-    differences.push({
-      path,
-      type: 'null_mismatch',
-      expected: a,
-      actual: b,
-    })
+    if (a !== b) {
+      differences.push({
+        path,
+        type: 'null_mismatch',
+        expected: a,
+        actual: b,
+      })
+    }
 
     return differences
   }
