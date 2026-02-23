@@ -34,11 +34,11 @@ export interface DeepComparisonResult {
 /**
  * Pattern for matching fields that should use existence-based (key-based)
  * comparison instead of position-based comparison.
- * Can be a simple field name (e.g. 'specifications') or a path pattern
- * with wildcards (e.g. 'facets[*].values').
- * Can also be an object with a custom key property for element matching.
+ * Can be a simple path string for primitive lists (compared by value) or
+ * an object with a path and a key property specifying which field to use
+ * for matching elements in object lists.
  */
-export type ExistenceComparePattern = string | { path: string; key?: string }
+export type ExistenceComparePattern = string | { path: string; key: string }
 
 /**
  * Options for the findDifferences function
@@ -119,7 +119,7 @@ function findMatchingExistencePattern(
       typeof patternConfig === 'string' ? patternConfig : patternConfig.path
 
     const customKey =
-      typeof patternConfig === 'string' ? null : patternConfig.key ?? null
+      typeof patternConfig === 'string' ? null : patternConfig.key
 
     if (matchesExistencePattern(path, patternPath)) {
       return { pattern: patternPath, key: customKey }
