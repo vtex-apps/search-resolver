@@ -129,7 +129,7 @@ describe('ShadowMigration', () => {
       setImmediate(() => resolve())
     })
 
-    expect(ctx.vtex.logger.warn).toHaveBeenCalledWith(
+    expect(ctx.vtex.logger.error).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'ShadowMigration diff-test structural differences',
         name: 'diff-test',
@@ -168,7 +168,7 @@ describe('ShadowMigration', () => {
       setImmediate(() => resolve())
     })
 
-    expect(ctx.vtex.logger.warn).toHaveBeenCalledWith(
+    expect(ctx.vtex.logger.error).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'ShadowMigration throw-test compare failed',
         name: 'throw-test',
