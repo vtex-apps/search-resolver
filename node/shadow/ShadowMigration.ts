@@ -79,7 +79,7 @@ export class ShadowMigration<T> {
         const { diffs, summary } = structuralCompare(normLegacy, normNew)
 
         if (diffs.length > 0) {
-          ctx.vtex?.logger?.warn?.({
+          ctx.vtex?.logger?.error?.({
             message: `ShadowMigration ${this.config.name} structural differences`,
             name: this.config.name,
             diffCount: diffs.length,
@@ -94,7 +94,7 @@ export class ShadowMigration<T> {
         }
       })
       .catch((err) => {
-        ctx.vtex?.logger?.warn?.({
+        ctx.vtex?.logger?.error?.({
           message: `ShadowMigration ${this.config.name} compare failed`,
           name: this.config.name,
           error: err instanceof Error ? err.message : String(err),

@@ -19,7 +19,7 @@ The consumer calls `ShadowMigration.execute(legacyFn, nextFn, ctx)`, where:
 
 In **shadow** mode, the comparison runs in the background: both payloads are normalized and go through a structural diff. **Logging**:
 - **No diffs**: `logger.info` with a message indicating no structural differences.
-- **Diffs found**: `logger.warn` with the diff count, summary, and the first differences.
+- **Diffs found**: `logger.error` with the diff count, summary, and the first differences.
 
 ### Diagram: flag-based decision
 
@@ -51,7 +51,7 @@ flowchart LR
     NormL[normalize]
     NormN[normalize]
     Diff[structuralCompare]
-    Log[diffs > 0: logger.warn / else: logger.info]
+    Log[diffs > 0: logger.error / else: logger.info]
   end
   L --> NormL
   N --> NormN
@@ -95,6 +95,6 @@ The diff is **structural**: it compares keys, types, lengths, and presence (empt
 | `type_mismatch` | Different types at the same path (e.g. string vs number) |
 | `presence_mismatch` | One value “empty” and the other not (e.g. `''` vs `'x'`, `null` vs object) |
 
-When there are diffs, the warning log includes the first differences and a **summary** by category (`legacy_has_more`, `new_has_more`, `both_different`). When there are no diffs, an **info** log is emitted to indicate a successful structural match.
+When there are diffs, the error log includes the first differences and a **summary** by category (`legacy_has_more`, `new_has_more`, `both_different`). When there are no diffs, an **info** log is emitted to indicate a successful structural match.
 
 **Limits**: The comparison caps tree depth and the number of elements compared in each array (see constants in `structuralCompare.ts`) to avoid excessive cost.
