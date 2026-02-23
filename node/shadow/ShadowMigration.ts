@@ -1,4 +1,4 @@
-import { evaluateBooleanFlag } from '../services/featurehub'
+import { createEvaluator } from '../services/featurehub'
 import { structuralCompare } from './structuralCompare'
 
 export interface ShadowMigrationConfig<T> {
@@ -32,19 +32,18 @@ export class ShadowMigration<T> {
     let returnNew = false
 
     try {
-      const [migrationCompleteRes, shadowRes, returnNewRes] = await Promise.all(
-        [
-          evaluateBooleanFlag(this.config.flags.migrationComplete, false, {
-            account,
-          }),
-          evaluateBooleanFlag(this.config.flags.shadow, false, { account }),
-          evaluateBooleanFlag(this.config.flags.returnNew, false, { account }),
-        ]
-      )
+      const evaluator = await createEvaluator(account)
+      const {
+        migrationComplete: migrationCompleteKey,
+        shadow: shadowKey,
+        returnNew: returnNewKey,
+      } = this.config.flags
 
-      migrationComplete = migrationCompleteRes.value
-      shadow = shadowRes.value
-      returnNew = returnNewRes.value
+      ;[migrationComplete, shadow, returnNew] = await Promise.all([
+        evaluator.getBoolean(migrationCompleteKey, false),
+        evaluator.getBoolean(shadowKey, false),
+        evaluator.getBoolean(returnNewKey, false),
+      ])
     } catch {
       // Fallback: all false -> legacy only
     }

@@ -1,12 +1,13 @@
 import { fetchProduct, buildVtexSegment } from './product'
 import { createContext } from '../mocks/contextFactory'
 
-jest.mock('./featurehub', () => ({
-  evaluateBooleanFlag: jest.fn(),
-}))
+const mockGetBoolean = jest.fn()
 
-const { evaluateBooleanFlag } = jest.requireMock('./featurehub')
-const mockEvaluateBooleanFlag = evaluateBooleanFlag as jest.Mock
+jest.mock('./featurehub', () => ({
+  createEvaluator: jest.fn(() =>
+    Promise.resolve({ getBoolean: mockGetBoolean })
+  ),
+}))
 
 describe('fetchProduct service', () => {
   const mockProduct = {
@@ -17,11 +18,7 @@ describe('fetchProduct service', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    // Default: legacy only (no shadow, no migration complete)
-    mockEvaluateBooleanFlag.mockResolvedValue({
-      value: false,
-      flagFound: true,
-    })
+    mockGetBoolean.mockResolvedValue(false)
   })
 
   it('should build vtex segment correctly', () => {
@@ -63,10 +60,10 @@ describe('fetchProduct service', () => {
   })
 
   it('should use intsch when FeatureHub migrationComplete is true', async () => {
-    mockEvaluateBooleanFlag
-      .mockResolvedValueOnce({ value: true, flagFound: true })
-      .mockResolvedValueOnce({ value: false, flagFound: true })
-      .mockResolvedValueOnce({ value: false, flagFound: true })
+    mockGetBoolean
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(false)
 
     const ctx = createContext({ accountName: 'b2bstoreqa' })
 

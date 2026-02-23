@@ -3,8 +3,7 @@ import { EdgeFeatureHubConfig } from 'featurehub-javascript-node-sdk'
 
 const FEATUREHUB_EDGE_URL = 'https://flags.vtex.com/'
 
-const FEATUREHUB_CLIENT_API_KEY =
-  '1a066a06-65c2-481a-b6f5-bc0c5bb3a565/Jxzg2n5WRLGbrVN8UrqD0jz4wOV6ln*FnKz6GX1TV16NAL2Jzmj'
+const FEATUREHUB_CLIENT_API_KEY = ''
 
 let fhConfig: EdgeFeatureHubConfig | null = null
 let ready = false
@@ -37,78 +36,45 @@ export async function initFeatureHub(): Promise<void> {
   })
 }
 
-export async function evaluateBooleanFlag(
-  flagKey: string,
-  defaultValue: boolean,
-  context?: Record<string, string>
-): Promise<{ value: boolean; flagFound: boolean }> {
-  if (!fhConfig || !ready) {
-    return { value: defaultValue, flagFound: false }
-  }
-
-  const clientContext = await buildContext(context)
-
-  if (!clientContext.isSet(flagKey)) {
-    return { value: defaultValue, flagFound: false }
-  }
-
-  const value = clientContext.getBoolean(flagKey)
-
-  if (value === null || value === undefined) {
-    return { value: defaultValue, flagFound: false }
-  }
-
-  return { value, flagFound: true }
+export interface FlagEvaluator {
+  getBoolean(flagKey: string, defaultValue: boolean): Promise<boolean>
 }
 
-export async function evaluateStringFlag(
-  flagKey: string,
-  defaultValue: string,
-  context?: Record<string, string>
-): Promise<{ value: string; flagFound: boolean }> {
+export async function createEvaluator(account: string): Promise<FlagEvaluator> {
   if (!fhConfig || !ready) {
-    return { value: defaultValue, flagFound: false }
+    return {
+      getBoolean: (_flagKey, defaultValue) => Promise.resolve(defaultValue),
+    }
   }
 
-  const clientContext = await buildContext(context)
+  const clientContext = await buildContext(account)
 
-  if (!clientContext.isSet(flagKey)) {
-    return { value: defaultValue, flagFound: false }
+  return {
+    getBoolean: async (flagKey, defaultValue) => {
+      if (!clientContext.isSet(flagKey)) {
+        return defaultValue
+      }
+
+      const value = clientContext.getBoolean(flagKey)
+
+      if (value === null || value === undefined) {
+        return defaultValue
+      }
+
+      return value
+    },
   }
-
-  const value = clientContext.getString(flagKey)
-
-  if (value === null || value === undefined) {
-    return { value: defaultValue, flagFound: false }
-  }
-
-  return { value, flagFound: true }
 }
 
-async function buildContext(
-  attrs?: Record<string, string>
-): Promise<ClientContext> {
+async function buildContext(account: string): Promise<ClientContext> {
   if (!fhConfig) {
     throw new Error('FeatureHub not initialized')
   }
 
-  let ctx = fhConfig.newContext()
+  const ctx = fhConfig
+    .newContext()
+    .userKey(account)
+    .attributeValue('account', account)
 
-  if (attrs) {
-    for (const [key, val] of Object.entries(attrs)) {
-      if (key === 'userKey' || key === 'targetingKey') {
-        ctx = ctx.userKey(val)
-      } else if (key === 'sessionKey') {
-        ctx = ctx.sessionKey(val)
-      } else if (key === 'version') {
-        ctx = ctx.version(val)
-      } else {
-        ctx = ctx.attributeValue(key, val)
-      }
-    }
-  }
-
-  ctx = await ctx.build()
-
-  return ctx
+  return ctx.build()
 }

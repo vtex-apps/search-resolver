@@ -1,11 +1,12 @@
 import { ShadowMigration } from './ShadowMigration'
 
-jest.mock('../services/featurehub', () => ({
-  evaluateBooleanFlag: jest.fn(),
-}))
+const mockGetBoolean = jest.fn()
 
-const { evaluateBooleanFlag } = jest.requireMock('../services/featurehub')
-const mockEvaluateBooleanFlag = evaluateBooleanFlag as jest.Mock
+jest.mock('../services/featurehub', () => ({
+  createEvaluator: jest.fn(() =>
+    Promise.resolve({ getBoolean: mockGetBoolean })
+  ),
+}))
 
 function createCtx(account = 'test') {
   return {
@@ -32,19 +33,14 @@ describe('ShadowMigration', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockEvaluateBooleanFlag.mockImplementation(() =>
-      Promise.resolve({
-        value: false,
-        flagFound: true,
-      })
-    )
+    mockGetBoolean.mockResolvedValue(false)
   })
 
   it('when migrationComplete=true calls only next() and returns new', async () => {
-    mockEvaluateBooleanFlag
-      .mockResolvedValueOnce({ value: true, flagFound: true })
-      .mockResolvedValueOnce({ value: false, flagFound: true })
-      .mockResolvedValueOnce({ value: false, flagFound: true })
+    mockGetBoolean
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(false)
 
     const ctx = createCtx()
     const { result, source } = await migration.execute(legacy, next, ctx)
@@ -66,10 +62,10 @@ describe('ShadowMigration', () => {
   })
 
   it('when shadow=true returnNew=false calls both, returns legacy', async () => {
-    mockEvaluateBooleanFlag
-      .mockResolvedValueOnce({ value: false, flagFound: true })
-      .mockResolvedValueOnce({ value: true, flagFound: true })
-      .mockResolvedValueOnce({ value: false, flagFound: true })
+    mockGetBoolean
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(false)
 
     const ctx = createCtx()
     const { result, source } = await migration.execute(legacy, next, ctx)
@@ -81,10 +77,10 @@ describe('ShadowMigration', () => {
   })
 
   it('when shadow=true returnNew=true calls both, returns new', async () => {
-    mockEvaluateBooleanFlag
-      .mockResolvedValueOnce({ value: false, flagFound: true })
-      .mockResolvedValueOnce({ value: true, flagFound: true })
-      .mockResolvedValueOnce({ value: true, flagFound: true })
+    mockGetBoolean
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(true)
 
     const ctx = createCtx()
     const { result, source } = await migration.execute(legacy, next, ctx)
@@ -96,7 +92,7 @@ describe('ShadowMigration', () => {
   })
 
   it('on flag evaluation error falls back to legacy only', async () => {
-    mockEvaluateBooleanFlag.mockRejectedValue(new Error('fh down'))
+    mockGetBoolean.mockRejectedValue(new Error('fh down'))
 
     const ctx = createCtx()
     const { result, source } = await migration.execute(legacy, next, ctx)
@@ -108,10 +104,10 @@ describe('ShadowMigration', () => {
   })
 
   it('when shadow=true logs structural differences when legacy and new differ', async () => {
-    mockEvaluateBooleanFlag
-      .mockResolvedValueOnce({ value: false, flagFound: true })
-      .mockResolvedValueOnce({ value: true, flagFound: true })
-      .mockResolvedValueOnce({ value: false, flagFound: true })
+    mockGetBoolean
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(false)
 
     const legacyFn = jest.fn().mockResolvedValue({ a: 1, b: 2 })
     const nextFn = jest.fn().mockResolvedValue({ a: 1 })
@@ -145,10 +141,10 @@ describe('ShadowMigration', () => {
   })
 
   it('when shadow=true logs compare failed when normalize throws', async () => {
-    mockEvaluateBooleanFlag
-      .mockResolvedValueOnce({ value: false, flagFound: true })
-      .mockResolvedValueOnce({ value: true, flagFound: true })
-      .mockResolvedValueOnce({ value: false, flagFound: true })
+    mockGetBoolean
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(false)
 
     const legacyFn = jest.fn().mockResolvedValue(1)
     const nextFn = jest.fn().mockResolvedValue(2)
