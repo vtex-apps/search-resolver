@@ -90,6 +90,13 @@
     },
     {
       "name": "vtex.messages:graphql-translate-messages"
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "flags.vtex.com",
+        "path": "/*"
+      }
     }
   ],
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"

@@ -4,6 +4,7 @@ import schema from 'vtex.search-graphql/graphql'
 
 import { Clients } from './clients'
 import { schemaDirectives } from './directives'
+import { initFeatureHub } from './services/featurehub'
 import { resolvers } from './resolvers'
 import {
   getWorkspaceSearchParams,
@@ -29,6 +30,9 @@ metrics.trackCache('messages', messagesCache)
 metrics.trackCache('vbase', vbaseCache)
 metrics.trackCache('apps', appsCache)
 metrics.trackCache('intsch', intschCache)
+
+// FeatureHub SSE connection ready before first requests
+initFeatureHub().catch(() => {})
 
 export default new Service<Clients, RecorderState, CustomContext>({
   clients: {

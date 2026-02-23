@@ -1,3 +1,5 @@
+import { ShadowMigration } from '../shadow/ShadowMigration'
+import { normalizeProduct } from '../shadow/normalizers/product'
 import type { SegmentData } from '../typings/Search'
 import { fetchAppSettings } from './settings'
 
@@ -114,6 +116,16 @@ async function fetchProductFromIntsch(
   return product ? [product] : []
 }
 
+const productMigration = new ShadowMigration<SearchProduct[]>({
+  normalize: normalizeProduct,
+  name: 'PDP:fetchProduct',
+  flags: {
+    migrationComplete: 'pdp_migration_complete',
+    shadow: 'pdp_shadow_enabled',
+    returnNew: 'pdp_return_new',
+  },
+})
+
 /**
  * Builds vtex segment token for product fetching
  */
@@ -140,15 +152,17 @@ export async function fetchProduct(
   ctx: Context,
   args: FetchProductArgs
 ): Promise<SearchProduct[]> {
-  const { shouldUseNewPDPEndpoint } = await fetchAppSettings(ctx)
+  const { result, source } = await productMigration.execute(
+    () => fetchProductFromSearch(ctx, args),
+    () => fetchProductFromIntsch(ctx, args),
+    ctx
+  )
 
-  // Check if current account should skip comparison and use intsch directly
-  if (shouldUseNewPDPEndpoint) {
+  if (source === 'new') {
     ctx.translated = true
-    return fetchProductFromIntsch(ctx, args)
   }
 
-  return fetchProductFromSearch(ctx, args)
+  return result
 }
 
 /**
