@@ -3,7 +3,8 @@ import { EdgeFeatureHubConfig } from 'featurehub-javascript-node-sdk'
 
 const FEATUREHUB_EDGE_URL = 'https://flags.vtex.com/'
 
-const FEATUREHUB_CLIENT_API_KEY = ''
+const FEATUREHUB_CLIENT_API_KEY =
+  '6729a5cb-284e-4f0f-8727-11c28dc76ea9/jO21O8Z7lSlDGHMMuU8ueZvj1uQcnt*SQ40zD7Jpq0vtQafBCTe'
 
 let fhConfig: EdgeFeatureHubConfig | null = null
 let ready = false

@@ -86,6 +86,11 @@ export class ShadowMigration<T> {
             diffSummary: summary,
             differences: diffs.slice(0, 20),
           })
+        } else {
+          ctx.vtex?.logger?.info?.({
+            message: `ShadowMigration ${this.config.name} no structural differences`,
+            name: this.config.name,
+          })
         }
       })
       .catch((err) => {
