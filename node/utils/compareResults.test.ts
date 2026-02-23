@@ -628,6 +628,91 @@ describe('existence-based array comparison', () => {
     expect(result.differences).toHaveLength(0)
   })
 
+  it('should fall back to positional comparison for objects missing the key', () => {
+    const obj1 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+        {
+          values: [{ name: 'Unknown', originalName: 'Unknown' }],
+        },
+      ],
+    }
+
+    const obj2 = {
+      skuSpecifications: [
+        {
+          values: [{ name: 'Unknown', originalName: 'Unknown' }],
+        },
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+      ],
+    }
+
+    const result = isDeepEqual(obj1, obj2, {
+      existenceCompareFields: [
+        { path: 'skuSpecifications', key: 'field.name' },
+      ],
+    })
+
+    expect(result.isEqual).toBe(true)
+    expect(result.differences).toHaveLength(0)
+  })
+
+  it('should compare keyless objects positionally and keyed objects by key', () => {
+    const obj1 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+        {
+          values: [{ name: 'A', originalName: 'A' }],
+        },
+      ],
+    }
+
+    const obj2 = {
+      skuSpecifications: [
+        {
+          values: [{ name: 'B', originalName: 'B' }],
+        },
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+      ],
+    }
+
+    const result = isDeepEqual(obj1, obj2, {
+      existenceCompareFields: [
+        { path: 'skuSpecifications', key: 'field.name' },
+      ],
+    })
+
+    expect(result.isEqual).toBe(false)
+    expect(result.differences).toEqual(
+      expect.arrayContaining([
+        {
+          path: 'skuSpecifications[0].values[0].name',
+          type: 'different_value',
+          expected: 'A',
+          actual: 'B',
+        },
+        {
+          path: 'skuSpecifications[0].values[0].originalName',
+          type: 'different_value',
+          expected: 'A',
+          actual: 'B',
+        },
+      ])
+    )
+  })
+
   it('should detect missing and extra elements in primitive arrays', () => {
     const obj1 = {
       categories: ['/Electronics/Phones/', '/Electronics/Tablets/'],

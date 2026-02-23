@@ -115,7 +115,7 @@ function compareArraysByExistence(
 ): ObjectDifference[] {
   const differences: ObjectDifference[] = []
 
-  const extractKey = (item: unknown): string => {
+  const extractKey = (item: unknown): string | null => {
     if (customKey) {
       if (typeof item === 'object' && item !== null) {
         const keys = customKey.split('.')
@@ -129,12 +129,14 @@ function compareArraysByExistence(
           ) {
             value = (value as Record<string, unknown>)[k]
           } else {
-            return String(item)
+            return null
           }
         }
 
-        return String(value)
+        return value != null ? String(value) : null
       }
+
+      return null
     }
 
     return String(item)
@@ -142,13 +144,58 @@ function compareArraysByExistence(
 
   const map1 = new Map<string, unknown>()
   const map2 = new Map<string, unknown>()
+  const noKey1: unknown[] = []
+  const noKey2: unknown[] = []
 
   for (let i = 0; i < arr1.length; i++) {
-    map1.set(extractKey(arr1[i]), arr1[i])
+    const key = extractKey(arr1[i])
+
+    if (key != null) {
+      map1.set(key, arr1[i])
+    } else {
+      noKey1.push(arr1[i])
+    }
   }
 
   for (let i = 0; i < arr2.length; i++) {
-    map2.set(extractKey(arr2[i]), arr2[i])
+    const key = extractKey(arr2[i])
+
+    if (key != null) {
+      map2.set(key, arr2[i])
+    } else {
+      noKey2.push(arr2[i])
+    }
+  }
+
+  // Compare items without keys by position (fallback)
+  const maxNoKeyLength = Math.max(noKey1.length, noKey2.length)
+
+  for (let i = 0; i < maxNoKeyLength; i++) {
+    const currentPath = path ? `${path}[${i}]` : `[${i}]`
+
+    if (i >= noKey1.length) {
+      differences.push({
+        path: currentPath,
+        type: 'missing_key',
+        actual: noKey2[i],
+      })
+    } else if (i >= noKey2.length) {
+      differences.push({
+        path: currentPath,
+        type: 'extra_key',
+        expected: noKey1[i],
+      })
+    } else {
+      differences.push(
+        ...findDifferences(
+          noKey1[i],
+          noKey2[i],
+          currentPath,
+          options,
+          currentDepth + 1
+        )
+      )
+    }
   }
 
   // Find elements in arr2 not in arr1 (missing from expected)
