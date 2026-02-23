@@ -483,6 +483,180 @@ describe('findDifferences', () => {
   })
 })
 
+describe('existence-based array comparison', () => {
+  it('should compare object arrays by nested key (e.g. field.name) regardless of order', () => {
+    const obj1 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+        {
+          field: { name: 'Colour', originalName: 'Colour' },
+          values: [{ name: 'Blue', originalName: 'Blue' }],
+        },
+      ],
+    }
+
+    const obj2 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Colour', originalName: 'Colour' },
+          values: [{ name: 'Blue', originalName: 'Blue' }],
+        },
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+      ],
+    }
+
+    const result = isDeepEqual(obj1, obj2, {
+      existenceCompareFields: [
+        { path: 'skuSpecifications', key: 'field.name' },
+      ],
+    })
+
+    expect(result.isEqual).toBe(true)
+    expect(result.differences).toHaveLength(0)
+  })
+
+  it('should detect value differences in object arrays matched by nested key', () => {
+    const obj1 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+        {
+          field: { name: 'Colour', originalName: 'Colour' },
+          values: [{ name: 'Blue', originalName: 'Blue' }],
+        },
+      ],
+    }
+
+    const obj2 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Colour', originalName: 'Colour' },
+          values: [{ name: 'Red', originalName: 'Red' }],
+        },
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+      ],
+    }
+
+    const result = isDeepEqual(obj1, obj2, {
+      existenceCompareFields: [
+        { path: 'skuSpecifications', key: 'field.name' },
+      ],
+    })
+
+    expect(result.isEqual).toBe(false)
+    expect(result.differences).toEqual([
+      {
+        path: 'skuSpecifications[name:Colour].values[0].name',
+        type: 'different_value',
+        expected: 'Blue',
+        actual: 'Red',
+      },
+      {
+        path: 'skuSpecifications[name:Colour].values[0].originalName',
+        type: 'different_value',
+        expected: 'Blue',
+        actual: 'Red',
+      },
+    ])
+  })
+
+  it('should detect missing and extra elements in object arrays matched by nested key', () => {
+    const obj1 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+      ],
+    }
+
+    const obj2 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Colour', originalName: 'Colour' },
+          values: [{ name: 'Blue', originalName: 'Blue' }],
+        },
+      ],
+    }
+
+    const result = isDeepEqual(obj1, obj2, {
+      existenceCompareFields: [
+        { path: 'skuSpecifications', key: 'field.name' },
+      ],
+    })
+
+    expect(result.isEqual).toBe(false)
+    expect(result.differences).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: 'skuSpecifications[name:Colour]',
+          type: 'missing_key',
+        }),
+        expect.objectContaining({
+          path: 'skuSpecifications[name:Size]',
+          type: 'extra_key',
+        }),
+      ])
+    )
+  })
+
+  it('should compare primitive arrays by value regardless of order', () => {
+    const obj1 = {
+      categories: ['/Electronics/Phones/', '/Electronics/Tablets/'],
+    }
+
+    const obj2 = {
+      categories: ['/Electronics/Tablets/', '/Electronics/Phones/'],
+    }
+
+    const result = isDeepEqual(obj1, obj2, {
+      existenceCompareFields: ['categories'],
+    })
+
+    expect(result.isEqual).toBe(true)
+    expect(result.differences).toHaveLength(0)
+  })
+
+  it('should detect missing and extra elements in primitive arrays', () => {
+    const obj1 = {
+      categories: ['/Electronics/Phones/', '/Electronics/Tablets/'],
+    }
+
+    const obj2 = {
+      categories: ['/Electronics/Phones/', '/Electronics/TVs/'],
+    }
+
+    const result = isDeepEqual(obj1, obj2, {
+      existenceCompareFields: ['categories'],
+    })
+
+    expect(result.isEqual).toBe(false)
+    expect(result.differences).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: 'categories[name:/Electronics/TVs/]',
+          type: 'missing_key',
+        }),
+        expect.objectContaining({
+          path: 'categories[name:/Electronics/Tablets/]',
+          type: 'extra_key',
+        }),
+      ])
+    )
+  })
+})
+
 describe('filterIgnoredDifferences', () => {
   describe('basic filtering', () => {
     it('should return all differences when no ignored differences are provided', () => {

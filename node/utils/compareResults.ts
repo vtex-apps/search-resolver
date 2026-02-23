@@ -49,35 +49,6 @@ export interface FindDifferencesOptions {
 }
 
 /**
- * Helper to extract a unique key from an array element for existence-based comparison.
- * Tries common key properties: id, key, name, originalName, value, field.name.
- * For primitives (strings, numbers), uses the value itself.
- */
-function getElementKey(element: unknown): string | null {
-  if (typeof element === 'string' || typeof element === 'number') {
-    return String(element)
-  }
-
-  if (!element || typeof element !== 'object') {
-    return null
-  }
-
-  const obj = element as Record<string, unknown>
-  // Use || (not ??) to match intelligent-search: skip falsy values like "" and 0
-  const key =
-    obj.id ||
-    obj.key ||
-    obj.name ||
-    obj.originalName ||
-    obj.value ||
-    (obj.field &&
-      typeof obj.field === 'object' &&
-      (obj.field as Record<string, unknown>).name)
-
-  return key != null ? String(key) : null
-}
-
-/**
  * Check if a given path matches an existence comparison pattern.
  * Supports simple field names and wildcard patterns like 'facets[*].values'.
  */
@@ -131,8 +102,8 @@ function findMatchingExistencePattern(
 
 /**
  * Compare arrays by existence (key-based) rather than by position.
- * Elements are matched by a key extracted from each element (id, name, etc.).
- * Elements without a key fall back to positional comparison.
+ * For primitive arrays (string pattern), elements are compared by their stringified value.
+ * For object arrays (object pattern), elements are matched by the provided customKey.
  */
 function compareArraysByExistence(
   arr1: unknown[],
@@ -144,7 +115,7 @@ function compareArraysByExistence(
 ): ObjectDifference[] {
   const differences: ObjectDifference[] = []
 
-  const extractKey = (item: unknown): string | null => {
+  const extractKey = (item: unknown): string => {
     if (customKey) {
       if (typeof item === 'object' && item !== null) {
         const keys = customKey.split('.')
@@ -158,76 +129,26 @@ function compareArraysByExistence(
           ) {
             value = (value as Record<string, unknown>)[k]
           } else {
-            return null
+            return String(item)
           }
         }
 
-        return value != null ? String(value) : null
+        return String(value)
       }
-
-      return null
     }
 
-    return getElementKey(item)
+    return String(item)
   }
 
   const map1 = new Map<string, unknown>()
   const map2 = new Map<string, unknown>()
-  const itemsWithoutKey1: Array<{ index: number; item: unknown }> = []
-  const itemsWithoutKey2: Array<{ index: number; item: unknown }> = []
 
   for (let i = 0; i < arr1.length; i++) {
-    const key = extractKey(arr1[i])
-
-    if (key) {
-      map1.set(key, arr1[i])
-    } else {
-      itemsWithoutKey1.push({ index: i, item: arr1[i] })
-    }
+    map1.set(extractKey(arr1[i]), arr1[i])
   }
 
   for (let i = 0; i < arr2.length; i++) {
-    const key = extractKey(arr2[i])
-
-    if (key) {
-      map2.set(key, arr2[i])
-    } else {
-      itemsWithoutKey2.push({ index: i, item: arr2[i] })
-    }
-  }
-
-  // Compare items without keys by position (fallback)
-  const maxNoKeyLength = Math.max(
-    itemsWithoutKey1.length,
-    itemsWithoutKey2.length
-  )
-
-  for (let i = 0; i < maxNoKeyLength; i++) {
-    const currentPath = path ? `${path}[no-name:${i}]` : `[no-name:${i}]`
-
-    if (i >= itemsWithoutKey1.length) {
-      differences.push({
-        path: currentPath,
-        type: 'missing_key',
-        actual: itemsWithoutKey2[i].item,
-      })
-    } else if (i >= itemsWithoutKey2.length) {
-      differences.push({
-        path: currentPath,
-        type: 'extra_key',
-        expected: itemsWithoutKey1[i].item,
-      })
-    } else {
-      differences.push(
-        ...findDifferences(
-          itemsWithoutKey1[i].item,
-          itemsWithoutKey2[i].item,
-          currentPath,
-          options,
-          currentDepth + 1
-        )
-      )
-    }
+    map2.set(extractKey(arr2[i]), arr2[i])
   }
 
   // Find elements in arr2 not in arr1 (missing from expected)
