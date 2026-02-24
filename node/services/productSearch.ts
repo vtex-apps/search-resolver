@@ -23,6 +23,7 @@ export const PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS: ExistenceComparePattern[] 
     'products[*].categories',
     'products[*].categoriesIds',
     { path: 'products[*].specificationGroups', key: 'name' },
+    { path: 'products[*].specificationGroups[*].specifications', key: 'name' },
     { path: 'products[*].properties', key: 'name' },
     { path: 'products[*].skuSpecifications', key: 'field.name' },
   ]

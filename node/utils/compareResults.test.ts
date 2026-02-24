@@ -742,6 +742,166 @@ describe('existence-based array comparison', () => {
   })
 })
 
+describe('nested existence-based comparison with ignore patterns', () => {
+  const biggyResponse = {
+    products: [
+      {
+        specificationGroups: [
+          {
+            originalName: 'allSpecifications',
+            name: 'allSpecifications',
+            specifications: [
+              {
+                originalName: 'Material',
+                name: 'Material',
+                values: ['soft'],
+              },
+              {
+                originalName: 'Fabric',
+                name: 'Fabric',
+                values: ['Fabric'],
+              },
+              {
+                originalName: 'sellerId',
+                name: 'sellerId',
+                values: ['1'],
+              },
+            ],
+          },
+        ],
+        properties: [
+          { originalName: 'Material', name: 'Material', values: ['soft'] },
+          { originalName: 'Fabric', name: 'Fabric', values: ['Fabric'] },
+          { originalName: 'sellerId', name: 'sellerId', values: ['1'] },
+        ],
+      },
+    ],
+  }
+
+  const intschResponse = {
+    products: [
+      {
+        specificationGroups: [
+          {
+            originalName: 'allSpecifications',
+            name: 'allSpecifications',
+            specifications: [
+              {
+                originalName: 'Fabric',
+                name: 'Fabric',
+                values: ['Fabric'],
+              },
+              {
+                originalName: 'Material',
+                name: 'Material',
+                values: ['soft'],
+              },
+            ],
+          },
+        ],
+        properties: [
+          { originalName: 'Fabric', name: 'Fabric', values: ['Fabric'] },
+          { originalName: 'Material', name: 'Material', values: ['soft'] },
+        ],
+      },
+    ],
+  }
+
+  it('should produce [name:sellerId] paths when specifications uses existence comparison', () => {
+    const result = isDeepEqual(biggyResponse, intschResponse, {
+      existenceCompareFields: [
+        { path: 'products[*].specificationGroups', key: 'name' },
+        {
+          path: 'products[*].specificationGroups[*].specifications',
+          key: 'name',
+        },
+        { path: 'products[*].properties', key: 'name' },
+      ],
+    })
+
+    expect(result.isEqual).toBe(false)
+    expect(result.differences).toEqual([
+      {
+        path: 'products[0].specificationGroups[name:allSpecifications].specifications[name:sellerId]',
+        type: 'extra_key',
+        expected: {
+          originalName: 'sellerId',
+          name: 'sellerId',
+          values: ['1'],
+        },
+      },
+      {
+        path: 'products[0].properties[name:sellerId]',
+        type: 'extra_key',
+        expected: {
+          originalName: 'sellerId',
+          name: 'sellerId',
+          values: ['1'],
+        },
+      },
+    ])
+  })
+
+  it('should produce numeric index paths when specifications does NOT use existence comparison', () => {
+    const result = isDeepEqual(biggyResponse, intschResponse, {
+      existenceCompareFields: [
+        { path: 'products[*].specificationGroups', key: 'name' },
+        { path: 'products[*].properties', key: 'name' },
+      ],
+    })
+
+    expect(result.isEqual).toBe(false)
+    const specDiffs = result.differences.filter((d) =>
+      d.path.includes('specifications')
+    )
+
+    expect(specDiffs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: 'products[0].specificationGroups[name:allSpecifications].specifications',
+          type: 'array_length_mismatch',
+        }),
+      ])
+    )
+
+    expect(specDiffs.some((d) => d.path.includes('specifications[2]'))).toBe(
+      true
+    )
+
+    expect(specDiffs.some((d) => d.path.includes('[name:sellerId]'))).toBe(
+      false
+    )
+  })
+
+  it('should allow ignore patterns to filter sellerId when specifications uses existence comparison', () => {
+    const result = isDeepEqual(biggyResponse, intschResponse, {
+      existenceCompareFields: [
+        { path: 'products[*].specificationGroups', key: 'name' },
+        {
+          path: 'products[*].specificationGroups[*].specifications',
+          key: 'name',
+        },
+        { path: 'products[*].properties', key: 'name' },
+      ],
+    })
+
+    const ignoredDifferences: IgnoredDifference[] = [
+      {
+        path: 'products[*].specificationGroups[name:allSpecifications].specifications[name:sellerId]',
+        type: 'extra_key',
+      },
+      { path: 'products[*].properties[name:sellerId]', type: 'extra_key' },
+    ]
+
+    const filtered = filterIgnoredDifferences(
+      result.differences,
+      ignoredDifferences
+    )
+
+    expect(filtered).toEqual([])
+  })
+})
+
 describe('filterIgnoredDifferences', () => {
   describe('basic filtering', () => {
     it('should return all differences when no ignored differences are provided', () => {
