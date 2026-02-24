@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Improved logic for comparing responses in compareResults.
+- Refactored product-search comparison.
+
 ## [1.92.0] - 2025-12-18
 
 ### Changed
