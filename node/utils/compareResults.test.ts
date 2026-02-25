@@ -5,6 +5,7 @@ import {
   compareApiResults,
   findDifferences,
   filterIgnoredDifferences,
+  shouldIgnoreDifference,
   type IgnoredDifference,
   type ObjectDifference,
 } from './compareResults'
@@ -258,10 +259,14 @@ describe('isDeepEqual', () => {
       expect(isDeepEqual(deepObj1, deepObj2).isEqual).toBe(false)
 
       // With depth of 3, the difference at level4 should not be detected
-      expect(isDeepEqual(deepObj1, deepObj2, 3).isEqual).toBe(true)
+      expect(isDeepEqual(deepObj1, deepObj2, { maxDepth: 3 }).isEqual).toBe(
+        true
+      )
 
       // With depth of 4, the difference should be detected
-      expect(isDeepEqual(deepObj1, deepObj2, 4).isEqual).toBe(false)
+      expect(isDeepEqual(deepObj1, deepObj2, { maxDepth: 4 }).isEqual).toBe(
+        false
+      )
     })
 
     it('should respect the maxDepth parameter for nested arrays', () => {
@@ -272,10 +277,14 @@ describe('isDeepEqual', () => {
       expect(isDeepEqual(nestedArray1, nestedArray2).isEqual).toBe(false)
 
       // With depth of 4, the difference at the deepest level should not be detected
-      expect(isDeepEqual(nestedArray1, nestedArray2, 3).isEqual).toBe(true)
+      expect(
+        isDeepEqual(nestedArray1, nestedArray2, { maxDepth: 3 }).isEqual
+      ).toBe(true)
 
       // With depth of 5, the difference should be detected
-      expect(isDeepEqual(nestedArray1, nestedArray2, 4).isEqual).toBe(false)
+      expect(
+        isDeepEqual(nestedArray1, nestedArray2, { maxDepth: 4 }).isEqual
+      ).toBe(false)
     })
   })
 
@@ -448,9 +457,448 @@ describe('findDifferences', () => {
     const deep1 = { level1: { level2: { level3: { value: 'a' } } } }
     const deep2 = { level1: { level2: { level3: { value: 'b' } } } }
 
-    const differences = findDifferences(deep1, deep2, '', 2)
+    const differences = findDifferences(deep1, deep2, '', { maxDepth: 2 })
 
     expect(differences).toHaveLength(0) // Should not find differences beyond maxDepth
+  })
+
+  it('should treat strings as equal if they only differ after 2000 chars', () => {
+    const base = 'a'.repeat(2000)
+    const str1 = `${base}XXXXX`
+    const str2 = `${base}YYYYY`
+
+    const differences = findDifferences({ text: str1 }, { text: str2 })
+
+    expect(differences).toHaveLength(0)
+  })
+
+  it('should detect differences within the first 2000 chars of strings', () => {
+    const str1 = `${'a'.repeat(1999)}X${'z'.repeat(100)}`
+    const str2 = `${'a'.repeat(1999)}Y${'z'.repeat(100)}`
+
+    const differences = findDifferences({ text: str1 }, { text: str2 })
+
+    expect(differences).toHaveLength(1)
+    expect(differences[0].type).toBe('different_value')
+  })
+})
+
+describe('existence-based array comparison', () => {
+  it('should compare object arrays by nested key (e.g. field.name) regardless of order', () => {
+    const obj1 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+        {
+          field: { name: 'Colour', originalName: 'Colour' },
+          values: [{ name: 'Blue', originalName: 'Blue' }],
+        },
+      ],
+    }
+
+    const obj2 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Colour', originalName: 'Colour' },
+          values: [{ name: 'Blue', originalName: 'Blue' }],
+        },
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+      ],
+    }
+
+    const result = isDeepEqual(obj1, obj2, {
+      existenceCompareFields: [
+        { path: 'skuSpecifications', key: 'field.name' },
+      ],
+    })
+
+    expect(result.isEqual).toBe(true)
+    expect(result.differences).toHaveLength(0)
+  })
+
+  it('should detect value differences in object arrays matched by nested key', () => {
+    const obj1 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+        {
+          field: { name: 'Colour', originalName: 'Colour' },
+          values: [{ name: 'Blue', originalName: 'Blue' }],
+        },
+      ],
+    }
+
+    const obj2 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Colour', originalName: 'Colour' },
+          values: [{ name: 'Red', originalName: 'Red' }],
+        },
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+      ],
+    }
+
+    const result = isDeepEqual(obj1, obj2, {
+      existenceCompareFields: [
+        { path: 'skuSpecifications', key: 'field.name' },
+      ],
+    })
+
+    expect(result.isEqual).toBe(false)
+    expect(result.differences).toEqual([
+      {
+        path: 'skuSpecifications[name:Colour].values[0].name',
+        type: 'different_value',
+        expected: 'Blue',
+        actual: 'Red',
+      },
+      {
+        path: 'skuSpecifications[name:Colour].values[0].originalName',
+        type: 'different_value',
+        expected: 'Blue',
+        actual: 'Red',
+      },
+    ])
+  })
+
+  it('should detect missing and extra elements in object arrays matched by nested key', () => {
+    const obj1 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+      ],
+    }
+
+    const obj2 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Colour', originalName: 'Colour' },
+          values: [{ name: 'Blue', originalName: 'Blue' }],
+        },
+      ],
+    }
+
+    const result = isDeepEqual(obj1, obj2, {
+      existenceCompareFields: [
+        { path: 'skuSpecifications', key: 'field.name' },
+      ],
+    })
+
+    expect(result.isEqual).toBe(false)
+    expect(result.differences).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: 'skuSpecifications[name:Colour]',
+          type: 'missing_key',
+        }),
+        expect.objectContaining({
+          path: 'skuSpecifications[name:Size]',
+          type: 'extra_key',
+        }),
+      ])
+    )
+  })
+
+  it('should compare primitive arrays by value regardless of order', () => {
+    const obj1 = {
+      categories: ['/Electronics/Phones/', '/Electronics/Tablets/'],
+    }
+
+    const obj2 = {
+      categories: ['/Electronics/Tablets/', '/Electronics/Phones/'],
+    }
+
+    const result = isDeepEqual(obj1, obj2, {
+      existenceCompareFields: ['categories'],
+    })
+
+    expect(result.isEqual).toBe(true)
+    expect(result.differences).toHaveLength(0)
+  })
+
+  it('should fall back to positional comparison for objects missing the key', () => {
+    const obj1 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+        {
+          values: [{ name: 'Unknown', originalName: 'Unknown' }],
+        },
+      ],
+    }
+
+    const obj2 = {
+      skuSpecifications: [
+        {
+          values: [{ name: 'Unknown', originalName: 'Unknown' }],
+        },
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+      ],
+    }
+
+    const result = isDeepEqual(obj1, obj2, {
+      existenceCompareFields: [
+        { path: 'skuSpecifications', key: 'field.name' },
+      ],
+    })
+
+    expect(result.isEqual).toBe(true)
+    expect(result.differences).toHaveLength(0)
+  })
+
+  it('should compare keyless objects positionally and keyed objects by key', () => {
+    const obj1 = {
+      skuSpecifications: [
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+        {
+          values: [{ name: 'A', originalName: 'A' }],
+        },
+      ],
+    }
+
+    const obj2 = {
+      skuSpecifications: [
+        {
+          values: [{ name: 'B', originalName: 'B' }],
+        },
+        {
+          field: { name: 'Size', originalName: 'Size' },
+          values: [{ name: '76W', originalName: '76W' }],
+        },
+      ],
+    }
+
+    const result = isDeepEqual(obj1, obj2, {
+      existenceCompareFields: [
+        { path: 'skuSpecifications', key: 'field.name' },
+      ],
+    })
+
+    expect(result.isEqual).toBe(false)
+    expect(result.differences).toEqual(
+      expect.arrayContaining([
+        {
+          path: 'skuSpecifications[0].values[0].name',
+          type: 'different_value',
+          expected: 'A',
+          actual: 'B',
+        },
+        {
+          path: 'skuSpecifications[0].values[0].originalName',
+          type: 'different_value',
+          expected: 'A',
+          actual: 'B',
+        },
+      ])
+    )
+  })
+
+  it('should detect missing and extra elements in primitive arrays', () => {
+    const obj1 = {
+      categories: ['/Electronics/Phones/', '/Electronics/Tablets/'],
+    }
+
+    const obj2 = {
+      categories: ['/Electronics/Phones/', '/Electronics/TVs/'],
+    }
+
+    const result = isDeepEqual(obj1, obj2, {
+      existenceCompareFields: ['categories'],
+    })
+
+    expect(result.isEqual).toBe(false)
+    expect(result.differences).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: 'categories[name:/Electronics/TVs/]',
+          type: 'missing_key',
+        }),
+        expect.objectContaining({
+          path: 'categories[name:/Electronics/Tablets/]',
+          type: 'extra_key',
+        }),
+      ])
+    )
+  })
+})
+
+describe('nested existence-based comparison with ignore patterns', () => {
+  const biggyResponse = {
+    products: [
+      {
+        specificationGroups: [
+          {
+            originalName: 'allSpecifications',
+            name: 'allSpecifications',
+            specifications: [
+              {
+                originalName: 'Material',
+                name: 'Material',
+                values: ['soft'],
+              },
+              {
+                originalName: 'Fabric',
+                name: 'Fabric',
+                values: ['Fabric'],
+              },
+              {
+                originalName: 'sellerId',
+                name: 'sellerId',
+                values: ['1'],
+              },
+            ],
+          },
+        ],
+        properties: [
+          { originalName: 'Material', name: 'Material', values: ['soft'] },
+          { originalName: 'Fabric', name: 'Fabric', values: ['Fabric'] },
+          { originalName: 'sellerId', name: 'sellerId', values: ['1'] },
+        ],
+      },
+    ],
+  }
+
+  const intschResponse = {
+    products: [
+      {
+        specificationGroups: [
+          {
+            originalName: 'allSpecifications',
+            name: 'allSpecifications',
+            specifications: [
+              {
+                originalName: 'Fabric',
+                name: 'Fabric',
+                values: ['Fabric'],
+              },
+              {
+                originalName: 'Material',
+                name: 'Material',
+                values: ['soft'],
+              },
+            ],
+          },
+        ],
+        properties: [
+          { originalName: 'Fabric', name: 'Fabric', values: ['Fabric'] },
+          { originalName: 'Material', name: 'Material', values: ['soft'] },
+        ],
+      },
+    ],
+  }
+
+  it('should produce [name:sellerId] paths when specifications uses existence comparison', () => {
+    const result = isDeepEqual(biggyResponse, intschResponse, {
+      existenceCompareFields: [
+        { path: 'products[*].specificationGroups', key: 'name' },
+        {
+          path: 'products[*].specificationGroups[*].specifications',
+          key: 'name',
+        },
+        { path: 'products[*].properties', key: 'name' },
+      ],
+    })
+
+    expect(result.isEqual).toBe(false)
+    expect(result.differences).toEqual([
+      {
+        path: 'products[0].specificationGroups[name:allSpecifications].specifications[name:sellerId]',
+        type: 'extra_key',
+        expected: {
+          originalName: 'sellerId',
+          name: 'sellerId',
+          values: ['1'],
+        },
+      },
+      {
+        path: 'products[0].properties[name:sellerId]',
+        type: 'extra_key',
+        expected: {
+          originalName: 'sellerId',
+          name: 'sellerId',
+          values: ['1'],
+        },
+      },
+    ])
+  })
+
+  it('should produce numeric index paths when specifications does NOT use existence comparison', () => {
+    const result = isDeepEqual(biggyResponse, intschResponse, {
+      existenceCompareFields: [
+        { path: 'products[*].specificationGroups', key: 'name' },
+        { path: 'products[*].properties', key: 'name' },
+      ],
+    })
+
+    expect(result.isEqual).toBe(false)
+    const specDiffs = result.differences.filter((d) =>
+      d.path.includes('specifications')
+    )
+
+    expect(specDiffs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: 'products[0].specificationGroups[name:allSpecifications].specifications',
+          type: 'array_length_mismatch',
+        }),
+      ])
+    )
+
+    expect(specDiffs.some((d) => d.path.includes('specifications[2]'))).toBe(
+      true
+    )
+
+    expect(specDiffs.some((d) => d.path.includes('[name:sellerId]'))).toBe(
+      false
+    )
+  })
+
+  it('should allow ignore patterns to filter sellerId when specifications uses existence comparison', () => {
+    const result = isDeepEqual(biggyResponse, intschResponse, {
+      existenceCompareFields: [
+        { path: 'products[*].specificationGroups', key: 'name' },
+        {
+          path: 'products[*].specificationGroups[*].specifications',
+          key: 'name',
+        },
+        { path: 'products[*].properties', key: 'name' },
+      ],
+    })
+
+    const ignoredDifferences: IgnoredDifference[] = [
+      {
+        path: 'products[*].specificationGroups[name:allSpecifications].specifications[name:sellerId]',
+        type: 'extra_key',
+      },
+      { path: 'products[*].properties[name:sellerId]', type: 'extra_key' },
+    ]
+
+    const filtered = filterIgnoredDifferences(
+      result.differences,
+      ignoredDifferences
+    )
+
+    expect(filtered).toEqual([])
   })
 })
 
@@ -754,6 +1202,301 @@ describe('filterIgnoredDifferences', () => {
 
       expect(result).toEqual([])
     })
+  })
+})
+
+describe('shouldIgnoreDifference', () => {
+  describe('wildcard [*] matching', () => {
+    it('should match [*] against numeric array indices', () => {
+      const diff: ObjectDifference = {
+        path: 'products[0].cacheId',
+        type: 'different_value',
+        expected: 'a',
+        actual: 'b',
+      }
+
+      expect(
+        shouldIgnoreDifference(diff, {
+          path: 'products[*].cacheId',
+          type: 'different_value',
+        })
+      ).toBe(true)
+    })
+
+    it('should NOT match [*] against named array indices (only numeric)', () => {
+      const diff: ObjectDifference = {
+        path: 'products[name:foo].cacheId',
+        type: 'different_value',
+        expected: 'a',
+        actual: 'b',
+      }
+
+      // [*] only matches numeric indices like [0], [1], etc.
+      expect(
+        shouldIgnoreDifference(diff, {
+          path: 'products[*].cacheId',
+          type: 'different_value',
+        })
+      ).toBe(false)
+    })
+
+    it('should match multiple [*] wildcards', () => {
+      const diff: ObjectDifference = {
+        path: 'products[0].items[2].sellers[0].commertialOffer.PriceValidUntil',
+        type: 'different_value',
+        expected: 'a',
+        actual: 'b',
+      }
+
+      expect(
+        shouldIgnoreDifference(diff, {
+          path: 'products[*].items[*].sellers[*].commertialOffer.PriceValidUntil',
+          type: 'different_value',
+        })
+      ).toBe(true)
+    })
+
+    it('should not match when path structure differs', () => {
+      const diff: ObjectDifference = {
+        path: 'products[0].other.cacheId',
+        type: 'different_value',
+        expected: 'a',
+        actual: 'b',
+      }
+
+      expect(
+        shouldIgnoreDifference(diff, {
+          path: 'products[*].cacheId',
+          type: 'different_value',
+        })
+      ).toBe(false)
+    })
+  })
+
+  describe('named index [name:X] matching', () => {
+    it('should match literal [name:X] patterns', () => {
+      const diff: ObjectDifference = {
+        path: 'products[0].specificationGroups[name:allSpecifications].specifications[name:sellerId]',
+        type: 'missing_key',
+        actual: 'test',
+      }
+
+      expect(
+        shouldIgnoreDifference(diff, {
+          path: 'products[*].specificationGroups[name:allSpecifications].specifications[name:sellerId]',
+          type: 'missing_key',
+        })
+      ).toBe(true)
+    })
+
+    it('should not match different named indices', () => {
+      const diff: ObjectDifference = {
+        path: 'products[0].specificationGroups[name:other]',
+        type: 'missing_key',
+        actual: 'test',
+      }
+
+      expect(
+        shouldIgnoreDifference(diff, {
+          path: 'products[*].specificationGroups[name:allSpecifications]',
+          type: 'missing_key',
+        })
+      ).toBe(false)
+    })
+  })
+
+  describe('optional type', () => {
+    it('should ignore all types when type is omitted (object pattern)', () => {
+      const diff1: ObjectDifference = {
+        path: 'searchId',
+        type: 'different_value',
+        expected: 'a',
+        actual: 'b',
+      }
+
+      const diff2: ObjectDifference = {
+        path: 'searchId',
+        type: 'missing_key',
+        actual: 'b',
+      }
+
+      const pattern: IgnoredDifference = { path: 'searchId' }
+
+      expect(shouldIgnoreDifference(diff1, pattern)).toBe(true)
+      expect(shouldIgnoreDifference(diff2, pattern)).toBe(true)
+    })
+
+    it('should ignore all types when using a string pattern', () => {
+      const diff1: ObjectDifference = {
+        path: 'products[0].cacheId',
+        type: 'different_value',
+        expected: 'a',
+        actual: 'b',
+      }
+
+      const diff2: ObjectDifference = {
+        path: 'products[0].cacheId',
+        type: 'extra_key',
+        expected: 'a',
+      }
+
+      expect(shouldIgnoreDifference(diff1, 'products[*].cacheId')).toBe(true)
+      expect(shouldIgnoreDifference(diff2, 'products[*].cacheId')).toBe(true)
+    })
+
+    it('should still filter by type when type is provided', () => {
+      const diff: ObjectDifference = {
+        path: 'searchId',
+        type: 'different_type',
+        expected: 'string',
+        actual: 'number',
+      }
+
+      expect(
+        shouldIgnoreDifference(diff, {
+          path: 'searchId',
+          type: 'different_value',
+        })
+      ).toBe(false)
+
+      expect(
+        shouldIgnoreDifference(diff, {
+          path: 'searchId',
+          type: 'different_type',
+        })
+      ).toBe(true)
+    })
+  })
+
+  describe('exact path matching (backward compatibility)', () => {
+    it('should still match exact paths', () => {
+      const diff: ObjectDifference = {
+        path: 'user.profile.avatar',
+        type: 'extra_key',
+        expected: 'avatar.jpg',
+      }
+
+      expect(
+        shouldIgnoreDifference(diff, {
+          path: 'user.profile.avatar',
+          type: 'extra_key',
+        })
+      ).toBe(true)
+    })
+
+    it('should not match partial paths', () => {
+      const diff: ObjectDifference = {
+        path: 'user.profile.avatar.url',
+        type: 'extra_key',
+        expected: 'avatar.jpg',
+      }
+
+      expect(
+        shouldIgnoreDifference(diff, {
+          path: 'user.profile.avatar',
+          type: 'extra_key',
+        })
+      ).toBe(false)
+    })
+  })
+})
+
+describe('filterIgnoredDifferences with wildcards', () => {
+  it('should filter using wildcard patterns', () => {
+    const differences: ObjectDifference[] = [
+      {
+        path: 'products[0].cacheId',
+        type: 'different_value',
+        expected: 'a',
+        actual: 'b',
+      },
+      {
+        path: 'products[1].cacheId',
+        type: 'different_value',
+        expected: 'c',
+        actual: 'd',
+      },
+      {
+        path: 'products[0].productName',
+        type: 'different_value',
+        expected: 'x',
+        actual: 'y',
+      },
+    ]
+
+    const ignoredDifferences: IgnoredDifference[] = [
+      { path: 'products[*].cacheId', type: 'different_value' },
+    ]
+
+    const result = filterIgnoredDifferences(differences, ignoredDifferences)
+
+    expect(result).toEqual([
+      {
+        path: 'products[0].productName',
+        type: 'different_value',
+        expected: 'x',
+        actual: 'y',
+      },
+    ])
+  })
+
+  it('should support string patterns', () => {
+    const differences: ObjectDifference[] = [
+      {
+        path: 'products[0].cacheId',
+        type: 'different_value',
+        expected: 'a',
+        actual: 'b',
+      },
+      {
+        path: 'products[0].cacheId',
+        type: 'extra_key',
+        expected: 'a',
+      },
+    ]
+
+    const result = filterIgnoredDifferences(differences, [
+      'products[*].cacheId',
+    ])
+
+    expect(result).toEqual([])
+  })
+
+  it('should handle mixed exact and wildcard patterns', () => {
+    const differences: ObjectDifference[] = [
+      { path: 'searchId', type: 'different_value', expected: 'a', actual: 'b' },
+      {
+        path: 'products[0].items[1].sellers[0].commertialOffer.PriceValidUntil',
+        type: 'different_value',
+        expected: 'a',
+        actual: 'b',
+      },
+      {
+        path: 'products[0].productName',
+        type: 'different_value',
+        expected: 'x',
+        actual: 'y',
+      },
+    ]
+
+    const ignoredDifferences: IgnoredDifference[] = [
+      { path: 'searchId', type: 'different_value' },
+      {
+        path: 'products[*].items[*].sellers[*].commertialOffer.PriceValidUntil',
+        type: 'different_value',
+      },
+    ]
+
+    const result = filterIgnoredDifferences(differences, ignoredDifferences)
+
+    expect(result).toEqual([
+      {
+        path: 'products[0].productName',
+        type: 'different_value',
+        expected: 'x',
+        actual: 'y',
+      },
+    ])
   })
 })
 

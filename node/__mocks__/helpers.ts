@@ -66,6 +66,7 @@ const initialCtxState = {
 }
 
 export const mockContext: any = {
+  get: jest.fn().mockReturnValue(''),
   vtex: {
     ...generateDeepCopy(initialCtxState),
     logger: {
