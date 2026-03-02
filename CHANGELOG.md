@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Adding more ignores and skiping comparisson for queries that would go to catalog.
+- Increase comparisson proportion for facets queries.
+
 ## [1.93.0] - 2026-02-25
 
 ### Changed
