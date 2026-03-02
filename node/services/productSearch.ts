@@ -26,6 +26,16 @@ export const PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS: ExistenceComparePattern[] 
     { path: 'products[*].specificationGroups[*].specifications', key: 'name' },
     { path: 'products[*].properties', key: 'name' },
     { path: 'products[*].skuSpecifications', key: 'field.name' },
+    { path: 'products[*].productClusters', key: 'id' },
+    { path: 'products[*].clusterHighlights', key: 'id' },
+    {
+      path: 'products[*].items[*].sellers[*].commertialOffer.teasers[*].generalValues',
+      key: 'key',
+    },
+    {
+      path: 'products[*].items[*].sellers[*].commertialOffer.discountHighlights[*].additionalInfo',
+      key: 'key',
+    },
   ]
 
 /**
@@ -46,8 +56,10 @@ export const PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
   { path: 'pagination.before[*].proxyUrl', type: 'different_value' },
   { path: 'pagination.after[*].proxyUrl', type: 'different_value' },
   { path: 'pagination.next.proxyUrl', type: 'different_value' },
+  { path: 'pagination.first.proxyUrl', type: 'different_value' },
   { path: 'pagination.last.proxyUrl', type: 'different_value' },
   { path: 'pagination.current.proxyUrl', type: 'different_value' },
+  { path: 'pagination.previous.proxyUrl', type: 'different_value' },
   // cacheId differs because of sponsored products middleware on node
   { path: 'products[*].cacheId', type: 'different_value' },
   // productReference: intsch sends this but biggy always returns ""
@@ -62,6 +74,15 @@ export const PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
   // PriceValidUntil changes with each request
   {
     path: 'products[*].items[*].sellers[*].commertialOffer.PriceValidUntil',
+    type: 'different_value',
+  },
+  // PriceValidUntil can also be null and we are defaulting to an empty string
+  {
+    path: 'products[*].items[*].sellers[*].commertialOffer.PriceValidUntil',
+    type: 'null_mismatch',
+  },
+  {
+    path: 'products[*].items[*].sellers[*].commertialOffer.RewardValue',
     type: 'different_value',
   },
   // imageText: intsch sends this but biggy always returns ""
@@ -280,6 +301,16 @@ export async function fetchProductSearch(
     ...clientArgs,
   }
 
+  if(args.productOriginVtex) {
+     // This uses the portal search reather than biggy, so the diff is guaranteed to be different and not useful. We can remove the comparison and just log the request params for debugging.
+     ctx.vtex.logger.info({
+      message: 'Product search with productOriginVtex=true, skipping comparison and using Intelligent Search endpoint directly',
+    })
+
+    return fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions)
+  }
+
+
   const { biggyCurl, intschCurl } = buildCurlCommands(
     ctx,
     path,
@@ -288,8 +319,7 @@ export async function fetchProductSearch(
   )
 
   return compareApiResults(
-    () =>
-      fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions),
+    () => fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions),
     () =>
       fetchProductSearchFromIntsch(ctx, args, selectedFacets, shippingOptions),
     ctx.vtex.production ? 1 : 100,

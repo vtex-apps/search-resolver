@@ -153,7 +153,7 @@ export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
   return compareApiResults(
     () => fetchFacetsFromBiggy(ctx, options),
     () => fetchFacetsFromIntsch(ctx, options),
-    ctx.vtex.production ? 1 : 100,
+    ctx.vtex.production ? 10 : 100,
     ctx.vtex.logger,
     {
       logPrefix: 'Facets',
