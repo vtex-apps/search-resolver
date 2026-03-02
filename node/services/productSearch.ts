@@ -301,6 +301,16 @@ export async function fetchProductSearch(
     ...clientArgs,
   }
 
+  if(args.productOriginVtex) {
+     // This uses the portal search reather than biggy, so the diff is guaranteed to be different and not useful. We can remove the comparison and just log the request params for debugging.
+     ctx.vtex.logger.info({
+      message: 'Product search with productOriginVtex=true, skipping comparison and using Intelligent Search endpoint directly',
+    })
+
+    return fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions)
+  }
+
+
   const { biggyCurl, intschCurl } = buildCurlCommands(
     ctx,
     path,
@@ -309,8 +319,7 @@ export async function fetchProductSearch(
   )
 
   return compareApiResults(
-    () =>
-      fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions),
+    () => fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions),
     () =>
       fetchProductSearchFromIntsch(ctx, args, selectedFacets, shippingOptions),
     ctx.vtex.production ? 1 : 100,
