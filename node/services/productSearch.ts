@@ -81,6 +81,10 @@ export const PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
     path: 'products[*].items[*].sellers[*].commertialOffer.PriceValidUntil',
     type: 'null_mismatch',
   },
+  {
+    path: 'products[*].items[*].sellers[*].commertialOffer.RewardValue',
+    type: 'different_value',
+  },
   // imageText: intsch sends this but biggy always returns ""
   { path: 'products[*].items[*].images[*].imageText', type: 'different_value' },
   // attachments: intsch sends this but biggy always returns an empty array
