@@ -22,16 +22,29 @@ function buildQueryString(params: Record<string, any>): string {
 }
 
 /**
+ * Returns the segment from ctx, falling back to the segment API if absent.
+ * Matches Rust v0's get_or_create_segment: the segment is either decoded from
+ * the request token or created via the segment API with account defaults.
+ */
+async function getOrCreateSegment(ctx: Context): Promise<Record<string, any>> {
+  if (ctx.vtex.segment) {
+    return ctx.vtex.segment as Record<string, any>
+  }
+
+  return ctx.clients.segment.getSegment()
+}
+
+/**
  * Builds curl commands for debugging API requests
  */
 // eslint-disable-next-line max-params
-function buildCurlCommands(
+async function buildCurlCommands(
   ctx: Context,
   path: string,
   params: Record<string, any>,
   selectedFacets: SelectedFacet[],
   shippingOptions?: string[]
-): { biggyCurl: string; intschCurl: string } {
+): Promise<{ biggyCurl: string; intschCurl: string }> {
   const { account } = ctx.vtex
   const queryString = buildQueryString(params)
   const shippingHeader = shippingOptions?.length
@@ -42,18 +55,17 @@ function buildCurlCommands(
     ? ` -H "x-vtex-segment: ${ctx.vtex.segmentToken}"`
     : ''
 
-  const segment = ctx.vtex.segment as Record<string, any> | undefined
-  let intschPath = path
-  let intschParams = params
+  const segment = await getOrCreateSegment(ctx)
+  const segData = extractSegmentData(segment)
 
-  if (segment) {
-    const data = extractSegmentData(segment)
-
-    intschParams = { ...(data.segmentParams as Record<string, any>), ...params }
-    intschPath = buildAttributePath(
-      concatSelectedFacets(selectedFacets, data.extraFacets)
-    )
+  const intschParams = {
+    ...(segData.segmentParams as Record<string, any>),
+    ...params,
   }
+
+  const intschPath = buildAttributePath(
+    concatSelectedFacets(selectedFacets, segData.extraFacets)
+  )
 
   const intschQueryString = buildQueryString(intschParams)
 
@@ -204,23 +216,15 @@ async function fetchFacetsFromIntsch(
   // unnecessary field. It's is an object and breaks the @vtex/api cache
   delete intschArgs.selectedFacets
 
-  const segment = ctx.vtex.segment as Record<string, any> | undefined
-  let segmentParams: SegmentParams | undefined
-  let allFacets = selectedFacets
-
-  if (segment) {
-    const data = extractSegmentData(segment)
-
-    segmentParams = data.segmentParams
-    allFacets = concatSelectedFacets(selectedFacets, data.extraFacets)
-  }
-
+  const segment = await getOrCreateSegment(ctx)
+  const segData = extractSegmentData(segment)
+  const allFacets = concatSelectedFacets(selectedFacets, segData.extraFacets)
   const intschPath = buildAttributePath(allFacets)
 
   const result: any = await intsch.facets(
     { ...intschArgs, query: args.fullText },
     intschPath,
-    { segmentParams, shippingHeader: shippingOptions }
+    { segmentParams: segData.segmentParams, shippingHeader: shippingOptions }
   )
 
   if (ctx.vtex.tenant) {
@@ -259,7 +263,7 @@ export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
     ...parseState(searchState),
   }
 
-  const { biggyCurl, intschCurl } = buildCurlCommands(
+  const { biggyCurl, intschCurl } = await buildCurlCommands(
     ctx,
     path,
     requestParams,
