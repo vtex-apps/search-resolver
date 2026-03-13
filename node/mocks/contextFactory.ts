@@ -59,7 +59,10 @@ export function createContext<Ctx = Context>({
       },
       vbase: {
         getJSON: jest.fn().mockResolvedValue({}),
-      }
+      },
+      segment: {
+        getSegment: jest.fn().mockResolvedValue(segment ?? {}),
+      },
     },
     vtex: {
       production: production ?? false,
