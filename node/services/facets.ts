@@ -2,6 +2,7 @@ import { buildAttributePath } from '../commons/compatibility-layer'
 import { compareApiResults } from '../utils/compareResults'
 import { fetchAppSettings } from './settings'
 import type { FacetsInput } from '../typings/Search'
+import type { SegmentParams } from '../clients/intsch/index'
 import { decodeQuery } from '../clients/intelligent-search-api'
 import { parseState } from '../utils/searchState'
 
@@ -21,15 +22,29 @@ function buildQueryString(params: Record<string, any>): string {
 }
 
 /**
+ * Returns the segment from ctx, falling back to the segment API if absent.
+ * Matches Rust v0's get_or_create_segment: the segment is either decoded from
+ * the request token or created via the segment API with account defaults.
+ */
+async function getOrCreateSegment(ctx: Context): Promise<Record<string, any>> {
+  if (ctx.vtex.segment) {
+    return ctx.vtex.segment as Record<string, any>
+  }
+
+  return ctx.clients.segment.getSegment()
+}
+
+/**
  * Builds curl commands for debugging API requests
  */
 // eslint-disable-next-line max-params
-function buildCurlCommands(
+async function buildCurlCommands(
   ctx: Context,
   path: string,
   params: Record<string, any>,
+  selectedFacets: SelectedFacet[],
   shippingOptions?: string[]
-): { biggyCurl: string; intschCurl: string } {
+): Promise<{ biggyCurl: string; intschCurl: string }> {
   const { account } = ctx.vtex
   const queryString = buildQueryString(params)
   const shippingHeader = shippingOptions?.length
@@ -40,10 +55,110 @@ function buildCurlCommands(
     ? ` -H "x-vtex-segment: ${ctx.vtex.segmentToken}"`
     : ''
 
+  const segment = await getOrCreateSegment(ctx)
+  const segData = extractSegmentData(segment)
+
+  const intschParams = {
+    ...(segData.segmentParams as Record<string, any>),
+    ...params,
+  }
+
+  const intschPath = buildAttributePath(
+    concatSelectedFacets(selectedFacets, segData.extraFacets)
+  )
+
+  const intschQueryString = buildQueryString(intschParams)
+
   const biggyCurl = `curl "https://${account}.myvtex.com/_v/api/intelligent-search/facets/${path}?${queryString}"${shippingHeader}${segmentHeader}`
-  const intschCurl = `curl "https://${account}.myvtex.com/api/intelligent-search/v0/facets/${path}?${queryString}"${shippingHeader}${segmentHeader}`
+  const intschCurl = `curl "https://${account}.myvtex.com/api/intelligent-search/v1/facets/${intschPath}?${intschQueryString}"${shippingHeader}`
 
   return { biggyCurl, intschCurl }
+}
+
+/**
+ * Concatenates path-selected facets with segment-derived facets
+ *
+ * - The `shipping` facet from the path takes precedence: if the path already
+ *   contains a `shipping` facet, segment `shipping` entries are skipped.
+ * - A `shipping=ignore` value signals the user explicitly deselected a shipping
+ *   filter present in the segment; when found, ALL `shipping` entries are removed.
+ */
+function concatSelectedFacets(
+  selectedFacets: SelectedFacet[],
+  selectedFacetsFromSegment: SelectedFacet[]
+): SelectedFacet[] {
+  let result = [...selectedFacets]
+  const hasShipping = result.some((f) => f.key === 'shipping')
+
+  for (const facet of selectedFacetsFromSegment) {
+    if (!hasShipping || facet.key !== 'shipping') {
+      result.push(facet)
+    }
+  }
+
+  if (result.some((f) => f.key === 'shipping' && f.value === 'ignore')) {
+    result = result.filter((f) => f.key !== 'shipping')
+  }
+
+  return result
+}
+
+/**
+ * Extracts segment-derived query params and extra path facets for the v1 endpoint.
+ * Parses the segment `facets` string to separate shipping/geo keys (sent as query params)
+ * from general facets (returned as extraFacets for concatenation).
+ */
+function extractSegmentData(segment: Record<string, any>): {
+  segmentParams: SegmentParams
+  extraFacets: SelectedFacet[]
+} {
+  const SHIPPING_KEYS = new Set([
+    'zip-code',
+    'pickupPoint',
+    'country',
+    'coordinates',
+    'deliveryZonesHash',
+    'pickupPointsHash',
+  ])
+
+  const shipping: Record<string, string> = {}
+  const extraFacets: SelectedFacet[] = []
+
+  if (typeof segment.facets === 'string' && segment.facets) {
+    const facetsStr: string = segment.facets
+
+    for (const pair of facetsStr.split(';')) {
+      const eqIdx = pair.indexOf('=')
+
+      if (eqIdx < 0) continue
+
+      const key = pair.slice(0, eqIdx)
+      const value = pair.slice(eqIdx + 1)
+
+      if (!key || !value) continue
+
+      if (SHIPPING_KEYS.has(key)) {
+        shipping[key] = value
+      } else {
+        extraFacets.push({ key, value })
+      }
+    }
+  }
+
+  return {
+    segmentParams: {
+      sc: segment.channel,
+      regionId: segment.regionId,
+      country: segment.countryCode ?? shipping.country,
+      locale: segment.cultureInfo,
+      'zip-code': shipping['zip-code'],
+      coordinates: shipping.coordinates,
+      pickupPoint: shipping.pickupPoint,
+      deliveryZonesHash: shipping.deliveryZonesHash,
+      pickupPointHash: shipping.pickupPointsHash,
+    },
+    extraFacets,
+  }
 }
 
 type FetchFacetsOptions = {
@@ -82,7 +197,8 @@ async function fetchFacetsFromBiggy(ctx: Context, options: FetchFacetsOptions) {
 }
 
 /**
- * Fetches facets using the intsch client (Intelligent Search)
+ * Fetches facets using the intsch client (Intelligent Search) v1 endpoint.
+ * Unpacks the segment and sends relevant fields as query params instead of the segment header.
  */
 async function fetchFacetsFromIntsch(
   ctx: Context,
@@ -100,10 +216,15 @@ async function fetchFacetsFromIntsch(
   // unnecessary field. It's is an object and breaks the @vtex/api cache
   delete intschArgs.selectedFacets
 
+  const segment = await getOrCreateSegment(ctx)
+  const segData = extractSegmentData(segment)
+  const allFacets = concatSelectedFacets(selectedFacets, segData.extraFacets)
+  const intschPath = buildAttributePath(allFacets)
+
   const result: any = await intsch.facets(
     { ...intschArgs, query: args.fullText },
-    buildAttributePath(selectedFacets),
-    shippingOptions
+    intschPath,
+    { segmentParams: segData.segmentParams, shippingHeader: shippingOptions }
   )
 
   if (ctx.vtex.tenant) {
@@ -142,10 +263,11 @@ export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
     ...parseState(searchState),
   }
 
-  const { biggyCurl, intschCurl } = buildCurlCommands(
+  const { biggyCurl, intschCurl } = await buildCurlCommands(
     ctx,
     path,
     requestParams,
+    selectedFacets,
     shippingOptions
   )
 

@@ -128,6 +128,6 @@ export interface IIntelligentSearchClient {
   facets(
     params: FacetsArgs,
     path: string,
-    shippingHeader?: string[]
+    ...args: any[]
   ): Promise<FacetsResponse>
 }
