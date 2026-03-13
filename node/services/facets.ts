@@ -47,12 +47,12 @@ function buildCurlCommands(
   let intschParams = params
 
   if (segment) {
-    const data = extractSegmentData(segment, selectedFacets)
+    const data = extractSegmentData(segment)
 
     intschParams = { ...(data.segmentParams as Record<string, any>), ...params }
-    if (data.extraFacets.length > 0) {
-      intschPath = `${intschPath}${buildAttributePath(data.extraFacets)}`
-    }
+    intschPath = buildAttributePath(
+      concatSelectedFacets(selectedFacets, data.extraFacets)
+    )
   }
 
   const intschQueryString = buildQueryString(intschParams)
@@ -64,14 +64,42 @@ function buildCurlCommands(
 }
 
 /**
+ * Concatenates path-selected facets with segment-derived facets
+ *
+ * - The `shipping` facet from the path takes precedence: if the path already
+ *   contains a `shipping` facet, segment `shipping` entries are skipped.
+ * - A `shipping=ignore` value signals the user explicitly deselected a shipping
+ *   filter present in the segment; when found, ALL `shipping` entries are removed.
+ */
+function concatSelectedFacets(
+  selectedFacets: SelectedFacet[],
+  selectedFacetsFromSegment: SelectedFacet[]
+): SelectedFacet[] {
+  let result = [...selectedFacets]
+  const hasShipping = result.some((f) => f.key === 'shipping')
+
+  for (const facet of selectedFacetsFromSegment) {
+    if (!hasShipping || facet.key !== 'shipping') {
+      result.push(facet)
+    }
+  }
+
+  if (result.some((f) => f.key === 'shipping' && f.value === 'ignore')) {
+    result = result.filter((f) => f.key !== 'shipping')
+  }
+
+  return result
+}
+
+/**
  * Extracts segment-derived query params and extra path facets for the v1 endpoint.
  * Parses the segment `facets` string to separate shipping/geo keys (sent as query params)
- * from general facets (appended to the path if not already in selectedFacets).
+ * from general facets (returned as extraFacets for concatenation).
  */
-function extractSegmentData(
-  segment: Record<string, any>,
-  selectedFacets: SelectedFacet[]
-): { segmentParams: SegmentParams; extraFacets: SelectedFacet[] } {
+function extractSegmentData(segment: Record<string, any>): {
+  segmentParams: SegmentParams
+  extraFacets: SelectedFacet[]
+} {
   const SHIPPING_KEYS = new Set([
     'zip-code',
     'pickupPoint',
@@ -82,7 +110,6 @@ function extractSegmentData(
   ])
 
   const shipping: Record<string, string> = {}
-  const existingKeys = new Set(selectedFacets.map((f) => f.key))
   const extraFacets: SelectedFacet[] = []
 
   if (typeof segment.facets === 'string' && segment.facets) {
@@ -100,7 +127,7 @@ function extractSegmentData(
 
       if (SHIPPING_KEYS.has(key)) {
         shipping[key] = value
-      } else if (!existingKeys.has(key)) {
+      } else {
         extraFacets.push({ key, value })
       }
     }
@@ -182,10 +209,10 @@ async function fetchFacetsFromIntsch(
   let allFacets = selectedFacets
 
   if (segment) {
-    const data = extractSegmentData(segment, selectedFacets)
+    const data = extractSegmentData(segment)
 
     segmentParams = data.segmentParams
-    allFacets = [...selectedFacets, ...data.extraFacets]
+    allFacets = concatSelectedFacets(selectedFacets, data.extraFacets)
   }
 
   const intschPath = buildAttributePath(allFacets)
