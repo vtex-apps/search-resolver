@@ -8,6 +8,7 @@ import type {
   CorrectionArgs,
   CorrectionArgsV1,
   CorrectionResponse,
+  FacetsOptions,
   FacetsResponse,
   FetchBannersArgs,
   FetchBannersArgsV1,
@@ -25,7 +26,6 @@ import type { SearchResultArgs } from '../../typings/Search'
 import type { FacetsArgs } from '../intelligent-search-api'
 import { decodeQuery, isPathTraversal } from '../intelligent-search-api'
 import { parseState } from '../../utils/searchState'
-import type { SegmentParams } from '../../utils/segment'
 
 export class Intsch extends JanusClient implements IIntelligentSearchClient {
   private locale: string | undefined
@@ -183,7 +183,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
   public facets(
     params: FacetsArgs,
     path: string,
-    options?: { segmentParams?: SegmentParams; shippingHeader?: string[] }
+    options?: FacetsOptions
   ): Promise<FacetsResponse> {
     if (isPathTraversal(path)) {
       throw new Error('Malformed URL')

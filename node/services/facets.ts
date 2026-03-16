@@ -90,7 +90,7 @@ async function fetchFacetsFromBiggy(ctx: Context, options: FetchFacetsOptions) {
   const result: any = await intelligentSearchApi.facets(
     { ...biggyArgs, query: args.fullText },
     buildAttributePath(selectedFacets),
-    shippingOptions
+    { shippingHeader: shippingOptions }
   )
 
   if (ctx.vtex.tenant) {
