@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Facets now uses intsch v1 endpoint with segment data as query params instead of encoded header.
+- Added new items to `PRODUCT_SEARCH_IGNORED_DIFFERENCES`.
+
+### Added
+
+- Shared segment and facet concatenation utilities.
+
 ## [1.94.0] - 2026-03-02
 
 ### Changed

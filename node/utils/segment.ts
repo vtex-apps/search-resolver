@@ -20,6 +20,7 @@ export type SegmentParams = {
  * Returns the segment from ctx, falling back to the segment API if absent.
  * Matches Rust v0's get_or_create_segment: the segment is either decoded from
  * the request token or created via the segment API with account defaults.
+ * Returns an empty object if the segment API call fails, so search is not blocked.
  */
 export async function getOrCreateSegment(
   ctx: Context
@@ -28,7 +29,16 @@ export async function getOrCreateSegment(
     return ctx.vtex.segment as Record<string, any>
   }
 
-  return ctx.clients.segment.getSegment()
+  try {
+    return await ctx.clients.segment.getSegment()
+  } catch (err) {
+    ctx.vtex.logger.warn({
+      message: 'Failed to fetch segment, proceeding without it',
+      error: err,
+    })
+
+    return {}
+  }
 }
 
 const SHIPPING_FACET_KEYS = new Set([
