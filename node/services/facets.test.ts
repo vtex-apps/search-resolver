@@ -105,7 +105,7 @@ describe('fetchFacets service', () => {
     expect(ctx.clients.intelligentSearchApi.facets).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'test query' }),
       expect.any(String),
-      shippingOptions
+      { shippingHeader: shippingOptions }
     )
   })
 
