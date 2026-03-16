@@ -25,18 +25,7 @@ import type { SearchResultArgs } from '../../typings/Search'
 import type { FacetsArgs } from '../intelligent-search-api'
 import { decodeQuery, isPathTraversal } from '../intelligent-search-api'
 import { parseState } from '../../utils/searchState'
-
-export type SegmentParams = {
-  sc?: string | number
-  regionId?: string
-  country?: string
-  locale?: string
-  'zip-code'?: string
-  coordinates?: string
-  pickupPoint?: string
-  deliveryZonesHash?: string
-  pickupPointHash?: string
-}
+import type { SegmentParams } from '../../utils/segment'
 
 export class Intsch extends JanusClient implements IIntelligentSearchClient {
   private locale: string | undefined
