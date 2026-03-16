@@ -27,14 +27,14 @@ function buildQueryString(params: Record<string, any>): string {
 /**
  * Builds curl commands for debugging API requests
  */
-// eslint-disable-next-line max-params
-async function buildCurlCommands(
+function buildCurlCommands(
   ctx: Context,
   path: string,
   params: Record<string, any>,
   selectedFacets: SelectedFacet[],
+  segmentData: ReturnType<typeof extractSegmentData>,
   shippingOptions?: string[]
-): Promise<{ biggyCurl: string; intschCurl: string }> {
+): { biggyCurl: string; intschCurl: string } {
   const { account } = ctx.vtex
   const queryString = buildQueryString(params)
   const shippingHeader = shippingOptions?.length
@@ -45,16 +45,13 @@ async function buildCurlCommands(
     ? ` -H "x-vtex-segment: ${ctx.vtex.segmentToken}"`
     : ''
 
-  const segment = await getOrCreateSegment(ctx)
-  const segData = extractSegmentData(segment)
-
   const intschParams = {
-    ...(segData.segmentParams as Record<string, any>),
+    ...(segmentData.segmentParams as Record<string, any>),
     ...params,
   }
 
   const intschPath = buildAttributePath(
-    concatSelectedFacets(selectedFacets, segData.extraFacets)
+    concatSelectedFacets(selectedFacets, segmentData.extraFacets)
   )
 
   const intschQueryString = buildQueryString(intschParams)
@@ -64,6 +61,8 @@ async function buildCurlCommands(
 
   return { biggyCurl, intschCurl }
 }
+
+type SegmentData = ReturnType<typeof extractSegmentData>
 
 type FetchFacetsOptions = {
   args: FacetsInput
@@ -106,7 +105,8 @@ async function fetchFacetsFromBiggy(ctx: Context, options: FetchFacetsOptions) {
  */
 async function fetchFacetsFromIntsch(
   ctx: Context,
-  options: FetchFacetsOptions
+  options: FetchFacetsOptions,
+  segmentData: SegmentData
 ) {
   const { args, selectedFacets, shippingOptions } = options
   const {
@@ -120,15 +120,20 @@ async function fetchFacetsFromIntsch(
   // unnecessary field. It's is an object and breaks the @vtex/api cache
   delete intschArgs.selectedFacets
 
-  const segment = await getOrCreateSegment(ctx)
-  const segData = extractSegmentData(segment)
-  const allFacets = concatSelectedFacets(selectedFacets, segData.extraFacets)
+  const allFacets = concatSelectedFacets(
+    selectedFacets,
+    segmentData.extraFacets
+  )
+
   const intschPath = buildAttributePath(allFacets)
 
   const result: any = await intsch.facets(
     { ...intschArgs, query: args.fullText },
     intschPath,
-    { segmentParams: segData.segmentParams, shippingHeader: shippingOptions }
+    {
+      segmentParams: segmentData.segmentParams,
+      shippingHeader: shippingOptions,
+    }
   )
 
   if (ctx.vtex.tenant) {
@@ -145,9 +150,12 @@ export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
   const { args, selectedFacets, shippingOptions } = options
   const { shouldUseNewPLPEndpoint } = await fetchAppSettings(ctx)
 
+  const segment = await getOrCreateSegment(ctx)
+  const segmentData = extractSegmentData(segment)
+
   // If flag is explicitly true, use intsch
   if (shouldUseNewPLPEndpoint) {
-    return fetchFacetsFromIntsch(ctx, options)
+    return fetchFacetsFromIntsch(ctx, options, segmentData)
   }
 
   // Build the exact request params as the clients do for debugging
@@ -167,18 +175,19 @@ export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
     ...parseState(searchState),
   }
 
-  const { biggyCurl, intschCurl } = await buildCurlCommands(
+  const { biggyCurl, intschCurl } = buildCurlCommands(
     ctx,
     path,
     requestParams,
     selectedFacets,
+    segmentData,
     shippingOptions
   )
 
   // If flag is undefined, compare both APIs
   return compareApiResults(
     () => fetchFacetsFromBiggy(ctx, options),
-    () => fetchFacetsFromIntsch(ctx, options),
+    () => fetchFacetsFromIntsch(ctx, options, segmentData),
     ctx.vtex.production ? 10 : 100,
     ctx.vtex.logger,
     {
