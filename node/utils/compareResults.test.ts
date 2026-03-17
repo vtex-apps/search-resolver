@@ -335,12 +335,12 @@ describe('isDeepEqual', () => {
         expect.arrayContaining([
           {
             path: 'age',
-            type: 'extra_key',
+            type: 'missing_key',
             expected: 25,
           },
           {
             path: 'email',
-            type: 'missing_key',
+            type: 'extra_key',
             actual: 'john@example.com',
           },
         ])
@@ -446,7 +446,7 @@ describe('findDifferences', () => {
         },
         {
           path: 'c',
-          type: 'missing_key',
+          type: 'extra_key',
           actual: 4,
         },
       ])
@@ -601,11 +601,11 @@ describe('existence-based array comparison', () => {
       expect.arrayContaining([
         expect.objectContaining({
           path: 'skuSpecifications[name:Colour]',
-          type: 'missing_key',
+          type: 'extra_key',
         }),
         expect.objectContaining({
           path: 'skuSpecifications[name:Size]',
-          type: 'extra_key',
+          type: 'missing_key',
         }),
       ])
     )
@@ -731,11 +731,11 @@ describe('existence-based array comparison', () => {
       expect.arrayContaining([
         expect.objectContaining({
           path: 'categories[name:/Electronics/TVs/]',
-          type: 'missing_key',
+          type: 'extra_key',
         }),
         expect.objectContaining({
           path: 'categories[name:/Electronics/Tablets/]',
-          type: 'extra_key',
+          type: 'missing_key',
         }),
       ])
     )
@@ -823,7 +823,7 @@ describe('nested existence-based comparison with ignore patterns', () => {
     expect(result.differences).toEqual([
       {
         path: 'products[0].specificationGroups[name:allSpecifications].specifications[name:sellerId]',
-        type: 'extra_key',
+        type: 'missing_key',
         expected: {
           originalName: 'sellerId',
           name: 'sellerId',
@@ -832,7 +832,7 @@ describe('nested existence-based comparison with ignore patterns', () => {
       },
       {
         path: 'products[0].properties[name:sellerId]',
-        type: 'extra_key',
+        type: 'missing_key',
         expected: {
           originalName: 'sellerId',
           name: 'sellerId',
@@ -888,15 +888,15 @@ describe('nested existence-based comparison with ignore patterns', () => {
     const ignoredDifferences: IgnoredDifference[] = [
       {
         path: 'products[*].specificationGroups[name:allSpecifications].specifications[name:sellerId]',
-        type: 'extra_key',
+        type: 'missing_key',
       },
-      { path: 'products[*].properties[name:sellerId]', type: 'extra_key' },
+      { path: 'products[*].properties[name:sellerId]', type: 'missing_key' },
     ]
 
     const filtered = filterIgnoredDifferences(
       result.differences,
       ignoredDifferences
-    )
+    ).filtered
 
     expect(filtered).toEqual([])
   })
@@ -915,7 +915,7 @@ describe('filterIgnoredDifferences', () => {
         { path: 'age', type: 'extra_key', expected: 25 },
       ]
 
-      const result = filterIgnoredDifferences(differences, [])
+      const result = filterIgnoredDifferences(differences, []).filtered
 
       expect(result).toEqual(differences)
     })
@@ -931,7 +931,7 @@ describe('filterIgnoredDifferences', () => {
         { path: 'age', type: 'extra_key', expected: 25 },
       ]
 
-      const result = filterIgnoredDifferences(differences)
+      const result = filterIgnoredDifferences(differences).filtered
 
       expect(result).toEqual(differences)
     })
@@ -953,7 +953,7 @@ describe('filterIgnoredDifferences', () => {
         { path: 'email', type: 'missing_key' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
 
       expect(result).toEqual([
         {
@@ -985,7 +985,7 @@ describe('filterIgnoredDifferences', () => {
         { path: 'value', type: 'different_value' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
 
       expect(result).toEqual([
         {
@@ -1007,7 +1007,7 @@ describe('filterIgnoredDifferences', () => {
         { path: 'name', type: 'extra_key' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
 
       expect(result).toEqual([{ path: 'age', type: 'extra_key', expected: 25 }])
     })
@@ -1031,7 +1031,7 @@ describe('filterIgnoredDifferences', () => {
         { path: '[0].brandImageUrl', type: 'extra_key' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
 
       expect(result).toEqual([
         {
@@ -1058,7 +1058,7 @@ describe('filterIgnoredDifferences', () => {
         { path: 'data[0].items[2].specs', type: 'missing_key' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
 
       expect(result).toEqual([
         {
@@ -1097,7 +1097,7 @@ describe('filterIgnoredDifferences', () => {
         { path: 'user.settings.notifications', type: 'missing_key' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
 
       expect(result).toEqual([
         {
@@ -1142,7 +1142,7 @@ describe('filterIgnoredDifferences', () => {
         { path: 'array', type: 'array_length_mismatch' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
 
       expect(result).toEqual([
         {
@@ -1162,7 +1162,7 @@ describe('filterIgnoredDifferences', () => {
         { path: 'any', type: 'extra_key' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
 
       expect(result).toEqual([])
     })
@@ -1177,7 +1177,7 @@ describe('filterIgnoredDifferences', () => {
         },
       ]
 
-      const result = filterIgnoredDifferences(differences, [])
+      const result = filterIgnoredDifferences(differences, []).filtered
 
       expect(result).toEqual(differences)
     })
@@ -1198,7 +1198,7 @@ describe('filterIgnoredDifferences', () => {
         { path: 'age', type: 'extra_key' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
 
       expect(result).toEqual([])
     })
@@ -1237,7 +1237,7 @@ describe('shouldIgnoreDifference', () => {
           path: 'products[*].cacheId',
           type: 'different_value',
         })
-      ).toBe(false)
+      ).toBe(true)
     })
 
     it('should match multiple [*] wildcards', () => {
@@ -1428,7 +1428,7 @@ describe('filterIgnoredDifferences with wildcards', () => {
       { path: 'products[*].cacheId', type: 'different_value' },
     ]
 
-    const result = filterIgnoredDifferences(differences, ignoredDifferences)
+    const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
 
     expect(result).toEqual([
       {
@@ -1457,7 +1457,7 @@ describe('filterIgnoredDifferences with wildcards', () => {
 
     const result = filterIgnoredDifferences(differences, [
       'products[*].cacheId',
-    ])
+    ]).filtered
 
     expect(result).toEqual([])
   })
@@ -1487,7 +1487,7 @@ describe('filterIgnoredDifferences with wildcards', () => {
       },
     ]
 
-    const result = filterIgnoredDifferences(differences, ignoredDifferences)
+    const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
 
     expect(result).toEqual([
       {
@@ -1673,7 +1673,7 @@ describe('compareApiResults', () => {
       const ignoredDifferences: IgnoredDifference[] = [
         { path: 'name', type: 'different_value' },
         { path: 'age', type: 'different_value' },
-        { path: 'extra', type: 'extra_key' },
+        { path: 'extra', type: 'missing_key' },
       ]
 
       const result = await compareApiResults(func1, func2, 100, mockLogger, {
@@ -1709,8 +1709,8 @@ describe('compareApiResults', () => {
       ])
 
       const ignoredDifferences: IgnoredDifference[] = [
-        { path: '[0].productReferenceCode', type: 'extra_key' },
-        { path: '[0].brandImageUrl', type: 'extra_key' },
+        { path: '[0].productReferenceCode', type: 'missing_key' },
+        { path: '[0].brandImageUrl', type: 'missing_key' },
       ]
 
       const result = await compareApiResults(func1, func2, 100, mockLogger, {
@@ -1781,9 +1781,9 @@ describe('compareApiResults', () => {
       ])
 
       const ignoredDifferences: IgnoredDifference[] = [
-        { path: '[0].productReferenceCode', type: 'extra_key' },
-        { path: '[0].brandImageUrl', type: 'extra_key' },
-        { path: '[0].searchableClusters', type: 'extra_key' },
+        { path: '[0].productReferenceCode', type: 'missing_key' },
+        { path: '[0].brandImageUrl', type: 'missing_key' },
+        { path: '[0].searchableClusters', type: 'missing_key' },
         { path: '[0].releaseDate', type: 'different_type' },
         { path: '[0].clusterHighlights', type: 'different_type' },
         { path: '[0].productClusters', type: 'different_type' },
@@ -1849,10 +1849,10 @@ describe('compareApiResults', () => {
       })
 
       const ignoredDifferences: IgnoredDifference[] = [
-        { path: 'user.avatar', type: 'extra_key' },
-        { path: 'user.settings.notifications', type: 'missing_key' },
+        { path: 'user.avatar', type: 'missing_key' },
+        { path: 'user.settings.notifications', type: 'extra_key' },
         { path: 'items', type: 'array_length_mismatch' },
-        { path: 'items[2]', type: 'extra_key' },
+        { path: 'items[2]', type: 'missing_key' },
       ]
 
       const result = await compareApiResults(func1, func2, 100, mockLogger, {

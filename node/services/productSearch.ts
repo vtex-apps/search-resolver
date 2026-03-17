@@ -60,19 +60,24 @@ export const PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
   { path: 'pagination.last.proxyUrl', type: 'different_value' },
   { path: 'pagination.current.proxyUrl', type: 'different_value' },
   { path: 'pagination.previous.proxyUrl', type: 'different_value' },
-  { path: 'products[*].items[*].kitItems', type: 'missing_key' },
-  { path: 'products[*].items[*].estimatedDateArrival', type: 'missing_key' },
-  { path: 'products[*].items[*].manufacturerCode', type: 'missing_key' },
   // cacheId differs because of sponsored products middleware on node
   { path: 'products[*].cacheId', type: 'different_value' },
   // productReference: intsch sends this but biggy always returns ""
+  // searchId is always different
+  { path: 'searchId', type: 'different_value' },
+  // PDP differences (from intelligent-search/tests), mapped under `products[*].*`
+  // New data that intsch sends and production doesn't (extra in local)
+  { path: 'products[*].items[*].kitItems', type: 'extra_key' },
+  { path: 'products[*].items[*].estimatedDateArrival', type: 'extra_key' },
+  { path: 'products[*].items[*].manufacturerCode', type: 'extra_key' },
+  // productReference: intsch sends this but production always returns ""
   { path: 'products[*].productReference', type: 'different_value' },
-  { path: 'products[*].productReference', type: 'missing_key' },
-  // metaTagDescription: intsch sends this but biggy always returns ""
+  { path: 'products[*].productReference', type: 'extra_key' },
+  // metaTagDescription: intsch sends this but production always returns ""
   { path: 'products[*].metaTagDescription', type: 'different_value' },
-  // isKit: intsch sends this but biggy always returns "false"
+  // isKit: intsch sends this but production always returns "false"
   { path: 'products[*].items[*].isKit', type: 'different_value' },
-  // modalType: intsch sends this but biggy always returns ""
+  // modalType: intsch sends this but production always returns ""
   { path: 'products[*].items[*].modalType', type: 'different_value' },
   // PriceValidUntil changes with each request
   {
@@ -84,39 +89,32 @@ export const PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
     path: 'products[*].items[*].sellers[*].commertialOffer.PriceValidUntil',
     type: 'null_mismatch',
   },
-  {
-    path: 'products[*].items[*].sellers[*].commertialOffer.RewardValue',
-    type: 'different_value',
-  },
-  // imageText: intsch sends this but biggy always returns ""
+  // imageText: intsch sends this but production always returns ""
   { path: 'products[*].items[*].images[*].imageText', type: 'different_value' },
-  // attachments: intsch sends this but biggy always returns an empty array
-  {
-    path: 'products[*].items[*].attachments',
-    type: 'array_length_mismatch',
-  },
-  { path: 'products[*].items[*].attachments[*]', type: 'missing_key' },
-  // sellerId in specificationGroups/properties: no longer sent by intsch
+  // attachments: intsch sends this but production always returns an empty array
+  { path: 'products[*].items[*].attachments', type: 'array_length_mismatch' },
+  { path: 'products[*].items[*].attachments[*]', type: 'extra_key' },
+  // sellerId in specificationGroups/properties: no longer sent by intsch (missing from local)
   {
     path: 'products[*].specificationGroups[name:allSpecifications].specifications[name:sellerId]',
-    type: 'extra_key',
+    type: 'missing_key',
   },
-  { path: 'products[*].properties[name:sellerId]', type: 'extra_key' },
-  // productTitle: no longer sent by intsch because it is always empty
-  { path: 'products[*].productTitle', type: 'extra_key' },
-  // description: differs because intsch gets the raw value from catalog without cropping
-  { path: 'products[*].description', type: 'different_value' },
-  // taxPercentage: biggy sends 0 or null, intsch always sends 0
+  { path: 'products[*].properties[name:sellerId]', type: 'missing_key' },
+  // taxPercentage: production sends 0 or null, intsch always sends 0
   {
     path: 'products[*].items[*].sellers[*].commertialOffer.taxPercentage',
     type: 'null_mismatch',
   },
-  // searchId is always different
-  { path: 'searchId', type: 'different_value' },
-  // allSpecifications group can be missing when product has no specs (biggy always returns sellerId there)
+  // cacheId differs because of sponsored products middleware on node
+  { path: 'products[*].cacheId', type: 'different_value' },
+  // productTitle: no longer sent because it is always empty (missing from local)
+  { path: 'products[*].productTitle', type: 'missing_key' },
+  // description: differs because intsch gets the raw value from catalog without cropping
+  { path: 'products[*].description', type: 'different_value' },
+  // allSpecifications group can be missing when product has no specs (missing from local)
   {
     path: 'products[*].specificationGroups[name:allSpecifications]',
-    type: 'extra_key',
+    type: 'missing_key',
   },
 ]
 

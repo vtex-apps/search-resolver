@@ -176,13 +176,13 @@ function compareArraysByExistence(
     if (i >= noKey1.length) {
       differences.push({
         path: currentPath,
-        type: 'missing_key',
+        type: 'extra_key',
         actual: noKey2[i],
       })
     } else if (i >= noKey2.length) {
       differences.push({
         path: currentPath,
-        type: 'extra_key',
+        type: 'missing_key',
         expected: noKey1[i],
       })
     } else {
@@ -198,27 +198,27 @@ function compareArraysByExistence(
     }
   }
 
-  // Find elements in arr2 not in arr1 (missing from expected)
+  // Find elements in arr2 not in arr1 (extra in local/actual)
   for (const [key, item] of map2) {
     if (!map1.has(key)) {
       const currentPath = path ? `${path}[name:${key}]` : `[name:${key}]`
 
       differences.push({
         path: currentPath,
-        type: 'missing_key',
+        type: 'extra_key',
         actual: item,
       })
     }
   }
 
-  // Find elements in arr1 not in arr2 (extra in expected)
+  // Find elements in arr1 not in arr2 (missing from local/actual)
   for (const [key, item] of map1) {
     if (!map2.has(key)) {
       const currentPath = path ? `${path}[name:${key}]` : `[name:${key}]`
 
       differences.push({
         path: currentPath,
-        type: 'extra_key',
+        type: 'missing_key',
         expected: item,
       })
     }
@@ -240,9 +240,12 @@ function compareArraysByExistence(
 }
 
 /**
- * Finds differences between two values recursively
- * @param a First value to compare
- * @param b Second value to compare
+ * Finds differences between two values recursively.
+ * Types are from local (b) perspective: extra_key = present only in local,
+ * missing_key = present only in production (missing from local).
+ *
+ * @param a First value to compare (production / expected)
+ * @param b Second value to compare (local / actual)
  * @param path Current path in the object (for tracking location of differences)
  * @param options Comparison options (maxDepth, existenceCompareFields)
  * @param currentDepth Current recursion depth (internal use)
@@ -351,13 +354,13 @@ export function findDifferences(
       if (i >= a.length) {
         differences.push({
           path: currentPath,
-          type: 'missing_key',
+          type: 'extra_key',
           actual: b[i],
         })
       } else if (i >= b.length) {
         differences.push({
           path: currentPath,
-          type: 'extra_key',
+          type: 'missing_key',
           expected: a[i],
         })
       } else {
@@ -399,13 +402,13 @@ export function findDifferences(
     if (hasKeyA && !hasKeyB) {
       differences.push({
         path: currentPath,
-        type: 'extra_key',
+        type: 'missing_key',
         expected: objA[key],
       })
     } else if (!hasKeyA && hasKeyB) {
       differences.push({
         path: currentPath,
-        type: 'missing_key',
+        type: 'extra_key',
         actual: objB[key],
       })
     } else if (hasKeyA && hasKeyB) {
@@ -448,7 +451,7 @@ export function isDeepEqual(
 /**
  * Convert an ignore path pattern to a RegExp.
  * Escapes all regex special chars first, then un-escapes our wildcard tokens:
- *   - `[*]` → matches any numeric array index (e.g. `[0]`, `[1]`)
+ *   - `[*]` → matches any array index: numeric (e.g. `[0]`, `[1]`) or named (e.g. `[name:foo]`)
  *   - `*`   → matches any characters except dots and brackets
  *   - `[name:X]` is matched literally (already escaped correctly)
  */
@@ -456,8 +459,11 @@ function ignorePatternToRegex(pathPattern: string): RegExp {
   // 1. Escape all regex special characters
   let regex = pathPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
-  // 2. Un-escape and replace [*] → match only numeric array indices (matches intelligent-search)
-  regex = regex.replace(/\\\[\\\*\\\]/g, '\\[\\d+\\]')
+  // 2. Un-escape and replace [*] → match numeric or named array indices (matches intelligent-search)
+  regex = regex.replace(
+    /\\\[\\\*\\\]/g,
+    '(?:\\[\\d+\\]|\\[name:[^\\]]+\\])'
+  )
 
   // 3. Un-escape and replace remaining * → match any chars except dots/brackets
   regex = regex.replace(/\\\*/g, '[^.\\[\\]]*')
@@ -502,16 +508,27 @@ export function shouldIgnoreDifference(
 export function filterIgnoredDifferences(
   differences: ObjectDifference[],
   ignoredDifferences: IgnoredDifference[] = []
-): ObjectDifference[] {
+): { filtered: ObjectDifference[]; ignored: ObjectDifference[] } {
   if (ignoredDifferences.length === 0) {
-    return differences
+    return { filtered: differences, ignored: [] }
   }
 
-  return differences.filter((difference) => {
-    return !ignoredDifferences.some((pattern) =>
-      shouldIgnoreDifference(difference, pattern)
-    )
-  })
+  const filtered: ObjectDifference[] = []
+  const ignored: ObjectDifference[] = []
+
+  for (const difference of differences) {
+    if (
+      ignoredDifferences.some((pattern) =>
+        shouldIgnoreDifference(difference, pattern)
+      )
+    ) {
+      ignored.push(difference)
+    } else {
+      filtered.push(difference)
+    }
+  }
+
+  return { filtered, ignored }
 }
 
 /**
@@ -538,6 +555,61 @@ export type IgnoredDifference =
         | 'null_mismatch'
         | 'array_length_mismatch'
     }
+
+/** Default max length for Expected/Actual values in formatted diff output to avoid breaking console. */
+export const DEFAULT_MAX_DIFF_VALUE_LENGTH = 2000
+
+function truncateForLog(value: unknown, maxLength: number): string {
+  const s = JSON.stringify(value)
+  if (maxLength <= 0 || s.length <= maxLength) return s
+  return `${s.slice(0, maxLength)} ... (truncated, total ${s.length} chars)`
+}
+
+/**
+ * Format differences for human-readable output.
+ * Truncates large Expected/Actual values so console output doesn't break.
+ *
+ * Note: compareApiResults currently logs raw differences arrays; this helper is
+ * mainly for debugging.
+ */
+export function formatDifferences(
+  differences: ObjectDifference[],
+  ignoredCount = 0,
+  maxValueLength: number = DEFAULT_MAX_DIFF_VALUE_LENGTH
+): string {
+  const hasIgnored = ignoredCount > 0
+
+  if (differences.length === 0 && !hasIgnored) {
+    return 'No differences found'
+  }
+
+  if (differences.length === 0 && hasIgnored) {
+    return `No differences found (${ignoredCount} ignored)`
+  }
+
+  let output = `Found ${differences.length} difference(s)`
+
+  if (hasIgnored) {
+    output += ` (${ignoredCount} ignored)`
+  }
+
+  output += ':\n'
+
+  for (const diff of differences) {
+    output += `\n  Path:     ${diff.path}\n`
+    output += `  Type:     ${diff.type}\n`
+
+    if (diff.expected !== undefined) {
+      output += `  Expected: ${truncateForLog(diff.expected, maxValueLength)}\n`
+    }
+
+    if (diff.actual !== undefined) {
+      output += `  Actual:   ${truncateForLog(diff.actual, maxValueLength)}\n`
+    }
+  }
+
+  return output
+}
 
 /**
  * Options for the compareApiResults function
@@ -595,6 +667,7 @@ export async function compareApiResults<T>(
   let areEqual = false
   let differences: ObjectDifference[] = []
   let filteredDifferences: ObjectDifference[] = []
+  let ignored: ObjectDifference[] = []
 
   try {
     if (!hasError1 && !hasError2) {
@@ -603,10 +676,9 @@ export async function compareApiResults<T>(
       })
 
       differences = comparisonResult.differences
-      filteredDifferences = filterIgnoredDifferences(
-        differences,
-        ignoredDifferences
-      )
+      const result = filterIgnoredDifferences(differences, ignoredDifferences)
+      filteredDifferences = result.filtered
+      ignored = result.ignored
       areEqual = filteredDifferences.length === 0
     }
   } catch (error) {
@@ -623,7 +695,7 @@ export async function compareApiResults<T>(
       differences: filteredDifferences.slice(0, 10), // Limit to first 10 differences to avoid log overflow
       differenceCount: filteredDifferences.length,
       totalDifferences: differences.length,
-      ignoredDifferences: differences.length - filteredDifferences.length,
+      ignoredDifferences: ignored.length,
     })
   } else if (areEqual) {
     logger.info({
@@ -631,7 +703,7 @@ export async function compareApiResults<T>(
       message: `${logPrefix}: Results are equal`,
       params: JSON.stringify(options.args),
       totalDifferences: differences.length,
-      ignoredDifferences: differences.length - filteredDifferences.length,
+      ignoredDifferences: ignored.length,
     })
   }
 
