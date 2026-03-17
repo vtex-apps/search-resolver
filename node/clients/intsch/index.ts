@@ -8,6 +8,7 @@ import type {
   CorrectionArgs,
   CorrectionArgsV1,
   CorrectionResponse,
+  FacetsOptions,
   FacetsResponse,
   FetchBannersArgs,
   FetchBannersArgsV1,
@@ -182,29 +183,36 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
   public facets(
     params: FacetsArgs,
     path: string,
-    shippingHeader?: string[]
+    options?: FacetsOptions
   ): Promise<FacetsResponse> {
     if (isPathTraversal(path)) {
       throw new Error('Malformed URL')
     }
 
     const { query, leap, searchState } = params
+    const { segmentParams, shippingHeader } = options ?? {}
 
-    // The admin auth token is releavant for CallCenter users when the sales channel is private.
     const authToken =
       this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
 
-    return this.http.get(`/api/intelligent-search/v0/facets/${path}`, {
+    return this.http.get(`/api/intelligent-search/v1/facets/${path}`, {
       params: {
+        sc: segmentParams?.sc,
+        regionId: segmentParams?.regionId,
+        country: segmentParams?.country,
+        'zip-code': segmentParams?.['zip-code'],
+        coordinates: segmentParams?.coordinates,
+        pickupPoint: segmentParams?.pickupPoint,
+        deliveryZonesHash: segmentParams?.deliveryZonesHash,
+        pickupPointHash: segmentParams?.pickupPointHash,
         ...params,
         query: query && decodeQuery(query),
-        locale: this.locale,
+        locale: this.locale ?? segmentParams?.locale,
         bgy_leap: leap ? true : undefined,
         ...parseState(searchState),
       },
-      metric: 'facets-new',
+      metric: 'facets-new-v1',
       headers: {
-        'x-vtex-segment': this.context.segmentToken,
         'x-vtex-shipping-options': shippingHeader ?? '',
         ...(authToken ? { VtexIdclientAutCookie: authToken } : {}),
       },

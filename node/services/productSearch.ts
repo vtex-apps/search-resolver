@@ -60,6 +60,9 @@ export const PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
   { path: 'pagination.last.proxyUrl', type: 'different_value' },
   { path: 'pagination.current.proxyUrl', type: 'different_value' },
   { path: 'pagination.previous.proxyUrl', type: 'different_value' },
+  { path: 'products[*].items[*].kitItems', type: 'missing_key' },
+  { path: 'products[*].items[*].estimatedDateArrival', type: 'missing_key' },
+  { path: 'products[*].items[*].manufacturerCode', type: 'missing_key' },
   // cacheId differs because of sponsored products middleware on node
   { path: 'products[*].cacheId', type: 'different_value' },
   // productReference: intsch sends this but biggy always returns ""
@@ -301,15 +304,20 @@ export async function fetchProductSearch(
     ...clientArgs,
   }
 
-  if(args.productOriginVtex) {
-     // This uses the portal search reather than biggy, so the diff is guaranteed to be different and not useful. We can remove the comparison and just log the request params for debugging.
-     ctx.vtex.logger.info({
-      message: 'Product search with productOriginVtex=true, skipping comparison and using Intelligent Search endpoint directly',
+  if (args.productOriginVtex) {
+    // This uses the portal search reather than biggy, so the diff is guaranteed to be different and not useful. We can remove the comparison and just log the request params for debugging.
+    ctx.vtex.logger.info({
+      message:
+        'Product search with productOriginVtex=true, skipping comparison and using Intelligent Search endpoint directly',
     })
 
-    return fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions)
+    return fetchProductSearchFromBiggy(
+      ctx,
+      args,
+      selectedFacets,
+      shippingOptions
+    )
   }
-
 
   const { biggyCurl, intschCurl } = buildCurlCommands(
     ctx,
@@ -319,7 +327,8 @@ export async function fetchProductSearch(
   )
 
   return compareApiResults(
-    () => fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions),
+    () =>
+      fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions),
     () =>
       fetchProductSearchFromIntsch(ctx, args, selectedFacets, shippingOptions),
     ctx.vtex.production ? 1 : 100,

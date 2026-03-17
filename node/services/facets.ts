@@ -1,5 +1,9 @@
-import { buildAttributePath } from '../commons/compatibility-layer'
+import {
+  buildAttributePath,
+  concatSelectedFacets,
+} from '../commons/compatibility-layer'
 import { compareApiResults } from '../utils/compareResults'
+import { extractSegmentData, getOrCreateSegment } from '../utils/segment'
 import { fetchAppSettings } from './settings'
 import type { FacetsInput } from '../typings/Search'
 import { decodeQuery } from '../clients/intelligent-search-api'
@@ -23,11 +27,12 @@ function buildQueryString(params: Record<string, any>): string {
 /**
  * Builds curl commands for debugging API requests
  */
-// eslint-disable-next-line max-params
 function buildCurlCommands(
   ctx: Context,
   path: string,
   params: Record<string, any>,
+  selectedFacets: SelectedFacet[],
+  segmentData: ReturnType<typeof extractSegmentData>,
   shippingOptions?: string[]
 ): { biggyCurl: string; intschCurl: string } {
   const { account } = ctx.vtex
@@ -40,11 +45,24 @@ function buildCurlCommands(
     ? ` -H "x-vtex-segment: ${ctx.vtex.segmentToken}"`
     : ''
 
+  const intschParams = {
+    ...(segmentData.segmentParams as Record<string, any>),
+    ...params,
+  }
+
+  const intschPath = buildAttributePath(
+    concatSelectedFacets(selectedFacets, segmentData.extraFacets)
+  )
+
+  const intschQueryString = buildQueryString(intschParams)
+
   const biggyCurl = `curl "https://${account}.myvtex.com/_v/api/intelligent-search/facets/${path}?${queryString}"${shippingHeader}${segmentHeader}`
-  const intschCurl = `curl "https://${account}.myvtex.com/api/intelligent-search/v0/facets/${path}?${queryString}"${shippingHeader}${segmentHeader}`
+  const intschCurl = `curl "https://${account}.myvtex.com/api/intelligent-search/v1/facets/${intschPath}?${intschQueryString}"${shippingHeader}`
 
   return { biggyCurl, intschCurl }
 }
+
+type SegmentData = ReturnType<typeof extractSegmentData>
 
 type FetchFacetsOptions = {
   args: FacetsInput
@@ -71,7 +89,7 @@ async function fetchFacetsFromBiggy(ctx: Context, options: FetchFacetsOptions) {
   const result: any = await intelligentSearchApi.facets(
     { ...biggyArgs, query: args.fullText },
     buildAttributePath(selectedFacets),
-    shippingOptions
+    { shippingHeader: shippingOptions }
   )
 
   if (ctx.vtex.tenant) {
@@ -82,11 +100,13 @@ async function fetchFacetsFromBiggy(ctx: Context, options: FetchFacetsOptions) {
 }
 
 /**
- * Fetches facets using the intsch client (Intelligent Search)
+ * Fetches facets using the intsch client (Intelligent Search) v1 endpoint.
+ * Unpacks the segment and sends relevant fields as query params instead of the segment header.
  */
 async function fetchFacetsFromIntsch(
   ctx: Context,
-  options: FetchFacetsOptions
+  options: FetchFacetsOptions,
+  segmentData: SegmentData
 ) {
   const { args, selectedFacets, shippingOptions } = options
   const {
@@ -100,10 +120,20 @@ async function fetchFacetsFromIntsch(
   // unnecessary field. It's is an object and breaks the @vtex/api cache
   delete intschArgs.selectedFacets
 
+  const allFacets = concatSelectedFacets(
+    selectedFacets,
+    segmentData.extraFacets
+  )
+
+  const intschPath = buildAttributePath(allFacets)
+
   const result: any = await intsch.facets(
     { ...intschArgs, query: args.fullText },
-    buildAttributePath(selectedFacets),
-    shippingOptions
+    intschPath,
+    {
+      segmentParams: segmentData.segmentParams,
+      shippingHeader: shippingOptions,
+    }
   )
 
   if (ctx.vtex.tenant) {
@@ -120,9 +150,12 @@ export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
   const { args, selectedFacets, shippingOptions } = options
   const { shouldUseNewPLPEndpoint } = await fetchAppSettings(ctx)
 
+  const segment = await getOrCreateSegment(ctx)
+  const segmentData = extractSegmentData(segment)
+
   // If flag is explicitly true, use intsch
   if (shouldUseNewPLPEndpoint) {
-    return fetchFacetsFromIntsch(ctx, options)
+    return fetchFacetsFromIntsch(ctx, options, segmentData)
   }
 
   // Build the exact request params as the clients do for debugging
@@ -146,13 +179,15 @@ export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
     ctx,
     path,
     requestParams,
+    selectedFacets,
+    segmentData,
     shippingOptions
   )
 
   // If flag is undefined, compare both APIs
   return compareApiResults(
     () => fetchFacetsFromBiggy(ctx, options),
-    () => fetchFacetsFromIntsch(ctx, options),
+    () => fetchFacetsFromIntsch(ctx, options, segmentData),
     ctx.vtex.production ? 10 : 100,
     ctx.vtex.logger,
     {
