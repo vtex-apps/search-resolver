@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.95.0] - 2026-03-17
+
 ### Changed
 
 - Facets now uses intsch v1 endpoint with segment data as query params instead of encoded header.
