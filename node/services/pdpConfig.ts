@@ -33,7 +33,9 @@ export const CATALOG_IGNORED_DIFFERENCES: IgnoredDifference[] = [
  * Existence-based comparison for catalog comparison. Populate as needed.
  */
 export const CATALOG_EXISTENCE_COMPARE_FIELDS: ExistenceComparePattern[] = [
-  'allSpecifications',
+  "categories",
+  "categoriesIds",
+  "allSpecifications",
   { path: 'completeSpecifications', key: 'Name' },
   { path: 'skuSpecifications', key: 'field.name' },
   { path: 'items[*].sellers[*].commertialOffer.PaymentOptions.paymentSystems', key: 'id' },
