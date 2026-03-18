@@ -1,5 +1,5 @@
-import type { SegmentData } from '../typings/Search'
 import { compareApiResults } from '../utils/compareResults'
+import { extractSegmentData, getOrCreateSegment } from '../utils/segment'
 import { fetchAppSettings } from './settings'
 import {
   CATALOG_IGNORED_DIFFERENCES,
@@ -22,8 +22,6 @@ interface FetchProductArgs {
   identifier: ProductIdentifier
   salesChannel?: number | null
   regionId?: string
-  vtexSegment?: string
-  productOriginVtex?: boolean
 }
 
 /**
@@ -39,8 +37,9 @@ async function fetchProductFromSearch(
   args: FetchProductArgs
 ): Promise<SearchProduct[]> {
   const { search } = ctx.clients
-  const { identifier, salesChannel, vtexSegment } = args
+  const { identifier, salesChannel } = args
   const { field, value } = identifier
+  const vtexSegment = ctx.vtex.segmentToken
 
   switch (field) {
     case 'id':
@@ -68,10 +67,11 @@ async function fetchProductFromSearch(
  */
 async function fetchProductFromIntsch(
   ctx: Context,
-  args: FetchProductArgs
+  args: FetchProductArgs,
+  segmentData: ReturnType<typeof extractSegmentData>
 ): Promise<SearchProduct[]> {
   const { intsch } = ctx.clients
-  const { identifier, salesChannel, regionId, vtexSegment } = args
+  const { identifier, salesChannel, regionId } = args
   const { field, value } = identifier
 
   // Get locale from context (fallback)
@@ -81,29 +81,13 @@ async function fetchProductFromIntsch(
   let finalSalesChannel = salesChannel ? `${salesChannel}` : undefined
   let finalLocale = defaultLocale
 
-  // Parse vtexSegment if available to extract locale and salesChannel
-  if (vtexSegment) {
-    try {
-      const segmentData: SegmentData = JSON.parse(
-        Buffer.from(vtexSegment, 'base64').toString()
-      )
-
-      // Use segment's salesChannel if available, otherwise use the provided one
-      if (segmentData.channel) {
-        finalSalesChannel = segmentData.channel
-      }
-
-      // Use segment's locale (cultureInfo) if available, otherwise use default
-      if (segmentData.cultureInfo) {
-        finalLocale = segmentData.cultureInfo
-      }
-    } catch (error) {
-      // If parsing fails, continue with defaults
-      ctx.vtex.logger.warn({
-        message: 'Failed to parse vtexSegment token, using defaults',
-        error: error.message,
-        vtexSegment,
-      })
+  // Extract locale and salesChannel from segment data
+  if (segmentData.segmentParams) {
+    if (segmentData.segmentParams.sc) {
+      finalSalesChannel = String(segmentData.segmentParams.sc)
+    }
+    if (segmentData.segmentParams.locale) {
+      finalLocale = segmentData.segmentParams.locale
     }
   }
 
@@ -113,6 +97,7 @@ async function fetchProductFromIntsch(
     salesChannel: finalSalesChannel?.toString(),
     regionId,
     locale: finalLocale,
+    productOriginVtex: true,
   })
 
   // intsch.fetchProduct returns a single SearchProduct, but we need to return an array
@@ -124,34 +109,20 @@ async function fetchProductFromIntsch(
  * Builds vtex segment token for product fetching
  */
 
-export function buildVtexSegment({
-  vtexSegment,
-  salesChannel,
-  regionId,
-}: {
-  vtexSegment?: SegmentData
-  salesChannel?: string
-  regionId?: string
-}): string {
-  const cookie = {
-    ...vtexSegment,
-    regionId: regionId ?? vtexSegment?.regionId,
-    channel: salesChannel ?? vtexSegment?.channel,
-  }
-
-  return Buffer.from(JSON.stringify(cookie)).toString('base64')
-}
-
 export async function fetchProduct(
   ctx: Context,
   args: FetchProductArgs
 ): Promise<SearchProduct[]> {
   const { shouldUseNewPDPEndpoint } = await fetchAppSettings(ctx)
 
+  // Get and create segment before calling intsch
+  const segment = await getOrCreateSegment(ctx)
+  const segmentData = extractSegmentData(segment)
+
   // Check if current account should skip comparison and use intsch directly
   if (shouldUseNewPDPEndpoint) {
     ctx.translated = true
-    return fetchProductFromIntsch(ctx, args)
+    return fetchProductFromIntsch(ctx, args, segmentData)
   }
 
   const existenceCompareFields = CATALOG_EXISTENCE_COMPARE_FIELDS
@@ -159,7 +130,7 @@ export async function fetchProduct(
 
   return compareApiResults(
     () => fetchProductFromSearch(ctx, args),
-    () => fetchProductFromIntsch(ctx, args),
+    () => fetchProductFromIntsch(ctx, args, segmentData),
     ctx.vtex.production ? 1 : 100,
     ctx.vtex.logger,
     {
@@ -200,26 +171,12 @@ export async function resolveProduct(
     throw new Error('No product identifier provided')
   }
 
-  const cookie: SegmentData | undefined = ctx.vtex.segment as
-    | SegmentData
-    | undefined
-
   const { salesChannel } = rawArgs
-
-  const vtexSegment =
-    !cookie || (!cookie?.regionId && rawArgs.regionId)
-      ? buildVtexSegment({
-          vtexSegment: ctx.vtex.segment as SegmentData | undefined,
-          salesChannel: rawArgs.salesChannel?.toString(),
-          regionId: rawArgs.regionId,
-        })
-      : ctx.vtex.segmentToken
 
   const fetchArgs: FetchProductArgs = {
     identifier: args.identifier as ProductIdentifier,
     salesChannel,
     regionId: rawArgs.regionId,
-    vtexSegment,
   }
 
   try {
@@ -254,11 +211,11 @@ export type ProductsByIdentifierArgs = {
  */
 async function fetchProductsByIdentifierFromSearch(
   ctx: Context,
-  args: ProductsByIdentifierArgs,
-  vtexSegment?: string
+  args: ProductsByIdentifierArgs
 ): Promise<SearchProduct[]> {
   const { search } = ctx.clients
   const { field, values, salesChannel } = args
+  const vtexSegment = ctx.vtex.segmentToken
 
   switch (field) {
     case 'id':
@@ -284,7 +241,7 @@ async function fetchProductsByIdentifierFromSearch(
 async function fetchProductsByIdentifierFromIntsch(
   ctx: Context,
   args: ProductsByIdentifierArgs,
-  vtexSegment?: string
+  segmentData: ReturnType<typeof extractSegmentData>
 ): Promise<SearchProduct[]> {
   const { intsch } = ctx.clients
   const { field, values, salesChannel, regionId } = args
@@ -296,29 +253,13 @@ async function fetchProductsByIdentifierFromIntsch(
   let finalSalesChannel = salesChannel ? `${salesChannel}` : undefined
   let finalLocale = defaultLocale
 
-  // Parse vtexSegment if available to extract locale and salesChannel
-  if (vtexSegment) {
-    try {
-      const segmentData: SegmentData = JSON.parse(
-        Buffer.from(vtexSegment, 'base64').toString()
-      )
-
-      // Use segment's salesChannel if available, otherwise use the provided one
-      if (segmentData.channel) {
-        finalSalesChannel = segmentData.channel
-      }
-
-      // Use segment's locale (cultureInfo) if available, otherwise use default
-      if (segmentData.cultureInfo) {
-        finalLocale = segmentData.cultureInfo
-      }
-    } catch (error) {
-      // If parsing fails, continue with defaults
-      ctx.vtex.logger.warn({
-        message: 'Failed to parse vtexSegment token, using defaults',
-        error: error.message,
-        vtexSegment,
-      })
+  // Extract locale and salesChannel from segment data
+  if (segmentData.segmentParams) {
+    if (segmentData.segmentParams.sc) {
+      finalSalesChannel = String(segmentData.segmentParams.sc)
+    }
+    if (segmentData.segmentParams.locale) {
+      finalLocale = segmentData.segmentParams.locale
     }
   }
 
@@ -330,6 +271,7 @@ async function fetchProductsByIdentifierFromIntsch(
       salesChannel: finalSalesChannel?.toString(),
       regionId: regionId ?? undefined,
       locale: finalLocale,
+      productOriginVtex: true,
     })
   )
 
@@ -342,16 +284,11 @@ export async function resolveProductsByIdentifier(
   ctx: Context,
   args: ProductsByIdentifierArgs
 ): Promise<SearchProduct[]> {
-  const vtexSegment =
-    !ctx.vtex.segment || (!ctx.vtex.segment?.regionId && args.regionId)
-      ? buildVtexSegment({
-          vtexSegment: ctx.vtex.segment as SegmentData | undefined,
-          salesChannel: args.salesChannel?.toString(),
-          regionId: args.regionId ?? undefined,
-        })
-      : ctx.vtex.segmentToken
-
   const { shouldUseNewPDPEndpoint } = await fetchAppSettings(ctx)
+
+  // Get and create segment before calling intsch
+  const segment = await getOrCreateSegment(ctx)
+  const segmentData = extractSegmentData(segment)
 
   try {
     let products: SearchProduct[]
@@ -361,13 +298,12 @@ export async function resolveProductsByIdentifier(
       products = await fetchProductsByIdentifierFromIntsch(
         ctx,
         args,
-        vtexSegment
+        segmentData
       )
     } else {
       products = await fetchProductsByIdentifierFromSearch(
         ctx,
-        args,
-        vtexSegment
+        args
       )
     }
 

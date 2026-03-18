@@ -91,6 +91,7 @@ export type FetchProductArgs = {
   salesChannel?: string
   regionId?: string
   locale?: string
+  productOriginVtex?: boolean
 }
 
 export type FetchProductResponse = SearchProduct
