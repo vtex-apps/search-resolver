@@ -119,6 +119,44 @@ export const PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
 ]
 
 /**
+ * Known expected differences to ignore when comparing productOriginVtex=true (catalog/portal) responses.
+ * These are based on CATALOG_IGNORED_DIFFERENCES from intelligent-search tests, with paths prefixed for product_search context.
+ */
+export const CATALOG_PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
+  // skuSpecifications[*].field.type: present in intsch but not in catalog
+  { path: 'products[*].skuSpecifications[*].field.type', type: 'missing_key' },
+  // origin: intsch sends this but catalog doesn't
+  { path: 'products[*].origin', type: 'extra_key' },
+  // productReference: catalog data plane does not always carry the product-level refId
+  { path: 'products[*].productReference', type: 'different_value' },
+  // PriceToken: generated internally by the catalog search API, not available in simulation
+  {
+    path: 'products[*].items[*].sellers[*].commertialOffer.PriceToken',
+    type: 'missing_key',
+  },
+  // PriceValidUntil: timezone differences between simulation and catalog search snapshots
+  {
+    path: 'products[*].items[*].sellers[*].commertialOffer.PriceValidUntil',
+    type: 'different_value',
+  },
+  {
+    path: 'products[*].items[*].sellers[*].commertialOffer.PaymentOptions.paymentSystems[*].dueDate',
+    type: 'different_value',
+  },
+]
+
+/**
+ * Existence-based comparison fields for productOriginVtex=true (catalog/portal) responses.
+ * These are based on CATALOG_EXISTENCE_COMPARE_FIELDS from intelligent-search tests, with paths prefixed for product_search context.
+ */
+export const CATALOG_PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS: ExistenceComparePattern[] = [
+  'products[*].allSpecifications',
+  { path: 'products[*].completeSpecifications', key: 'Name' },
+  { path: 'products[*].skuSpecifications', key: 'field.name' },
+  { path: 'products[*].items[*].sellers[*].commertialOffer.PaymentOptions.paymentSystems', key: 'id' },
+]
+
+/**
  * Builds a query string from an object of params, filtering out undefined/null values
  */
 function buildQueryString(params: Record<string, any>): string {
@@ -302,27 +340,22 @@ export async function fetchProductSearch(
     ...clientArgs,
   }
 
-  if (args.productOriginVtex) {
-    // This uses the portal search reather than biggy, so the diff is guaranteed to be different and not useful. We can remove the comparison and just log the request params for debugging.
-    ctx.vtex.logger.info({
-      message:
-        'Product search with productOriginVtex=true, skipping comparison and using Intelligent Search endpoint directly',
-    })
-
-    return fetchProductSearchFromBiggy(
-      ctx,
-      args,
-      selectedFacets,
-      shippingOptions
-    )
-  }
-
   const { biggyCurl, intschCurl } = buildCurlCommands(
     ctx,
     path,
     requestParams,
     shippingOptions
   )
+
+  // Use catalog-specific comparison configs when productOriginVtex is enabled
+  // since the response format differs (uses catalog data plane)
+  const isProductOriginVtex = args.productOriginVtex ?? false
+  const existenceCompareFields = isProductOriginVtex
+    ? CATALOG_PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS
+    : PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS
+  const ignoredDifferences = isProductOriginVtex
+    ? CATALOG_PRODUCT_SEARCH_IGNORED_DIFFERENCES
+    : PRODUCT_SEARCH_IGNORED_DIFFERENCES
 
   return compareApiResults(
     () =>
@@ -336,9 +369,10 @@ export async function fetchProductSearch(
       args: {
         biggyCurl,
         intschCurl,
+        productOriginVtex: isProductOriginVtex,
       },
-      existenceCompareFields: PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS,
-      ignoredDifferences: PRODUCT_SEARCH_IGNORED_DIFFERENCES,
+      existenceCompareFields,
+      ignoredDifferences,
     }
   )
 }
