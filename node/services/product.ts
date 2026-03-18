@@ -1,5 +1,10 @@
 import type { SegmentData } from '../typings/Search'
+import { compareApiResults } from '../utils/compareResults'
 import { fetchAppSettings } from './settings'
+import {
+  CATALOG_IGNORED_DIFFERENCES,
+  CATALOG_EXISTENCE_COMPARE_FIELDS,
+} from './pdpConfig'
 
 export type ProductIdentifier = {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
@@ -18,6 +23,7 @@ interface FetchProductArgs {
   salesChannel?: number | null
   regionId?: string
   vtexSegment?: string
+  productOriginVtex?: boolean
 }
 
 /**
@@ -148,7 +154,24 @@ export async function fetchProduct(
     return fetchProductFromIntsch(ctx, args)
   }
 
-  return fetchProductFromSearch(ctx, args)
+  const existenceCompareFields = CATALOG_EXISTENCE_COMPARE_FIELDS
+  const ignoredDifferences =  CATALOG_IGNORED_DIFFERENCES
+
+  return compareApiResults(
+    () => fetchProductFromSearch(ctx, args),
+    () => fetchProductFromIntsch(ctx, args),
+    ctx.vtex.production ? 1 : 100,
+    ctx.vtex.logger,
+    {
+      logPrefix: 'Product',
+      args: {
+        field: args.identifier.field,
+        value: args.identifier.value,
+      },
+      existenceCompareFields,
+      ignoredDifferences,
+    }
+  )
 }
 
 /**
