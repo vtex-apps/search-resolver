@@ -123,6 +123,18 @@ export const PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
  * These are based on CATALOG_IGNORED_DIFFERENCES from intelligent-search tests, with paths prefixed for product_search context.
  */
 export const CATALOG_PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
+  // recordsFiltered can differ because the request might go to different nodes
+  { path: 'recordsFiltered', type: 'different_value' },
+  // Pagination proxy URLs are assembled differently
+  { path: 'pagination.before[*].proxyUrl', type: 'different_value' },
+  { path: 'pagination.after[*].proxyUrl', type: 'different_value' },
+  { path: 'pagination.next.proxyUrl', type: 'different_value' },
+  { path: 'pagination.first.proxyUrl', type: 'different_value' },
+  { path: 'pagination.last.proxyUrl', type: 'different_value' },
+  { path: 'pagination.current.proxyUrl', type: 'different_value' },
+  { path: 'pagination.previous.proxyUrl', type: 'different_value' },
+  // searchId is always different
+  { path: 'searchId', type: 'different_value' },
   // skuSpecifications[*].field.type: present in intsch but not in catalog
   { path: 'products[*].skuSpecifications[*].field.type', type: 'missing_key' },
   // origin: intsch sends this but catalog doesn't
@@ -143,6 +155,31 @@ export const CATALOG_PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
     path: 'products[*].items[*].sellers[*].commertialOffer.PaymentOptions.paymentSystems[*].dueDate',
     type: 'different_value',
   },
+  { // For some reason the portal proxy returns a link starting with portal.vtexcommercestable.com.br/ instead of ACCOUNt.vtexcommercestable.com.br
+    path: 'products[*].link',
+    type: 'different_value',
+  },
+  {
+    path: 'products[*].items[*].sellers[*].addToCartLink',
+    type: 'different_value',
+  },
+  //
+  {
+    path: 'products[*].specification',
+    type: 'missing_key',
+  },
+  {
+    path: 'products[*].biggyIndex',
+    type: 'missing_key',
+  },
+  {
+    path: 'products[*].sellerId',
+    type: 'missing_key',
+  },
+  {
+    path: 'products[*].allSpecifications[name:sellerId]',
+    type: 'missing_key',
+  },
 ]
 
 /**
@@ -150,6 +187,8 @@ export const CATALOG_PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
  * These are based on CATALOG_EXISTENCE_COMPARE_FIELDS from intelligent-search tests, with paths prefixed for product_search context.
  */
 export const CATALOG_PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS: ExistenceComparePattern[] = [
+  "products[*].categories",
+  "products[*].categoriesIds",
   'products[*].allSpecifications',
   { path: 'products[*].completeSpecifications', key: 'Name' },
   { path: 'products[*].skuSpecifications', key: 'field.name' },
