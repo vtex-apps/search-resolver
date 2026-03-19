@@ -60,19 +60,24 @@ export const PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
   { path: 'pagination.last.proxyUrl', type: 'different_value' },
   { path: 'pagination.current.proxyUrl', type: 'different_value' },
   { path: 'pagination.previous.proxyUrl', type: 'different_value' },
-  { path: 'products[*].items[*].kitItems', type: 'missing_key' },
-  { path: 'products[*].items[*].estimatedDateArrival', type: 'missing_key' },
-  { path: 'products[*].items[*].manufacturerCode', type: 'missing_key' },
   // cacheId differs because of sponsored products middleware on node
   { path: 'products[*].cacheId', type: 'different_value' },
   // productReference: intsch sends this but biggy always returns ""
+  // searchId is always different
+  { path: 'searchId', type: 'different_value' },
+  // PDP differences (from intelligent-search/tests), mapped under `products[*].*`
+  // New data that intsch sends and production doesn't (extra in local)
+  { path: 'products[*].items[*].kitItems', type: 'extra_key' },
+  { path: 'products[*].items[*].estimatedDateArrival', type: 'extra_key' },
+  { path: 'products[*].items[*].manufacturerCode', type: 'extra_key' },
+  // productReference: intsch sends this but production always returns ""
   { path: 'products[*].productReference', type: 'different_value' },
-  { path: 'products[*].productReference', type: 'missing_key' },
-  // metaTagDescription: intsch sends this but biggy always returns ""
+  { path: 'products[*].productReference', type: 'extra_key' },
+  // metaTagDescription: intsch sends this but production always returns ""
   { path: 'products[*].metaTagDescription', type: 'different_value' },
-  // isKit: intsch sends this but biggy always returns "false"
+  // isKit: intsch sends this but production always returns "false"
   { path: 'products[*].items[*].isKit', type: 'different_value' },
-  // modalType: intsch sends this but biggy always returns ""
+  // modalType: intsch sends this but production always returns ""
   { path: 'products[*].items[*].modalType', type: 'different_value' },
   // PriceValidUntil changes with each request
   {
@@ -84,40 +89,71 @@ export const PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
     path: 'products[*].items[*].sellers[*].commertialOffer.PriceValidUntil',
     type: 'null_mismatch',
   },
-  {
-    path: 'products[*].items[*].sellers[*].commertialOffer.RewardValue',
-    type: 'different_value',
-  },
-  // imageText: intsch sends this but biggy always returns ""
+  // imageText: intsch sends this but production always returns ""
   { path: 'products[*].items[*].images[*].imageText', type: 'different_value' },
-  // attachments: intsch sends this but biggy always returns an empty array
-  {
-    path: 'products[*].items[*].attachments',
-    type: 'array_length_mismatch',
-  },
-  { path: 'products[*].items[*].attachments[*]', type: 'missing_key' },
-  // sellerId in specificationGroups/properties: no longer sent by intsch
+  // attachments: intsch sends this but production always returns an empty array
+  { path: 'products[*].items[*].attachments', type: 'array_length_mismatch' },
+  { path: 'products[*].items[*].attachments[*]', type: 'extra_key' },
+  // sellerId in specificationGroups/properties: no longer sent by intsch (missing from local)
   {
     path: 'products[*].specificationGroups[name:allSpecifications].specifications[name:sellerId]',
-    type: 'extra_key',
+    type: 'missing_key',
   },
-  { path: 'products[*].properties[name:sellerId]', type: 'extra_key' },
-  // productTitle: no longer sent by intsch because it is always empty
-  { path: 'products[*].productTitle', type: 'extra_key' },
-  // description: differs because intsch gets the raw value from catalog without cropping
-  { path: 'products[*].description', type: 'different_value' },
-  // taxPercentage: biggy sends 0 or null, intsch always sends 0
+  { path: 'products[*].properties[name:sellerId]', type: 'missing_key' },
+  // taxPercentage: production sends 0 or null, intsch always sends 0
   {
     path: 'products[*].items[*].sellers[*].commertialOffer.taxPercentage',
     type: 'null_mismatch',
   },
-  // searchId is always different
-  { path: 'searchId', type: 'different_value' },
-  // allSpecifications group can be missing when product has no specs (biggy always returns sellerId there)
+  // cacheId differs because of sponsored products middleware on node
+  { path: 'products[*].cacheId', type: 'different_value' },
+  // productTitle: no longer sent because it is always empty (missing from local)
+  { path: 'products[*].productTitle', type: 'missing_key' },
+  // description: differs because intsch gets the raw value from catalog without cropping
+  { path: 'products[*].description', type: 'different_value' },
+  // allSpecifications group can be missing when product has no specs (missing from local)
   {
     path: 'products[*].specificationGroups[name:allSpecifications]',
-    type: 'extra_key',
+    type: 'missing_key',
   },
+]
+
+/**
+ * Known expected differences to ignore when comparing productOriginVtex=true (catalog/portal) responses.
+ * These are based on CATALOG_IGNORED_DIFFERENCES from intelligent-search tests, with paths prefixed for product_search context.
+ */
+export const CATALOG_PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
+  // skuSpecifications[*].field.type: present in intsch but not in catalog
+  { path: 'products[*].skuSpecifications[*].field.type', type: 'missing_key' },
+  // origin: intsch sends this but catalog doesn't
+  { path: 'products[*].origin', type: 'extra_key' },
+  // productReference: catalog data plane does not always carry the product-level refId
+  { path: 'products[*].productReference', type: 'different_value' },
+  // PriceToken: generated internally by the catalog search API, not available in simulation
+  {
+    path: 'products[*].items[*].sellers[*].commertialOffer.PriceToken',
+    type: 'missing_key',
+  },
+  // PriceValidUntil: timezone differences between simulation and catalog search snapshots
+  {
+    path: 'products[*].items[*].sellers[*].commertialOffer.PriceValidUntil',
+    type: 'different_value',
+  },
+  {
+    path: 'products[*].items[*].sellers[*].commertialOffer.PaymentOptions.paymentSystems[*].dueDate',
+    type: 'different_value',
+  },
+]
+
+/**
+ * Existence-based comparison fields for productOriginVtex=true (catalog/portal) responses.
+ * These are based on CATALOG_EXISTENCE_COMPARE_FIELDS from intelligent-search tests, with paths prefixed for product_search context.
+ */
+export const CATALOG_PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS: ExistenceComparePattern[] = [
+  'products[*].allSpecifications',
+  { path: 'products[*].completeSpecifications', key: 'Name' },
+  { path: 'products[*].skuSpecifications', key: 'field.name' },
+  { path: 'products[*].items[*].sellers[*].commertialOffer.PaymentOptions.paymentSystems', key: 'id' },
 ]
 
 /**
@@ -304,27 +340,22 @@ export async function fetchProductSearch(
     ...clientArgs,
   }
 
-  if (args.productOriginVtex) {
-    // This uses the portal search reather than biggy, so the diff is guaranteed to be different and not useful. We can remove the comparison and just log the request params for debugging.
-    ctx.vtex.logger.info({
-      message:
-        'Product search with productOriginVtex=true, skipping comparison and using Intelligent Search endpoint directly',
-    })
-
-    return fetchProductSearchFromBiggy(
-      ctx,
-      args,
-      selectedFacets,
-      shippingOptions
-    )
-  }
-
   const { biggyCurl, intschCurl } = buildCurlCommands(
     ctx,
     path,
     requestParams,
     shippingOptions
   )
+
+  // Use catalog-specific comparison configs when productOriginVtex is enabled
+  // since the response format differs (uses catalog data plane)
+  const isProductOriginVtex = args.productOriginVtex ?? false
+  const existenceCompareFields = isProductOriginVtex
+    ? CATALOG_PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS
+    : PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS
+  const ignoredDifferences = isProductOriginVtex
+    ? CATALOG_PRODUCT_SEARCH_IGNORED_DIFFERENCES
+    : PRODUCT_SEARCH_IGNORED_DIFFERENCES
 
   return compareApiResults(
     () =>
@@ -338,9 +369,10 @@ export async function fetchProductSearch(
       args: {
         biggyCurl,
         intschCurl,
+        productOriginVtex: isProductOriginVtex,
       },
-      existenceCompareFields: PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS,
-      ignoredDifferences: PRODUCT_SEARCH_IGNORED_DIFFERENCES,
+      existenceCompareFields,
+      ignoredDifferences,
     }
   )
 }

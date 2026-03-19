@@ -52,6 +52,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
         sc: args.salesChannel ?? 1,
         regionId: args.regionId,
         locale: args.locale,
+        productOriginVtex: args.productOriginVtex
       },
       metric: 'search-product-new',
       headers: {

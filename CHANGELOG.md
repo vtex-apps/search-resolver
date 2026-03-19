@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Improve compare configs for ProductSearch
+- Start comparing traffic for PDP by calling the Intsch with productOriginVtex true.
+
 ## [1.95.0] - 2026-03-17
 
 ### Changed
