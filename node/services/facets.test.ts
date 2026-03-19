@@ -35,9 +35,6 @@ describe('fetchFacets service', () => {
   it('should fetch facets via intsch and not call intelligentSearchApi', async () => {
     const ctx = createContext({
       accountName: 'testaccount',
-      appSettings: {
-        shouldUseNewPLPEndpoint: true,
-      },
       intschSettings: {
         facets: mockFacetsResponse,
       },
@@ -57,9 +54,6 @@ describe('fetchFacets service', () => {
   it('should handle shipping options correctly', async () => {
     const ctx = createContext({
       accountName: 'testaccount',
-      appSettings: {
-        shouldUseNewPLPEndpoint: false,
-      },
       intschSettings: {
         facets: mockFacetsResponse,
       },
@@ -83,9 +77,6 @@ describe('fetchFacets service', () => {
   it('should set translated flag in context when tenant is present', async () => {
     const ctx = createContext({
       accountName: 'testaccount',
-      appSettings: {
-        shouldUseNewPLPEndpoint: false,
-      },
       intschSettings: {
         facets: { ...mockFacetsResponse, translated: true },
       },
