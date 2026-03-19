@@ -1,7 +1,6 @@
 import { fetchFacets } from './facets'
 import { createContext } from '../mocks/contextFactory'
 import type { FacetsInput } from '../typings/Search'
-import * as compareResultsModule from '../utils/compareResults'
 
 describe('fetchFacets service', () => {
   const mockFacetsResponse = {
@@ -33,12 +32,9 @@ describe('fetchFacets service', () => {
     jest.clearAllMocks()
   })
 
-  it('should use intsch when shouldUseNewPLPEndpoint is true', async () => {
+  it('should fetch facets via intsch and not call intelligentSearchApi', async () => {
     const ctx = createContext({
       accountName: 'testaccount',
-      appSettings: {
-        shouldUseNewPLPEndpoint: true,
-      },
       intschSettings: {
         facets: mockFacetsResponse,
       },
@@ -54,42 +50,11 @@ describe('fetchFacets service', () => {
     expect(result).toEqual(mockFacetsResponse)
   })
 
-  it('should compare both APIs when shouldUseNewPLPEndpoint is undefined', async () => {
-    const ctx = createContext({
-      accountName: 'testaccount',
-      appSettings: {
-        shouldUseNewPLPEndpoint: undefined,
-      },
-      intelligentSearchApiSettings: {
-        facets: mockFacetsResponse,
-      },
-      intschSettings: {
-        facets: mockFacetsResponse,
-      },
-    })
-
-    const compareApiResultsSpy = jest
-      .spyOn(compareResultsModule, 'compareApiResults')
-      .mockResolvedValue(mockFacetsResponse)
-
-    const result = await fetchFacets(ctx, {
-      args: mockArgs,
-      selectedFacets: mockSelectedFacets,
-    })
-
-    expect(compareApiResultsSpy).toHaveBeenCalled()
-    expect(result).toEqual(mockFacetsResponse)
-
-    compareApiResultsSpy.mockRestore()
-  })
 
   it('should handle shipping options correctly', async () => {
     const ctx = createContext({
       accountName: 'testaccount',
-      appSettings: {
-        shouldUseNewPLPEndpoint: false,
-      },
-      intelligentSearchApiSettings: {
+      intschSettings: {
         facets: mockFacetsResponse,
       },
     })
@@ -102,20 +67,17 @@ describe('fetchFacets service', () => {
       shippingOptions,
     })
 
-    expect(ctx.clients.intelligentSearchApi.facets).toHaveBeenCalledWith(
+    expect(ctx.clients.intsch.facets).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'test query' }),
       expect.any(String),
-      { shippingHeader: shippingOptions }
+      expect.objectContaining({ shippingHeader: shippingOptions })
     )
   })
 
   it('should set translated flag in context when tenant is present', async () => {
     const ctx = createContext({
       accountName: 'testaccount',
-      appSettings: {
-        shouldUseNewPLPEndpoint: false,
-      },
-      intelligentSearchApiSettings: {
+      intschSettings: {
         facets: { ...mockFacetsResponse, translated: true },
       },
       tenantLocale: 'en-US',
