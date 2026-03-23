@@ -404,6 +404,22 @@ async function fetchProductSearchFromIntsch(
   }
 }
 
+function logSponsoredProducts(ctx: Context, result: any) {
+  const products = result?.products
+
+  if (!Array.isArray(products)) return
+
+  const sponsoredCount = products.filter((p: any) => p.advertisement).length
+
+  if (sponsoredCount > 0) {
+    ctx.vtex.logger.info({
+      message: `ProductSearch migration: response contains ${sponsoredCount} sponsored product(s)`,
+      account: ctx.vtex.account,
+      sponsoredCount,
+    })
+  }
+}
+
 /**
  * ProductSearch service that extracts product search fetching logic and implements comparison or flag-based routing
  */
@@ -427,12 +443,16 @@ export async function fetchProductSearch(
   }
 
   if (shouldUseNewPLPEndpoint) {
-    return fetchProductSearchFromIntsch(
+    const result = await fetchProductSearchFromIntsch(
       ctx,
       args,
       selectedFacets,
       shippingOptions
     )
+
+    logSponsoredProducts(ctx, result)
+
+    return result
   }
 
   // Build the exact request params as the clients do for debugging
@@ -480,7 +500,7 @@ export async function fetchProductSearch(
     ? CATALOG_PRODUCT_SEARCH_IGNORED_DIFFERENCES
     : PRODUCT_SEARCH_IGNORED_DIFFERENCES
 
-  return compareApiResults(
+  const result = await compareApiResults(
     () =>
       fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions),
     () =>
@@ -498,4 +518,8 @@ export async function fetchProductSearch(
       ignoredDifferences,
     }
   )
+
+  logSponsoredProducts(ctx, result)
+
+  return result
 }
