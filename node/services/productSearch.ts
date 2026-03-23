@@ -416,6 +416,16 @@ export async function fetchProductSearch(
 ) {
   const { shouldUseNewPLPEndpoint } = await fetchAppSettings(ctx)
 
+  if (Math.random() < 0.1) {
+    const logMethod = shouldUseNewPLPEndpoint ? 'info' : 'warn'
+
+    ctx.vtex.logger[logMethod]({
+      message: `ProductSearch migration: intsch ${
+        shouldUseNewPLPEndpoint ? 'used' : 'not used'
+      } as final response`,
+    })
+  }
+
   if (shouldUseNewPLPEndpoint) {
     return fetchProductSearchFromIntsch(
       ctx,
@@ -465,6 +475,7 @@ export async function fetchProductSearch(
   const existenceCompareFields = isProductOriginVtex
     ? CATALOG_PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS
     : PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS
+
   const ignoredDifferences = isProductOriginVtex
     ? CATALOG_PRODUCT_SEARCH_IGNORED_DIFFERENCES
     : PRODUCT_SEARCH_IGNORED_DIFFERENCES
