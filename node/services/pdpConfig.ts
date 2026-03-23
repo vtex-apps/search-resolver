@@ -27,7 +27,8 @@ export const CATALOG_IGNORED_DIFFERENCES: IgnoredDifference[] = [
     path: '[*].items[*].sellers[*].commertialOffer.PaymentOptions.paymentSystems[*].dueDate',
     type: 'different_value',
   },
-  { // For some reason the portal proxy returns a link starting with portal.vtexcommercestable.com.br/ instead of ACCOUNt.vtexcommercestable.com.br
+  {
+    // For some reason the portal proxy returns a link starting with portal.vtexcommercestable.com.br/ instead of ACCOUNt.vtexcommercestable.com.br
     path: '[*].link',
     type: 'different_value',
   },
@@ -35,17 +36,57 @@ export const CATALOG_IGNORED_DIFFERENCES: IgnoredDifference[] = [
     path: '[*].items[*].sellers[*].addToCartLink',
     type: 'different_value',
   },
-  //
+  // This info doesn't exist on portal search and it is added by the intelligent-search-api mapping
+  {
+    path: '[*].biggyIndex',
+    type: 'missing_key',
+  },
+  {
+    path: '[*].sellerId',
+    type: 'missing_key',
+  },
+  {
+    path: '[*].allSpecifications[name:sellerId]',
+    type: 'missing_key',
+  },
+  // Potential indexing differences
+  {
+    path: '[*].items[*].sellers[*].commertialOffer.GetInfoErrorMessage',
+    type: 'null_mismatch',
+  },
+  {
+    path: '[*].allSpecificationsGroups',
+    type: 'array_length_mismatch',
+  },
+  {
+    path: '[*].allSpecificationsGroups[*]',
+    type: 'different_value',
+  },
+  {
+    path: '[*].allSpecificationsGroups[*]',
+    type: 'extra_key',
+  },
 ]
 
 /**
  * Existence-based comparison for catalog comparison. Populate as needed.
  */
 export const CATALOG_EXISTENCE_COMPARE_FIELDS: ExistenceComparePattern[] = [
-  "[*].categories",
-  "[*].categoriesIds",
-  "[*].allSpecifications",
+  '[*].categories',
+  '[*].categoriesIds',
+  '[*].allSpecifications',
   { path: '[*].completeSpecifications', key: 'Name' },
   { path: '[*].skuSpecifications', key: 'field.name' },
-  { path: '[*].items[*].sellers[*].commertialOffer.PaymentOptions.paymentSystems', key: 'id' },
+  {
+    path: '[*].skuSpecifications[*].values',
+    key: 'id',
+  },
+  {
+    path: '[*].items[*].sellers[*].commertialOffer.PaymentOptions.paymentSystems',
+    key: 'id',
+  },
+  {
+    path: '[*].items[*].sellers[*].commertialOffer.Installments',
+    key: 'Name',
+  },
 ]
