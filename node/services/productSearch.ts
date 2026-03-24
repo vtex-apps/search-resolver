@@ -36,6 +36,7 @@ export const PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS: ExistenceComparePattern[] 
       path: 'products[*].items[*].sellers[*].commertialOffer.discountHighlights[*].additionalInfo',
       key: 'key',
     },
+    'products[*].items[*].activeSubscriptions',
   ]
 
 /**
@@ -60,9 +61,6 @@ export const PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
   { path: 'pagination.last.proxyUrl', type: 'different_value' },
   { path: 'pagination.current.proxyUrl', type: 'different_value' },
   { path: 'pagination.previous.proxyUrl', type: 'different_value' },
-  // cacheId differs because of sponsored products middleware on node
-  { path: 'products[*].cacheId', type: 'different_value' },
-  // productReference: intsch sends this but biggy always returns ""
   // searchId is always different
   { path: 'searchId', type: 'different_value' },
   // PDP differences (from intelligent-search/tests), mapped under `products[*].*`
@@ -116,6 +114,54 @@ export const PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
     path: 'products[*].specificationGroups[name:allSpecifications]',
     type: 'missing_key',
   },
+  // Potential indexing differences
+  { path: 'products[*].productClusters[name:*]', type: 'extra_key' },
+  { path: 'products[*].productClusters[name:*]', type: 'missing_key' },
+  { path: 'products[*].clusterHighlights[name:*]', type: 'extra_key' },
+  { path: 'products[*].clusterHighlights[name:*]', type: 'missing_key' },
+  {
+    path: 'products[*].specificationGroups[name:*].specifications[name:*]',
+    type: 'missing_key',
+  },
+  {
+    path: 'products[*].specificationGroups[name:*].specifications[name:*].values',
+    type: 'array_length_mismatch',
+  },
+  {
+    path: 'products[*].specificationGroups[name:*].specifications[name:*].values[*]',
+    type: 'missing_key',
+  },
+  {
+    path: 'products[*].specificationGroups[name:*].specifications[name:*].values[*]',
+    type: 'extra_key',
+  },
+  {
+    path: 'products[*].specificationGroups[name:*].specifications[name:*].values[*]',
+    type: 'different_value',
+  },
+  {
+    path: 'products[*].properties[name:*].values',
+    type: 'array_length_mismatch',
+  },
+  { path: 'products[*].properties[name:*].values[*]', type: 'extra_key' },
+  { path: 'products[*].properties[name:*].values[*]', type: 'different_value' },
+  { path: 'products[*].categoriesIds', type: 'extra_key' },
+  { path: 'products[*].productClusters[name:*].name', type: 'different_value' },
+  { path: 'products[*].items[*].variations[*].name', type: 'different_value' },
+  { path: 'products[*].releaseDate', type: 'different_value' },
+  {
+    path: 'products[*].items[*].sellers[*].commertialOffer.GetInfoErrorMessage',
+    type: 'null_mismatch',
+  },
+  { path: 'products[*].items[*].variations[*]', type: 'missing_key' },
+  { path: 'products[*].items[*].variations', type: 'array_length_mismatch' },
+  { path: 'products[*].items[*].variations[*].values[*]', type: 'extra_key' },
+  {
+    path: 'products[*].items[*].variations[*].values',
+    type: 'array_length_mismatch',
+  },
+  { path: 'products[*].items[*].activeSubscriptions[*]', type: 'extra_key' },
+  { path: 'products[*].items[0].nameComplete', type: 'different_value' },
 ]
 
 /**
@@ -155,7 +201,8 @@ export const CATALOG_PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
     path: 'products[*].items[*].sellers[*].commertialOffer.PaymentOptions.paymentSystems[*].dueDate',
     type: 'different_value',
   },
-  { // For some reason the portal proxy returns a link starting with portal.vtexcommercestable.com.br/ instead of ACCOUNt.vtexcommercestable.com.br
+  {
+    // For some reason the portal proxy returns a link starting with portal.vtexcommercestable.com.br/ instead of ACCOUNt.vtexcommercestable.com.br
     path: 'products[*].link',
     type: 'different_value',
   },
@@ -180,20 +227,46 @@ export const CATALOG_PRODUCT_SEARCH_IGNORED_DIFFERENCES: IgnoredDifference[] = [
     path: 'products[*].allSpecifications[name:sellerId]',
     type: 'missing_key',
   },
+  // Potential indexing differences
+  {
+    path: 'products[*].items[*].sellers[*].commertialOffer.GetInfoErrorMessage',
+    type: 'null_mismatch',
+  },
+  {
+    path: 'products[*].allSpecificationsGroups',
+    type: 'array_length_mismatch',
+  },
+  {
+    path: 'products[*].allSpecificationsGroups[*]',
+    type: 'different_value',
+  },
+  {
+    path: 'products[*].allSpecificationsGroups[*]',
+    type: 'extra_key',
+  },
 ]
 
 /**
  * Existence-based comparison fields for productOriginVtex=true (catalog/portal) responses.
  * These are based on CATALOG_EXISTENCE_COMPARE_FIELDS from intelligent-search tests, with paths prefixed for product_search context.
  */
-export const CATALOG_PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS: ExistenceComparePattern[] = [
-  "products[*].categories",
-  "products[*].categoriesIds",
-  'products[*].allSpecifications',
-  { path: 'products[*].completeSpecifications', key: 'Name' },
-  { path: 'products[*].skuSpecifications', key: 'field.name' },
-  { path: 'products[*].items[*].sellers[*].commertialOffer.PaymentOptions.paymentSystems', key: 'id' },
-]
+export const CATALOG_PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS: ExistenceComparePattern[] =
+  [
+    'products[*].categories',
+    'products[*].categoriesIds',
+    'products[*].allSpecifications',
+    { path: 'products[*].completeSpecifications', key: 'Name' },
+    { path: 'products[*].skuSpecifications', key: 'field.name' },
+    { path: 'products[*].skuSpecifications[*].values', key: 'id' },
+    {
+      path: 'products[*].items[*].sellers[*].commertialOffer.PaymentOptions.paymentSystems',
+      key: 'id',
+    },
+    {
+      path: 'products[*].items[*].sellers[*].commertialOffer.Installments',
+      key: 'Name',
+    },
+  ]
 
 /**
  * Builds a query string from an object of params, filtering out undefined/null values
@@ -331,6 +404,22 @@ async function fetchProductSearchFromIntsch(
   }
 }
 
+function logSponsoredProducts(ctx: Context, result: any) {
+  const products = result?.products
+
+  if (!Array.isArray(products)) return
+
+  const sponsoredCount = products.filter((p: any) => p.advertisement).length
+
+  if (sponsoredCount > 0) {
+    ctx.vtex.logger.info({
+      message: `ProductSearch migration: response contains ${sponsoredCount} sponsored product(s)`,
+      account: ctx.vtex.account,
+      sponsoredCount,
+    })
+  }
+}
+
 /**
  * ProductSearch service that extracts product search fetching logic and implements comparison or flag-based routing
  */
@@ -343,13 +432,27 @@ export async function fetchProductSearch(
 ) {
   const { shouldUseNewPLPEndpoint } = await fetchAppSettings(ctx)
 
+  if (Math.random() < 0.1) {
+    const logMethod = shouldUseNewPLPEndpoint ? 'info' : 'warn'
+
+    ctx.vtex.logger[logMethod]({
+      message: `ProductSearch migration: intsch ${
+        shouldUseNewPLPEndpoint ? 'used' : 'not used'
+      } as final response`,
+    })
+  }
+
   if (shouldUseNewPLPEndpoint) {
-    return fetchProductSearchFromIntsch(
+    const result = await fetchProductSearchFromIntsch(
       ctx,
       args,
       selectedFacets,
       shippingOptions
     )
+
+    logSponsoredProducts(ctx, result)
+
+    return result
   }
 
   // Build the exact request params as the clients do for debugging
@@ -392,11 +495,12 @@ export async function fetchProductSearch(
   const existenceCompareFields = isProductOriginVtex
     ? CATALOG_PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS
     : PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS
+
   const ignoredDifferences = isProductOriginVtex
     ? CATALOG_PRODUCT_SEARCH_IGNORED_DIFFERENCES
     : PRODUCT_SEARCH_IGNORED_DIFFERENCES
 
-  return compareApiResults(
+  const result = await compareApiResults(
     () =>
       fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions),
     () =>
@@ -414,4 +518,8 @@ export async function fetchProductSearch(
       ignoredDifferences,
     }
   )
+
+  logSponsoredProducts(ctx, result)
+
+  return result
 }

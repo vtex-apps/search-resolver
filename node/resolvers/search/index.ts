@@ -14,16 +14,23 @@ import {
 } from '../../services/autocomplete'
 import { fetchBanners } from '../../services/banners'
 import { fetchFacets } from '../../services/facets'
-import {
+import type {
   ProductArgs,
   ProductIdentifier,
   ProductsByIdentifierArgs,
+} from '../../services/product'
+import {
   resolveProduct,
-  resolveProductsByIdentifier
+  resolveProductsByIdentifier,
 } from '../../services/product'
 import { fetchProductSearch } from '../../services/productSearch'
 import { fetchAppSettings } from '../../services/settings'
-import { AdvertisementOptions, FacetsInput, ProductSearchInput, ProductsInput, SuggestionProductsArgs } from '../../typings/Search'
+import type {
+  FacetsInput,
+  ProductSearchInput,
+  ProductsInput,
+  SuggestionProductsArgs,
+} from '../../typings/Search'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
 import { resolvers as assemblyOptionResolvers } from './assemblyOption'
 import { resolvers as autocompleteResolvers } from './autocomplete'
@@ -51,7 +58,6 @@ import {
   getShippingOptionsFromSelectedFacets,
   validMapAndQuery,
 } from './utils'
-
 
 enum CrossSellingInput {
   view = 'view',
@@ -111,7 +117,6 @@ interface ProductRecommendationArg {
   type?: CrossSellingInput
   groupBy?: CrossSellingGroupByInput
 }
-
 
 const inputToSearchCrossSelling = {
   [CrossSellingInput.buy]: SearchCrossSellingTypes.whoboughtalsobought,
@@ -314,12 +319,6 @@ const buildSelectedFacets = (args: SearchArgs) => {
   return selectedFacets
 }
 
-const defaultAdvertisementOptions: AdvertisementOptions = {
-  showSponsored: false,
-  sponsoredCount: 3,
-  repeatSponsoredProducts: true,
-}
-
 export const queries = {
   autocomplete: async (
     _: any,
@@ -386,15 +385,7 @@ export const queries = {
   },
 
   products: async (_: any, args: ProductsInput, ctx: Context) => {
-    const {
-      clients: { intelligentSearchApi },
-    } = ctx
-
-    const {
-      to,
-      orderBy,
-      advertisementOptions = defaultAdvertisementOptions,
-    } = args
+    const { to } = args
 
     if (to && to > 2500) {
       throw new UserInputError(
@@ -403,27 +394,18 @@ export const queries = {
     }
 
     const selectedFacets: SelectedFacet[] = buildSelectedFacets(args)
-    const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
-    const biggyArgs = {
-      ...advertisementOptions,
+    const productSearchArgs = {
       ...args,
-      sort: convertOrderBy(orderBy),
-      ...workspaceSearchParams,
-    }
+      fullText: args.query,
+    } as unknown as ProductSearchInput
 
-    // unnecessary field. It's is an object and breaks the @vtex/api cache
-    delete biggyArgs.selectedFacets
-
-    const result = await intelligentSearchApi.productSearch(
-      biggyArgs,
-      buildAttributePath(selectedFacets),
+    const result = await fetchProductSearch(
+      ctx,
+      productSearchArgs,
+      selectedFacets,
       args.shippingOptions
     )
-
-    if (ctx.vtex.tenant) {
-      ctx.translated = result.translated
-    }
 
     return result.products
   },
@@ -527,7 +509,7 @@ export const queries = {
       throw new UserInputError('Wrong input provided')
     }
 
-  const { shouldUseNewPDPEndpoint } = await fetchAppSettings(ctx)
+    const { shouldUseNewPDPEndpoint } = await fetchAppSettings(ctx)
     const searchType = inputToSearchCrossSelling[type]
     let productId = identifier.value
 
@@ -619,41 +601,24 @@ export const queries = {
     args: SuggestionProductsArgs,
     ctx: Context
   ) => {
-    const {
-      clients: { intelligentSearchApi },
-    } = ctx
-
-    const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
     const selectedFacets: SelectedFacet[] =
       args.facetKey && args.facetValue
         ? [{ key: args.facetKey, value: args.facetValue }]
         : []
 
-    const { advertisementOptions = defaultAdvertisementOptions } = args
-
-    const biggyArgs: { [key: string]: any } = {
-      ...advertisementOptions,
+    const productSearchArgs = {
       ...args,
-      query: args.fullText,
       from: 0,
       to: args.count ? args.count - 1 : 4,
-      sort: convertOrderBy(args.orderBy),
-      allowRedirect: false, // When there is a redirect, no product is returned.
-      ...workspaceSearchParams,
-    }
+      options: { allowRedirect: false },
+    } as unknown as ProductSearchInput
 
-    // unnecessary field. It's is an object and breaks the @vtex/api cache
-    delete biggyArgs.selectedFacets
-
-    const result = await intelligentSearchApi.productSearch(
-      biggyArgs,
-      buildAttributePath(selectedFacets),
+    const result = await fetchProductSearch(
+      ctx,
+      productSearchArgs,
+      selectedFacets,
       args.shippingOptions
     )
-
-    if (ctx.vtex.tenant && !args.productOriginVtex) {
-      ctx.translated = result.translated
-    }
 
     return {
       ...result,

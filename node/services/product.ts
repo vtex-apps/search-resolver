@@ -86,6 +86,7 @@ async function fetchProductFromIntsch(
     if (segmentData.segmentParams.sc) {
       finalSalesChannel = String(segmentData.segmentParams.sc)
     }
+
     if (segmentData.segmentParams.locale) {
       finalLocale = segmentData.segmentParams.locale
     }
@@ -122,11 +123,12 @@ export async function fetchProduct(
   // Check if current account should skip comparison and use intsch directly
   if (shouldUseNewPDPEndpoint) {
     ctx.translated = true
+
     return fetchProductFromIntsch(ctx, args, segmentData)
   }
 
   const existenceCompareFields = CATALOG_EXISTENCE_COMPARE_FIELDS
-  const ignoredDifferences =  CATALOG_IGNORED_DIFFERENCES
+  const ignoredDifferences = CATALOG_IGNORED_DIFFERENCES
 
   return compareApiResults(
     () => fetchProductFromSearch(ctx, args),
@@ -258,6 +260,7 @@ async function fetchProductsByIdentifierFromIntsch(
     if (segmentData.segmentParams.sc) {
       finalSalesChannel = String(segmentData.segmentParams.sc)
     }
+
     if (segmentData.segmentParams.locale) {
       finalLocale = segmentData.segmentParams.locale
     }
@@ -301,10 +304,7 @@ export async function resolveProductsByIdentifier(
         segmentData
       )
     } else {
-      products = await fetchProductsByIdentifierFromSearch(
-        ctx,
-        args
-      )
+      products = await fetchProductsByIdentifierFromSearch(ctx, args)
     }
 
     return products
