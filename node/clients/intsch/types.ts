@@ -98,6 +98,22 @@ export type FetchProductResponse = SearchProduct
 
 export type ProductSearchResponse = {
   products: SearchProduct[]
+  recordsFiltered?: number
+  translated?: boolean
+  translatedArgs?: unknown
+  searchId?: string
+  pagination?: unknown
+}
+
+/** Query path, params, and non-auth headers sent with product search (for logging). */
+export type ProductSearchRequestInfo = {
+  path: string
+  params: Record<string, unknown>
+  headers: Record<string, string | string[]>
+}
+
+export type ProductSearchResult = ProductSearchResponse & {
+  requestInfo: ProductSearchRequestInfo
 }
 
 export type FacetsOptions = {
@@ -136,7 +152,7 @@ export interface IIntelligentSearchClient {
     args: SearchResultArgs,
     path: string,
     options?: ProductSearchOptions
-  ): Promise<ProductSearchResponse>
+  ): Promise<ProductSearchResult>
   facets(
     params: FacetsArgs,
     path: string,

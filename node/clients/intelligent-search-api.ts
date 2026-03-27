@@ -5,6 +5,7 @@ import { parseState } from '../utils/searchState'
 import type {
   FacetsOptions,
   ProductSearchOptions,
+  ProductSearchResult,
   FetchBannersArgs,
   IIntelligentSearchClient,
   FetchProductArgs,
@@ -158,7 +159,7 @@ export class IntelligentSearchApi
     params: SearchResultArgs,
     path: string,
     options?: ProductSearchOptions
-  ) {
+  ): Promise<ProductSearchResult> {
     const { query, leap, searchState } = params
     const { shippingHeader } = options ?? {}
 
@@ -169,20 +170,36 @@ export class IntelligentSearchApi
     const authToken =
       this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
 
-    return this.http.get(`/product_search/${path}`, {
-      params: {
-        query: query && decodeQuery(query),
-        locale: this.locale,
-        bgy_leap: leap ? true : undefined,
-        ...parseState(searchState),
-        ...params,
-      },
+    const requestPath = `/product_search/${path}`
+    const requestParams = {
+      query: query && decodeQuery(query),
+      locale: this.locale,
+      bgy_leap: leap ? true : undefined,
+      ...parseState(searchState),
+      ...params,
+    }
+
+    const requestHeaders: Record<string, string | string[]> = {
+      'x-vtex-shipping-options': shippingHeader ?? '',
+    }
+
+    const data = await this.http.get(requestPath, {
+      params: requestParams,
       metric: 'product-search',
       headers: {
-        'x-vtex-shipping-options': shippingHeader ?? '',
+        ...requestHeaders,
         ...(authToken ? { VtexIdclientAutCookie: authToken } : {}), // This is required when the sales channel is private
       },
     })
+
+    return {
+      ...data,
+      requestInfo: {
+        path: requestPath,
+        params: requestParams,
+        headers: requestHeaders,
+      },
+    }
   }
 
   public async sponsoredProducts(

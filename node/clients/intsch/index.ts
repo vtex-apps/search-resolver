@@ -11,13 +11,13 @@ import type {
   FacetsOptions,
   FacetsResponse,
   ProductSearchOptions,
+  ProductSearchResult,
   FetchBannersArgs,
   FetchBannersArgsV1,
   FetchBannersResponse,
   FetchProductArgs,
   FetchProductResponse,
   IIntelligentSearchClient,
-  ProductSearchResponse,
   SearchSuggestionsArgs,
   SearchSuggestionsArgsV1,
   SearchSuggestionsResponse,
@@ -150,11 +150,11 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     })
   }
 
-  public productSearch(
+  public async productSearch(
     params: SearchResultArgs,
     path: string,
     options?: ProductSearchOptions
-  ): Promise<ProductSearchResponse> {
+  ): Promise<ProductSearchResult> {
     const { query, leap, searchState } = params
     const { segmentParams, shippingHeader } = options ?? {}
 
@@ -166,33 +166,49 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     const authToken =
       this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
 
-    return this.http.get(`/api/intelligent-search/v1/product-search/${path}`, {
-      params: {
-        sc: segmentParams?.sc,
-        regionId: segmentParams?.regionId,
-        country: segmentParams?.country,
-        'zip-code': segmentParams?.['zip-code'],
-        coordinates: segmentParams?.coordinates,
-        pickupPoint: segmentParams?.pickupPoint,
-        deliveryZonesHash: segmentParams?.deliveryZonesHash,
-        pickupPointHash: segmentParams?.pickupPointHash,
-        utmSource: segmentParams?.utmSource,
-        utmCampaign: segmentParams?.utmCampaign,
-        utmiCampaign: segmentParams?.utmiCampaign,
-        campaigns: segmentParams?.campaigns,
-        priceTables: segmentParams?.priceTables,
-        ...params,
-        query: query && decodeQuery(query),
-        locale: this.locale ?? segmentParams?.locale,
-        bgy_leap: leap ? true : undefined,
-        ...parseState(searchState),
-      },
+    const requestPath = `/api/intelligent-search/v1/product-search/${path}`
+    const requestParams = {
+      sc: segmentParams?.sc,
+      regionId: segmentParams?.regionId,
+      country: segmentParams?.country,
+      'zip-code': segmentParams?.['zip-code'],
+      coordinates: segmentParams?.coordinates,
+      pickupPoint: segmentParams?.pickupPoint,
+      deliveryZonesHash: segmentParams?.deliveryZonesHash,
+      pickupPointHash: segmentParams?.pickupPointHash,
+      utmSource: segmentParams?.utmSource,
+      utmCampaign: segmentParams?.utmCampaign,
+      utmiCampaign: segmentParams?.utmiCampaign,
+      campaigns: segmentParams?.campaigns,
+      priceTables: segmentParams?.priceTables,
+      ...params,
+      query: query && decodeQuery(query),
+      locale: this.locale ?? segmentParams?.locale,
+      bgy_leap: leap ? true : undefined,
+      ...parseState(searchState),
+    }
+
+    const requestHeaders: Record<string, string | string[]> = {
+      'x-vtex-shipping-options': shippingHeader ?? '',
+    }
+
+    const data = await this.http.get(requestPath, {
+      params: requestParams,
       metric: 'product-search-new-v1',
       headers: {
-        'x-vtex-shipping-options': shippingHeader ?? '',
+        ...requestHeaders,
         ...(authToken ? { VtexIdclientAutCookie: authToken } : {}),
       },
     })
+
+    return {
+      ...data,
+      requestInfo: {
+        path: requestPath,
+        params: requestParams,
+        headers: requestHeaders,
+      },
+    }
   }
 
   public facets(
