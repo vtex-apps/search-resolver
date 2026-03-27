@@ -4,7 +4,6 @@ import {
   convertOrderBy,
 } from '../commons/compatibility-layer'
 import { extractSegmentData, getOrCreateSegment } from '../utils/segment'
-import { getWorkspaceSearchParamsFromStorage } from '../routes/workspaceSearchParams'
 import {
   compareApiResults,
   type ExistenceComparePattern,
@@ -337,15 +336,12 @@ async function fetchProductSearchFromBiggy(
   const { intelligentSearchApi } = ctx.clients
   const { fullText, advertisementOptions = defaultAdvertisementOptions } = args
 
-  const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
-
   const biggyArgs: { [key: string]: any } = {
     ...advertisementOptions,
     ...args,
     query: fullText,
     sort: convertOrderBy(args.orderBy),
     ...args.options,
-    ...workspaceSearchParams,
   }
 
   // unnecessary field. It's is an object and breaks the @vtex/api cache
@@ -390,15 +386,12 @@ async function fetchProductSearchFromIntsch(
   const { intsch } = ctx.clients
   const { fullText, advertisementOptions = defaultAdvertisementOptions } = args
 
-  const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
-
   const intschArgs: { [key: string]: any } = {
     ...advertisementOptions,
     ...args,
     query: fullText,
     sort: convertOrderBy(args.orderBy),
     ...args.options,
-    ...workspaceSearchParams,
   }
 
   // unnecessary field. It's is an object and breaks the @vtex/api cache
