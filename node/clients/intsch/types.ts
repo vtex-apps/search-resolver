@@ -105,6 +105,11 @@ export type FacetsOptions = {
   shippingHeader?: string[]
 }
 
+export type ProductSearchOptions = {
+  segmentParams?: SegmentParams
+  shippingHeader?: string[]
+}
+
 export type FacetsResponse = any
 
 export interface IIntelligentSearchClient {
@@ -130,7 +135,7 @@ export interface IIntelligentSearchClient {
   productSearch(
     args: SearchResultArgs,
     path: string,
-    shippingHeader?: string[]
+    options?: ProductSearchOptions
   ): Promise<ProductSearchResponse>
   facets(
     params: FacetsArgs,

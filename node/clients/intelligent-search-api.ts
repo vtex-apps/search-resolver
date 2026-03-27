@@ -4,6 +4,7 @@ import { ExternalClient } from '@vtex/api'
 import { parseState } from '../utils/searchState'
 import type {
   FacetsOptions,
+  ProductSearchOptions,
   FetchBannersArgs,
   IIntelligentSearchClient,
   FetchProductArgs,
@@ -156,9 +157,10 @@ export class IntelligentSearchApi
   public async productSearch(
     params: SearchResultArgs,
     path: string,
-    shippingHeader?: string[]
+    options?: ProductSearchOptions
   ) {
     const { query, leap, searchState } = params
+    const { shippingHeader } = options ?? {}
 
     if (isPathTraversal(path)) {
       throw new Error('Malformed URL')

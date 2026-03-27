@@ -1,7 +1,9 @@
 import {
   buildAttributePath,
+  concatSelectedFacets,
   convertOrderBy,
 } from '../commons/compatibility-layer'
+import { extractSegmentData, getOrCreateSegment } from '../utils/segment'
 import { getWorkspaceSearchParamsFromStorage } from '../routes/workspaceSearchParams'
 import {
   compareApiResults,
@@ -12,6 +14,8 @@ import { fetchAppSettings } from './settings'
 import type { ProductSearchInput } from '../typings/Search'
 import { decodeQuery } from '../clients/intelligent-search-api'
 import { parseState } from '../utils/searchState'
+
+type SegmentData = ReturnType<typeof extractSegmentData>
 
 /**
  * Fields that should use existence-based (key-based) comparison instead of
@@ -289,12 +293,14 @@ function buildQueryString(params: Record<string, any>): string {
 // eslint-disable-next-line max-params
 function buildCurlCommands(
   ctx: Context,
-  path: string,
+  biggyPath: string,
   params: Record<string, any>,
-  shippingOptions?: string[]
+  shippingOptions?: string[],
+  intschPath?: string
 ): { biggyCurl: string; intschCurl: string } {
   const { account } = ctx.vtex
   const queryString = buildQueryString(params)
+  const pathIntsch = intschPath ?? biggyPath
 
   const shippingHeader = shippingOptions?.length
     ? ` -H "x-vtex-shipping-options: ${shippingOptions.join(',')}"`
@@ -304,8 +310,9 @@ function buildCurlCommands(
     ? ` -H "x-vtex-segment: ${ctx.vtex.segmentToken}"`
     : ''
 
-  const biggyCurl = `curl "https://${account}.myvtex.com/_v/api/intelligent-search/product_search/${path}?${queryString}"${shippingHeader}${segmentHeader}`
-  const intschCurl = `curl "https://${account}.myvtex.com/api/intelligent-search/v0/product-search/${path}?${queryString}"${shippingHeader}${segmentHeader}`
+  const biggyCurl = `curl "https://${account}.myvtex.com/_v/api/intelligent-search/product_search/${biggyPath}?${queryString}"${shippingHeader}${segmentHeader}`
+  // v1 product-search: segment fields are query params, not the segment header
+  const intschCurl = `curl "https://${account}.myvtex.com/api/intelligent-search/v1/product-search/${pathIntsch}?an=${account}&${queryString}"${shippingHeader}`
 
   return { biggyCurl, intschCurl }
 }
@@ -347,7 +354,7 @@ async function fetchProductSearchFromBiggy(
   const result: any = await intelligentSearchApi.productSearch(
     { ...biggyArgs },
     buildAttributePath(selectedFacets),
-    shippingOptions
+    { shippingHeader: shippingOptions }
   )
 
   if (ctx.vtex.tenant && !args.productOriginVtex) {
@@ -368,7 +375,8 @@ async function fetchProductSearchFromIntsch(
   ctx: Context,
   args: ProductSearchInput,
   selectedFacets: SelectedFacet[],
-  shippingOptions?: string[]
+  shippingOptions?: string[],
+  segmentData?: SegmentData
 ) {
   const { intsch } = ctx.clients
   const { fullText, advertisementOptions = defaultAdvertisementOptions } = args
@@ -388,10 +396,17 @@ async function fetchProductSearchFromIntsch(
   delete intschArgs.selectedFacets
   delete intschArgs.advertisementOptions
 
+  const allFacets = segmentData
+    ? concatSelectedFacets(selectedFacets, segmentData.extraFacets)
+    : selectedFacets
+
   const result: any = await intsch.productSearch(
     { ...intschArgs },
-    buildAttributePath(selectedFacets),
-    shippingOptions
+    buildAttributePath(allFacets),
+    {
+      segmentParams: segmentData?.segmentParams,
+      shippingHeader: shippingOptions,
+    }
   )
 
   if (ctx.vtex.tenant && !args.productOriginVtex) {
@@ -431,6 +446,8 @@ export async function fetchProductSearch(
   shippingOptions?: string[]
 ) {
   const { shouldUseNewPLPEndpoint } = await fetchAppSettings(ctx)
+  const segment = await getOrCreateSegment(ctx)
+  const segmentData = extractSegmentData(segment)
 
   if (Math.random() < 0.1) {
     const logMethod = shouldUseNewPLPEndpoint ? 'info' : 'warn'
@@ -447,7 +464,8 @@ export async function fetchProductSearch(
       ctx,
       args,
       selectedFacets,
-      shippingOptions
+      shippingOptions,
+      segmentData
     )
 
     logSponsoredProducts(ctx, result)
@@ -457,6 +475,10 @@ export async function fetchProductSearch(
 
   // Build the exact request params as the clients do for debugging
   const path = buildAttributePath(selectedFacets)
+  const intschPath = buildAttributePath(
+    concatSelectedFacets(selectedFacets, segmentData.extraFacets)
+  )
+
   const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
   const { advertisementOptions = defaultAdvertisementOptions } = args
 
@@ -486,7 +508,8 @@ export async function fetchProductSearch(
     ctx,
     path,
     requestParams,
-    shippingOptions
+    shippingOptions,
+    intschPath
   )
 
   // Use catalog-specific comparison configs when productOriginVtex is enabled
@@ -504,7 +527,13 @@ export async function fetchProductSearch(
     () =>
       fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions),
     () =>
-      fetchProductSearchFromIntsch(ctx, args, selectedFacets, shippingOptions),
+      fetchProductSearchFromIntsch(
+        ctx,
+        args,
+        selectedFacets,
+        shippingOptions,
+        segmentData
+      ),
     ctx.vtex.production ? 1 : 100,
     ctx.vtex.logger,
     {

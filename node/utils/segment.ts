@@ -8,12 +8,13 @@ export type SegmentParams = {
   pickupPoint?: string
   deliveryZonesHash?: string
   pickupPointHash?: string
-  // TODO: add these when product-search uses the v1 endpoint (needed for simulation)
-  // utm_source?: string
-  // utm_campaign?: string
-  // utmi_campaign?: string
-  // campaigns?: string
-  // priceTables?: string
+  /** Simulation / marketing (product-search v1) — camelCase matches query param names */
+  utmSource?: string
+  utmCampaign?: string
+  utmiCampaign?: string
+  /** Only when segment has a string campaign id (matches Rust segment deserialize_campaigns) */
+  campaigns?: string
+  priceTables?: string
 }
 
 /**
@@ -96,12 +97,12 @@ export function extractSegmentData(segment: Record<string, any>): {
       pickupPoint: shipping.pickupPoint,
       deliveryZonesHash: shipping.deliveryZonesHash,
       pickupPointHash: shipping.pickupPointsHash,
-      // TODO: add these when product-search uses the v1 endpoint (needed for simulation)
-      // utm_source: segment.utm_source,
-      // utm_campaign: segment.utm_campaign,
-      // utmi_campaign: segment.utmi_campaign,
-      // campaigns: segment.campaigns (can be string or array of {id, name} — needs serialization)
-      // priceTables: segment.priceTables,
+      utmSource: segment.utm_source ?? undefined,
+      utmCampaign: segment.utm_campaign ?? undefined,
+      utmiCampaign: segment.utmi_campaign ?? undefined,
+      campaigns:
+        typeof segment.campaigns === 'string' ? segment.campaigns : undefined,
+      priceTables: segment.priceTables ?? undefined,
     },
     extraFacets,
   }
