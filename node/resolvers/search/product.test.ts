@@ -309,8 +309,9 @@ describe('tests related to product resolver', () => {
       expect(specificationGroups).toHaveLength(5)
 
       // If the completeSpecifications doesn't give info on the specs, return it
-      const groups = [...(specificationGroups ?? [])] as Array<{ name: string }>
-      const cucardas = groups.find((group) => group.name === 'Cucardas')
+      const cucardas = specificationGroups?.find(
+        (group) => group.name === 'Cucardas'
+      )
 
       expect(cucardas).toBeTruthy()
     })
