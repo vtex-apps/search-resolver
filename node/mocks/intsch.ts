@@ -6,9 +6,16 @@ import type {
   CorrectionResponse,
   FetchBannersResponse,
   FetchProductResponse,
+  ProductSearchRequestInfo,
   ProductSearchResponse,
   FacetsResponse,
 } from '../clients/intsch/types'
+
+const defaultProductSearchRequestInfo: ProductSearchRequestInfo = {
+  path: '/api/intelligent-search/v1/product-search/',
+  params: {},
+  headers: { 'x-vtex-shipping-options': '' },
+}
 
 export class MockedIntschClient implements IIntelligentSearchClient {
   constructor(args?: IntelligentSearchClientArgs) {
@@ -97,7 +104,14 @@ export class MockedIntschClient implements IIntelligentSearchClient {
     if (args?.productSearch instanceof Error) {
       this.productSearch.mockRejectedValue(args.productSearch)
     } else {
-      this.productSearch.mockResolvedValue(args?.productSearch ?? null)
+      const payload = (args?.productSearch ?? {
+        products: [],
+      }) as ProductSearchResponse
+
+      this.productSearch.mockResolvedValue({
+        ...payload,
+        requestInfo: defaultProductSearchRequestInfo,
+      })
     }
 
     if (args?.facets instanceof Error) {

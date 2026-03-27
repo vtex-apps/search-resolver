@@ -1,8 +1,9 @@
 import {
   buildAttributePath,
+  concatSelectedFacets,
   convertOrderBy,
 } from '../commons/compatibility-layer'
-import { getWorkspaceSearchParamsFromStorage } from '../routes/workspaceSearchParams'
+import { extractSegmentData, getOrCreateSegment } from '../utils/segment'
 import {
   compareApiResults,
   type ExistenceComparePattern,
@@ -10,8 +11,9 @@ import {
 } from '../utils/compareResults'
 import { fetchAppSettings } from './settings'
 import type { ProductSearchInput } from '../typings/Search'
-import { decodeQuery } from '../clients/intelligent-search-api'
-import { parseState } from '../utils/searchState'
+import type { ProductSearchRequestInfo } from '../clients/intsch/types'
+
+type SegmentData = ReturnType<typeof extractSegmentData>
 
 /**
  * Fields that should use existence-based (key-based) comparison instead of
@@ -268,46 +270,51 @@ export const CATALOG_PRODUCT_SEARCH_EXISTENCE_COMPARE_FIELDS: ExistenceComparePa
     },
   ]
 
+function formatHeaderValue(value: unknown): string {
+  if (Array.isArray(value)) {
+    return value.join(',')
+  }
+
+  if (value === undefined || value === null) {
+    return ''
+  }
+
+  return String(value)
+}
+
 /**
- * Builds a query string from an object of params, filtering out undefined/null values
+ * Builds a curl command from request metadata returned by productSearch (no auth header).
  */
-function buildQueryString(params: Record<string, any>): string {
+function buildCurl(
+  account: string,
+  hostAndPrefix: string,
+  requestInfo: ProductSearchRequestInfo
+): string {
   const searchParams = new URLSearchParams()
 
-  for (const [key, value] of Object.entries(params)) {
+  for (const [key, value] of Object.entries(requestInfo.params)) {
     if (value !== undefined && value !== null && value !== '') {
       searchParams.append(key, String(value))
     }
   }
 
-  return searchParams.toString()
+  const headerFlags = Object.entries(requestInfo.headers)
+    .map(([k, v]) => ({ k, v: formatHeaderValue(v) }))
+    .filter(({ v }) => v !== '')
+    .map(({ k, v }) => ` -H "${k}: ${v}"`)
+    .join('')
+
+  return `curl "https://${account}.${hostAndPrefix}${requestInfo.path}?${searchParams}"${headerFlags}`
 }
 
-/**
- * Builds curl commands for debugging API requests
- */
-// eslint-disable-next-line max-params
-function buildCurlCommands(
-  ctx: Context,
-  path: string,
-  params: Record<string, any>,
-  shippingOptions?: string[]
-): { biggyCurl: string; intschCurl: string } {
-  const { account } = ctx.vtex
-  const queryString = buildQueryString(params)
+function omitRequestInfo<T extends { requestInfo: ProductSearchRequestInfo }>(
+  res: T
+): Omit<T, 'requestInfo'> {
+  // Drop requestInfo only; keep all API payload fields for callers / comparators
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { requestInfo, ...rest } = res
 
-  const shippingHeader = shippingOptions?.length
-    ? ` -H "x-vtex-shipping-options: ${shippingOptions.join(',')}"`
-    : ''
-
-  const segmentHeader = ctx.vtex.segmentToken
-    ? ` -H "x-vtex-segment: ${ctx.vtex.segmentToken}"`
-    : ''
-
-  const biggyCurl = `curl "https://${account}.myvtex.com/_v/api/intelligent-search/product_search/${path}?${queryString}"${shippingHeader}${segmentHeader}`
-  const intschCurl = `curl "https://${account}.myvtex.com/api/intelligent-search/v0/product-search/${path}?${queryString}"${shippingHeader}${segmentHeader}`
-
-  return { biggyCurl, intschCurl }
+  return rest as Omit<T, 'requestInfo'>
 }
 
 const defaultAdvertisementOptions = {
@@ -329,34 +336,39 @@ async function fetchProductSearchFromBiggy(
   const { intelligentSearchApi } = ctx.clients
   const { fullText, advertisementOptions = defaultAdvertisementOptions } = args
 
-  const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
-
   const biggyArgs: { [key: string]: any } = {
     ...advertisementOptions,
     ...args,
     query: fullText,
     sort: convertOrderBy(args.orderBy),
     ...args.options,
-    ...workspaceSearchParams,
   }
 
   // unnecessary field. It's is an object and breaks the @vtex/api cache
   delete biggyArgs.selectedFacets
   delete biggyArgs.advertisementOptions
 
-  const result: any = await intelligentSearchApi.productSearch(
+  const raw = await intelligentSearchApi.productSearch(
     { ...biggyArgs },
     buildAttributePath(selectedFacets),
-    shippingOptions
+    { shippingHeader: shippingOptions }
   )
 
-  if (ctx.vtex.tenant && !args.productOriginVtex) {
-    ctx.translated = result.translated
+  const { requestInfo, ...result } = raw
+
+  if (
+    ctx.vtex.tenant &&
+    !args.productOriginVtex &&
+    raw.translated !== undefined &&
+    raw.translated !== null
+  ) {
+    ctx.translated = raw.translated
   }
 
   return {
     searchState: args.searchState,
     ...result,
+    requestInfo,
   }
 }
 
@@ -368,12 +380,11 @@ async function fetchProductSearchFromIntsch(
   ctx: Context,
   args: ProductSearchInput,
   selectedFacets: SelectedFacet[],
-  shippingOptions?: string[]
+  shippingOptions?: string[],
+  segmentData?: SegmentData
 ) {
   const { intsch } = ctx.clients
   const { fullText, advertisementOptions = defaultAdvertisementOptions } = args
-
-  const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
 
   const intschArgs: { [key: string]: any } = {
     ...advertisementOptions,
@@ -381,26 +392,40 @@ async function fetchProductSearchFromIntsch(
     query: fullText,
     sort: convertOrderBy(args.orderBy),
     ...args.options,
-    ...workspaceSearchParams,
   }
 
   // unnecessary field. It's is an object and breaks the @vtex/api cache
   delete intschArgs.selectedFacets
   delete intschArgs.advertisementOptions
 
-  const result: any = await intsch.productSearch(
+  const allFacets = segmentData
+    ? concatSelectedFacets(selectedFacets, segmentData.extraFacets)
+    : selectedFacets
+
+  const raw = await intsch.productSearch(
     { ...intschArgs },
-    buildAttributePath(selectedFacets),
-    shippingOptions
+    buildAttributePath(allFacets),
+    {
+      segmentParams: segmentData?.segmentParams,
+      shippingHeader: shippingOptions,
+    }
   )
 
-  if (ctx.vtex.tenant && !args.productOriginVtex) {
-    ctx.translated = result.translated
+  const { requestInfo, ...result } = raw
+
+  if (
+    ctx.vtex.tenant &&
+    !args.productOriginVtex &&
+    raw.translated !== undefined &&
+    raw.translated !== null
+  ) {
+    ctx.translated = raw.translated
   }
 
   return {
     searchState: args.searchState,
     ...result,
+    requestInfo,
   }
 }
 
@@ -431,6 +456,8 @@ export async function fetchProductSearch(
   shippingOptions?: string[]
 ) {
   const { shouldUseNewPLPEndpoint } = await fetchAppSettings(ctx)
+  const segment = await getOrCreateSegment(ctx)
+  const segmentData = extractSegmentData(segment)
 
   if (Math.random() < 0.1) {
     const logMethod = shouldUseNewPLPEndpoint ? 'info' : 'warn'
@@ -447,47 +474,14 @@ export async function fetchProductSearch(
       ctx,
       args,
       selectedFacets,
-      shippingOptions
+      shippingOptions,
+      segmentData
     )
 
     logSponsoredProducts(ctx, result)
 
-    return result
+    return omitRequestInfo(result)
   }
-
-  // Build the exact request params as the clients do for debugging
-  const path = buildAttributePath(selectedFacets)
-  const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
-  const { advertisementOptions = defaultAdvertisementOptions } = args
-
-  const clientArgs: { [key: string]: any } = {
-    ...advertisementOptions,
-    ...args,
-    query: args.fullText,
-    sort: convertOrderBy(args.orderBy),
-    ...args.options,
-    ...workspaceSearchParams,
-  }
-
-  delete clientArgs.selectedFacets
-  delete clientArgs.advertisementOptions
-
-  const { leap, searchState } = args as { leap?: boolean; searchState?: string }
-
-  const requestParams = {
-    query: args.fullText && decodeQuery(args.fullText),
-    locale: ctx.vtex.locale ?? ctx.vtex.tenant?.locale,
-    bgy_leap: leap ? true : undefined,
-    ...parseState(searchState),
-    ...clientArgs,
-  }
-
-  const { biggyCurl, intschCurl } = buildCurlCommands(
-    ctx,
-    path,
-    requestParams,
-    shippingOptions
-  )
 
   // Use catalog-specific comparison configs when productOriginVtex is enabled
   // since the response format differs (uses catalog data plane)
@@ -500,20 +494,52 @@ export async function fetchProductSearch(
     ? CATALOG_PRODUCT_SEARCH_IGNORED_DIFFERENCES
     : PRODUCT_SEARCH_IGNORED_DIFFERENCES
 
+  const { account } = ctx.vtex
+  const logArgs: {
+    biggyCurl?: string
+    intschCurl?: string
+    productOriginVtex: boolean
+  } = { productOriginVtex: isProductOriginVtex }
+
   const result = await compareApiResults(
-    () =>
-      fetchProductSearchFromBiggy(ctx, args, selectedFacets, shippingOptions),
-    () =>
-      fetchProductSearchFromIntsch(ctx, args, selectedFacets, shippingOptions),
+    async () => {
+      const res = await fetchProductSearchFromBiggy(
+        ctx,
+        args,
+        selectedFacets,
+        shippingOptions
+      )
+
+      logArgs.biggyCurl = buildCurl(
+        account,
+        'myvtex.com/_v/api/intelligent-search',
+        res.requestInfo
+      )
+
+      return omitRequestInfo(res)
+    },
+    async () => {
+      const res = await fetchProductSearchFromIntsch(
+        ctx,
+        args,
+        selectedFacets,
+        shippingOptions,
+        segmentData
+      )
+
+      logArgs.intschCurl = buildCurl(account, 'myvtex.com', {
+        path: res.requestInfo.path,
+        params: { ...res.requestInfo.params, an: account },
+        headers: res.requestInfo.headers,
+      })
+
+      return omitRequestInfo(res)
+    },
     ctx.vtex.production ? 1 : 100,
     ctx.vtex.logger,
     {
       logPrefix: 'ProductSearch',
-      args: {
-        biggyCurl,
-        intschCurl,
-        productOriginVtex: isProductOriginVtex,
-      },
+      args: logArgs,
       existenceCompareFields,
       ignoredDifferences,
     }
