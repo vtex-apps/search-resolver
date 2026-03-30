@@ -5,7 +5,6 @@ import {
   buildAttributePath,
   convertOrderBy,
 } from '../../commons/compatibility-layer'
-import { getWorkspaceSearchParamsFromStorage } from '../../routes/workspaceSearchParams'
 import {
   fetchAutocompleteSuggestions,
   fetchCorrection,
@@ -474,14 +473,11 @@ export const queries = {
     const { intelligentSearchApi } = ctx.clients
     const { selectedFacets, fullText } = args
 
-    const workspaceSearchParams = await getWorkspaceSearchParamsFromStorage(ctx)
-
     const biggyArgs: { [key: string]: any } = {
       ...args,
       query: fullText,
       sort: convertOrderBy(args.orderBy),
       ...args.options,
-      ...workspaceSearchParams,
     }
 
     // unnecessary field. It's is an object and breaks the @vtex/api cache

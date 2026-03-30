@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Started using product-search-v1
+
+### Removed
+
+- Unnused enpoints to get and set workspace search params.
+
 ## [1.98.0] - 2026-03-24
 
 ### Changed

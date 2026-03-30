@@ -102,7 +102,7 @@ describe('fetchProductSearch service', () => {
     expect(ctx.clients.intelligentSearchApi.productSearch).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'test query' }),
       expect.any(String),
-      shippingOptions
+      { shippingHeader: shippingOptions }
     )
   })
 
@@ -209,7 +209,7 @@ describe('fetchProductSearch service', () => {
         repeatSponsoredProducts: false,
       }),
       expect.any(String),
-      undefined
+      { shippingHeader: undefined }
     )
   })
 })

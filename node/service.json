@@ -10,19 +10,5 @@
   "timeout": 12,
   "minReplicas": 30,
   "maxReplicas": 250,
-  "workers": 2,
-  "routes": {
-    "setWorkspaceSearchParams": {
-      "path": "/_v/setWorkspaceSearchParams",
-      "public": false,
-      "cache": false,
-      "smartcache": false
-    },
-    "getWorkspaceSearchParams": {
-      "path": "/_v/getWorkspaceSearchParams",
-      "public": false,
-      "cache": false,
-      "smartcache": false
-    }
-  }
+  "workers": 2
 }
