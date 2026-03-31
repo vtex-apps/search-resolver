@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.100.0] - 2026-03-31
+
 ### Changed
 
 - Disable compare product-search shadow traffic.
