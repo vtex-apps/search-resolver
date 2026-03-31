@@ -535,7 +535,7 @@ export async function fetchProductSearch(
 
       return omitRequestInfo(res)
     },
-    ctx.vtex.production ? 1 : 100,
+    ctx.vtex.production ? 0 : 100,
     ctx.vtex.logger,
     {
       logPrefix: 'ProductSearch',
