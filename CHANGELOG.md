@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- **Intelligent Search v1 (`intsch`):** `concatSelectedFacets` now normalizes `shipping/pickup-in-point-{id}` path facets to `pickup-in-point` for the attribute path (aligned with intelligent-search-api).
+- **Intelligent Search v1 (`intsch`):** When the URL includes a pickup-in-point id in the path, that id is sent as the `pickupPoint` query param and overrides the value from the segment cookie, matching search-context behavior on the API route.
+
 ## [1.100.0] - 2026-03-31
 
 ### Changed

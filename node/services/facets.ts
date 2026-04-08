@@ -1,6 +1,7 @@
 import {
   buildAttributePath,
   concatSelectedFacets,
+  mergeSegmentParamsWithPickupFromPath,
 } from '../commons/compatibility-layer'
 import { extractSegmentData, getOrCreateSegment } from '../utils/segment'
 import type { FacetsInput } from '../typings/Search'
@@ -45,7 +46,10 @@ async function fetchFacetsFromIntsch(
     { ...intschArgs, query: args.fullText },
     intschPath,
     {
-      segmentParams: segmentData.segmentParams,
+      segmentParams: mergeSegmentParamsWithPickupFromPath(
+        segmentData.segmentParams,
+        selectedFacets
+      ),
       shippingHeader: shippingOptions,
     }
   )

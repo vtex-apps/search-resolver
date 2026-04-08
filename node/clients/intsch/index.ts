@@ -226,22 +226,25 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     const authToken =
       this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
 
-    return this.http.get(`/api/intelligent-search/v1/facets/${path}`, {
-      params: {
-        sc: segmentParams?.sc,
-        regionId: segmentParams?.regionId,
-        country: segmentParams?.country,
-        'zip-code': segmentParams?.['zip-code'],
-        coordinates: segmentParams?.coordinates,
-        pickupPoint: segmentParams?.pickupPoint,
-        deliveryZonesHash: segmentParams?.deliveryZonesHash,
-        pickupPointHash: segmentParams?.pickupPointHash,
-        ...params,
-        query: query && decodeQuery(query),
-        locale: this.locale ?? segmentParams?.locale,
-        bgy_leap: leap ? true : undefined,
-        ...parseState(searchState),
-      },
+    const facetsPath = `/api/intelligent-search/v1/facets/${path}`
+    const facetsParams = {
+      sc: segmentParams?.sc,
+      regionId: segmentParams?.regionId,
+      country: segmentParams?.country,
+      'zip-code': segmentParams?.['zip-code'],
+      coordinates: segmentParams?.coordinates,
+      pickupPoint: segmentParams?.pickupPoint,
+      deliveryZonesHash: segmentParams?.deliveryZonesHash,
+      pickupPointHash: segmentParams?.pickupPointHash,
+      ...params,
+      query: query && decodeQuery(query),
+      locale: this.locale ?? segmentParams?.locale,
+      bgy_leap: leap ? true : undefined,
+      ...parseState(searchState),
+    }
+
+    return this.http.get(facetsPath, {
+      params: facetsParams,
       metric: 'facets-new-v1',
       headers: {
         'x-vtex-shipping-options': shippingHeader ?? '',
