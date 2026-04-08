@@ -2,6 +2,7 @@ import {
   buildAttributePath,
   concatSelectedFacets,
   convertOrderBy,
+  mergeSegmentParamsWithPickupFromPath,
 } from '../commons/compatibility-layer'
 import { extractSegmentData, getOrCreateSegment } from '../utils/segment'
 import {
@@ -406,7 +407,10 @@ async function fetchProductSearchFromIntsch(
     { ...intschArgs },
     buildAttributePath(allFacets),
     {
-      segmentParams: segmentData?.segmentParams,
+      segmentParams: mergeSegmentParamsWithPickupFromPath(
+        segmentData?.segmentParams,
+        selectedFacets
+      ),
       shippingHeader: shippingOptions,
     }
   )
