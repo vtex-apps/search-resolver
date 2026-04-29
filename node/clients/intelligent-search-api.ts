@@ -139,6 +139,12 @@ export class IntelligentSearchApi
     const authToken =
       this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
 
+    // eslint-disable-next-line no-console
+    console.log(
+      '[search-resolver] IntelligentSearchApi.facets API hideUnavailableItems:',
+      params.hideUnavailableItems
+    )
+
     return this.http.get(`/facets/${path}`, {
       params: {
         ...params,
@@ -183,6 +189,12 @@ export class IntelligentSearchApi
       'x-vtex-shipping-options': shippingHeader ?? '',
     }
 
+    // eslint-disable-next-line no-console
+    console.log(
+      '[search-resolver] IntelligentSearchApi.productSearch API hideUnavailableItems:',
+      params.hideUnavailableItems
+    )
+
     const data = await this.http.get(requestPath, {
       params: requestParams,
       metric: 'product-search',
@@ -212,6 +224,12 @@ export class IntelligentSearchApi
     if (isPathTraversal(path)) {
       throw new Error('Malformed URL')
     }
+
+    // eslint-disable-next-line no-console
+    console.log(
+      '[search-resolver] IntelligentSearchApi.sponsoredProducts API hideUnavailableItems:',
+      params.hideUnavailableItems
+    )
 
     return this.http.get(`/sponsored_products/${path}`, {
       params: {

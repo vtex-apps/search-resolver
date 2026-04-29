@@ -459,6 +459,12 @@ export async function fetchProductSearch(
   selectedFacets: SelectedFacet[],
   shippingOptions?: string[]
 ) {
+  // eslint-disable-next-line no-console
+  console.log(
+    '[search-resolver] service fetchProductSearch hideUnavailableItems:',
+    args.hideUnavailableItems
+  )
+
   const { shouldUseNewPLPEndpoint } = await fetchAppSettings(ctx)
   const segment = await getOrCreateSegment(ctx)
   const segmentData = extractSegmentData(segment)

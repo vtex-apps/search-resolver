@@ -65,6 +65,12 @@ async function fetchFacetsFromIntsch(
  * Facets service that extracts facets fetching logic and implements comparison or flag-based routing
  */
 export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
+  // eslint-disable-next-line no-console
+  console.log(
+    '[search-resolver] service fetchFacets hideUnavailableItems:',
+    options.args.hideUnavailableItems
+  )
+
   const segment = await getOrCreateSegment(ctx)
   const segmentData = extractSegmentData(segment)
 

@@ -4385,21 +4385,9 @@ vary@^1.1.2:
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha1-IpnwLG3tMNSllhsLn3RSShj2NPw=
 
-"vtex.catalog-api-proxy@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.10.1/public/_types/react":
+"vtex.search-graphql@https://dptest--aramismenswear.myvtex.com/_v/private/typings/linked/v1/vtex.search-graphql@0.69.4+build1777481565/public/":
   version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.10.1/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
-
-"vtex.messages@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.64.0/public/@types/vtex.messages":
-  version "1.64.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.64.0/public/@types/vtex.messages#f57bcc82a2420c15eb7a388543ee1925a005fe96"
-
-"vtex.rewriter@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.53.4/public/@types/vtex.rewriter":
-  version "1.53.4"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.53.4/public/@types/vtex.rewriter#6348993efde4106196bca60fd40dba00b3a354b6"
-
-"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.65.0/public":
-  version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.65.0/public#fa3f6f4118ed92b27724643f493666c0c9f7d451"
+  resolved "https://dptest--aramismenswear.myvtex.com/_v/private/typings/linked/v1/vtex.search-graphql@0.69.4+build1777481565/public/#2c0e6c5541e9fe0baefea1637c1ddcea2b6ebbc3"
 
 walker@^1.0.8:
   version "1.0.8"
