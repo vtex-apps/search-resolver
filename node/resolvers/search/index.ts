@@ -30,7 +30,9 @@ import type {
   ProductsInput,
   SuggestionProductsArgs,
 } from '../../typings/Search'
+import { applyHideUnavailableItemsDefaultForDP } from '../../utils/hideUnavailableItems'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
+import { extractSegmentData, getOrCreateSegment } from '../../utils/segment'
 import { resolvers as assemblyOptionResolvers } from './assemblyOption'
 import { resolvers as autocompleteResolvers } from './autocomplete'
 import { resolvers as brandResolvers } from './brand'
@@ -487,9 +489,16 @@ export const queries = {
     // unnecessary field. It's is an object and breaks the @vtex/api cache
     delete biggyArgs.selectedFacets
 
+    const segment = await getOrCreateSegment(ctx)
+    const segmentData = extractSegmentData(segment)
+    const finalArgs = applyHideUnavailableItemsDefaultForDP(
+      biggyArgs,
+      segmentData.segmentParams
+    )
+
     const result = await intelligentSearchApi.sponsoredProducts(
-      { ...biggyArgs },
-      buildAttributePath(selectedFacets ?? []),
+      { ...finalArgs },
+      buildAttributePath(selectedFacets),
       shippingOptions
     )
 

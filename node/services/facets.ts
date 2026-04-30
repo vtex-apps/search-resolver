@@ -5,6 +5,7 @@ import {
 } from '../commons/compatibility-layer'
 import type { IntschFacetsParams } from '../clients/intsch/types'
 import { extractSegmentData, getOrCreateSegment } from '../utils/segment'
+import { applyHideUnavailableItemsDefaultForDP } from '../utils/hideUnavailableItems'
 import type { FacetsInput } from '../typings/Search'
 
 type SegmentData = ReturnType<typeof extractSegmentData>
@@ -36,6 +37,11 @@ async function fetchFacetsFromIntsch(
     query: args.fullText,
   }
 
+  const finalArgs = applyHideUnavailableItemsDefaultForDP(
+    intschArgs,
+    segmentData.segmentParams
+  )
+
   const allFacets = concatSelectedFacets(
     selectedFacets,
     segmentData.extraFacets
@@ -43,13 +49,17 @@ async function fetchFacetsFromIntsch(
 
   const intschPath = buildAttributePath(allFacets)
 
-  const result: any = await intsch.facets(intschArgs, intschPath, {
-    segmentParams: mergeSegmentParamsWithPickupFromPath(
-      segmentData.segmentParams,
-      selectedFacets
-    ),
-    shippingHeader: shippingOptions,
-  })
+  const result: any = await intsch.facets(
+    { ...finalArgs, query: args.fullText },
+    intschPath,
+    {
+      segmentParams: mergeSegmentParamsWithPickupFromPath(
+        segmentData.segmentParams,
+        selectedFacets
+      ),
+      shippingHeader: shippingOptions,
+    }
+  )
 
   if (ctx.vtex.tenant) {
     ctx.translated = result.translated

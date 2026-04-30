@@ -30,6 +30,59 @@ describe('fetchProductSearch service', () => {
     jest.clearAllMocks()
   })
 
+  it('should default hideUnavailableItems=true when DP is enabled and hideUnavailableItems is undefined (intsch path)', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: true,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+      segment: {
+        facets: 'deliveryZonesHash=dzHash',
+      } as any,
+    })
+
+    const { hideUnavailableItems: _ignored, ...argsWithoutHide } = mockArgs as any
+
+    await fetchProductSearch(ctx, argsWithoutHide, mockSelectedFacets)
+
+    expect(ctx.clients.intsch.productSearch).toHaveBeenCalledWith(
+      expect.objectContaining({ hideUnavailableItems: true }),
+      expect.any(String),
+      expect.any(Object)
+    )
+  })
+
+  it('should default hideUnavailableItems=true when DP is enabled and hideUnavailableItems is undefined (biggy path)', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: false,
+      },
+      intelligentSearchApiSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+      segment: {
+        facets: 'deliveryZonesHash=dzHash',
+      } as any,
+    })
+
+    const { hideUnavailableItems: _ignored, ...argsWithoutHide } = mockArgs as any
+
+    await fetchProductSearch(ctx, argsWithoutHide, mockSelectedFacets)
+
+    expect(ctx.clients.intelligentSearchApi.productSearch).toHaveBeenCalledWith(
+      expect.objectContaining({ hideUnavailableItems: true }),
+      expect.any(String),
+      expect.objectContaining({ shippingHeader: undefined })
+    )
+  })
+
   it('should use intsch when shouldUseNewPLPEndpoint is true', async () => {
     const ctx = createContext({
       accountName: 'testaccount',

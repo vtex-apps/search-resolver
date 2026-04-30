@@ -96,7 +96,7 @@ export interface FacetsInput {
   fullText?: string
   map?: string
   selectedFacets?: SelectedFacet[]
-  hideUnavailableItems?: boolean
+  hideUnavailableItems?: boolean | null
   removeHiddenFacets?: boolean
   behavior?: string
   operator?: SearchOperator
@@ -127,7 +127,7 @@ export interface ProductSearchInput {
   orderBy?: string
   from?: number
   to?: number
-  hideUnavailableItems?: boolean
+  hideUnavailableItems?: boolean | null
   simulationBehavior?: SimulationBehavior
   productOriginVtex?: boolean
   operator?: SearchOperator
