@@ -32,6 +32,31 @@ describe('fetchFacets service', () => {
     jest.clearAllMocks()
   })
 
+  it('should default hideUnavailableItems=true when DP is enabled and hideUnavailableItems is undefined', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      intschSettings: {
+        facets: mockFacetsResponse,
+      },
+      segment: {
+        facets: 'deliveryZonesHash=dzHash',
+      } as any,
+    })
+
+    const { hideUnavailableItems: _ignored, ...argsWithoutHide } = mockArgs as any
+
+    await fetchFacets(ctx, {
+      args: argsWithoutHide,
+      selectedFacets: mockSelectedFacets,
+    })
+
+    expect(ctx.clients.intsch.facets).toHaveBeenCalledWith(
+      expect.objectContaining({ hideUnavailableItems: true }),
+      expect.any(String),
+      expect.any(Object)
+    )
+  })
+
   it('should fetch facets via intsch and not call intelligentSearchApi', async () => {
     const ctx = createContext({
       accountName: 'testaccount',

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- `hideUnavailableItems` resolution for intelligent search and catalog calls: when the segment includes `deliveryZonesHash` (delivery promise), an omitted value defaults to `true`; otherwise it defaults to `false`. Applies to product search (Biggy and Intsch), facets, and sponsored products. `null` remains explicit and is not overridden.
+- Introduce `node/utils/hideUnavailableItems.ts` with `applyHideUnavailableItemsDefaultForDP` to centralize the defaulting logic.
+
 ## [1.101.0] - 2026-04-08
 
 ### Changed
