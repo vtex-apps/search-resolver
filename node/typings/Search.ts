@@ -87,7 +87,7 @@ export interface FacetsInput {
   query: string
   searchState?: string
   removeHiddenFacets: boolean
-  hideUnavailableItems: boolean
+  hideUnavailableItems?: boolean | null
   initialAttributes?: string
   categoryTreeBehavior: 'default' | 'show' | 'hide'
 }
@@ -108,7 +108,7 @@ export interface ProductSearchInput {
   productOriginVtex: boolean
   searchState?: string
   simulationBehavior: 'skip' | 'default' | null
-  hideUnavailableItems: boolean
+  hideUnavailableItems?: boolean | null
   map?: string
   options?: Options
   showSponsored?: boolean

@@ -272,12 +272,6 @@ export class Search extends AppClient {
     )
 
   public products = (args: SearchArgs) => {
-    // eslint-disable-next-line no-console
-    console.log(
-      '[search-resolver] SearchClient.products API hideUnavailableItems:',
-      args.hideUnavailableItems
-    )
-
     return this.get<SearchProduct[]>(this.productSearchUrl(args), {
       metric: 'search-products',
     })

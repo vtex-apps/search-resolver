@@ -4,6 +4,7 @@ import {
   mergeSegmentParamsWithPickupFromPath,
 } from '../commons/compatibility-layer'
 import { extractSegmentData, getOrCreateSegment } from '../utils/segment'
+import { applyHideUnavailableItemsDefaultForDP } from '../utils/hideUnavailableItems'
 import type { FacetsInput } from '../typings/Search'
 
 type SegmentData = ReturnType<typeof extractSegmentData>
@@ -35,6 +36,11 @@ async function fetchFacetsFromIntsch(
   // unnecessary field. It's is an object and breaks the @vtex/api cache
   delete intschArgs.selectedFacets
 
+  const finalArgs = applyHideUnavailableItemsDefaultForDP(
+    intschArgs,
+    segmentData.segmentParams
+  )
+
   const allFacets = concatSelectedFacets(
     selectedFacets,
     segmentData.extraFacets
@@ -43,7 +49,7 @@ async function fetchFacetsFromIntsch(
   const intschPath = buildAttributePath(allFacets)
 
   const result: any = await intsch.facets(
-    { ...intschArgs, query: args.fullText },
+    { ...finalArgs, query: args.fullText },
     intschPath,
     {
       segmentParams: mergeSegmentParamsWithPickupFromPath(
@@ -65,12 +71,6 @@ async function fetchFacetsFromIntsch(
  * Facets service that extracts facets fetching logic and implements comparison or flag-based routing
  */
 export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
-  // eslint-disable-next-line no-console
-  console.log(
-    '[search-resolver] service fetchFacets hideUnavailableItems:',
-    options.args.hideUnavailableItems
-  )
-
   const segment = await getOrCreateSegment(ctx)
   const segmentData = extractSegmentData(segment)
 

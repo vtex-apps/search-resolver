@@ -192,12 +192,6 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       'x-vtex-shipping-options': shippingHeader ?? '',
     }
 
-    // eslint-disable-next-line no-console
-    console.log(
-      '[search-resolver] Intsch.productSearch API hideUnavailableItems:',
-      params.hideUnavailableItems
-    )
-
     const data = await this.http.get(requestPath, {
       params: requestParams,
       metric: 'product-search-new-v1',
@@ -248,12 +242,6 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       bgy_leap: leap ? true : undefined,
       ...parseState(searchState),
     }
-
-    // eslint-disable-next-line no-console
-    console.log(
-      '[search-resolver] Intsch.facets API hideUnavailableItems:',
-      params.hideUnavailableItems
-    )
 
     return this.http.get(facetsPath, {
       params: facetsParams,
