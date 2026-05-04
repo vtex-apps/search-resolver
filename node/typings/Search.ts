@@ -18,8 +18,6 @@ export type IndexingType = 'API' | 'XML'
 export interface SearchResultArgs extends AdvertisementOptions {
   attributePath?: string
   query?: string
-  page?: number
-  count?: number
   sort?: string
   operator?: string
   fuzzy?: string

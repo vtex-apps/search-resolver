@@ -34,14 +34,12 @@ interface AutocompleteSearchSuggestionsParams {
 
 export type FacetsArgs = {
   query?: string
-  page?: number
-  count?: number
-  sort?: string
   operator?: string
   fuzzy?: string
   leap?: boolean
   tradePolicy?: number
   searchState?: string
+  variant?: string
   hideUnavailableItems?: boolean | null
   removeHiddenFacets?: boolean | null
   options?: Options
