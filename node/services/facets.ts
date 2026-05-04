@@ -66,7 +66,15 @@ async function fetchFacetsFromIntsch(
  */
 export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
   const segment = await getOrCreateSegment(ctx)
+
   const segmentData = extractSegmentData(segment)
+
+  if (segment && !segment.channel) {
+    ctx.vtex.logger.warn({
+      message: 'Segment is missing channel on facets',
+      segment,
+    })
+  }
 
   return fetchFacetsFromIntsch(ctx, options, segmentData)
 }

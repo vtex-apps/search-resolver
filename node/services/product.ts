@@ -118,6 +118,14 @@ export async function fetchProduct(
 
   // Get and create segment before calling intsch
   const segment = await getOrCreateSegment(ctx)
+
+  if (segment && !segment.channel) {
+    ctx.vtex.logger.warn({
+      message: 'Segment is missing channel on product',
+      segment,
+    })
+  }
+
   const segmentData = extractSegmentData(segment)
 
   // Check if current account should skip comparison and use intsch directly

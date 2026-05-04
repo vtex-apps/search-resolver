@@ -463,6 +463,13 @@ export async function fetchProductSearch(
   const segment = await getOrCreateSegment(ctx)
   const segmentData = extractSegmentData(segment)
 
+  if (segment && !segment.channel) {
+    ctx.vtex.logger.warn({
+      message: 'Segment is missing channel on product search',
+      segment,
+    })
+  }
+
   if (Math.random() < 0.1) {
     const logMethod = shouldUseNewPLPEndpoint ? 'info' : 'warn'
 
