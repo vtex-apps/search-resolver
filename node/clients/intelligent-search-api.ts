@@ -4,8 +4,6 @@ import { ExternalClient } from '@vtex/api'
 import { parseState } from '../utils/searchState'
 import type {
   FacetsOptions,
-  ProductSearchOptions,
-  ProductSearchResult,
   FetchBannersArgs,
   IIntelligentSearchClient,
   FetchProductArgs,
@@ -15,8 +13,12 @@ import type {
   FetchBannersResponse,
   SearchSuggestionsResponse,
   TopSearchesResponse,
+  IntschFacetsParams,
+  IntschProductSearchParams,
+  ProductSearchOptions,
+  ProductSearchResult,
 } from './intsch/types'
-import type { Options, SearchResultArgs } from '../typings/Search'
+import type { SearchResultArgs } from '../typings/Search'
 
 export const isPathTraversal = (str: string) => str.indexOf('..') >= 0
 
@@ -32,21 +34,8 @@ interface AutocompleteSearchSuggestionsParams {
   query: string
 }
 
-export type FacetsArgs = {
-  query?: string
-  operator?: string
-  fuzzy?: string
-  leap?: boolean
-  tradePolicy?: number
-  searchState?: string
-  variant?: string
-  hideUnavailableItems?: boolean | null
-  removeHiddenFacets?: boolean | null
-  options?: Options
-  initialAttributes?: string
-  workspaceSearchParams?: object
-  regionId?: string | null
-}
+/** @deprecated Use IntschFacetsParams from clients/intsch/types (alias kept for compatibility). */
+export type FacetsArgs = IntschFacetsParams
 
 export const decodeQuery = (query: string) => {
   try {
@@ -123,7 +112,7 @@ export class IntelligentSearchApi
   }
 
   public async facets(
-    params: FacetsArgs,
+    params: IntschFacetsParams,
     path: string,
     options?: FacetsOptions
   ) {
@@ -154,7 +143,7 @@ export class IntelligentSearchApi
   }
 
   public async productSearch(
-    params: SearchResultArgs,
+    params: IntschProductSearchParams,
     path: string,
     options?: ProductSearchOptions
   ): Promise<ProductSearchResult> {

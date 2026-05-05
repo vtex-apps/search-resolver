@@ -22,22 +22,15 @@ import type {
   SearchSuggestionsArgsV1,
   SearchSuggestionsResponse,
   TopSearchesResponse,
+  IntschFacetsParams,
+  IntschProductSearchParams,
 } from './types'
-import type { ProductSearchInput, SearchResultArgs } from '../../typings/Search'
-import type { FacetsArgs } from '../intelligent-search-api'
 import { decodeQuery, isPathTraversal } from '../intelligent-search-api'
 import { parseState } from '../../utils/searchState'
 import {
   filterUndefined,
   filterByAllowedIntelligentSearchQueryKeys,
 } from './utils'
-
-/** GraphQL layer passes `ProductSearchInput` fields through `SearchResultArgs`-shaped objects. */
-type ProductSearchRequestArgs = SearchResultArgs &
-  Partial<ProductSearchInput> & {
-    debugMode?: string | boolean
-    variant?: string | string[]
-  }
 
 export class Intsch extends JanusClient implements IIntelligentSearchClient {
   private locale: string | undefined
@@ -162,12 +155,11 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
   }
 
   public async productSearch(
-    params: SearchResultArgs,
+    params: IntschProductSearchParams,
     path: string,
     options?: ProductSearchOptions
   ): Promise<ProductSearchResult> {
     const { query, leap, searchState } = params
-    const p = params as ProductSearchRequestArgs
     const { segmentParams, shippingHeader } = options ?? {}
 
     if (isPathTraversal(path)) {
@@ -181,7 +173,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
 
     const merged = filterUndefined({
       sc: segmentParams?.sc,
-      regionId: p.regionId ?? segmentParams?.regionId,
+      regionId: params.regionId ?? segmentParams?.regionId,
       country: segmentParams?.country,
       'zip-code': segmentParams?.['zip-code'],
       coordinates: segmentParams?.coordinates,
@@ -194,30 +186,30 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       campaigns: segmentParams?.campaigns,
       priceTables: segmentParams?.priceTables,
       query: query ? decodeQuery(query) : undefined,
-      sort: p.sort,
-      operator: p.operator,
-      fuzzy: p.fuzzy,
-      from: p.from ?? undefined,
-      to: p.to ?? undefined,
-      hideUnavailableItems: p.hideUnavailableItems ?? undefined,
-      initialAttributes: p.initialAttributes,
-      searchState: p.searchState,
+      sort: params.sort,
+      operator: params.operator,
+      fuzzy: params.fuzzy,
+      from: params.from ?? undefined,
+      to: params.to ?? undefined,
+      hideUnavailableItems: params.hideUnavailableItems ?? undefined,
+      initialAttributes: params.initialAttributes,
+      searchState: params.searchState,
       // Adds
-      showSponsored: p.showSponsored,
-      repeatSponsoredProducts: p.repeatSponsoredProducts,
-      advertisementPlacement: p.advertisementPlacement,
-      sponsoredCount: p.sponsoredCount,
-      allowRedirect: p.options?.allowRedirect,
+      showSponsored: params.showSponsored,
+      repeatSponsoredProducts: params.repeatSponsoredProducts,
+      advertisementPlacement: params.advertisementPlacement,
+      sponsoredCount: params.sponsoredCount,
+      allowRedirect: params.allowRedirect,
       locale: this.locale ?? segmentParams?.locale,
       bgy_leap: leap ? 'true' : undefined,
       productOriginVtex:
-        p.productOriginVtex !== undefined
-          ? String(p.productOriginVtex)
+        params.productOriginVtex !== undefined
+          ? String(params.productOriginVtex)
           : undefined,
-      simulationBehavior: p.simulationBehavior ?? undefined,
-      variant: p.variant,
+      simulationBehavior: params.simulationBehavior ?? undefined,
+      variant: params.variant,
       ...parseState(searchState),
-    } as Record<string, unknown>)
+    })
 
     const requestParams = filterByAllowedIntelligentSearchQueryKeys(merged)
 
@@ -245,7 +237,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
   }
 
   public facets(
-    params: FacetsArgs,
+    params: IntschFacetsParams,
     path: string,
     options?: FacetsOptions
   ): Promise<FacetsResponse> {
