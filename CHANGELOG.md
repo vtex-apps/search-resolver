@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Block requests (product, facets, productSearch) without sales-channel to intsch.
+- Improve arguments passed while making a request to intsch.
+
 ## [1.101.0] - 2026-04-08
 
 ### Changed
