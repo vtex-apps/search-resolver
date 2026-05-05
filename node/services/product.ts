@@ -119,11 +119,8 @@ export async function fetchProduct(
   // Get and create segment before calling intsch
   const segment = await getOrCreateSegment(ctx)
 
-  if (segment && !segment.channel) {
-    ctx.vtex.logger.warn({
-      message: 'Segment is missing channel on product',
-      segment,
-    })
+  if (segment && segment.channel === null) {
+    throw new Error('Couldnt detect a sales channel')
   }
 
   const segmentData = extractSegmentData(segment)

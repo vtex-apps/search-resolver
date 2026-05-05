@@ -483,11 +483,8 @@ export async function fetchProductSearch(
   const segment = await getOrCreateSegment(ctx)
   const segmentData = extractSegmentData(segment)
 
-  if (segment && !segment.channel) {
-    ctx.vtex.logger.warn({
-      message: 'Segment is missing channel on product search',
-      segment,
-    })
+  if (segment && segment.channel === null && !args.salesChannel) {
+    throw new Error('Couldnt detect a sales channel')
   }
 
   if (Math.random() < 0.1) {

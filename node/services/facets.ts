@@ -66,11 +66,8 @@ export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
 
   const segmentData = extractSegmentData(segment)
 
-  if (segment && !segment.channel) {
-    ctx.vtex.logger.warn({
-      message: 'Segment is missing channel on facets',
-      segment,
-    })
+  if (segment && segment.channel === null) {
+    throw new Error('Couldnt detect a sales channel')
   }
 
   return fetchFacetsFromIntsch(ctx, options, segmentData)
