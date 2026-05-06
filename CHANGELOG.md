@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Removed that blocked requests without sales-channel.
+
 ## [1.102.0] - 2026-05-06
 
 ### Changed
