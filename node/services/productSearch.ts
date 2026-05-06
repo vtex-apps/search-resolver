@@ -484,7 +484,9 @@ export async function fetchProductSearch(
   const segmentData = extractSegmentData(segment)
 
   if (segment && segment.channel === null && !args.salesChannel) {
-    throw new Error('Couldnt detect a sales channel')
+    ctx.vtex.logger.warn({
+      message: 'Couldnt detect a sales channel',
+    })
   }
 
   if (Math.random() < 0.1) {

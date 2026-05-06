@@ -120,7 +120,9 @@ export async function fetchProduct(
   const segment = await getOrCreateSegment(ctx)
 
   if (segment && segment.channel === null) {
-    throw new Error('Couldnt detect a sales channel')
+    ctx.vtex.logger.warn({
+      message: 'Couldnt detect a sales channel',
+    })
   }
 
   const segmentData = extractSegmentData(segment)
