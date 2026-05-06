@@ -78,10 +78,10 @@ const isLegacySearchFormat = ({
   query,
   map,
 }: {
-  query: string
+  query?: string
   map?: string
 }) => {
-  if (!map) {
+  if (!map || !query) {
     return false
   }
 
@@ -134,10 +134,19 @@ const inputToSearchCrossSelling = {
  * @param {QueryArgs} args
  * @returns
  */
-const getCompatibilityArgsFromSelectedFacets = async (
+/** Args that can be normalized via `map` / `query` / `selectedFacets` compatibility helpers. */
+type SelectedFacetsCompatibilityArgs = {
+  query?: string
+  map?: string
+  selectedFacets?: SelectedFacet[]
+}
+
+const getCompatibilityArgsFromSelectedFacets = async <
+  T extends SelectedFacetsCompatibilityArgs
+>(
   ctx: Context,
-  args: QueryArgs
-) => {
+  args: T
+): Promise<T> => {
   const { selectedFacets, query } = args
 
   if (!selectedFacets || selectedFacets.length === 0 || !query) {
@@ -154,7 +163,7 @@ const getCompatibilityArgsFromSelectedFacets = async (
     return args
   }
 
-  const compatibilityArgs = (await getCompatibilityArgs(ctx, args)) as QueryArgs
+  const compatibilityArgs = await getCompatibilityArgs(ctx, args as QueryArgs)
 
   const mapSegments = compatibilityArgs.map!.split(MAP_VALUES_SEP)
   const querySegments = compatibilityArgs.query!.split(PATH_SEPARATOR)
@@ -347,21 +356,22 @@ export const queries = {
       itemsReturned,
     }
   },
-  facets: async (_: any, args: FacetsInput, ctx: any) => {
+  facets: async (_: unknown, args: FacetsInput, ctx: Context) => {
     const [shippingOptions, facets] = getShippingOptionsFromSelectedFacets(
       args.selectedFacets
     )
 
     args.selectedFacets = facets
 
-    args = (await getCompatibilityArgsFromSelectedFacets(
-      ctx,
-      args
-    )) as FacetsInput
+    args = await getCompatibilityArgsFromSelectedFacets(ctx, args)
 
     const { selectedFacets } = args
 
-    return fetchFacets(ctx, { args, selectedFacets, shippingOptions })
+    return fetchFacets(ctx, {
+      args,
+      selectedFacets: selectedFacets ?? [],
+      shippingOptions,
+    })
   },
 
   product: async (_: any, rawArgs: ProductArgs, ctx: Context) => {
@@ -425,17 +435,14 @@ export const queries = {
     )
   },
 
-  productSearch: async (_: any, args: ProductSearchInput, ctx: any) => {
+  productSearch: async (_: unknown, args: ProductSearchInput, ctx: Context) => {
     const [shippingOptions, facets] = getShippingOptionsFromSelectedFacets(
       args.selectedFacets
     )
 
     args.selectedFacets = facets
 
-    args = (await getCompatibilityArgsFromSelectedFacets(
-      ctx,
-      args
-    )) as ProductSearchInput
+    args = await getCompatibilityArgsFromSelectedFacets(ctx, args)
 
     if (!validMapAndQuery(args.query, args.map)) {
       ctx.vtex.logger.warn({
@@ -447,7 +454,7 @@ export const queries = {
 
     const { selectedFacets } = args
 
-    return fetchProductSearch(ctx, args, selectedFacets, shippingOptions)
+    return fetchProductSearch(ctx, args, selectedFacets ?? [], shippingOptions)
   },
 
   sponsoredProducts: async (_: any, args: ProductSearchInput, ctx: any) => {
@@ -457,10 +464,7 @@ export const queries = {
 
     args.selectedFacets = facets
 
-    args = (await getCompatibilityArgsFromSelectedFacets(
-      ctx,
-      args
-    )) as ProductSearchInput
+    args = await getCompatibilityArgsFromSelectedFacets(ctx, args)
 
     if (!validMapAndQuery(args.query, args.map)) {
       ctx.vtex.logger.warn({
@@ -485,7 +489,7 @@ export const queries = {
 
     const result = await intelligentSearchApi.sponsoredProducts(
       { ...biggyArgs },
-      buildAttributePath(selectedFacets),
+      buildAttributePath(selectedFacets ?? []),
       shippingOptions
     )
 
@@ -515,8 +519,7 @@ export const queries = {
       productId = product!.productId
     }
 
-    const groupByProduct =
-      groupBy === CrossSellingGroupByInput.PRODUCT ? true : false
+    const groupByProduct = groupBy === CrossSellingGroupByInput.PRODUCT
 
     if (shouldUseNewPDPEndpoint) {
       ctx.translated = true

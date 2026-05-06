@@ -3,6 +3,7 @@ import {
   concatSelectedFacets,
   mergeSegmentParamsWithPickupFromPath,
 } from '../commons/compatibility-layer'
+import type { IntschFacetsParams } from '../clients/intsch/types'
 import { extractSegmentData, getOrCreateSegment } from '../utils/segment'
 import type { FacetsInput } from '../typings/Search'
 
@@ -28,12 +29,12 @@ async function fetchFacetsFromIntsch(
     clients: { intsch },
   } = ctx
 
-  const intschArgs: { [key: string]: any } = {
-    ...args,
-  }
+  const { selectedFacets: _omitSelectedFacetsForPath, ...facetFieldArgs } = args
 
-  // unnecessary field. It's is an object and breaks the @vtex/api cache
-  delete intschArgs.selectedFacets
+  const intschArgs: IntschFacetsParams = {
+    ...facetFieldArgs,
+    query: args.fullText,
+  }
 
   const allFacets = concatSelectedFacets(
     selectedFacets,
@@ -42,17 +43,13 @@ async function fetchFacetsFromIntsch(
 
   const intschPath = buildAttributePath(allFacets)
 
-  const result: any = await intsch.facets(
-    { ...intschArgs, query: args.fullText },
-    intschPath,
-    {
-      segmentParams: mergeSegmentParamsWithPickupFromPath(
-        segmentData.segmentParams,
-        selectedFacets
-      ),
-      shippingHeader: shippingOptions,
-    }
-  )
+  const result: any = await intsch.facets(intschArgs, intschPath, {
+    segmentParams: mergeSegmentParamsWithPickupFromPath(
+      segmentData.segmentParams,
+      selectedFacets
+    ),
+    shippingHeader: shippingOptions,
+  })
 
   if (ctx.vtex.tenant) {
     ctx.translated = result.translated
@@ -66,7 +63,12 @@ async function fetchFacetsFromIntsch(
  */
 export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
   const segment = await getOrCreateSegment(ctx)
+
   const segmentData = extractSegmentData(segment)
+
+  if (segment && segment.channel === null) {
+    throw new Error('Couldnt detect a sales channel')
+  }
 
   return fetchFacetsFromIntsch(ctx, options, segmentData)
 }

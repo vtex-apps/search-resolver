@@ -15,13 +15,22 @@ export type SegmentData = {
 
 export type IndexingType = 'API' | 'XML'
 
+export type SearchOperator = 'and' | 'or'
+
+export type SimulationBehavior =
+  | 'default'
+  | 'only1P'
+  | 'skip'
+  | 'async'
+  | 'regionalize1p'
+
+export type CategoryTreeBehavior = 'default' | 'show' | 'hide'
+
 export interface SearchResultArgs extends AdvertisementOptions {
   attributePath?: string
   query?: string
-  page?: number
-  count?: number
   sort?: string
-  operator?: string
+  operator?: SearchOperator
   fuzzy?: string
   leap?: boolean
   tradePolicy?: number
@@ -53,7 +62,7 @@ export interface SuggestionProductsArgs {
   segment?: SegmentData
   indexingType?: IndexingType
   productOriginVtex: boolean
-  simulationBehavior: 'skip' | 'default' | 'only1P' | null
+  simulationBehavior: SimulationBehavior | null
   hideUnavailableItems?: boolean | null
   regionId?: string
   workspaceSearchParams?: object
@@ -64,9 +73,10 @@ export interface SuggestionProductsArgs {
   advertisementOptions: AdvertisementOptions
 }
 
-interface SelectedFacet {
-  value: string
+/** Facet chosen in the storefront / GraphQL (`SelectedFacetInput`). */
+export interface SelectedFacet {
   key: string
+  value: string
 }
 
 export interface Options {
@@ -80,37 +90,53 @@ export interface AdvertisementOptions {
   advertisementPlacement?: string
 }
 
+/** Arguments for the `facets` GraphQL query (see vtex.search-graphql schema). */
 export interface FacetsInput {
-  map: string
-  selectedFacets: SelectedFacet[]
-  fullText: string
-  query: string
+  query?: string
+  fullText?: string
+  map?: string
+  selectedFacets?: SelectedFacet[]
+  hideUnavailableItems?: boolean
+  removeHiddenFacets?: boolean
+  behavior?: string
+  operator?: SearchOperator
+  fuzzy?: string
   searchState?: string
-  removeHiddenFacets: boolean
-  hideUnavailableItems: boolean
+  // from?: number this shouldn't be used
+  // to?: number this shouldn't be used
+  categoryTreeBehavior?: CategoryTreeBehavior
   initialAttributes?: string
-  categoryTreeBehavior: 'default' | 'show' | 'hide'
+  variant?: string
 }
 
 export interface ProductsInput extends SearchArgs {
   advertisementOptions?: AdvertisementOptions
 }
 
+/** Arguments for the `productSearch` GraphQL query (see vtex.search-graphql schema). */
 export interface ProductSearchInput {
-  query: string
-  from: number
-  to: number
-  selectedFacets: SelectedFacet[]
-  fullText: string
-  fuzzy: string
-  operator: string
-  orderBy: string
-  productOriginVtex: boolean
-  searchState?: string
-  simulationBehavior: 'skip' | 'default' | null
-  hideUnavailableItems: boolean
+  query?: string
+  fullText?: string
   map?: string
+  selectedFacets?: SelectedFacet[]
+  category?: string
+  specificationFilters?: string[]
+  priceRange?: string
+  collection?: string
+  salesChannel?: string
+  orderBy?: string
+  from?: number
+  to?: number
+  hideUnavailableItems?: boolean
+  simulationBehavior?: SimulationBehavior
+  productOriginVtex?: boolean
+  operator?: SearchOperator
+  fuzzy?: string
+  searchState?: string
   options?: Options
+  variant?: string
+  /** @deprecated Prefer `advertisementOptions`. */
   showSponsored?: boolean
   advertisementOptions?: AdvertisementOptions
+  origin?: string
 }

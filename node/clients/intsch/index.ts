@@ -22,11 +22,15 @@ import type {
   SearchSuggestionsArgsV1,
   SearchSuggestionsResponse,
   TopSearchesResponse,
+  IntschFacetsParams,
+  IntschProductSearchParams,
 } from './types'
-import type { SearchResultArgs } from '../../typings/Search'
-import type { FacetsArgs } from '../intelligent-search-api'
 import { decodeQuery, isPathTraversal } from '../intelligent-search-api'
 import { parseState } from '../../utils/searchState'
+import {
+  filterUndefined,
+  filterByAllowedIntelligentSearchQueryKeys,
+} from './utils'
 
 export class Intsch extends JanusClient implements IIntelligentSearchClient {
   private locale: string | undefined
@@ -151,7 +155,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
   }
 
   public async productSearch(
-    params: SearchResultArgs,
+    params: IntschProductSearchParams,
     path: string,
     options?: ProductSearchOptions
   ): Promise<ProductSearchResult> {
@@ -162,14 +166,14 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       throw new Error('Malformed URL')
     }
 
-    // The admin auth token is releavant for CallCenter users when the sales channel is private.
     const authToken =
       this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
 
     const requestPath = `/api/intelligent-search/v1/product-search/${path}`
-    const requestParams = {
-      sc: segmentParams?.sc,
-      regionId: segmentParams?.regionId,
+
+    const merged = filterUndefined({
+      sc: params.salesChannel ?? segmentParams?.sc,
+      regionId: params.regionId ?? segmentParams?.regionId,
       country: segmentParams?.country,
       'zip-code': segmentParams?.['zip-code'],
       coordinates: segmentParams?.coordinates,
@@ -181,12 +185,33 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       utmiCampaign: segmentParams?.utmiCampaign,
       campaigns: segmentParams?.campaigns,
       priceTables: segmentParams?.priceTables,
-      ...params,
-      query: query && decodeQuery(query),
+      query: query ? decodeQuery(query) : undefined,
+      sort: params.sort,
+      operator: params.operator,
+      fuzzy: params.fuzzy,
+      from: params.from ?? undefined,
+      to: params.to ?? undefined,
+      hideUnavailableItems: params.hideUnavailableItems ?? undefined,
+      initialAttributes: params.initialAttributes,
+      searchState: params.searchState,
+      // Adds
+      showSponsored: params.showSponsored,
+      repeatSponsoredProducts: params.repeatSponsoredProducts,
+      advertisementPlacement: params.advertisementPlacement,
+      sponsoredCount: params.sponsoredCount,
+      allowRedirect: params.allowRedirect,
       locale: this.locale ?? segmentParams?.locale,
-      bgy_leap: leap ? true : undefined,
+      bgy_leap: leap ? 'true' : undefined,
+      productOriginVtex:
+        params.productOriginVtex !== undefined
+          ? String(params.productOriginVtex)
+          : undefined,
+      simulationBehavior: params.simulationBehavior ?? undefined,
+      variant: params.variant,
       ...parseState(searchState),
-    }
+    })
+
+    const requestParams = filterByAllowedIntelligentSearchQueryKeys(merged)
 
     const requestHeaders: Record<string, string | string[]> = {
       'x-vtex-shipping-options': shippingHeader ?? '',
@@ -212,7 +237,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
   }
 
   public facets(
-    params: FacetsArgs,
+    params: IntschFacetsParams,
     path: string,
     options?: FacetsOptions
   ): Promise<FacetsResponse> {
@@ -227,21 +252,30 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
 
     const facetsPath = `/api/intelligent-search/v1/facets/${path}`
-    const facetsParams = {
+
+    const merged = filterUndefined({
       sc: segmentParams?.sc,
-      regionId: segmentParams?.regionId,
+      regionId: params.regionId ?? segmentParams?.regionId,
       country: segmentParams?.country,
       'zip-code': segmentParams?.['zip-code'],
       coordinates: segmentParams?.coordinates,
       pickupPoint: segmentParams?.pickupPoint,
       deliveryZonesHash: segmentParams?.deliveryZonesHash,
       pickupPointHash: segmentParams?.pickupPointHash,
-      ...params,
-      query: query && decodeQuery(query),
+      query: query ? decodeQuery(query) : undefined,
+      operator: params.operator,
+      fuzzy: params.fuzzy,
+      hideUnavailableItems: params.hideUnavailableItems ?? undefined,
+      initialAttributes: params.initialAttributes,
+      searchState: params.searchState,
+      allowRedirect: params.options?.allowRedirect,
       locale: this.locale ?? segmentParams?.locale,
-      bgy_leap: leap ? true : undefined,
+      bgy_leap: leap ? 'true' : undefined,
+      variant: params.variant,
       ...parseState(searchState),
-    }
+    } as Record<string, unknown>)
+
+    const facetsParams = filterByAllowedIntelligentSearchQueryKeys(merged)
 
     return this.http.get(facetsPath, {
       params: facetsParams,

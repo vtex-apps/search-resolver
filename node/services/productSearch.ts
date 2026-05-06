@@ -10,9 +10,15 @@ import {
   type ExistenceComparePattern,
   type IgnoredDifference,
 } from '../utils/compareResults'
+import type {
+  AdvertisementOptions,
+  ProductSearchInput,
+} from '../typings/Search'
+import type {
+  IntschProductSearchParams,
+  ProductSearchRequestInfo,
+} from '../clients/intsch/types'
 import { fetchAppSettings } from './settings'
-import type { ProductSearchInput } from '../typings/Search'
-import type { ProductSearchRequestInfo } from '../clients/intsch/types'
 
 type SegmentData = ReturnType<typeof extractSegmentData>
 
@@ -318,10 +324,31 @@ function omitRequestInfo<T extends { requestInfo: ProductSearchRequestInfo }>(
   return rest as Omit<T, 'requestInfo'>
 }
 
-const defaultAdvertisementOptions = {
+const defaultAdvertisementOptions: AdvertisementOptions = {
   showSponsored: false,
   sponsoredCount: 3,
   repeatSponsoredProducts: true,
+}
+
+function buildProductSearchRequestParams(
+  args: ProductSearchInput,
+  fullText: string | undefined,
+  advertisementOptionsResolved: AdvertisementOptions
+): IntschProductSearchParams {
+  const {
+    selectedFacets: _omitSelectedFacets,
+    advertisementOptions: _omitAdvertisementOptions,
+    options: searchOptions,
+    ...restSearchInput
+  } = args
+
+  return {
+    ...advertisementOptionsResolved,
+    ...restSearchInput,
+    query: fullText,
+    sort: convertOrderBy(args.orderBy),
+    ...(searchOptions ?? {}),
+  }
 }
 
 /**
@@ -335,19 +362,15 @@ async function fetchProductSearchFromBiggy(
   shippingOptions?: string[]
 ) {
   const { intelligentSearchApi } = ctx.clients
-  const { fullText, advertisementOptions = defaultAdvertisementOptions } = args
+  const { fullText } = args
+  const advertisementOptionsResolved =
+    args.advertisementOptions ?? defaultAdvertisementOptions
 
-  const biggyArgs: { [key: string]: any } = {
-    ...advertisementOptions,
-    ...args,
-    query: fullText,
-    sort: convertOrderBy(args.orderBy),
-    ...args.options,
-  }
-
-  // unnecessary field. It's is an object and breaks the @vtex/api cache
-  delete biggyArgs.selectedFacets
-  delete biggyArgs.advertisementOptions
+  const biggyArgs = buildProductSearchRequestParams(
+    args,
+    fullText,
+    advertisementOptionsResolved
+  )
 
   const raw = await intelligentSearchApi.productSearch(
     { ...biggyArgs },
@@ -385,19 +408,16 @@ async function fetchProductSearchFromIntsch(
   segmentData?: SegmentData
 ) {
   const { intsch } = ctx.clients
-  const { fullText, advertisementOptions = defaultAdvertisementOptions } = args
+  const { fullText } = args
 
-  const intschArgs: { [key: string]: any } = {
-    ...advertisementOptions,
-    ...args,
-    query: fullText,
-    sort: convertOrderBy(args.orderBy),
-    ...args.options,
-  }
+  const advertisementOptionsResolved =
+    args.advertisementOptions ?? defaultAdvertisementOptions
 
-  // unnecessary field. It's is an object and breaks the @vtex/api cache
-  delete intschArgs.selectedFacets
-  delete intschArgs.advertisementOptions
+  const intschArgs = buildProductSearchRequestParams(
+    args,
+    fullText,
+    advertisementOptionsResolved
+  )
 
   const allFacets = segmentData
     ? concatSelectedFacets(selectedFacets, segmentData.extraFacets)
@@ -462,6 +482,10 @@ export async function fetchProductSearch(
   const { shouldUseNewPLPEndpoint } = await fetchAppSettings(ctx)
   const segment = await getOrCreateSegment(ctx)
   const segmentData = extractSegmentData(segment)
+
+  if (segment && segment.channel === null && !args.salesChannel) {
+    throw new Error('Couldnt detect a sales channel')
+  }
 
   if (Math.random() < 0.1) {
     const logMethod = shouldUseNewPLPEndpoint ? 'info' : 'warn'

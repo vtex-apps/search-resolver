@@ -118,6 +118,11 @@ export async function fetchProduct(
 
   // Get and create segment before calling intsch
   const segment = await getOrCreateSegment(ctx)
+
+  if (segment && segment.channel === null) {
+    throw new Error('Couldnt detect a sales channel')
+  }
+
   const segmentData = extractSegmentData(segment)
 
   // Check if current account should skip comparison and use intsch directly

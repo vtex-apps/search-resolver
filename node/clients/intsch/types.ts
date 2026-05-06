@@ -1,6 +1,40 @@
-import type { SearchResultArgs } from '../../typings/Search'
-import type { FacetsArgs } from '../intelligent-search-api'
+import type {
+  AdvertisementOptions,
+  FacetsInput,
+  Options,
+  ProductSearchInput,
+} from '../../typings/Search'
 import type { SegmentParams } from '../../utils/segment'
+
+/**
+ * HTTP params for facets after stripping `selectedFacets` and mapping `fullText`
+ * to `query` (see {@link fetchFacets}).
+ */
+export type IntschFacetsParams = Omit<FacetsInput, 'selectedFacets'> & {
+  query?: string
+  options?: Options
+  leap?: boolean
+  regionId?: string | null
+}
+
+/**
+ * HTTP params for product search after merging advertisement options, `options`,
+ * and dropping `selectedFacets` / nested `advertisementOptions` (see
+ * {@link fetchProductSearch}).
+ */
+export type IntschProductSearchParams = Omit<
+  ProductSearchInput,
+  'selectedFacets' | 'advertisementOptions' | 'options'
+> &
+  AdvertisementOptions & {
+    query?: string
+    sort?: string
+    allowRedirect?: boolean
+    regionId?: string | null
+    leap?: boolean
+    /** Used by intelligent-search / Biggy legacy client; not exposed on `productSearch` GraphQL. */
+    initialAttributes?: string
+  }
 
 export type AutocompleteSuggestionsArgs = {
   query: string
@@ -149,12 +183,12 @@ export interface IIntelligentSearchClient {
   fetchCorrectionV1(args: CorrectionArgsV1): Promise<CorrectionResponse>
   fetchBannersV1(args: FetchBannersArgsV1): Promise<FetchBannersResponse>
   productSearch(
-    args: SearchResultArgs,
+    args: IntschProductSearchParams,
     path: string,
     options?: ProductSearchOptions
   ): Promise<ProductSearchResult>
   facets(
-    params: FacetsArgs,
+    params: IntschFacetsParams,
     path: string,
     options?: FacetsOptions
   ): Promise<FacetsResponse>
