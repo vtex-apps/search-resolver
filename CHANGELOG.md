@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.102.2] - 2026-05-07
+
 ### Fixed
 
 - SalesChannel forwarding while calling the intsch. 
