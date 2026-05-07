@@ -1,12 +1,12 @@
 /**
  * Drops keys whose value is `undefined` from a plain object.
- * Keeps `null`, `false`, and `0` (needed for valid API semantics).
+ * Keeps `false`, '' and `0` (needed for valid API semantics).
  */
-export function filterUndefined<T extends Record<string, unknown>>(
+export function filterUndefinedNonNull<T extends Record<string, unknown>>(
   obj: T
 ): Partial<T> {
   return Object.fromEntries(
-    Object.entries(obj).filter(([, v]) => v !== undefined)
+    Object.entries(obj).filter(([, v]) => v !== undefined && v !== null)
   ) as Partial<T>
 }
 
