@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - SalesChannel forwarding while calling the intsch. 
 
+### Changed
+
+- Updated search-graphl version.
+
 ## [1.102.1] - 2026-05-06 [YANKED]
 
 ### Fixed
