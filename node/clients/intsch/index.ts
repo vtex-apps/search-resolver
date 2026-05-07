@@ -172,7 +172,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     const requestPath = `/api/intelligent-search/v1/product-search/${path}`
 
     const merged = filterUndefinedNonNull({
-      sc: params.salesChannel !== '' ? params.salesChannel : segmentParams?.sc,
+      sc: params.salesChannel ? params.salesChannel : segmentParams?.sc,
       regionId: params.regionId ?? segmentParams?.regionId,
       country: segmentParams?.country,
       'zip-code': segmentParams?.['zip-code'],
