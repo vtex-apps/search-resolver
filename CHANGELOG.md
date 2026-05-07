@@ -7,13 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [1.102.1] - 2026-05-06
+### Fixed
+
+- SalesChannel forwarding while calling the intsch. 
+
+## [1.102.1] - 2026-05-06 [YANKED]
 
 ### Fixed
 
 - Removed that blocked requests without sales-channel.
 
-## [1.102.0] - 2026-05-06
+## [1.102.0] - 2026-05-06 [YANKED]
 
 ### Changed
 

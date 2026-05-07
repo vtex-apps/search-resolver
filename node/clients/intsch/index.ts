@@ -28,7 +28,7 @@ import type {
 import { decodeQuery, isPathTraversal } from '../intelligent-search-api'
 import { parseState } from '../../utils/searchState'
 import {
-  filterUndefined,
+  filterUndefinedNonNull,
   filterByAllowedIntelligentSearchQueryKeys,
 } from './utils'
 
@@ -171,8 +171,8 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
 
     const requestPath = `/api/intelligent-search/v1/product-search/${path}`
 
-    const merged = filterUndefined({
-      sc: params.salesChannel ?? segmentParams?.sc,
+    const merged = filterUndefinedNonNull({
+      sc: params.salesChannel !== '' ? params.salesChannel : segmentParams?.sc,
       regionId: params.regionId ?? segmentParams?.regionId,
       country: segmentParams?.country,
       'zip-code': segmentParams?.['zip-code'],
@@ -253,7 +253,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
 
     const facetsPath = `/api/intelligent-search/v1/facets/${path}`
 
-    const merged = filterUndefined({
+    const merged = filterUndefinedNonNull({
       sc: segmentParams?.sc,
       regionId: params.regionId ?? segmentParams?.regionId,
       country: segmentParams?.country,
