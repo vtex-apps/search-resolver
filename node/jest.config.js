@@ -21,4 +21,13 @@ module.exports = {
   },
   testRegex: '(.*(test|spec)).ts?$',
   testEnvironment: 'node',
+
+  // managed-by: golden-path v1
+  coverageThreshold: {
+    global: {
+      lines: 60,
+      functions: 60,
+      statements: 60,
+    },
+  },
 }
