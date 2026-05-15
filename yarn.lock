@@ -483,10 +483,10 @@
     danger "^10.4.0"
     danger-plugin-keepachangelog "^1.0.5"
 
-"@vtex/prettier-config@^0.3.6":
-  version "0.3.6"
-  resolved "https://registry.yarnpkg.com/@vtex/prettier-config/-/prettier-config-0.3.6.tgz#31762608d9a59b815b6d4e963e439b12f1a12279"
-  integrity sha512-nXE3BcMODomFK3EowfK+Hdj2qQRqB8JcdRv8yTREXnN9xq8DYKmH/dWB+RY/Hn3KozFLbygpZRbqYsiA6HDINQ==
+"@vtex/prettier-config@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@vtex/prettier-config/-/prettier-config-1.0.0.tgz#a7a7091ecff1da340d398000f4855dc9910aa9c9"
+  integrity sha512-4Uv67bK2eORhzWg/11J5/+fxPUWY6b0sYdhcqMzIgo0zluXlYqbZU6iueKZ48SxG4ODw8ZaqMRfpNsLd3Gw5+Q==
 
 abab@^1.0.0:
   version "1.0.4"
