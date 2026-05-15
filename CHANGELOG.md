@@ -7,24 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### Added
-
-- `Makefile` with canonical Golden Path targets (`help`, `dev`, `build`, `test`, `coverage`, `lint`, `format-check`, `check`, `link`, `run`, `clean`).
-- `README.md` with Prerequisites / How to run / How to test / How to publish / Documentation sections.
-- `AGENTS.md` with project-specific context (resolver wiring, search contract, segment/binding rules, breaking-change cycle for `vtex.search-graphql`), Sources of Truth, Verified Commands, Expected Skills, Expected MCPs, Autonomy Limits, and a Multi-repo Specs pointer. `CLAUDE.md` symlinked to it.
-- `SECURITY.md` with the VTEX vulnerability reporting policy.
-- `docs/glossary.md`, `docs/data-model.md`, `docs/sdd/model-guide.md`.
-- `.nvmrc` pinning Node 20.
-- `.github/dependabot.yml` for npm + GitHub Actions weekly updates.
-- `.mcp.json` declaring the GitHub MCP server.
-- 60% coverage threshold (lines / functions / statements) in `node/jest.config.js`.
-
-### Changed
-
-- `.editorconfig`: added `[Makefile]` section with tab indentation.
-- `.github/workflows/pull-request.yml`: rewrote with `actions/checkout` / `actions/setup-node` pinned to `@v4`, `node-version-file: '.nvmrc'`, and separate lint + test jobs.
-- `.gitignore`: added the spec-kit canonical ignore block (multi-repo: `.specify/` lives in the parent `is-io-specs` aggregator, not here).
-
 ## [1.102.2] - 2026-05-07
 
 ### Fixed
