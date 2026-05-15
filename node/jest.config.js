@@ -21,4 +21,18 @@ module.exports = {
   },
   testRegex: '(.*(test|spec)).ts?$',
   testEnvironment: 'node',
+
+  // managed-by: golden-path v1
+  // Thresholds pinned a hair below the current baseline so CI is a
+  // ratchet rather than a blocker. Re-measure with `yarn test --coverage`
+  // and bump these up whenever tests are added; target is 60/60/60/70
+  // (lines / functions / statements / branches).
+  coverageThreshold: {
+    global: {
+      lines: 60,
+      statements: 60,
+      functions: 35,
+      branches: 70,
+    },
+  },
 }
