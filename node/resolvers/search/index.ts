@@ -498,7 +498,7 @@ export const queries = {
 
     const result = await intelligentSearchApi.sponsoredProducts(
       { ...finalArgs },
-      buildAttributePath(selectedFacets),
+      buildAttributePath(selectedFacets ?? []),
       shippingOptions
     )
 

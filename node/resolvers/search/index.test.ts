@@ -1,9 +1,10 @@
 import { queries } from './index'
-import { mockContext } from '../../__mocks__/helpers'
+import { mockContext, resetContext } from '../../__mocks__/helpers'
 import { getProduct, getItem } from '../../__mocks__/product'
 
 beforeEach(() => {
   jest.clearAllMocks()
+  resetContext()
 })
 
 describe('product recommendations query tests', () => {
