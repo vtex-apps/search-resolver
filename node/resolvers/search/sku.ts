@@ -19,10 +19,10 @@ type DomainValue = {
 }
 
 type SkuNonStructuredAttributeGql = {
-  id: string | null
-  name: string | null
-  value: string | null
-  visible: boolean | null
+  id: string
+  name: string
+  value: string
+  visible: boolean
 }
 
 export const resolvers = {
@@ -41,24 +41,15 @@ export const resolvers = {
      * Non-structured SKU specifications.
      *
      * Backed by the Intelligent Search `attributes` field on each SKU
-     * (`ProductSkuCatalogAttribute`). The legacy Portal Search client does
-     * not return this field, in which case `[]` is returned so consumers get
-     * a stable contract regardless of which upstream served the request.
+     * (`ProductSkuCatalogAttribute`). Fields are guaranteed non-null by the
+     * upstream contract, so the array is returned as-is. The legacy Portal
+     * Search client does not return this field, in which case `[]` is
+     * returned so consumers get a stable contract regardless of which
+     * upstream served the request.
      */
     attributes: ({
       attributes,
-    }: SearchItem): SkuNonStructuredAttributeGql[] => {
-      if (!Array.isArray(attributes) || attributes.length === 0) {
-        return []
-      }
-
-      return attributes.map((attr) => ({
-        id: attr?.id != null ? String(attr.id) : null,
-        name: attr?.name ?? null,
-        value: attr?.value ?? null,
-        visible: typeof attr?.visible === 'boolean' ? attr.visible : null,
-      }))
-    },
+    }: SearchItem): SkuNonStructuredAttributeGql[] => attributes ?? [],
 
     attachments: ({ attachments = [] }: SearchItem) => {
       const attachmentsResults: Attachment[] = []

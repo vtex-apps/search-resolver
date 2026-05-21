@@ -22,7 +22,7 @@ const baseItem = {
 } as unknown as SearchItem
 
 describe('SKU.attributes resolver (non-structured SKU specifications, SkuNonStructuredAttribute)', () => {
-  it('returns the IS attributes mapped through (id, name, value, visible)', () => {
+  it('returns the IS attributes as-is (upstream contract guarantees non-null fields)', () => {
     const item: SearchItem = {
       ...baseItem,
       attributes: [
@@ -47,22 +47,7 @@ describe('SKU.attributes resolver (non-structured SKU specifications, SkuNonStru
     expect(skuAttributesResolver(item)).toEqual([])
   })
 
-  it('coerces non-string id to string and missing visible to null', () => {
-    const item = {
-      ...baseItem,
-      attributes: [
-        // Defensive: IS contract is `id: String`, but the field is `ID` in
-        // GraphQL, so a numeric id from a future change must still serialize.
-        { id: 42 as unknown as string, name: 'Width', value: '12in' },
-      ],
-    } as SearchItem
-
-    expect(skuAttributesResolver(item)).toEqual([
-      { id: '42', name: 'Width', value: '12in', visible: null },
-    ])
-  })
-
-  it('does not throw when attributes is not an array', () => {
+  it('returns [] when attributes is null', () => {
     const item = {
       ...baseItem,
       attributes: null as unknown as SearchItem['attributes'],
