@@ -5,6 +5,7 @@ import {
   mergeSegmentParamsWithPickupFromPath,
 } from '../commons/compatibility-layer'
 import { extractSegmentData, getOrCreateSegment } from '../utils/segment'
+import { applyHideUnavailableItemsDefaultForDP } from '../utils/hideUnavailableItems'
 import {
   compareApiResults,
   type ExistenceComparePattern,
@@ -359,7 +360,8 @@ async function fetchProductSearchFromBiggy(
   ctx: Context,
   args: ProductSearchInput,
   selectedFacets: SelectedFacet[],
-  shippingOptions?: string[]
+  shippingOptions?: string[],
+  segmentData?: SegmentData
 ) {
   const { intelligentSearchApi } = ctx.clients
   const { fullText } = args
@@ -372,8 +374,13 @@ async function fetchProductSearchFromBiggy(
     advertisementOptionsResolved
   )
 
+  const finalArgs = applyHideUnavailableItemsDefaultForDP(
+    biggyArgs,
+    segmentData?.segmentParams
+  )
+
   const raw = await intelligentSearchApi.productSearch(
-    { ...biggyArgs },
+    { ...finalArgs },
     buildAttributePath(selectedFacets),
     { shippingHeader: shippingOptions }
   )
@@ -419,12 +426,17 @@ async function fetchProductSearchFromIntsch(
     advertisementOptionsResolved
   )
 
+  const finalArgs = applyHideUnavailableItemsDefaultForDP(
+    intschArgs,
+    segmentData?.segmentParams
+  )
+
   const allFacets = segmentData
     ? concatSelectedFacets(selectedFacets, segmentData.extraFacets)
     : selectedFacets
 
   const raw = await intsch.productSearch(
-    { ...intschArgs },
+    { ...finalArgs },
     buildAttributePath(allFacets),
     {
       segmentParams: mergeSegmentParamsWithPickupFromPath(
@@ -537,7 +549,8 @@ export async function fetchProductSearch(
         ctx,
         args,
         selectedFacets,
-        shippingOptions
+        shippingOptions,
+        segmentData
       )
 
       logArgs.biggyCurl = buildCurl(

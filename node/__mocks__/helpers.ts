@@ -103,5 +103,12 @@ export const mockContext: any = {
 export const getBindingLocale = () => mockContext.vtex.binding.locale
 
 export const resetContext = () => {
-  mockContext.vtex = { ...generateDeepCopy(initialCtxState) }
+  mockContext.vtex = {
+    ...generateDeepCopy(initialCtxState),
+    logger: {
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    },
+  }
 }
