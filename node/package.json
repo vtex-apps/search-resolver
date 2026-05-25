@@ -14,7 +14,7 @@
     "qs": "^6.6.0",
     "ramda": "^0.27.1",
     "slugify": "^1.6.4",
-    "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.69.4/public"
+    "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.71.0/public"
   },
   "devDependencies": {
     "@types/camelcase": "^4.1.0",
