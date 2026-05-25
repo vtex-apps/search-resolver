@@ -136,17 +136,31 @@ interface SearchItem {
     required: boolean
     isRequired?: boolean // Response from intsch
     domainValues?: string
-    fields?: { // Response from intsch
+    fields?: {
+      // Response from intsch
       fieldName: string
       maxCharacters: string
       domainValues: string
     }[]
   }[]
+  // Non-structured SKU specifications coming from the Intelligent
+  // Search `attributes` field on each SKU (ProductSkuCatalogAttribute).
+  // Created via the Catalog API
+  // /api/catalog/pvt/specification/nonstructured. Not present on
+  // responses from the legacy Portal Search client.
+  attributes?: SkuNonStructuredAttribute[]
   isKit: boolean
   kitItems?: {
     itemId: string
     amount: number
   }[]
+}
+
+interface SkuNonStructuredAttribute {
+  id: string
+  name: string
+  value: string
+  visible: boolean
 }
 
 interface CompleteSpecification {
