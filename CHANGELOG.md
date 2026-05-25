@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `SKU.attributes` resolver that exposes non-structured SKU specifications coming from Intelligent Search (`ProductSkuCatalogAttribute`). Requires `vtex.search-graphql` with the matching `SkuNonStructuredAttribute` type and `SKU.attributes` field. Returns `[]` when the upstream response does not include attributes (e.g. legacy Portal Search).
 
+## [1.103.0] - 2026-05-22
+
 ### Changed
 
 - `hideUnavailableItems` resolution for intelligent search and catalog calls: when the segment includes `deliveryZonesHash` (delivery promise), an omitted value defaults to `true`; otherwise it defaults to `false`. Applies to product search (Biggy and Intsch), facets, and sponsored products. `null` remains explicit and is not overridden.
