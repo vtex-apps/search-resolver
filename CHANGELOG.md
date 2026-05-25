@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.104.0] - 2026-05-25
+
 ### Added
 
 - `SKU.attributes` resolver that exposes non-structured SKU specifications coming from Intelligent Search (`ProductSkuCatalogAttribute`). Requires `vtex.search-graphql` with the matching `SkuNonStructuredAttribute` type and `SKU.attributes` field. Returns `[]` when the upstream response does not include attributes (e.g. legacy Portal Search).
