@@ -30,6 +30,7 @@ import { parseState } from '../../utils/searchState'
 import {
   filterUndefinedNonNull,
   filterByAllowedIntelligentSearchQueryKeys,
+  shouldInjectDPPreview,
 } from './utils'
 
 export class Intsch extends JanusClient implements IIntelligentSearchClient {
@@ -171,6 +172,13 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
 
     const requestPath = `/api/intelligent-search/v1/product-search/${path}`
 
+    // DPT-67: emit dpPreview=true on non-master workspaces so QA traffic
+    // exercises the DP code path end-to-end without flipping the persisted
+    // `deliveryPromisesEnabled` store setting.
+    const dpPreview = shouldInjectDPPreview(this.context.workspace)
+      ? 'true'
+      : undefined
+
     const merged = filterUndefinedNonNull({
       sc: params.salesChannel ? params.salesChannel : segmentParams?.sc,
       regionId: params.regionId ?? segmentParams?.regionId,
@@ -208,6 +216,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
           : undefined,
       simulationBehavior: params.simulationBehavior ?? undefined,
       variant: params.variant,
+      dpPreview,
       ...parseState(searchState),
     })
 
@@ -253,6 +262,13 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
 
     const facetsPath = `/api/intelligent-search/v1/facets/${path}`
 
+    // DPT-67: emit dpPreview=true on non-master workspaces so QA traffic
+    // exercises the DP code path end-to-end without flipping the persisted
+    // `deliveryPromisesEnabled` store setting.
+    const dpPreview = shouldInjectDPPreview(this.context.workspace)
+      ? 'true'
+      : undefined
+
     const merged = filterUndefinedNonNull({
       sc: segmentParams?.sc,
       regionId: params.regionId ?? segmentParams?.regionId,
@@ -272,6 +288,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       locale: this.locale ?? segmentParams?.locale,
       bgy_leap: leap ? 'true' : undefined,
       variant: params.variant,
+      dpPreview,
       ...parseState(searchState),
     } as Record<string, unknown>)
 
