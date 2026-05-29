@@ -90,25 +90,13 @@ export const INTELLIGENT_SEARCH_PRODUCT_QUERY_KEYS = new Set<string>([
   'priceTables',
   'simulationBehavior',
   'variant',
-  // DPT-67: per-request override that activates the Delivery Promises code
-  // path in the IS API without flipping the persisted `deliveryPromisesEnabled`
-  // store setting. Emitted automatically on non-`master` workspaces — see
-  // {@link shouldInjectDPPreview}.
   'dpPreview',
 ])
 
 /**
- * Whether the IS API call should carry the `dpPreview=true` query param
- * for this request.
- *
- * Workspaces other than `master` are treated as QA environments — they get
- * DP activated end-to-end so the customer can validate the feature before
- * flipping the persisted store setting. `master` traffic is left untouched
- * to guarantee no behavioral change in production until the store explicitly
- * opts in via Store Search Settings.
- *
- * See DPT-67 for the rationale behind decoupling activation from the
- * `deliveryPromisesEnabled` flag.
+ * Whether the IS API call should carry `dpPreview=true`. Non-`master`
+ * workspaces are treated as QA and get DP activated end-to-end without
+ * the store flipping `deliveryPromisesEnabled`.
  */
 export function shouldInjectDPPreview(workspace: string | undefined): boolean {
   return workspace !== undefined && workspace !== '' && workspace !== 'master'

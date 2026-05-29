@@ -172,9 +172,6 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
 
     const requestPath = `/api/intelligent-search/v1/product-search/${path}`
 
-    // DPT-67: emit dpPreview=true on non-master workspaces so QA traffic
-    // exercises the DP code path end-to-end without flipping the persisted
-    // `deliveryPromisesEnabled` store setting.
     const dpPreview = shouldInjectDPPreview(this.context.workspace)
       ? 'true'
       : undefined
@@ -262,9 +259,6 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
 
     const facetsPath = `/api/intelligent-search/v1/facets/${path}`
 
-    // DPT-67: emit dpPreview=true on non-master workspaces so QA traffic
-    // exercises the DP code path end-to-end without flipping the persisted
-    // `deliveryPromisesEnabled` store setting.
     const dpPreview = shouldInjectDPPreview(this.context.workspace)
       ? 'true'
       : undefined
