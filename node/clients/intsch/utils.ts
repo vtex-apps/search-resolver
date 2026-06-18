@@ -94,12 +94,14 @@ export const INTELLIGENT_SEARCH_PRODUCT_QUERY_KEYS = new Set<string>([
 ])
 
 /**
- * Whether the IS API call should carry `dpPreview=true`. Non-`master`
- * workspaces are treated as QA and get DP activated end-to-end without
- * the store flipping `deliveryPromisesEnabled`.
+ * Whether the IS API call should carry `dpPreview=true`. Non-production
+ * workspaces are treated as QA and get DP activated end-to-end without the
+ * store flipping `deliveryPromisesEnabled`. Production workspaces never carry
+ * the param — including named workspaces promoted to production, not just
+ * `master`.
  */
-export function shouldInjectDPPreview(workspace: string | undefined): boolean {
-  return workspace !== undefined && workspace !== '' && workspace !== 'master'
+export function shouldInjectDPPreview(production: boolean): boolean {
+  return !production
 }
 
 export function filterByAllowedIntelligentSearchQueryKeys(

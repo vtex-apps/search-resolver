@@ -40,29 +40,18 @@ describe('filterByAllowedIntelligentSearchQueryKeys', () => {
 })
 
 /**
- * DPT-67: workspace-driven QA mode. The storefront emits `dpPreview=true` on
- * non-`master` workspaces so the IS API activates the Delivery Promises code
+ * DPT-67: production-driven QA mode. The storefront emits `dpPreview=true` on
+ * non-production workspaces so the IS API activates the Delivery Promises code
  * path without the store having to flip `deliveryPromisesEnabled`. Production
- * traffic in `master` must never carry the param.
+ * traffic must never carry the param — including named workspaces promoted to
+ * production, not just `master`.
  */
 describe('shouldInjectDPPreview', () => {
-  it('returns true for a typical QA workspace', () => {
-    expect(shouldInjectDPPreview('qa-store')).toBe(true)
+  it('returns true for a non-production (QA/dev) workspace', () => {
+    expect(shouldInjectDPPreview(false)).toBe(true)
   })
 
-  it('returns true for a dev workspace', () => {
-    expect(shouldInjectDPPreview('dev')).toBe(true)
-  })
-
-  it('returns false for master', () => {
-    expect(shouldInjectDPPreview('master')).toBe(false)
-  })
-
-  it('returns false when the workspace is undefined', () => {
-    expect(shouldInjectDPPreview(undefined)).toBe(false)
-  })
-
-  it('returns false when the workspace is an empty string', () => {
-    expect(shouldInjectDPPreview('')).toBe(false)
+  it('returns false for a production workspace', () => {
+    expect(shouldInjectDPPreview(true)).toBe(false)
   })
 })
