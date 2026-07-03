@@ -15,7 +15,8 @@
     "vtex.search-graphql": "0.x",
     "vtex.rewriter": "1.x",
     "vtex.sae-analytics": "2.x",
-    "vtex.intelligent-search-api": "0.x"
+    "vtex.intelligent-search-api": "0.x",
+    "vtex.search-session": "0.x"
   },
   "settingsSchema": {
     "title": "Intelligent Search Resolver",
