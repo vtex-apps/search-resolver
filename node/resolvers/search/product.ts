@@ -352,7 +352,10 @@ export const resolvers = {
       _: unknown,
       ctx: Context
     ) => {
-      if (product.origin === 'intelligent-search') {
+      if (
+        product.origin === 'intsch' ||
+        product.origin === 'intelligent-search'
+      ) {
         return product.specificationGroups
       }
 

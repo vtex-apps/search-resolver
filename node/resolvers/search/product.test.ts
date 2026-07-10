@@ -410,6 +410,42 @@ describe('tests related to product resolver', () => {
 
       expect(cucardas).toBeTruthy()
     })
+
+    it('specificationGroups returns product.specificationGroups as-is for both intelligent-search and intsch origins', async () => {
+      const rawSpecificationGroups = [
+        {
+          name: 'Group',
+          originalName: 'Group',
+          specifications: [
+            { name: 'Color', originalName: 'Color', values: ['Red'] },
+          ],
+        },
+      ]
+      const isProduct = getProduct({
+        origin: 'intelligent-search',
+        specificationGroups: rawSpecificationGroups,
+      })
+
+      const intschProduct = getProduct({
+        origin: 'intsch',
+        specificationGroups: rawSpecificationGroups,
+      })
+
+      const isResult = await resolvers.Product.specificationGroups(
+        isProduct as any,
+        {},
+        mockContext as any
+      )
+
+      const intschResult = await resolvers.Product.specificationGroups(
+        intschProduct as any,
+        {},
+        mockContext as any
+      )
+
+      expect(isResult).toBe(rawSpecificationGroups)
+      expect(intschResult).toBe(rawSpecificationGroups)
+    })
   })
 
   describe('properties resolver', () => {
