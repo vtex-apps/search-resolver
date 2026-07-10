@@ -230,7 +230,7 @@ export const resolvers = {
     },
 
     productClusters: ({ origin, productClusters }: SearchProduct) => {
-      if (origin === 'intelligent-search') {
+      if (origin === 'intsch' || origin === 'intelligent-search') {
         return productClusters
       }
 

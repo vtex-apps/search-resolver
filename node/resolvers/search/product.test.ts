@@ -161,6 +161,26 @@ describe('tests related to product resolver', () => {
     expect(result).toMatchObject([])
   })
 
+  it('productClusters is returned as-is for both intelligent-search and intsch origins', () => {
+    const rawProductClusters = [{ id: '140', name: 'Casual Footwear' }]
+    const isProduct = getProduct({
+      origin: 'intelligent-search',
+      productClusters: rawProductClusters,
+    })
+
+    const intschProduct = getProduct({
+      origin: 'intsch',
+      productClusters: rawProductClusters,
+    })
+
+    expect(resolvers.Product.productClusters(isProduct as any)).toEqual(
+      rawProductClusters
+    )
+    expect(resolvers.Product.productClusters(intschProduct as any)).toEqual(
+      rawProductClusters
+    )
+  })
+
   it('clusterHighlights should be properly formatted', () => {
     const product = getProduct()
 
