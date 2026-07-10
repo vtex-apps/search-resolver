@@ -461,5 +461,34 @@ describe('tests related to product resolver', () => {
         },
       ])
     })
+    it('properties uses product.properties as-is for both intelligent-search and intsch origins', async () => {
+      const rawProperties = [
+        { name: 'Color', originalName: 'Color', values: ['Red'] },
+      ]
+      const isProduct = getProduct({
+        origin: 'intelligent-search',
+        properties: rawProperties,
+      })
+
+      const intschProduct = getProduct({
+        origin: 'intsch',
+        properties: rawProperties,
+      })
+
+      const isResult = await resolvers.Product.properties(
+        isProduct as any,
+        {},
+        mockContext as any
+      )
+
+      const intschResult = await resolvers.Product.properties(
+        intschProduct as any,
+        {},
+        mockContext as any
+      )
+
+      expect(isResult).toEqual(rawProperties)
+      expect(intschResult).toEqual(rawProperties)
+    })
   })
 })

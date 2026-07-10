@@ -240,7 +240,7 @@ export const resolvers = {
     properties: async (product: SearchProduct, _: unknown, ctx: Context) => {
       let valuesUntranslated = []
 
-      if (product.origin === 'intelligent-search') {
+      if (product.origin === 'intsch' || product.origin === 'intelligent-search') {
         valuesUntranslated = product.properties ?? []
       } else {
         valuesUntranslated = (product.allSpecifications ?? []).map(
