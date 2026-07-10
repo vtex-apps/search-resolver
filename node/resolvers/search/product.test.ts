@@ -213,6 +213,26 @@ describe('tests related to product resolver', () => {
     expect(result).toMatchObject([])
   })
 
+  it('clusterHighlights is returned as-is for both intelligent-search and intsch origins', () => {
+    const rawClusterHighlights = [{ id: '140', name: 'Casual Footwear' }]
+    const isProduct = getProduct({
+      origin: 'intelligent-search',
+      clusterHighlights: rawClusterHighlights,
+    })
+
+    const intschProduct = getProduct({
+      origin: 'intsch',
+      clusterHighlights: rawClusterHighlights,
+    })
+
+    expect(resolvers.Product.clusterHighlights(isProduct as any)).toEqual(
+      rawClusterHighlights
+    )
+    expect(resolvers.Product.clusterHighlights(intschProduct as any)).toEqual(
+      rawClusterHighlights
+    )
+  })
+
   describe('linkText resolver', () => {
     it('linkText with binding with different locales', async () => {
       const product = getProduct()

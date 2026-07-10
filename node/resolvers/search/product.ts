@@ -208,7 +208,7 @@ export const resolvers = {
       cacheId ?? linkText,
 
     clusterHighlights: ({ origin, clusterHighlights }: SearchProduct) => {
-      if (origin === 'intelligent-search') {
+      if (origin === 'intsch' || origin === 'intelligent-search') {
         return clusterHighlights
       }
 
