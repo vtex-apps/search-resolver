@@ -15,7 +15,7 @@ linkText: async ({ productId, linkText, origin }: SearchProduct, _: unknown, ctx
 }
 ```
 
-`intsch` bypasses `vtex.intelligent-search-api` and hits the Intelligent Search platform directly — it never performs that Rewriter call. `origin` on `intsch` responses already arrives as the literal `'intsch'` (confirmed: no stamping needed in search-resolver code), so it currently only fails to match `'intelligent-search'` in this one check.
+`intsch` bypasses `vtex.intelligent-search-api` and hits the Intelligent Search platform directly — it never performs that Rewriter call. Today, `intsch` responses still send `origin: 'intelligent-search'` (kept that way for compatibility with the other 5 checks below), so nothing in the response currently distinguishes it from the legacy path. This change is paired with a separate PR on the `intsch` platform side that will change its `origin` value to `'intsch'` — search-resolver does not stamp or override `origin` itself; see "Cross-repo dependency" below.
 
 Additionally, `resolveProduct` (PDP fetch, `node/services/product.ts`) hardcodes `ctx.translated = true` whenever `shouldUseNewPDPEndpoint` is on, and the PLP fetch (`fetchProductSearchFromIntsch`, `node/services/productSearch.ts`) forwards the platform's own `raw.translated` flag. Either way, `ctx.translated` reflects the platform's query/content translation (correct for fields like `productName`/`description`, which the platform does translate via the `locale` param) — it says nothing about whether `linkText` specifically was translated, so it's the wrong signal to gate `linkText` on.
 
@@ -33,6 +33,15 @@ Separately, five other resolvers in `product.ts` branch on `origin === 'intellig
 - Fixing `vtex.tenant.locale` incorrectly reporting the tenant's locale under a non-default binding (a separate, likely platform-level issue raised in the same Jira ticket — not something `search-resolver` can address).
 - Refactoring the 5 non-`linkText` checks to duck-type by field presence instead of by origin value (considered and rejected — see Alternatives).
 - Explicitly stamping an `origin: 'catalog'` value for the legacy `search` client path (left as `undefined`, matching current behavior).
+- Changing what `origin` value `intsch` sends — that happens in a separate PR against the `intsch` platform, not in this repo.
+
+## Cross-repo dependency
+
+This change is inert until a paired PR on the `intsch` platform ships, changing its response to send `origin: 'intsch'` instead of `origin: 'intelligent-search'`. Until that lands:
+
+- This repo's code changes are safe to merge and deploy independently — no behavior changes today, since `origin === 'intsch'` will simply never match (all `intsch` responses still report `'intelligent-search'`).
+- Once the platform-side PR ships, `intsch`-origin products automatically start taking the new `linkText`-translation branch and the widened 5-field branches, with no further search-resolver deploy required.
+- Tests in this repo mock `origin: 'intsch'` directly (see Testing below), so they validate the search-resolver side of the contract ahead of the platform change landing.
 
 ## Design
 
@@ -49,7 +58,7 @@ interface SearchProduct {
 }
 ```
 
-`undefined` continues to mean the legacy catalog (Portal) path. No stamping is added anywhere — `origin` already arrives correctly as `'intsch'` or `'intelligent-search'` on the raw API response for each respective client; `node/services/product.ts` and `node/services/productSearch.ts` are not modified.
+`undefined` continues to mean the legacy catalog (Portal) path. No stamping is added anywhere in search-resolver — `node/services/product.ts` and `node/services/productSearch.ts` are not modified. The `'intsch'` value will start appearing in practice once the paired `intsch` platform PR ships (see "Cross-repo dependency" above); until then it only appears in this repo's tests.
 
 ### 2. `linkText` resolver
 
@@ -113,6 +122,6 @@ Extend `node/resolvers/search/product.test.ts`:
 
 ## Alternatives considered
 
-- **Stamping `origin` at the fetch layer** (`services/product.ts` / `services/productSearch.ts`): rejected — `origin` already arrives as `'intsch'` on the raw response; no override needed.
+- **Stamping `origin` at the fetch layer** (`services/product.ts` / `services/productSearch.ts`): rejected — the `origin` value change belongs upstream, in a paired PR against the `intsch` platform itself, not in search-resolver.
 - **Duck-typing the 5 non-`linkText` checks by field presence** instead of widening the origin comparison: rejected for this change — would require verifying catalog's exact response shape for all 5 fields, which isn't fully verifiable from static code alone. Widening the origin comparison achieves the same fix with a smaller, easily-reviewed diff and no behavior change for the two origins whose behavior was already correct.
 - **A shared `isSearchPlatformOrigin(origin)` helper** instead of repeating the `origin === 'intsch' || origin === 'intelligent-search'` condition at each site: rejected per explicit preference — the repeated condition is clearer to read at each call site than an indirection through a helper.
