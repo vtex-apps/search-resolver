@@ -83,8 +83,9 @@ interface SpecificationGroup {
   originalName: string
   specifications: { name: string; originalName: string; values: string[] }
 }
+type ProductOrigin = 'intelligent-search' | 'intsch'
 interface SearchProduct {
-  origin?: string
+  origin?: ProductOrigin
   productId: string
   productName: string
   brand: string

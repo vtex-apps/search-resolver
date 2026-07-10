@@ -208,7 +208,7 @@ export const resolvers = {
       cacheId ?? linkText,
 
     clusterHighlights: ({ origin, clusterHighlights }: SearchProduct) => {
-      if (origin === 'intelligent-search') {
+      if (origin === 'intsch' || origin === 'intelligent-search') {
         return clusterHighlights
       }
 
@@ -230,7 +230,7 @@ export const resolvers = {
     },
 
     productClusters: ({ origin, productClusters }: SearchProduct) => {
-      if (origin === 'intelligent-search') {
+      if (origin === 'intsch' || origin === 'intelligent-search') {
         return productClusters
       }
 
@@ -240,7 +240,7 @@ export const resolvers = {
     properties: async (product: SearchProduct, _: unknown, ctx: Context) => {
       let valuesUntranslated = []
 
-      if (product.origin === 'intelligent-search') {
+      if (product.origin === 'intsch' || product.origin === 'intelligent-search') {
         valuesUntranslated = product.properties ?? []
       } else {
         valuesUntranslated = (product.allSpecifications ?? []).map(
@@ -318,7 +318,13 @@ export const resolvers = {
         vtex: { binding },
       } = ctx
 
-      if (origin === 'intelligent-search' || !shouldTranslateToBinding(ctx)) {
+      if (origin === 'intelligent-search') {
+        return linkText
+      }
+
+      const ignoreIndexedTranslation = origin === 'intsch'
+
+      if (!shouldTranslateToBinding(ctx, ignoreIndexedTranslation)) {
         return linkText
       }
 
@@ -346,7 +352,10 @@ export const resolvers = {
       _: unknown,
       ctx: Context
     ) => {
-      if (product.origin === 'intelligent-search') {
+      if (
+        product.origin === 'intsch' ||
+        product.origin === 'intelligent-search'
+      ) {
         return product.specificationGroups
       }
 
@@ -478,7 +487,7 @@ export const resolvers = {
       productId,
     }: SearchProduct) => {
       // Since the IS doesn't return the itemMetadata, we need to build it from the items.attachments
-      if (origin === 'intelligent-search') {
+      if (origin === 'intsch' || origin === 'intelligent-search') {
         // Build itemMetadata from items.attachments
         const metadataItems = items.map((item) => {
           // Build assemblyOptions from attachments

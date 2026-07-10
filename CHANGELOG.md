@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- `linkText` not translated to the shopper's binding locale on multibinding stores when using the new PDP/PLP endpoints (`intsch`). `origin === 'intsch'` is now treated distinctly from `origin === 'intelligent-search'` for `linkText` translation, and identically to it for `clusterHighlights`, `productClusters`, `properties`, `specificationGroups`, and `itemMetadata`. Requires a paired change on the `intsch` platform to send `origin: 'intsch'` — see [TIS-707](https://vtex-dev.atlassian.net/browse/TIS-707).
+
 ## [1.104.0] - 2026-05-25
 
 ### Added
