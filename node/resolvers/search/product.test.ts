@@ -527,4 +527,24 @@ describe('tests related to product resolver', () => {
       expect(intschResult).toEqual(rawProperties)
     })
   })
+
+  describe('itemMetadata resolver', () => {
+    it('itemMetadata is built from items.attachments identically for both intelligent-search and intsch origins', () => {
+      const isProduct = getProduct({ origin: 'intelligent-search' })
+      const intschProduct = getProduct({ origin: 'intsch' })
+
+      const isResult = resolvers.Product.itemMetadata(isProduct as any)
+      const intschResult = resolvers.Product.itemMetadata(intschProduct as any)
+
+      expect(intschResult).toEqual(isResult)
+      expect(isResult.items).toHaveLength(isProduct.items.length)
+    })
+
+    it('itemMetadata is returned as-is for catalog origin (undefined)', () => {
+      const product = getProduct({ itemMetadata: { items: [] } })
+      const result = resolvers.Product.itemMetadata(product as any)
+
+      expect(result).toEqual({ items: [] })
+    })
+  })
 })

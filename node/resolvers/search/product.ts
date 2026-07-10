@@ -487,7 +487,7 @@ export const resolvers = {
       productId,
     }: SearchProduct) => {
       // Since the IS doesn't return the itemMetadata, we need to build it from the items.attachments
-      if (origin === 'intelligent-search') {
+      if (origin === 'intsch' || origin === 'intelligent-search') {
         // Build itemMetadata from items.attachments
         const metadataItems = items.map((item) => {
           // Build assemblyOptions from attachments
