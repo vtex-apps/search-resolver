@@ -240,6 +240,61 @@ describe('tests related to product resolver', () => {
 
       expect(result).toBe(product.linkText)
     })
+
+    it('linkText is returned unchanged for intelligent-search origin, even with different binding locale', async () => {
+      const product = getProduct({ origin: 'intelligent-search' })
+
+      mockContext.vtex.binding.locale = 'fr-FR'
+      const result = await resolvers.Product.linkText(
+        product as any,
+        {},
+        mockContext as any
+      )
+
+      expect(result).toBe(product.linkText)
+      expect(mockContext.clients.rewriter.getRoute).not.toHaveBeenCalled()
+    })
+
+    it('linkText is translated via rewriter for intsch origin with different binding locale, ignoring ctx.translated', async () => {
+      const product = getProduct({ origin: 'intsch' })
+
+      mockContext.vtex.binding.locale = 'fr-FR'
+      mockContext.translated = true
+      mockContext.clients.rewriter.getRoute.mockImplementationOnce(
+        (id: string, type: string, bindingId: string) =>
+          Promise.resolve(`/${id}-${type}-${bindingId}-${getBindingLocale()}/p`)
+      )
+      const result = await resolvers.Product.linkText(
+        product as any,
+        {},
+        mockContext as any
+      )
+
+      expect(result).toBe('16-product-abc-fr-FR')
+      expect(mockContext.clients.rewriter.getRoute).toHaveBeenCalledWith(
+        product.productId,
+        'product',
+        'abc'
+      )
+
+      mockContext.translated = false
+    })
+
+    it('linkText is returned unchanged for intsch origin when binding locale matches tenant locale', async () => {
+      const product = getProduct({ origin: 'intsch' })
+
+      mockContext.translated = true
+      const result = await resolvers.Product.linkText(
+        product as any,
+        {},
+        mockContext as any
+      )
+
+      expect(result).toBe(product.linkText)
+      expect(mockContext.clients.rewriter.getRoute).not.toHaveBeenCalled()
+
+      mockContext.translated = false
+    })
   })
 
   describe('specificationGroups resolver', () => {

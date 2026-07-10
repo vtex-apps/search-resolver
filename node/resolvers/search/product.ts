@@ -318,7 +318,13 @@ export const resolvers = {
         vtex: { binding },
       } = ctx
 
-      if (origin === 'intelligent-search' || !shouldTranslateToBinding(ctx)) {
+      if (origin === 'intelligent-search') {
+        return linkText
+      }
+
+      const ignoreIndexedTranslation = origin === 'intsch'
+
+      if (!shouldTranslateToBinding(ctx, ignoreIndexedTranslation)) {
         return linkText
       }
 
