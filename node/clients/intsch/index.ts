@@ -1,5 +1,5 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
-import { JanusClient } from '@vtex/api'
+import { HeaderKeys, JanusClient } from '@vtex/api'
 
 import type {
   AutocompleteSuggestionsArgs,
@@ -217,7 +217,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       'x-vtex-shipping-options': shippingHeader ?? '',
     }
 
-    const data = await this.http.get(requestPath, {
+    const response = await this.http.getRaw(requestPath, {
       params: requestParams,
       metric: 'product-search-new-v1',
       headers: {
@@ -226,8 +226,14 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
       },
     })
 
+    this.logCacheStatus(
+      'product-search',
+      response.headers,
+      segmentParams?.deliveryZonesHash
+    )
+
     return {
-      ...data,
+      ...response.data,
       requestInfo: {
         path: requestPath,
         params: requestParams,
@@ -236,7 +242,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     }
   }
 
-  public facets(
+  public async facets(
     params: IntschFacetsParams,
     path: string,
     options?: FacetsOptions
@@ -277,13 +283,34 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
 
     const facetsParams = filterByAllowedIntelligentSearchQueryKeys(merged)
 
-    return this.http.get(facetsPath, {
+    const response = await this.http.getRaw(facetsPath, {
       params: facetsParams,
       metric: 'facets-new-v1',
       headers: {
         'x-vtex-shipping-options': shippingHeader ?? '',
         ...(authToken ? { VtexIdclientAutCookie: authToken } : {}),
       },
+    })
+
+    this.logCacheStatus(
+      'facets',
+      response.headers,
+      segmentParams?.deliveryZonesHash
+    )
+
+    return response.data
+  }
+
+  private logCacheStatus(
+    route: 'product-search' | 'facets',
+    headers: Record<string, string>,
+    deliveryZonesHash?: string
+  ) {
+    this.context.logger.info({
+      message: 'IntelligentSearch cache status',
+      route,
+      cacheHit: headers[HeaderKeys.ROUTER_CACHE] === 'HIT',
+      hasDeliveryZonesHash: Boolean(deliveryZonesHash),
     })
   }
 }
