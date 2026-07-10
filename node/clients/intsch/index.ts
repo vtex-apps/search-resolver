@@ -306,6 +306,10 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     headers: Record<string, string>,
     deliveryZonesHash?: string
   ) {
+    if (Math.random() >= 0.1) {
+      return
+    }
+
     this.context.logger.info({
       message: 'IntelligentSearch cache status',
       route,
