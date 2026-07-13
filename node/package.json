@@ -22,7 +22,7 @@
     "@types/cookie": "^0.4.1",
     "@types/graphql": "^14.5.0",
     "@types/jest": "^29.5.14",
-    "@types/node": "^20.0.0",
+    "@types/node": "^26.1.1",
     "@types/qs": "^6.5.1",
     "@types/ramda": "^0.26.21",
     "@vtex/api": "^7.2.7",
