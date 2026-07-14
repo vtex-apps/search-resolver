@@ -295,6 +295,29 @@ export async function resolveProductsByIdentifier(
   args: ProductsByIdentifierArgs
 ): Promise<SearchProduct[]> {
   const { shouldUseNewPDPEndpoint } = await fetchAppSettings(ctx)
+  const rejectedValues =
+    args.field === 'id' ? args.values.filter((value) => value === '-1') : []
+  const sanitizedArgs =
+    rejectedValues.length > 0
+      ? {
+          ...args,
+          values: args.values.filter((value) => value !== '-1'),
+        }
+      : args
+
+  if (rejectedValues.length > 0) {
+    ctx.vtex.logger.warn({
+      message: 'Filtered invalid product identifiers',
+      field: args.field,
+      rejectedValues,
+      receivedValues: args.values,
+      forwardedValues: sanitizedArgs.values,
+    })
+  }
+
+  if (sanitizedArgs.values.length === 0) {
+    return []
+  }
 
   // Get and create segment before calling intsch
   const segment = await getOrCreateSegment(ctx)
@@ -307,11 +330,11 @@ export async function resolveProductsByIdentifier(
     if (shouldUseNewPDPEndpoint) {
       products = await fetchProductsByIdentifierFromIntsch(
         ctx,
-        args,
+        sanitizedArgs,
         segmentData
       )
     } else {
-      products = await fetchProductsByIdentifierFromSearch(ctx, args)
+      products = await fetchProductsByIdentifierFromSearch(ctx, sanitizedArgs)
     }
 
     return products
@@ -319,7 +342,7 @@ export async function resolveProductsByIdentifier(
     ctx.vtex.logger.error({
       message: 'Error fetching products by identifier',
       error: error.message,
-      args,
+      args: sanitizedArgs,
     })
     throw error
   }
