@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `enableHybridSearch` app setting: when enabled, sends `semanticRatio` on `intsch` product-search requests to activate semantic ranking. `semanticModel` and the rest of the backend's `isSemanticEnabled()` inputs must already be configured on the account's `storeSearchSettings` — `semanticRatio` is the only one not set there. Only applies when `shouldUseNewPLPEndpoint` is also enabled; has no effect on the legacy Biggy search path. Intended for demo/test accounts linked to a workspace running this version.
+
 ## [1.104.1] - 2026-07-10
 
 ### Fixed

@@ -20,6 +20,7 @@ import type {
   ProductSearchRequestInfo,
 } from '../clients/intsch/types'
 import { fetchAppSettings } from './settings'
+import { buildSemanticSearchParams } from '../utils/semanticSearch'
 
 type SegmentData = ReturnType<typeof extractSegmentData>
 
@@ -334,7 +335,8 @@ const defaultAdvertisementOptions: AdvertisementOptions = {
 function buildProductSearchRequestParams(
   args: ProductSearchInput,
   fullText: string | undefined,
-  advertisementOptionsResolved: AdvertisementOptions
+  advertisementOptionsResolved: AdvertisementOptions,
+  semanticParams: Partial<IntschProductSearchParams> = {}
 ): IntschProductSearchParams {
   const {
     selectedFacets: _omitSelectedFacets,
@@ -349,6 +351,7 @@ function buildProductSearchRequestParams(
     query: fullText,
     sort: convertOrderBy(args.orderBy),
     ...(searchOptions ?? {}),
+    ...semanticParams,
   }
 }
 
@@ -412,7 +415,8 @@ async function fetchProductSearchFromIntsch(
   args: ProductSearchInput,
   selectedFacets: SelectedFacet[],
   shippingOptions?: string[],
-  segmentData?: SegmentData
+  segmentData?: SegmentData,
+  enableHybridSearch = false
 ) {
   const { intsch } = ctx.clients
   const { fullText } = args
@@ -423,7 +427,8 @@ async function fetchProductSearchFromIntsch(
   const intschArgs = buildProductSearchRequestParams(
     args,
     fullText,
-    advertisementOptionsResolved
+    advertisementOptionsResolved,
+    buildSemanticSearchParams(enableHybridSearch)
   )
 
   const finalArgs = applyHideUnavailableItemsDefaultForDP(
@@ -491,7 +496,8 @@ export async function fetchProductSearch(
   selectedFacets: SelectedFacet[],
   shippingOptions?: string[]
 ) {
-  const { shouldUseNewPLPEndpoint } = await fetchAppSettings(ctx)
+  const { shouldUseNewPLPEndpoint, enableHybridSearch } =
+    await fetchAppSettings(ctx)
   const segment = await getOrCreateSegment(ctx)
   const segmentData = extractSegmentData(segment)
 
@@ -517,7 +523,8 @@ export async function fetchProductSearch(
       args,
       selectedFacets,
       shippingOptions,
-      segmentData
+      segmentData,
+      enableHybridSearch
     )
 
     logSponsoredProducts(ctx, result)
@@ -567,7 +574,8 @@ export async function fetchProductSearch(
         args,
         selectedFacets,
         shippingOptions,
-        segmentData
+        segmentData,
+        enableHybridSearch
       )
 
       logArgs.intschCurl = buildCurl(account, 'myvtex.com', {
