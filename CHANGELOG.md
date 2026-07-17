@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-- `priceToken` resolver on the `Offer` type: passes through the signed price token (Pricing Fallback) from `commertialOffer.PriceToken` when present, `null` otherwise. Requires `vtex.search-graphql` with the matching `priceToken` field on `Offer`.
+- `priceToken` resolver on the `Offer` type: passes through the signed price token (Pricing Fallback) from `commertialOffer.PriceToken` when present, `null` otherwise. Requires `vtex.search-graphql@0.72.0` or later, which introduces the matching `priceToken` field on `Offer`.
 
 ## [1.105.0] - 2026-07-15
 
