@@ -265,4 +265,68 @@ describe('fetchProductSearch service', () => {
       { shippingHeader: undefined }
     )
   })
+
+  it('sends semanticRatio to intsch when enableHybridSearch setting is true', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: true,
+        enableHybridSearch: true,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+    })
+
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+
+    expect(ctx.clients.intsch.productSearch).toHaveBeenCalledWith(
+      expect.objectContaining({ semanticRatio: 0.5 }),
+      expect.any(String),
+      expect.any(Object)
+    )
+  })
+
+  it('does not send semanticRatio to intsch when enableHybridSearch setting is false', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: true,
+        enableHybridSearch: false,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+    })
+
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+
+    const [callArgs] = (ctx.clients.intsch.productSearch as jest.Mock).mock
+      .calls[0]
+
+    expect(callArgs).not.toHaveProperty('semanticRatio')
+  })
+
+  it('never sends semanticRatio to the legacy Biggy client even when enableHybridSearch is true', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: false,
+        enableHybridSearch: true,
+      },
+      intelligentSearchApiSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+    })
+
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+
+    const [callArgs] = (ctx.clients.intelligentSearchApi
+      .productSearch as jest.Mock).mock.calls[0]
+
+    expect(callArgs).not.toHaveProperty('semanticRatio')
+  })
 })

@@ -83,8 +83,9 @@ interface SpecificationGroup {
   originalName: string
   specifications: { name: string; originalName: string; values: string[] }
 }
+type ProductOrigin = 'intelligent-search' | 'intsch'
 interface SearchProduct {
-  origin?: string
+  origin?: ProductOrigin
   productId: string
   productName: string
   brand: string
@@ -244,6 +245,9 @@ interface CommertialOffer {
   // Supports the Intelligent Search API which
   // uses the same name from the simulation
   discountHighlights: any[]
+  // Signed price token (Pricing Fallback). Only present when intsch has
+  // price signing enabled for the account; absent on the legacy search client.
+  PriceToken?: string
 }
 
 interface Seller {

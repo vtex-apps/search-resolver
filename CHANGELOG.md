@@ -11,6 +11,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `vtex.search-session` as an app dependency.
 
+## [1.106.0] - 2026-07-20
+
+### Added
+
+- `priceToken` resolver on the `Offer` type: passes through the signed price token (Pricing Fallback) from `commertialOffer.PriceToken` when present, `null` otherwise. Requires `vtex.search-graphql@0.72.0` or later, which introduces the matching `priceToken` field on `Offer`.
+
+## [1.105.0] - 2026-07-15
+
+### Added
+
+- `enableHybridSearch` app setting: when enabled, sends `semanticRatio` on `intsch` product-search requests to activate semantic ranking. `semanticModel` and the rest of the backend's `isSemanticEnabled()` inputs must already be configured on the account's `storeSearchSettings` — `semanticRatio` is the only one not set there. Only applies when `shouldUseNewPLPEndpoint` is also enabled; has no effect on the legacy Biggy search path. Intended for demo/test accounts linked to a workspace running this version.
+
+## [1.104.1] - 2026-07-10
+
+### Fixed
+
+- `linkText` not translated to the shopper's binding locale on multibinding stores when using the new PDP/PLP endpoints (`intsch`). `origin === 'intsch'` is now treated distinctly from `origin === 'intelligent-search'` for `linkText` translation, and identically to it for `clusterHighlights`, `productClusters`, `properties`, `specificationGroups`, and `itemMetadata`. Requires a paired change on the `intsch` platform to send `origin: 'intsch'` — see [TIS-707](https://vtex-dev.atlassian.net/browse/TIS-707).
+
 ## [1.104.0] - 2026-05-25
 
 ### Added

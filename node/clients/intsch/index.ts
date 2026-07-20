@@ -208,6 +208,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
           : undefined,
       simulationBehavior: params.simulationBehavior ?? undefined,
       variant: params.variant,
+      semanticRatio: params.semanticRatio,
       ...parseState(searchState),
     })
 

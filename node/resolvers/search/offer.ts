@@ -146,6 +146,9 @@ export const resolvers = {
       }
 
       return offer.Tax / offer.Price
-    }
+    },
+    priceToken: (offer: CommertialOffer) => {
+      return offer.PriceToken ?? null
+    },
   },
 }
