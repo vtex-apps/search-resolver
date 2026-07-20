@@ -245,6 +245,9 @@ interface CommertialOffer {
   // Supports the Intelligent Search API which
   // uses the same name from the simulation
   discountHighlights: any[]
+  // Signed price token (Pricing Fallback). Only present when intsch has
+  // price signing enabled for the account; absent on the legacy search client.
+  PriceToken?: string
 }
 
 interface Seller {
