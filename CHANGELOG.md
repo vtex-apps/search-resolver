@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.106.1] - 2026-07-20
+
 ### Added
 
 - `vtex.search-session` as an app dependency.
