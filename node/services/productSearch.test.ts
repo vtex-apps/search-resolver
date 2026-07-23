@@ -30,6 +30,59 @@ describe('fetchProductSearch service', () => {
     jest.clearAllMocks()
   })
 
+  it('should default hideUnavailableItems=true when DP is enabled and hideUnavailableItems is undefined (intsch path)', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: true,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+      segment: {
+        facets: 'deliveryZonesHash=dzHash',
+      } as any,
+    })
+
+    const { hideUnavailableItems: _ignored, ...argsWithoutHide } = mockArgs as any
+
+    await fetchProductSearch(ctx, argsWithoutHide, mockSelectedFacets)
+
+    expect(ctx.clients.intsch.productSearch).toHaveBeenCalledWith(
+      expect.objectContaining({ hideUnavailableItems: true }),
+      expect.any(String),
+      expect.any(Object)
+    )
+  })
+
+  it('should default hideUnavailableItems=true when DP is enabled and hideUnavailableItems is undefined (biggy path)', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: false,
+      },
+      intelligentSearchApiSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+      segment: {
+        facets: 'deliveryZonesHash=dzHash',
+      } as any,
+    })
+
+    const { hideUnavailableItems: _ignored, ...argsWithoutHide } = mockArgs as any
+
+    await fetchProductSearch(ctx, argsWithoutHide, mockSelectedFacets)
+
+    expect(ctx.clients.intelligentSearchApi.productSearch).toHaveBeenCalledWith(
+      expect.objectContaining({ hideUnavailableItems: true }),
+      expect.any(String),
+      expect.objectContaining({ shippingHeader: undefined })
+    )
+  })
+
   it('should use intsch when shouldUseNewPLPEndpoint is true', async () => {
     const ctx = createContext({
       accountName: 'testaccount',
@@ -211,5 +264,69 @@ describe('fetchProductSearch service', () => {
       expect.any(String),
       { shippingHeader: undefined }
     )
+  })
+
+  it('sends semanticRatio to intsch when enableHybridSearch setting is true', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: true,
+        enableHybridSearch: true,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+    })
+
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+
+    expect(ctx.clients.intsch.productSearch).toHaveBeenCalledWith(
+      expect.objectContaining({ semanticRatio: 0.5 }),
+      expect.any(String),
+      expect.any(Object)
+    )
+  })
+
+  it('does not send semanticRatio to intsch when enableHybridSearch setting is false', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: true,
+        enableHybridSearch: false,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+    })
+
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+
+    const [callArgs] = (ctx.clients.intsch.productSearch as jest.Mock).mock
+      .calls[0]
+
+    expect(callArgs).not.toHaveProperty('semanticRatio')
+  })
+
+  it('never sends semanticRatio to the legacy Biggy client even when enableHybridSearch is true', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: false,
+        enableHybridSearch: true,
+      },
+      intelligentSearchApiSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+    })
+
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+
+    const [callArgs] = (ctx.clients.intelligentSearchApi
+      .productSearch as jest.Mock).mock.calls[0]
+
+    expect(callArgs).not.toHaveProperty('semanticRatio')
   })
 })

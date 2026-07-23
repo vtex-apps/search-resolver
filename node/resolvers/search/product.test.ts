@@ -161,30 +161,24 @@ describe('tests related to product resolver', () => {
     expect(result).toMatchObject([])
   })
 
-  it('clusterHighlights should be properly formatted', () => {
-    const product = getProduct()
+  it('productClusters is returned as-is for both intelligent-search and intsch origins', () => {
+    const rawProductClusters = [{ id: '140', name: 'Casual Footwear' }]
+    const isProduct = getProduct({
+      origin: 'intelligent-search',
+      productClusters: rawProductClusters,
+    })
 
-    product.clusterHighlights = {
-      '140': 'Casual Footwear',
-      '195': 'All products',
-      '201': 'Third',
-    }
-    const result = resolvers.Product.clusterHighlights(product as any)
+    const intschProduct = getProduct({
+      origin: 'intsch',
+      productClusters: rawProductClusters,
+    })
 
-    expect(result).toMatchObject([
-      { id: '140', name: 'Casual Footwear' },
-      { id: '195', name: 'All products' },
-      { id: '201', name: 'Third' },
-    ])
-  })
-
-  it('clusterHighlights should not break if value is null', () => {
-    const product = getProduct()
-
-    product.clusterHighlights = null as any
-    const result = resolvers.Product.clusterHighlights(product as any)
-
-    expect(result).toMatchObject([])
+    expect(resolvers.Product.productClusters(isProduct as any)).toEqual(
+      rawProductClusters
+    )
+    expect(resolvers.Product.productClusters(intschProduct as any)).toEqual(
+      rawProductClusters
+    )
   })
 
   it('clusterHighlights should be properly formatted', () => {
@@ -211,6 +205,52 @@ describe('tests related to product resolver', () => {
     const result = resolvers.Product.clusterHighlights(product as any)
 
     expect(result).toMatchObject([])
+  })
+
+  it('clusterHighlights should be properly formatted', () => {
+    const product = getProduct()
+
+    product.clusterHighlights = {
+      '140': 'Casual Footwear',
+      '195': 'All products',
+      '201': 'Third',
+    }
+    const result = resolvers.Product.clusterHighlights(product as any)
+
+    expect(result).toMatchObject([
+      { id: '140', name: 'Casual Footwear' },
+      { id: '195', name: 'All products' },
+      { id: '201', name: 'Third' },
+    ])
+  })
+
+  it('clusterHighlights should not break if value is null', () => {
+    const product = getProduct()
+
+    product.clusterHighlights = null as any
+    const result = resolvers.Product.clusterHighlights(product as any)
+
+    expect(result).toMatchObject([])
+  })
+
+  it('clusterHighlights is returned as-is for both intelligent-search and intsch origins', () => {
+    const rawClusterHighlights = [{ id: '140', name: 'Casual Footwear' }]
+    const isProduct = getProduct({
+      origin: 'intelligent-search',
+      clusterHighlights: rawClusterHighlights,
+    })
+
+    const intschProduct = getProduct({
+      origin: 'intsch',
+      clusterHighlights: rawClusterHighlights,
+    })
+
+    expect(resolvers.Product.clusterHighlights(isProduct as any)).toEqual(
+      rawClusterHighlights
+    )
+    expect(resolvers.Product.clusterHighlights(intschProduct as any)).toEqual(
+      rawClusterHighlights
+    )
   })
 
   describe('linkText resolver', () => {
@@ -239,6 +279,61 @@ describe('tests related to product resolver', () => {
       )
 
       expect(result).toBe(product.linkText)
+    })
+
+    it('linkText is returned unchanged for intelligent-search origin, even with different binding locale', async () => {
+      const product = getProduct({ origin: 'intelligent-search' })
+
+      mockContext.vtex.binding.locale = 'fr-FR'
+      const result = await resolvers.Product.linkText(
+        product as any,
+        {},
+        mockContext as any
+      )
+
+      expect(result).toBe(product.linkText)
+      expect(mockContext.clients.rewriter.getRoute).not.toHaveBeenCalled()
+    })
+
+    it('linkText is translated via rewriter for intsch origin with different binding locale, ignoring ctx.translated', async () => {
+      const product = getProduct({ origin: 'intsch' })
+
+      mockContext.vtex.binding.locale = 'fr-FR'
+      mockContext.translated = true
+      mockContext.clients.rewriter.getRoute.mockImplementationOnce(
+        (id: string, type: string, bindingId: string) =>
+          Promise.resolve(`/${id}-${type}-${bindingId}-${getBindingLocale()}/p`)
+      )
+      const result = await resolvers.Product.linkText(
+        product as any,
+        {},
+        mockContext as any
+      )
+
+      expect(result).toBe('16-product-abc-fr-FR')
+      expect(mockContext.clients.rewriter.getRoute).toHaveBeenCalledWith(
+        product.productId,
+        'product',
+        'abc'
+      )
+
+      mockContext.translated = false
+    })
+
+    it('linkText is returned unchanged for intsch origin when binding locale matches tenant locale', async () => {
+      const product = getProduct({ origin: 'intsch' })
+
+      mockContext.translated = true
+      const result = await resolvers.Product.linkText(
+        product as any,
+        {},
+        mockContext as any
+      )
+
+      expect(result).toBe(product.linkText)
+      expect(mockContext.clients.rewriter.getRoute).not.toHaveBeenCalled()
+
+      mockContext.translated = false
     })
   })
 
@@ -315,6 +410,42 @@ describe('tests related to product resolver', () => {
 
       expect(cucardas).toBeTruthy()
     })
+
+    it('specificationGroups returns product.specificationGroups as-is for both intelligent-search and intsch origins', async () => {
+      const rawSpecificationGroups = [
+        {
+          name: 'Group',
+          originalName: 'Group',
+          specifications: [
+            { name: 'Color', originalName: 'Color', values: ['Red'] },
+          ],
+        },
+      ]
+      const isProduct = getProduct({
+        origin: 'intelligent-search',
+        specificationGroups: rawSpecificationGroups,
+      })
+
+      const intschProduct = getProduct({
+        origin: 'intsch',
+        specificationGroups: rawSpecificationGroups,
+      })
+
+      const isResult = await resolvers.Product.specificationGroups(
+        isProduct as any,
+        {},
+        mockContext as any
+      )
+
+      const intschResult = await resolvers.Product.specificationGroups(
+        intschProduct as any,
+        {},
+        mockContext as any
+      )
+
+      expect(isResult).toBe(rawSpecificationGroups)
+      expect(intschResult).toBe(rawSpecificationGroups)
+    })
   })
 
   describe('properties resolver', () => {
@@ -365,6 +496,55 @@ describe('tests related to product resolver', () => {
           values: ['teste value (((teste-id))) <<<pt-BR>>> [[[original]]]'],
         },
       ])
+    })
+    it('properties uses product.properties as-is for both intelligent-search and intsch origins', async () => {
+      const rawProperties = [
+        { name: 'Color', originalName: 'Color', values: ['Red'] },
+      ]
+      const isProduct = getProduct({
+        origin: 'intelligent-search',
+        properties: rawProperties,
+      })
+
+      const intschProduct = getProduct({
+        origin: 'intsch',
+        properties: rawProperties,
+      })
+
+      const isResult = await resolvers.Product.properties(
+        isProduct as any,
+        {},
+        mockContext as any
+      )
+
+      const intschResult = await resolvers.Product.properties(
+        intschProduct as any,
+        {},
+        mockContext as any
+      )
+
+      expect(isResult).toEqual(rawProperties)
+      expect(intschResult).toEqual(rawProperties)
+    })
+  })
+
+  describe('itemMetadata resolver', () => {
+    it('itemMetadata is built from items.attachments identically for both intelligent-search and intsch origins', () => {
+      const isProduct = getProduct({ origin: 'intelligent-search' })
+      const intschProduct = getProduct({ origin: 'intsch' })
+
+      const isResult = resolvers.Product.itemMetadata(isProduct as any)
+      const intschResult = resolvers.Product.itemMetadata(intschProduct as any)
+
+      expect(intschResult).toEqual(isResult)
+      expect(isResult.items).toHaveLength(isProduct.items.length)
+    })
+
+    it('itemMetadata is returned as-is for catalog origin (undefined)', () => {
+      const product = getProduct({ itemMetadata: { items: [] } })
+      const result = resolvers.Product.itemMetadata(product as any)
+
+      expect(result).toEqual({ items: [] })
     })
   })
 })

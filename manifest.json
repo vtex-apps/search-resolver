@@ -1,7 +1,7 @@
 {
   "vendor": "vtex",
   "name": "search-resolver",
-  "version": "1.102.2",
+  "version": "1.106.1",
   "title": "GraphQL resolver for the VTEX store APIs",
   "description": "GraphQL resolvers for the VTEX API for the catalog and orders.",
   "credentialType": "absolute",
@@ -15,7 +15,8 @@
     "vtex.search-graphql": "0.x",
     "vtex.rewriter": "1.x",
     "vtex.sae-analytics": "2.x",
-    "vtex.intelligent-search-api": "0.x"
+    "vtex.intelligent-search-api": "0.x",
+    "vtex.search-session": "0.x"
   },
   "settingsSchema": {
     "title": "Intelligent Search Resolver",
@@ -33,6 +34,11 @@
       },
       "shouldUseNewPLPEndpoint": {
         "title": "Feature flag to use the new PLP endpoint",
+        "type": "boolean",
+        "default": false
+      },
+      "enableHybridSearch": {
+        "title": "Enable Hybrid Search. Sends semanticRatio on product-search requests to activate semantic ranking (requires storeSearchSettings to already be configured on the account).",
         "type": "boolean",
         "default": false
       }

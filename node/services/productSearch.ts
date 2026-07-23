@@ -5,6 +5,7 @@ import {
   mergeSegmentParamsWithPickupFromPath,
 } from '../commons/compatibility-layer'
 import { extractSegmentData, getOrCreateSegment } from '../utils/segment'
+import { applyHideUnavailableItemsDefaultForDP } from '../utils/hideUnavailableItems'
 import {
   compareApiResults,
   type ExistenceComparePattern,
@@ -19,6 +20,7 @@ import type {
   ProductSearchRequestInfo,
 } from '../clients/intsch/types'
 import { fetchAppSettings } from './settings'
+import { buildSemanticSearchParams } from '../utils/semanticSearch'
 
 type SegmentData = ReturnType<typeof extractSegmentData>
 
@@ -333,7 +335,8 @@ const defaultAdvertisementOptions: AdvertisementOptions = {
 function buildProductSearchRequestParams(
   args: ProductSearchInput,
   fullText: string | undefined,
-  advertisementOptionsResolved: AdvertisementOptions
+  advertisementOptionsResolved: AdvertisementOptions,
+  semanticParams: Partial<IntschProductSearchParams> = {}
 ): IntschProductSearchParams {
   const {
     selectedFacets: _omitSelectedFacets,
@@ -348,6 +351,7 @@ function buildProductSearchRequestParams(
     query: fullText,
     sort: convertOrderBy(args.orderBy),
     ...(searchOptions ?? {}),
+    ...semanticParams,
   }
 }
 
@@ -359,7 +363,8 @@ async function fetchProductSearchFromBiggy(
   ctx: Context,
   args: ProductSearchInput,
   selectedFacets: SelectedFacet[],
-  shippingOptions?: string[]
+  shippingOptions?: string[],
+  segmentData?: SegmentData
 ) {
   const { intelligentSearchApi } = ctx.clients
   const { fullText } = args
@@ -372,8 +377,13 @@ async function fetchProductSearchFromBiggy(
     advertisementOptionsResolved
   )
 
+  const finalArgs = applyHideUnavailableItemsDefaultForDP(
+    biggyArgs,
+    segmentData?.segmentParams
+  )
+
   const raw = await intelligentSearchApi.productSearch(
-    { ...biggyArgs },
+    { ...finalArgs },
     buildAttributePath(selectedFacets),
     { shippingHeader: shippingOptions }
   )
@@ -405,7 +415,8 @@ async function fetchProductSearchFromIntsch(
   args: ProductSearchInput,
   selectedFacets: SelectedFacet[],
   shippingOptions?: string[],
-  segmentData?: SegmentData
+  segmentData?: SegmentData,
+  enableHybridSearch = false
 ) {
   const { intsch } = ctx.clients
   const { fullText } = args
@@ -416,7 +427,13 @@ async function fetchProductSearchFromIntsch(
   const intschArgs = buildProductSearchRequestParams(
     args,
     fullText,
-    advertisementOptionsResolved
+    advertisementOptionsResolved,
+    buildSemanticSearchParams(enableHybridSearch)
+  )
+
+  const finalArgs = applyHideUnavailableItemsDefaultForDP(
+    intschArgs,
+    segmentData?.segmentParams
   )
 
   const allFacets = segmentData
@@ -424,7 +441,7 @@ async function fetchProductSearchFromIntsch(
     : selectedFacets
 
   const raw = await intsch.productSearch(
-    { ...intschArgs },
+    { ...finalArgs },
     buildAttributePath(allFacets),
     {
       segmentParams: mergeSegmentParamsWithPickupFromPath(
@@ -479,7 +496,8 @@ export async function fetchProductSearch(
   selectedFacets: SelectedFacet[],
   shippingOptions?: string[]
 ) {
-  const { shouldUseNewPLPEndpoint } = await fetchAppSettings(ctx)
+  const { shouldUseNewPLPEndpoint, enableHybridSearch } =
+    await fetchAppSettings(ctx)
   const segment = await getOrCreateSegment(ctx)
   const segmentData = extractSegmentData(segment)
 
@@ -505,7 +523,8 @@ export async function fetchProductSearch(
       args,
       selectedFacets,
       shippingOptions,
-      segmentData
+      segmentData,
+      enableHybridSearch
     )
 
     logSponsoredProducts(ctx, result)
@@ -537,7 +556,8 @@ export async function fetchProductSearch(
         ctx,
         args,
         selectedFacets,
-        shippingOptions
+        shippingOptions,
+        segmentData
       )
 
       logArgs.biggyCurl = buildCurl(
@@ -554,7 +574,8 @@ export async function fetchProductSearch(
         args,
         selectedFacets,
         shippingOptions,
-        segmentData
+        segmentData,
+        enableHybridSearch
       )
 
       logArgs.intschCurl = buildCurl(account, 'myvtex.com', {

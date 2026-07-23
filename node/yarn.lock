@@ -4397,9 +4397,9 @@ vary@^1.1.2:
   version "1.53.4"
   resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.53.4/public/@types/vtex.rewriter#6348993efde4106196bca60fd40dba00b3a354b6"
 
-"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.69.4/public":
+"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.72.0/public":
   version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.69.4/public#c48776a188c1d69e51bb307a0459268412b283bd"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.72.0/public#7bc95c94800b8f09ce1e0b0cf4417bef8bca6e7b"
 
 walker@^1.0.8:
   version "1.0.8"

@@ -83,8 +83,9 @@ interface SpecificationGroup {
   originalName: string
   specifications: { name: string; originalName: string; values: string[] }
 }
+type ProductOrigin = 'intelligent-search' | 'intsch'
 interface SearchProduct {
-  origin?: string
+  origin?: ProductOrigin
   productId: string
   productName: string
   brand: string
@@ -136,17 +137,31 @@ interface SearchItem {
     required: boolean
     isRequired?: boolean // Response from intsch
     domainValues?: string
-    fields?: { // Response from intsch
+    fields?: {
+      // Response from intsch
       fieldName: string
       maxCharacters: string
       domainValues: string
     }[]
   }[]
+  // Non-structured SKU specifications coming from the Intelligent
+  // Search `attributes` field on each SKU (ProductSkuCatalogAttribute).
+  // Created via the Catalog API
+  // /api/catalog/pvt/specification/nonstructured. Not present on
+  // responses from the legacy Portal Search client.
+  attributes?: SkuNonStructuredAttribute[]
   isKit: boolean
   kitItems?: {
     itemId: string
     amount: number
   }[]
+}
+
+interface SkuNonStructuredAttribute {
+  id: string
+  name: string
+  value: string
+  visible: boolean
 }
 
 interface CompleteSpecification {
@@ -230,6 +245,9 @@ interface CommertialOffer {
   // Supports the Intelligent Search API which
   // uses the same name from the simulation
   discountHighlights: any[]
+  // Signed price token (Pricing Fallback). Only present when intsch has
+  // price signing enabled for the account; absent on the legacy search client.
+  PriceToken?: string
 }
 
 interface Seller {
