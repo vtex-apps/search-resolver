@@ -4,53 +4,23 @@
 
 import * as TypeMoq from 'typemoq'
 import type { IOContext } from '@vtex/api'
-import { VBase } from '@vtex/api'
 
 import { Search } from '../../clients/search'
 import { mountCompatibilityQuery } from './newURLs'
 import { getCompatibilityArgs } from '.'
 import { Clients } from '../../clients'
+import { clearCompatibilityCaches } from './modules/compatibilityCache'
 
 const contextMock = TypeMoq.Mock.ofType<IOContext>()
 const categoryTreeResponseMock = TypeMoq.Mock.ofType<CategoryTreeResponse>()
 const facetsMock = TypeMoq.Mock.ofType<SearchFacets>()
-const vbaseTypeMock = TypeMoq.Mock.ofInstance(VBase)
 const state = TypeMoq.Mock.ofType<State>()
 const customContext = TypeMoq.Mock.ofType<CustomContext>()
 
 describe('Search new URLs dicovery', () => {
-  class VBaseMock extends vbaseTypeMock.object {
-    private jsonData: any
-
-    constructor() {
-      super(contextMock.object)
-      this.jsonData = {}
-    }
-
-    public getJSON = async <T>(
-      bucket: string,
-      file: string,
-      nullOrUndefined?: boolean | undefined
-    ): Promise<T> => {
-      if (!this.jsonData[bucket]) {
-        return (nullOrUndefined ? null : {}) as T
-      }
-
-      return Promise.resolve(this.jsonData[bucket][file] as T)
-    }
-
-    public saveJSON = async <T>(
-      bucket: string,
-      file: string,
-      data: T
-    ): Promise<any> => {
-      if (!this.jsonData[bucket]) {
-        this.jsonData[bucket] = {}
-      }
-
-      this.jsonData[bucket][file] = data
-    }
-  }
+  beforeEach(() => {
+    clearCompatibilityCaches()
+  })
 
   const search = class SearchMock extends Search {
     private categoriesResponse: CategoryTreeResponse[]
@@ -101,10 +71,8 @@ describe('Search new URLs dicovery', () => {
       SpecificationFilters: {},
     }
 
-    const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, {}, facets)
     const result = await mountCompatibilityQuery({
-      vbase: vbaseMock,
       search: searchMock,
       args,
     })
@@ -137,10 +105,8 @@ describe('Search new URLs dicovery', () => {
       SpecificationFilters: {},
     }
 
-    const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
     const result = await mountCompatibilityQuery({
-      vbase: vbaseMock,
       search: searchMock,
       args,
     })
@@ -173,10 +139,8 @@ describe('Search new URLs dicovery', () => {
       SpecificationFilters: {},
     }
 
-    const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
     const result = await mountCompatibilityQuery({
-      vbase: vbaseMock,
       search: searchMock,
       args,
     })
@@ -199,10 +163,8 @@ describe('Search new URLs dicovery', () => {
       SpecificationFilters: {},
     }
 
-    const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
     const result = await mountCompatibilityQuery({
-      vbase: vbaseMock,
       search: searchMock,
       args,
     })
@@ -228,10 +190,8 @@ describe('Search new URLs dicovery', () => {
       SpecificationFilters: {},
     }
 
-    const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets)
     const result = await mountCompatibilityQuery({
-      vbase: vbaseMock,
       search: searchMock,
       args,
     })
@@ -286,10 +246,8 @@ describe('Search new URLs dicovery', () => {
       },
     }
 
-    const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets as any)
     const result = await mountCompatibilityQuery({
-      vbase: vbaseMock,
       search: searchMock,
       args,
     })
@@ -330,10 +288,8 @@ describe('Search new URLs dicovery', () => {
       },
     }
 
-    const vbaseMock = new VBaseMock()
     const searchMock = new search(categoryTree, categoryChildren, facets as any)
     const result = await mountCompatibilityQuery({
-      vbase: vbaseMock,
       search: searchMock,
       args,
     })
@@ -371,16 +327,6 @@ describe('Search new URLs dicovery', () => {
             return new search([], {}, { SpecificationFilters: {} } as any)
           } catch (error) {
             console.error('Error getting search client:', error)
-
-            return {} as any
-          }
-        }
-
-        public get vbase() {
-          try {
-            return new VBaseMock()
-          } catch (error) {
-            console.error('Error getting vbase client:', error)
 
             return {} as any
           }
