@@ -24,7 +24,7 @@ export async function fetchAppSettings(ctx: Context): Promise<AppSettings> {
 
     return {
       shouldUseNewPDPEndpoint: forceNewPDP || shouldUseNewPDPEndpoint,
-      shouldUseNewPLPEndpoint: forceNewPLP || shouldUseNewPLPEndpoint,
+      shouldUseNewPLPEndpoint: forceNewPLP || (shouldUseNewPLPEndpoint ?? true),
       enableHybridSearch: enableHybridSearch ?? false,
     }
   } catch (error) {
@@ -35,7 +35,9 @@ export async function fetchAppSettings(ctx: Context): Promise<AppSettings> {
 
     return {
       shouldUseNewPDPEndpoint: forceNewPDP,
-      shouldUseNewPLPEndpoint: forceNewPLP,
+      // Defaults to true (matches the new manifest default) — the legacy
+      // client is no longer the safe fallback when settings can't be read.
+      shouldUseNewPLPEndpoint: true,
       enableHybridSearch: false,
     }
   }

@@ -61,5 +61,5 @@ jsconfig.json
 .claude/
 .specify/
 
-# superpowers subagent-driven-development scratch workspace (ledgers, briefs, review packages)
+# AI-assisted development scratch workspace (not part of the shipped app)
 .superpowers/

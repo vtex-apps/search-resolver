@@ -63,7 +63,7 @@ export const resolvers = {
 |---|---|---|
 | `slugifyLinks` | `false` | When `true`, links are slugified via `slugify`; when `false`, the default catalog slug is used. |
 | `shouldUseNewPDPEndpoint` | `false` | Routes PDP queries through the new IS endpoint instead of the legacy search backend. |
-| `shouldUseNewPLPEndpoint` | `false` | Same as above, for PLP queries. |
+| `shouldUseNewPLPEndpoint` | `true` | Same as above, for PLP queries. |
 
 These are read from VTEX **app settings** at runtime, not from FeatureHub.
 

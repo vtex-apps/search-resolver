@@ -43,7 +43,8 @@ describe('fetchProductSearch service', () => {
       } as any,
     })
 
-    const { hideUnavailableItems: _ignored, ...argsWithoutHide } = mockArgs as any
+    const { hideUnavailableItems: _ignored, ...argsWithoutHide } =
+      mockArgs as any
 
     await fetchProductSearch(ctx, argsWithoutHide, mockSelectedFacets)
 
@@ -71,7 +72,8 @@ describe('fetchProductSearch service', () => {
       } as any,
     })
 
-    const { hideUnavailableItems: _ignored, ...argsWithoutHide } = mockArgs as any
+    const { hideUnavailableItems: _ignored, ...argsWithoutHide } =
+      mockArgs as any
 
     await fetchProductSearch(ctx, argsWithoutHide, mockSelectedFacets)
 
@@ -119,12 +121,16 @@ describe('fetchProductSearch service', () => {
       },
     })
 
-    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+    const result = await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
 
     expect(
       ctx.clients.intelligentSearchApi.productSearch
     ).toHaveBeenCalledTimes(1)
     expect(ctx.clients.intsch.productSearch).not.toHaveBeenCalled()
+    expect(result).toEqual({
+      searchState: undefined,
+      ...mockProductSearchResponse,
+    })
   })
 
   it('should log a warning when a PLP request is served without intsch', async () => {
@@ -353,8 +359,9 @@ describe('fetchProductSearch service', () => {
 
     await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
 
-    const [callArgs] = (ctx.clients.intelligentSearchApi
-      .productSearch as jest.Mock).mock.calls[0]
+    const [callArgs] = (
+      ctx.clients.intelligentSearchApi.productSearch as jest.Mock
+    ).mock.calls[0]
 
     expect(callArgs).not.toHaveProperty('semanticRatio')
   })
