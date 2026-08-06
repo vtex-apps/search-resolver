@@ -60,3 +60,4 @@ jsconfig.json
 # This repo intentionally does not host `.specify/` locally.
 .claude/
 .specify/
+.superpowers/
