@@ -1,7 +1,6 @@
 import { fetchProductSearch } from './productSearch'
 import { createContext } from '../mocks/contextFactory'
 import type { ProductSearchInput } from '../typings/Search'
-import * as compareResultsModule from '../utils/compareResults'
 
 describe('fetchProductSearch service', () => {
   const mockProductSearchResponse = {
@@ -106,11 +105,11 @@ describe('fetchProductSearch service', () => {
     })
   })
 
-  it('should compare both APIs when shouldUseNewPLPEndpoint is undefined', async () => {
+  it('should call only the legacy client, never intsch, when shouldUseNewPLPEndpoint is false', async () => {
     const ctx = createContext({
       accountName: 'testaccount',
       appSettings: {
-        shouldUseNewPLPEndpoint: undefined,
+        shouldUseNewPLPEndpoint: false,
       },
       intelligentSearchApiSettings: {
         productSearch: mockProductSearchResponse,
@@ -120,21 +119,51 @@ describe('fetchProductSearch service', () => {
       },
     })
 
-    const mockResult = {
-      searchState: undefined,
-      ...mockProductSearchResponse,
-    }
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
 
-    const compareApiResultsSpy = jest
-      .spyOn(compareResultsModule, 'compareApiResults')
-      .mockResolvedValue(mockResult)
+    expect(
+      ctx.clients.intelligentSearchApi.productSearch
+    ).toHaveBeenCalledTimes(1)
+    expect(ctx.clients.intsch.productSearch).not.toHaveBeenCalled()
+  })
 
-    const result = await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+  it('should log a warning when a PLP request is served without intsch', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: false,
+      },
+      intelligentSearchApiSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+    })
 
-    expect(compareApiResultsSpy).toHaveBeenCalled()
-    expect(result).toEqual(mockResult)
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
 
-    compareApiResultsSpy.mockRestore()
+    expect(ctx.vtex.logger.warn).toHaveBeenCalledWith({
+      message: 'ProductSearch migration: intsch not used as final response',
+      account: 'testaccount',
+    })
+  })
+
+  it('should not log the "intsch not used" warning when shouldUseNewPLPEndpoint is true', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: true,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+    })
+
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+
+    expect(ctx.vtex.logger.warn).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'ProductSearch migration: intsch not used as final response',
+      })
+    )
   })
 
   it('should handle shipping options correctly', async () => {
