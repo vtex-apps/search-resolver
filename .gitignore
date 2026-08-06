@@ -60,3 +60,6 @@ jsconfig.json
 # This repo intentionally does not host `.specify/` locally.
 .claude/
 .specify/
+
+# superpowers subagent-driven-development scratch workspace (ledgers, briefs, review packages)
+.superpowers/
