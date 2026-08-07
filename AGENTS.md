@@ -64,7 +64,7 @@ GraphQL request ─► vtex.graphql-server / @vtex/api Service runtime
 |---|---|
 | `node/resolvers/search/` | Catalog + search core. Sub-modules:<br/>• `product.ts`, `brand.ts`, `category.ts` — entity resolvers<br/>• `autocomplete.ts`, `productPriceRange.ts`, `offer.ts`, `discount.ts` — composed fields<br/>• `assemblyOption.ts`, `itemMetadata*.ts` — product configuration<br/>• `newURLs.ts` — URL/slug normalization<br/>• `modules/` — internal helpers |
 | `node/resolvers/benefits/` | Promotions, discount lists, badges |
-| `node/resolvers/stats/` | Top-searches and analytics queries |
+| `node/resolvers/stats/` | `searchURLsCount` (no-op since VBase removal, always returns `[]`) — `topSearches` lives in `resolvers/search/` |
 | `node/directives/` | Schema directive implementations |
 
 ### Endpoint switching

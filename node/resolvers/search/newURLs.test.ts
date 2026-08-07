@@ -6,7 +6,7 @@ import * as TypeMoq from 'typemoq'
 import type { IOContext } from '@vtex/api'
 
 import { Search } from '../../clients/search'
-import { mountCompatibilityQuery } from './newURLs'
+import { mountCompatibilityQuery, toCompatibilityArgs } from './newURLs'
 import { getCompatibilityArgs } from '.'
 import { Clients } from '../../clients'
 import { clearCompatibilityCaches } from './modules/compatibilityCache'
@@ -16,6 +16,7 @@ const categoryTreeResponseMock = TypeMoq.Mock.ofType<CategoryTreeResponse>()
 const facetsMock = TypeMoq.Mock.ofType<SearchFacets>()
 const state = TypeMoq.Mock.ofType<State>()
 const customContext = TypeMoq.Mock.ofType<CustomContext>()
+const TEST_CACHE_KEY_PREFIX = 'test-account:test-workspace'
 
 describe('Search new URLs dicovery', () => {
   beforeEach(() => {
@@ -75,6 +76,7 @@ describe('Search new URLs dicovery', () => {
     const result = await mountCompatibilityQuery({
       search: searchMock,
       args,
+      cacheKeyPrefix: TEST_CACHE_KEY_PREFIX,
     })
 
     expect(result).toStrictEqual({ query: 'category', map: 'c' })
@@ -109,6 +111,7 @@ describe('Search new URLs dicovery', () => {
     const result = await mountCompatibilityQuery({
       search: searchMock,
       args,
+      cacheKeyPrefix: TEST_CACHE_KEY_PREFIX,
     })
 
     expect(result).toStrictEqual({
@@ -143,6 +146,7 @@ describe('Search new URLs dicovery', () => {
     const result = await mountCompatibilityQuery({
       search: searchMock,
       args,
+      cacheKeyPrefix: TEST_CACHE_KEY_PREFIX,
     })
 
     expect(result).toStrictEqual({ query: 'category/brand', map: 'c,b' })
@@ -167,6 +171,7 @@ describe('Search new URLs dicovery', () => {
     const result = await mountCompatibilityQuery({
       search: searchMock,
       args,
+      cacheKeyPrefix: TEST_CACHE_KEY_PREFIX,
     })
 
     expect(result).toStrictEqual({
@@ -194,6 +199,7 @@ describe('Search new URLs dicovery', () => {
     const result = await mountCompatibilityQuery({
       search: searchMock,
       args,
+      cacheKeyPrefix: TEST_CACHE_KEY_PREFIX,
     })
 
     expect(result).toStrictEqual({
@@ -250,6 +256,7 @@ describe('Search new URLs dicovery', () => {
     const result = await mountCompatibilityQuery({
       search: searchMock,
       args,
+      cacheKeyPrefix: TEST_CACHE_KEY_PREFIX,
     })
 
     expect(result).toStrictEqual({
@@ -292,6 +299,7 @@ describe('Search new URLs dicovery', () => {
     const result = await mountCompatibilityQuery({
       search: searchMock,
       args,
+      cacheKeyPrefix: TEST_CACHE_KEY_PREFIX,
     })
 
     expect(result).toStrictEqual({
@@ -338,6 +346,11 @@ describe('Search new URLs dicovery', () => {
         clients: new ClientsImpl({}, contextMock.object),
         ...contextMock.object,
         ...customContext.object,
+        vtex: {
+          ...customContext.object.vtex,
+          account: 'test-account',
+          workspace: 'test-workspace',
+        },
         state: {
           ...state.object,
         },
@@ -347,5 +360,38 @@ describe('Search new URLs dicovery', () => {
 
       expect(result).toStrictEqual(args)
     }
+  })
+
+  it('does not share cached compatibility data across different cacheKeyPrefix values (tenant isolation)', async () => {
+    const categoryTree: CategoryTreeResponse[] = [
+      {
+        ...categoryTreeResponseMock.object,
+        id: 1,
+        name: 'category',
+        hasChildren: false,
+      },
+    ]
+
+    const facets = {
+      ...facetsMock.object,
+      SpecificationFilters: {},
+    }
+
+    const searchMock = new search(categoryTree, {}, facets)
+    const categoriesSpy = jest.spyOn(searchMock, 'categories')
+
+    const args = { query: 'category', map: '' }
+
+    // Same prefix, called twice: second call must be served from cache.
+    await toCompatibilityArgs(searchMock, args, 'account-a:workspace-a')
+    await toCompatibilityArgs(searchMock, args, 'account-a:workspace-a')
+
+    expect(categoriesSpy).toHaveBeenCalledTimes(1)
+
+    // Different prefix, same query: must independently miss and re-fetch,
+    // never reusing account-a's cached entry.
+    await toCompatibilityArgs(searchMock, args, 'account-b:workspace-b')
+
+    expect(categoriesSpy).toHaveBeenCalledTimes(2)
   })
 })

@@ -28,11 +28,13 @@ export interface CategoryIdNamePair {
 export class CategoryTreeSegmentsFinder {
   private clients: Clients
   private segments: string[]
+  private cacheKeyPrefix: string
   protected categoryTreeRoot: Record<string, LazyCategoryTreeNode>
 
-  constructor(clients: Clients, segments: string[]) {
+  constructor(clients: Clients, segments: string[], cacheKeyPrefix: string) {
     this.clients = clients
     this.segments = segments
+    this.cacheKeyPrefix = cacheKeyPrefix
     this.categoryTreeRoot = {}
   }
 
@@ -68,7 +70,7 @@ export class CategoryTreeSegmentsFinder {
 
     return this.staleWhileRevalidate<Record<string, string>>(
       categoryTreeChildrenCache,
-      id.toString(),
+      `${this.cacheKeyPrefix}:${id.toString()}`,
       () => this.fetchChildrenFromSearch({ search, id })
     )
   }
@@ -101,8 +103,10 @@ export class CategoryTreeSegmentsFinder {
   private initCategoryTreeRoot = async () => {
     this.categoryTreeRoot = await this.staleWhileRevalidate<
       Record<string, LazyCategoryTreeNode>
-    >(categoryTreeRootCache, CATEGORY_TREE_ROOT_PATH, () =>
-      this.getCategoryTreeRoot()
+    >(
+      categoryTreeRootCache,
+      `${this.cacheKeyPrefix}:${CATEGORY_TREE_ROOT_PATH}`,
+      () => this.getCategoryTreeRoot()
     )
   }
 

@@ -71,9 +71,15 @@ const normalizedFiltersFromFacets = async (facets: SearchFacets) => {
   }, {} as Record<string, string>)
 }
 
-const getCategoryFilters = async (search: Search, query: string) => {
-  const facets = await getOrSet<SearchFacets>(facetsCache, query, () =>
-    search.facets(query)
+const getCategoryFilters = async (
+  search: Search,
+  query: string,
+  cacheKeyPrefix: string
+) => {
+  const facets = await getOrSet<SearchFacets>(
+    facetsCache,
+    `${cacheKeyPrefix}:${query}`,
+    () => search.facets(query)
   )
 
   return normalizedFiltersFromFacets(facets)
@@ -82,8 +88,9 @@ const getCategoryFilters = async (search: Search, query: string) => {
 export const mountCompatibilityQuery = async (params: {
   search: Search
   args: any
+  cacheKeyPrefix: string
 }) => {
-  const { search, args } = params
+  const { search, args, cacheKeyPrefix } = params
   const { query, map } = args
   const querySegments = query.startsWith(PATH_SEPARATOR)
     ? query.split(PATH_SEPARATOR).slice(1)
@@ -91,14 +98,15 @@ export const mountCompatibilityQuery = async (params: {
 
   const categoryTreeFinder = new CategoryTreeSegmentsFinder(
     { search },
-    querySegments
+    querySegments,
+    cacheKeyPrefix
   )
 
   const categories = await categoryTreeFinder.find()
   const facetsQuery = getFacetsQueryFromCategories(categories)
 
   const fieldsLookup = facetsQuery
-    ? await getCategoryFilters(search, facetsQuery)
+    ? await getCategoryFilters(search, facetsQuery, cacheKeyPrefix)
     : {}
 
   const mapSegments = fillCategoriesMapSegments(categories, map)
@@ -131,9 +139,10 @@ export const mountCompatibilityQuery = async (params: {
 
 export const toCompatibilityArgs = async (
   search: Search,
-  args: QueryArgs
+  args: QueryArgs,
+  cacheKeyPrefix: string
 ): Promise<QueryArgs | undefined> => {
-  const { query } = args
+  const { query, map } = args
 
   if (!query) {
     return
@@ -141,8 +150,8 @@ export const toCompatibilityArgs = async (
 
   const { query: compatibilityQuery, map: compatibilityMap } = await getOrSet(
     searchUrlsCache,
-    query,
-    () => mountCompatibilityQuery({ search, args })
+    `${cacheKeyPrefix}:${query}:${map ?? ''}`,
+    () => mountCompatibilityQuery({ search, args, cacheKeyPrefix })
   )
 
   return { query: compatibilityQuery, map: compatibilityMap }

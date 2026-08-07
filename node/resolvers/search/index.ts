@@ -98,11 +98,14 @@ export const getCompatibilityArgs = async <T extends QueryArgs>(
 ) => {
   const {
     clients: { search },
+    vtex: { account, workspace },
   } = ctx
+
+  const cacheKeyPrefix = `${account}:${workspace}`
 
   const compatArgs = isLegacySearchFormat(args)
     ? args
-    : await toCompatibilityArgs(search, args)
+    : await toCompatibilityArgs(search, args, cacheKeyPrefix)
 
   const formattedArgs = compatArgs ? { ...args, ...compatArgs } : args
 

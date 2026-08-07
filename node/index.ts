@@ -5,6 +5,12 @@ import schema from 'vtex.search-graphql/graphql'
 import { Clients } from './clients'
 import { schemaDirectives } from './directives'
 import { resolvers } from './resolvers'
+import {
+  categoryTreeChildrenCache,
+  categoryTreeRootCache,
+  searchUrlsCache,
+  facetsCache,
+} from './resolvers/search/modules/compatibilityCache'
 
 const TWO_SECONDS_MS = 2 * 1000
 const THREE_SECONDS_MS = 3 * 1000
@@ -23,6 +29,13 @@ metrics.trackCache('search', searchCache)
 metrics.trackCache('messages', messagesCache)
 metrics.trackCache('apps', appsCache)
 metrics.trackCache('intsch', intschCache)
+metrics.trackCache('compatibilityCategoryTreeRoot', categoryTreeRootCache)
+metrics.trackCache(
+  'compatibilityCategoryTreeChildren',
+  categoryTreeChildrenCache
+)
+metrics.trackCache('compatibilitySearchUrls', searchUrlsCache)
+metrics.trackCache('compatibilityFacets', facetsCache)
 
 export default new Service<Clients, RecorderState, CustomContext>({
   clients: {

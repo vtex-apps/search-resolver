@@ -47,7 +47,7 @@ const toPair = (categories: any[]) =>
 describe('Category Tree Search tests', () => {
   const Finder = class CategoryTreeSegmentsFinderMock extends CategoryTreeSegmentsFinder {
     constructor(segments: string[]) {
-      super(clients, segments)
+      super(clients, segments, 'test-account:test-workspace')
       this.categoryTreeRoot = root
     }
 
