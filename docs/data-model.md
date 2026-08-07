@@ -51,7 +51,6 @@ export const resolvers = {
 | `segmentCache` | 1000 | Segment client |
 | `searchCache` | 3000 | Legacy search client |
 | `messagesCache` | 3000 | `messagesGraphQL` (translations) |
-| `vbaseCache` | 3000 | `vbase` (per-account JSON storage) |
 | `appsCache` | 1500 | `apps` client (`@vtex/api`) |
 | `intschCache` | 3000 | Direct IS client |
 
