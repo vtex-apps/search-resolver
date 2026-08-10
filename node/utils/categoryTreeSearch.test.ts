@@ -87,7 +87,7 @@ describe('Category Tree Search tests', () => {
     expect(result).toStrictEqual(toPair([c0, c1, null]))
   })
 
-  it('should not find when doesnt exist', async () => {
+  it("should not find when it doesn't exist", async () => {
     const segments = 'x/c1/c4'.split('/')
     const treeFinder = new Finder(segments)
     const result = await treeFinder.find()

@@ -9,7 +9,7 @@ import { Search } from '../../clients/search'
 import { mountCompatibilityQuery, toCompatibilityArgs } from './newURLs'
 import { getCompatibilityArgs } from '.'
 import { Clients } from '../../clients'
-import { clearCompatibilityCaches } from './modules/compatibilityCache'
+import { clearCompatibilityCaches } from './modules/compatibilityCacheTestUtils'
 
 const contextMock = TypeMoq.Mock.ofType<IOContext>()
 const categoryTreeResponseMock = TypeMoq.Mock.ofType<CategoryTreeResponse>()

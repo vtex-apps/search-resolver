@@ -1,11 +1,15 @@
 import type { Search } from '../../clients/search'
-import { CATEGORY_SEGMENT, FULL_TEXT_SEGMENT } from './constants'
+import {
+  CATEGORY_SEGMENT,
+  FULL_TEXT_SEGMENT,
+  MAP_VALUES_SEP,
+  PATH_SEPARATOR,
+} from './constants'
 import type { CategoryIdNamePair } from '../../utils/CategoryTreeSegmentsFinder'
 import { CategoryTreeSegmentsFinder } from '../../utils/CategoryTreeSegmentsFinder'
 import { getOrSet } from '../../utils/cache'
 import { searchUrlsCache, facetsCache } from './modules/compatibilityCache'
 import { searchSlugify } from '../../utils/slug'
-import { PATH_SEPARATOR, MAP_SEPARATOR } from '../stats/constants'
 
 export const hasFacetsBadArgs = ({ query, map }: QueryArgs) => !query || !map
 
@@ -16,7 +20,7 @@ const fillCategoriesMapSegments = (
   map: string
 ): Array<string | undefined> => {
   const mapSegments = map
-    .split(MAP_SEPARATOR)
+    .split(MAP_VALUES_SEP)
     .filter((segment) => segment !== CATEGORY_SEGMENT)
 
   const segmentsFound = []
@@ -44,7 +48,7 @@ const getFacetsQueryFromCategories = (
           : category.name.toLocaleLowerCase()
         // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         acc.map = acc.map
-          ? acc.map + MAP_SEPARATOR + CATEGORY_SEGMENT
+          ? acc.map + MAP_VALUES_SEP + CATEGORY_SEGMENT
           : CATEGORY_SEGMENT
       }
 
