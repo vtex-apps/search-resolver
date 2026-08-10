@@ -1,7 +1,6 @@
 import { fetchProductSearch } from './productSearch'
 import { createContext } from '../mocks/contextFactory'
 import type { ProductSearchInput } from '../typings/Search'
-import * as compareResultsModule from '../utils/compareResults'
 
 describe('fetchProductSearch service', () => {
   const mockProductSearchResponse = {
@@ -44,7 +43,8 @@ describe('fetchProductSearch service', () => {
       } as any,
     })
 
-    const { hideUnavailableItems: _ignored, ...argsWithoutHide } = mockArgs as any
+    const { hideUnavailableItems: _ignored, ...argsWithoutHide } =
+      mockArgs as any
 
     await fetchProductSearch(ctx, argsWithoutHide, mockSelectedFacets)
 
@@ -72,7 +72,8 @@ describe('fetchProductSearch service', () => {
       } as any,
     })
 
-    const { hideUnavailableItems: _ignored, ...argsWithoutHide } = mockArgs as any
+    const { hideUnavailableItems: _ignored, ...argsWithoutHide } =
+      mockArgs as any
 
     await fetchProductSearch(ctx, argsWithoutHide, mockSelectedFacets)
 
@@ -106,11 +107,11 @@ describe('fetchProductSearch service', () => {
     })
   })
 
-  it('should compare both APIs when shouldUseNewPLPEndpoint is undefined', async () => {
+  it('should call only the legacy client, never intsch, when shouldUseNewPLPEndpoint is false', async () => {
     const ctx = createContext({
       accountName: 'testaccount',
       appSettings: {
-        shouldUseNewPLPEndpoint: undefined,
+        shouldUseNewPLPEndpoint: false,
       },
       intelligentSearchApiSettings: {
         productSearch: mockProductSearchResponse,
@@ -120,21 +121,55 @@ describe('fetchProductSearch service', () => {
       },
     })
 
-    const mockResult = {
-      searchState: undefined,
-      ...mockProductSearchResponse,
-    }
-
-    const compareApiResultsSpy = jest
-      .spyOn(compareResultsModule, 'compareApiResults')
-      .mockResolvedValue(mockResult)
-
     const result = await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
 
-    expect(compareApiResultsSpy).toHaveBeenCalled()
-    expect(result).toEqual(mockResult)
+    expect(
+      ctx.clients.intelligentSearchApi.productSearch
+    ).toHaveBeenCalledTimes(1)
+    expect(ctx.clients.intsch.productSearch).not.toHaveBeenCalled()
+    expect(result).toEqual({
+      searchState: undefined,
+      ...mockProductSearchResponse,
+    })
+  })
 
-    compareApiResultsSpy.mockRestore()
+  it('should log a warning when a PLP request is served without intsch', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: false,
+      },
+      intelligentSearchApiSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+    })
+
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+
+    expect(ctx.vtex.logger.warn).toHaveBeenCalledWith({
+      message: 'ProductSearch migration: intsch not used as final response',
+      account: 'testaccount',
+    })
+  })
+
+  it('should not log the "intsch not used" warning when shouldUseNewPLPEndpoint is true', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: true,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+    })
+
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+
+    expect(ctx.vtex.logger.warn).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'ProductSearch migration: intsch not used as final response',
+      })
+    )
   })
 
   it('should handle shipping options correctly', async () => {
@@ -264,5 +299,70 @@ describe('fetchProductSearch service', () => {
       expect.any(String),
       { shippingHeader: undefined }
     )
+  })
+
+  it('sends semanticRatio to intsch when enableHybridSearch setting is true', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: true,
+        enableHybridSearch: true,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+    })
+
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+
+    expect(ctx.clients.intsch.productSearch).toHaveBeenCalledWith(
+      expect.objectContaining({ semanticRatio: 0.5 }),
+      expect.any(String),
+      expect.any(Object)
+    )
+  })
+
+  it('does not send semanticRatio to intsch when enableHybridSearch setting is false', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: true,
+        enableHybridSearch: false,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+    })
+
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+
+    const [callArgs] = (ctx.clients.intsch.productSearch as jest.Mock).mock
+      .calls[0]
+
+    expect(callArgs).not.toHaveProperty('semanticRatio')
+  })
+
+  it('never sends semanticRatio to the legacy Biggy client even when enableHybridSearch is true', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: false,
+        enableHybridSearch: true,
+      },
+      intelligentSearchApiSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+    })
+
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+
+    const [callArgs] = (
+      ctx.clients.intelligentSearchApi.productSearch as jest.Mock
+    ).mock.calls[0]
+
+    expect(callArgs).not.toHaveProperty('semanticRatio')
   })
 })

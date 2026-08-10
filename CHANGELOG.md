@@ -11,6 +11,42 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Log cache status (hit/miss) and `deliveryZonesHash` presence for `product-search` and `facets` calls to `intsch`, sampled at 10%.
 
+## [1.109.0] - 2026-08-10
+
+### Changed
+
+- `shouldUseNewPLPEndpoint` now defaults to `true`: `productSearch`, `products`, and `productSuggestions` use intsch as the primary PLP data source. Accounts that still need the legacy client can opt out via the per-account app setting.
+
+### Removed
+
+- PLP shadow traffic: `productSearch`/`products` no longer dual-call the legacy client and intsch for comparison when `shouldUseNewPLPEndpoint` is `false` — a single request is made to whichever client the flag selects. PDP's shadow traffic (`product.ts`) is unaffected.
+
+## [1.108.0] - 2026-08-10
+
+### Removed
+
+- VBase usage as a caching backend. Replaced the stale-while-revalidate cache for legacy-URL/category/facet compatibility lookups with a plain, per-replica, in-memory LRU cache (TTL only, no persistence, no background revalidation) — VBase's role there was assessed as non-material to search latency. Also removed the long-dead `searchStats` VBase write path (unreferenced since 2020); the `searchURLsCount` query is now a no-op returning an empty array. The `vbase-read-write` policy was dropped from `manifest.json` accordingly.
+
+## [1.107.0] - 2026-07-24
+
+## [1.106.1] - 2026-07-20
+
+### Added
+
+- `vtex.search-session` as an app dependency.
+
+## [1.106.0] - 2026-07-20
+
+### Added
+
+- `priceToken` resolver on the `Offer` type: passes through the signed price token (Pricing Fallback) from `commertialOffer.PriceToken` when present, `null` otherwise. Requires `vtex.search-graphql@0.72.0` or later, which introduces the matching `priceToken` field on `Offer`.
+
+## [1.105.0] - 2026-07-15
+
+### Added
+
+- `enableHybridSearch` app setting: when enabled, sends `semanticRatio` on `intsch` product-search requests to activate semantic ranking. `semanticModel` and the rest of the backend's `isSemanticEnabled()` inputs must already be configured on the account's `storeSearchSettings` — `semanticRatio` is the only one not set there. Only applies when `shouldUseNewPLPEndpoint` is also enabled; has no effect on the legacy Biggy search path. Intended for demo/test accounts linked to a workspace running this version.
+
 ## [1.104.1] - 2026-07-10
 
 ### Fixed

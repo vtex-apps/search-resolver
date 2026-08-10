@@ -24,7 +24,7 @@ It is the resolver layer of the Intelligent Search stack. The GraphQL schema (th
 |---|---|
 | `manifest.json` | App identity (`vtex.search-resolver@1.102.2`), builders (`node`, `docs`), dependencies (`vtex.messages`, `vtex.catalog-api-proxy`, `vtex.search-graphql`, `vtex.rewriter`, `vtex.sae-analytics`, `vtex.intelligent-search-api`), `settingsSchema` (`slugifyLinks`, `shouldUseNewPDPEndpoint`, `shouldUseNewPLPEndpoint`), policies (`vtex.messages:translate-messages`, `vtex.catalog-api-proxy:catalog-proxy`/`authenticated-catalog-proxy`, …) |
 | `node/service.json` | Runtime: `nodejs` stack, 2048MB memory, 80 shared CPU @ 95%, ttl 30s, timeout 12s, 30–250 replicas, 2 workers. **No `routes`** — this service is a pure GraphQL plugin mounted by `vtex.search-graphql` via the schema. |
-| `node/index.ts` | Service composition, LRU caches (`segmentCache: 1000`, `searchCache: 3000`, `messagesCache: 3000`, `vbaseCache: 3000`, `appsCache: 1500`, `intschCache: 3000`), per-client timeouts (default 3s, `search: 6s`, `intelligentSearchApi: 9s`), `metrics.trackCache` instrumentation. Imports `schema` from `vtex.search-graphql/graphql`. |
+| `node/index.ts` | Service composition, LRU caches (`segmentCache: 1000`, `searchCache: 3000`, `messagesCache: 3000`, `appsCache: 1500`, `intschCache: 3000`), per-client timeouts (default 3s, `search: 6s`, `intelligentSearchApi: 9s`), `metrics.trackCache` instrumentation. Imports `schema` from `vtex.search-graphql/graphql`. |
 | `node/resolvers/index.ts` | Composes `searchFieldResolvers`, `benefitsFieldResolvers`, `searchQueries`, `statsQueries`. **This is the resolver entry point.** |
 | `node/resolvers/search/` | All catalog / search / autocomplete / product / brand / category / facets resolvers + tests (`product.test.ts`, `productPriceRange.test.ts`, `assemblyOption.test.ts`, `newURLs.test.ts`, `index.test.ts`) |
 | `node/resolvers/benefits/`, `node/resolvers/stats/` | Smaller resolver groups |
@@ -64,7 +64,7 @@ GraphQL request ─► vtex.graphql-server / @vtex/api Service runtime
 |---|---|
 | `node/resolvers/search/` | Catalog + search core. Sub-modules:<br/>• `product.ts`, `brand.ts`, `category.ts` — entity resolvers<br/>• `autocomplete.ts`, `productPriceRange.ts`, `offer.ts`, `discount.ts` — composed fields<br/>• `assemblyOption.ts`, `itemMetadata*.ts` — product configuration<br/>• `newURLs.ts` — URL/slug normalization<br/>• `modules/` — internal helpers |
 | `node/resolvers/benefits/` | Promotions, discount lists, badges |
-| `node/resolvers/stats/` | Top-searches and analytics queries |
+| `node/resolvers/stats/` | `searchURLsCount` (no-op since VBase removal, always returns `[]`) — `topSearches` lives in `resolvers/search/` |
 | `node/directives/` | Schema directive implementations |
 
 ### Endpoint switching
@@ -75,7 +75,7 @@ Three settings control the new-vs-legacy migration:
 |---|---|---|
 | `slugifyLinks` | `false` | When `true`, links use `slugify` instead of the default catalog slug |
 | `shouldUseNewPDPEndpoint` | `false` | When `true`, PDP queries hit the new IS endpoint via `intelligentSearchApi` / `intsch`; otherwise the legacy `search` client |
-| `shouldUseNewPLPEndpoint` | `false` | Same for PLP |
+| `shouldUseNewPLPEndpoint` | `true` | Same for PLP — per-account override still available to roll back to legacy |
 
 These are **per-account app settings**, not FeatureHub flags. Toggling them changes which client takes the hot path.
 
@@ -90,7 +90,6 @@ Configured in `node/index.ts`:
 | `intsch` (direct IS) | `intschCache` | 3000 | — | — |
 | `messagesGraphQL` | `messagesCache` | 3000 | 2000ms | `concurrency: 10` |
 | `segment` | `segmentCache` | 1000 | 3000ms | small + immutable |
-| `vbase` | `vbaseCache` | 3000 | default | — |
 | `apps` | `appsCache` | 1500 | 2000ms | `retries: 2`, `concurrency: 5` |
 | default | — | — | 3000ms | `retries: 2` |
 

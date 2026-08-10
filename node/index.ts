@@ -5,6 +5,12 @@ import schema from 'vtex.search-graphql/graphql'
 import { Clients } from './clients'
 import { schemaDirectives } from './directives'
 import { resolvers } from './resolvers'
+import {
+  categoryTreeChildrenCache,
+  categoryTreeRootCache,
+  searchUrlsCache,
+  facetsCache,
+} from './resolvers/search/modules/compatibilityCache'
 
 const TWO_SECONDS_MS = 2 * 1000
 const THREE_SECONDS_MS = 3 * 1000
@@ -15,16 +21,21 @@ const NINE_SECONDS_MS = 9 * 1000
 const segmentCache = new LRUCache<string, Cached>({ max: 1000 })
 const searchCache = new LRUCache<string, Cached>({ max: 3000 })
 const messagesCache = new LRUCache<string, Cached>({ max: 3000 })
-const vbaseCache = new LRUCache<string, Cached>({ max: 3000 })
 const appsCache = new LRUCache<string, Cached>({ max: 1500 })
 const intschCache = new LRUCache<string, Cached>({ max: 3000 })
 
 metrics.trackCache('segment', segmentCache)
 metrics.trackCache('search', searchCache)
 metrics.trackCache('messages', messagesCache)
-metrics.trackCache('vbase', vbaseCache)
 metrics.trackCache('apps', appsCache)
 metrics.trackCache('intsch', intschCache)
+metrics.trackCache('compatibilityCategoryTreeRoot', categoryTreeRootCache)
+metrics.trackCache(
+  'compatibilityCategoryTreeChildren',
+  categoryTreeChildrenCache
+)
+metrics.trackCache('compatibilitySearchUrls', searchUrlsCache)
+metrics.trackCache('compatibilityFacets', facetsCache)
 
 export default new Service<Clients, RecorderState, CustomContext>({
   clients: {
@@ -67,11 +78,6 @@ export default new Service<Clients, RecorderState, CustomContext>({
       },
       rewriter: {
         timeout: SIX_SECONDS_MS,
-      },
-      vbase: {
-        concurrency: 2,
-        memoryCache: vbaseCache,
-        timeout: TWO_SECONDS_MS,
       },
     },
   },

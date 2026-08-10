@@ -34,6 +34,16 @@ export type IntschProductSearchParams = Omit<
     leap?: boolean
     /** Used by intelligent-search / Biggy legacy client; not exposed on `productSearch` GraphQL. */
     initialAttributes?: string
+    /**
+     * Semantic ranking blend ratio. `semanticModel` and the rest of the
+     * `isSemanticEnabled()` inputs (similarity, binning, products,
+     * candidates, fusion function) must already be configured on the
+     * account's storeSearchSettings — semanticModel is required there
+     * regardless for indexing, so setting it here would do nothing.
+     * semanticRatio is the one field NOT set on storeSearchSettings, so
+     * sending it is what actually activates semantic ranking.
+     */
+    semanticRatio?: number
   }
 
 export type AutocompleteSuggestionsArgs = {

@@ -28,7 +28,7 @@ export const resolvers = {
 |---|---|---|
 | `node/resolvers/search/` | All catalog / search / autocomplete / product / brand / category / facets fields | `index.ts`, `product.ts`, `brand.ts`, `category.ts`, `autocomplete.ts`, `productPriceRange.ts`, `offer.ts`, `discount.ts`, `assemblyOption.ts`, `itemMetadata*.ts`, `newURLs.ts`, plus `modules/` |
 | `node/resolvers/benefits/` | Product benefits (promotions, discount lists) field resolvers | — |
-| `node/resolvers/stats/` | Statistics queries (top searches, etc.) | — |
+| `node/resolvers/stats/` | `searchURLsCount` (no-op since VBase removal, always returns `[]`); `topSearches` lives in `resolvers/search/`, not here | — |
 | `node/directives/` | Schema directives (`@cacheControl`, `@withSegment`, etc.) | — |
 | `node/commons/` | Shared helpers (caching keys, segment parsing) | — |
 | `node/services/` | Higher-level service objects composed in resolvers | — |
@@ -51,7 +51,6 @@ export const resolvers = {
 | `segmentCache` | 1000 | Segment client |
 | `searchCache` | 3000 | Legacy search client |
 | `messagesCache` | 3000 | `messagesGraphQL` (translations) |
-| `vbaseCache` | 3000 | `vbase` (per-account JSON storage) |
 | `appsCache` | 1500 | `apps` client (`@vtex/api`) |
 | `intschCache` | 3000 | Direct IS client |
 
@@ -63,7 +62,7 @@ export const resolvers = {
 |---|---|---|
 | `slugifyLinks` | `false` | When `true`, links are slugified via `slugify`; when `false`, the default catalog slug is used. |
 | `shouldUseNewPDPEndpoint` | `false` | Routes PDP queries through the new IS endpoint instead of the legacy search backend. |
-| `shouldUseNewPLPEndpoint` | `false` | Same as above, for PLP queries. |
+| `shouldUseNewPLPEndpoint` | `true` | Same as above, for PLP queries. |
 
 These are read from VTEX **app settings** at runtime, not from FeatureHub.
 
