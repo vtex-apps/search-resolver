@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.109.0] - 2026-08-10
+
 ### Changed
 
 - `shouldUseNewPLPEndpoint` now defaults to `true`: `productSearch`, `products`, and `productSuggestions` use intsch as the primary PLP data source. Accounts that still need the legacy client can opt out via the per-account app setting.
