@@ -60,4 +60,6 @@ jsconfig.json
 # This repo intentionally does not host `.specify/` locally.
 .claude/
 .specify/
+
+# AI-assisted development scratch workspace (not part of the shipped app)
 .superpowers/

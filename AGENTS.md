@@ -75,7 +75,7 @@ Three settings control the new-vs-legacy migration:
 |---|---|---|
 | `slugifyLinks` | `false` | When `true`, links use `slugify` instead of the default catalog slug |
 | `shouldUseNewPDPEndpoint` | `false` | When `true`, PDP queries hit the new IS endpoint via `intelligentSearchApi` / `intsch`; otherwise the legacy `search` client |
-| `shouldUseNewPLPEndpoint` | `false` | Same for PLP |
+| `shouldUseNewPLPEndpoint` | `true` | Same for PLP — per-account override still available to roll back to legacy |
 
 These are **per-account app settings**, not FeatureHub flags. Toggling them changes which client takes the hot path.
 

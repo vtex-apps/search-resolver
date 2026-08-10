@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- `shouldUseNewPLPEndpoint` now defaults to `true`: `productSearch`, `products`, and `productSuggestions` use intsch as the primary PLP data source. Accounts that still need the legacy client can opt out via the per-account app setting.
+
+### Removed
+
+- PLP shadow traffic: `productSearch`/`products` no longer dual-call the legacy client and intsch for comparison when `shouldUseNewPLPEndpoint` is `false` — a single request is made to whichever client the flag selects. PDP's shadow traffic (`product.ts`) is unaffected.
+
 ## [1.108.0] - 2026-08-10
 
 ### Removed
