@@ -58,9 +58,6 @@
       "name": "vtex.rewriter:resolve-graphql"
     },
     {
-      "name": "vbase-read-write"
-    },
-    {
       "name": "colossus-fire-event"
     },
     {

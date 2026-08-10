@@ -57,9 +57,6 @@ export function createContext<Ctx = Context>({
       apps: {
         getAppSettings: jest.fn().mockReturnValue(appSettings ?? {}),
       },
-      vbase: {
-        getJSON: jest.fn().mockResolvedValue({}),
-      },
       segment: {
         getSegment: jest.fn().mockResolvedValue(segment ?? {}),
       },

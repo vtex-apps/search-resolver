@@ -60,6 +60,7 @@ import {
   validMapAndQuery,
 } from './utils'
 
+// eslint-disable-next-line no-restricted-syntax
 enum CrossSellingInput {
   view = 'view',
   buy = 'buy',
@@ -69,6 +70,7 @@ enum CrossSellingInput {
   accessories = 'accessories',
 }
 
+// eslint-disable-next-line no-restricted-syntax
 enum CrossSellingGroupByInput {
   PRODUCT = 'PRODUCT',
   NONE = 'NONE',
@@ -95,12 +97,15 @@ export const getCompatibilityArgs = async <T extends QueryArgs>(
   args: T
 ) => {
   const {
-    clients: { vbase, search },
+    clients: { search },
+    vtex: { account, workspace },
   } = ctx
+
+  const cacheKeyPrefix = `${account}:${workspace}`
 
   const compatArgs = isLegacySearchFormat(args)
     ? args
-    : await toCompatibilityArgs(vbase, search, args)
+    : await toCompatibilityArgs(search, args, cacheKeyPrefix)
 
   const formattedArgs = compatArgs ? { ...args, ...compatArgs } : args
 
@@ -170,9 +175,9 @@ const getCompatibilityArgsFromSelectedFacets = async <
   const mapSegments = compatibilityArgs.map!.split(MAP_VALUES_SEP)
   const querySegments = compatibilityArgs.query!.split(PATH_SEPARATOR)
 
-  args.selectedFacets = mapSegments.map((map, index) => {
+  args.selectedFacets = mapSegments.map((mapSegment, index) => {
     return {
-      key: map,
+      key: mapSegment,
       value: querySegments[index],
     }
   })
@@ -219,8 +224,8 @@ const noop = () => {}
 // Does prefetching and warms up cache for up to the 10 first elements of a search, so if user clicks on product page
 const searchFirstElements = (
   products: SearchProduct[],
-  from: number | null = 0,
-  search: Context['clients']['search']
+  search: Context['clients']['search'],
+  from: number | null = 0
 ) => {
   if (from !== 0 || from == null) {
     // We do not want this for pages other than the first
@@ -541,7 +546,7 @@ export const queries = {
       shouldUseNewPDPEndpoint ? ctx.vtex.locale : undefined
     )
 
-    searchFirstElements(products, 0, ctx.clients.search)
+    searchFirstElements(products, ctx.clients.search, 0)
     // We add a custom cacheId because these products are not exactly like the other products from search apis.
     // Each product is basically a SKU and you may have two products in response with same ID but each one representing a SKU.
 
@@ -557,7 +562,7 @@ export const queries = {
 
   searchMetadata: async (_: any, args: SearchMetadataArgs, ctx: Context) => {
     if (args.selectedFacets) {
-      const { maps, queries } = args.selectedFacets.reduce(
+      const { maps, queries: queryValues } = args.selectedFacets.reduce(
         (acc, { key, value }) => {
           if (key !== 'region-id') {
             acc.maps.push(key)
@@ -570,7 +575,7 @@ export const queries = {
       )
 
       const map = maps.join(',')
-      const query = queries.join('/')
+      const query = queryValues.join('/')
 
       args.map = map
       args.query = args.query || query || undefined
