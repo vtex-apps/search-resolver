@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.108.0] - 2026-08-10
+
 ### Removed
 
 - VBase usage as a caching backend. Replaced the stale-while-revalidate cache for legacy-URL/category/facet compatibility lookups with a plain, per-replica, in-memory LRU cache (TTL only, no persistence, no background revalidation) — VBase's role there was assessed as non-material to search latency. Also removed the long-dead `searchStats` VBase write path (unreferenced since 2020); the `searchURLsCount` query is now a no-op returning an empty array. The `vbase-read-write` policy was dropped from `manifest.json` accordingly.
