@@ -80,7 +80,6 @@ export const mockContext: any = {
     segment: segmentClientMock,
     messagesGraphQL: messagesGraphQLClientMock,
     rewriter: rewriterClientMock,
-    vbase: { getJSON: jest.fn() },
     intelligentSearchApi: isClientMock,
     apps: {
       getAppSettings: jest.fn().mockResolvedValue({}),
