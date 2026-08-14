@@ -43,7 +43,7 @@
         "default": false
       },
       "enableDeliveryPromisePreview": {
-        "title": "Send dpPreview=true on Intelligent Search product-search and facets requests, activating the Delivery Promises QA preview without flipping deliveryPromisesEnabled.",
+        "title": "Enable Delivery Promises Preview for Intelligent Search",
         "type": "boolean",
         "default": false
       }
