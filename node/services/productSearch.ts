@@ -119,7 +119,8 @@ async function fetchProductSearchFromIntsch(
   selectedFacets: SelectedFacet[],
   shippingOptions?: string[],
   segmentData?: SegmentData,
-  enableHybridSearch = false
+  enableHybridSearch = false,
+  enableDeliveryPromisePreview = false
 ) {
   const { intsch } = ctx.clients
   const { fullText } = args
@@ -131,7 +132,10 @@ async function fetchProductSearchFromIntsch(
     args,
     fullText,
     advertisementOptionsResolved,
-    buildSemanticSearchParams(enableHybridSearch)
+    {
+      ...buildSemanticSearchParams(enableHybridSearch),
+      dpPreview: enableDeliveryPromisePreview,
+    }
   )
 
   const finalArgs = applyHideUnavailableItemsDefaultForDP(
@@ -200,8 +204,11 @@ export async function fetchProductSearch(
   selectedFacets: SelectedFacet[],
   shippingOptions?: string[]
 ) {
-  const { shouldUseNewPLPEndpoint, enableHybridSearch } =
-    await fetchAppSettings(ctx)
+  const {
+    shouldUseNewPLPEndpoint,
+    enableHybridSearch,
+    enableDeliveryPromisePreview,
+  } = await fetchAppSettings(ctx)
   const segment = await getOrCreateSegment(ctx)
   const segmentData = extractSegmentData(segment)
 
@@ -218,7 +225,8 @@ export async function fetchProductSearch(
       selectedFacets,
       shippingOptions,
       segmentData,
-      enableHybridSearch
+      enableHybridSearch,
+      enableDeliveryPromisePreview
     )
 
     logSponsoredProducts(ctx, result)

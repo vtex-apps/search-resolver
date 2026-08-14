@@ -30,7 +30,6 @@ import { parseState } from '../../utils/searchState'
 import {
   filterUndefinedNonNull,
   filterByAllowedIntelligentSearchQueryKeys,
-  shouldInjectDPPreview,
 } from './utils'
 
 export class Intsch extends JanusClient implements IIntelligentSearchClient {
@@ -172,9 +171,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
 
     const requestPath = `/api/intelligent-search/v1/product-search/${path}`
 
-    const dpPreview = shouldInjectDPPreview(this.context.production)
-      ? 'true'
-      : undefined
+    const dpPreview = params.dpPreview ? 'true' : undefined
 
     const merged = filterUndefinedNonNull({
       sc: params.salesChannel ? params.salesChannel : segmentParams?.sc,
@@ -260,9 +257,7 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
 
     const facetsPath = `/api/intelligent-search/v1/facets/${path}`
 
-    const dpPreview = shouldInjectDPPreview(this.context.production)
-      ? 'true'
-      : undefined
+    const dpPreview = params.dpPreview ? 'true' : undefined
 
     const merged = filterUndefinedNonNull({
       sc: segmentParams?.sc,

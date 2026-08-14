@@ -7,6 +7,7 @@ import type { IntschFacetsParams } from '../clients/intsch/types'
 import { extractSegmentData, getOrCreateSegment } from '../utils/segment'
 import { applyHideUnavailableItemsDefaultForDP } from '../utils/hideUnavailableItems'
 import type { FacetsInput } from '../typings/Search'
+import { fetchAppSettings } from './settings'
 
 type SegmentData = ReturnType<typeof extractSegmentData>
 
@@ -23,7 +24,8 @@ type FetchFacetsOptions = {
 async function fetchFacetsFromIntsch(
   ctx: Context,
   options: FetchFacetsOptions,
-  segmentData: SegmentData
+  segmentData: SegmentData,
+  enableDeliveryPromisePreview = false
 ) {
   const { args, selectedFacets, shippingOptions } = options
   const {
@@ -35,6 +37,7 @@ async function fetchFacetsFromIntsch(
   const intschArgs: IntschFacetsParams = {
     ...facetFieldArgs,
     query: args.fullText,
+    dpPreview: enableDeliveryPromisePreview,
   }
 
   const finalArgs = applyHideUnavailableItemsDefaultForDP(
@@ -72,6 +75,7 @@ async function fetchFacetsFromIntsch(
  * Facets service that extracts facets fetching logic and implements comparison or flag-based routing
  */
 export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
+  const { enableDeliveryPromisePreview } = await fetchAppSettings(ctx)
   const segment = await getOrCreateSegment(ctx)
 
   const segmentData = extractSegmentData(segment)
@@ -82,5 +86,10 @@ export async function fetchFacets(ctx: Context, options: FetchFacetsOptions) {
     })
   }
 
-  return fetchFacetsFromIntsch(ctx, options, segmentData)
+  return fetchFacetsFromIntsch(
+    ctx,
+    options,
+    segmentData,
+    enableDeliveryPromisePreview
+  )
 }

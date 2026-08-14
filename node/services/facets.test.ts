@@ -99,6 +99,47 @@ describe('fetchFacets service', () => {
     )
   })
 
+  it('sends dpPreview=true to intsch when enableDeliveryPromisePreview is on', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        enableDeliveryPromisePreview: true,
+      },
+      intschSettings: {
+        facets: mockFacetsResponse,
+      },
+    })
+
+    await fetchFacets(ctx, {
+      args: mockArgs,
+      selectedFacets: mockSelectedFacets,
+    })
+
+    expect(ctx.clients.intsch.facets).toHaveBeenCalledWith(
+      expect.objectContaining({ dpPreview: true }),
+      expect.any(String),
+      expect.any(Object)
+    )
+  })
+
+  it('does not send dpPreview when enableDeliveryPromisePreview is off', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      intschSettings: {
+        facets: mockFacetsResponse,
+      },
+    })
+
+    await fetchFacets(ctx, {
+      args: mockArgs,
+      selectedFacets: mockSelectedFacets,
+    })
+
+    const [callArgs] = (ctx.clients.intsch.facets as jest.Mock).mock.calls[0]
+
+    expect(callArgs.dpPreview).toBe(false)
+  })
+
   it('should set translated flag in context when tenant is present', async () => {
     const ctx = createContext({
       accountName: 'testaccount',

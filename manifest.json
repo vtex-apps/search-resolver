@@ -41,6 +41,11 @@
         "title": "Enable Hybrid Search. Sends semanticRatio on product-search requests to activate semantic ranking (requires storeSearchSettings to already be configured on the account).",
         "type": "boolean",
         "default": false
+      },
+      "enableDeliveryPromisePreview": {
+        "title": "Send dpPreview=true on Intelligent Search product-search and facets requests, activating the Delivery Promises QA preview without flipping deliveryPromisesEnabled.",
+        "type": "boolean",
+        "default": false
       }
     }
   },
