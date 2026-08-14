@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- Log cache status (hit/miss) and `deliveryZonesHash` presence for `product-search` and `facets` calls to `intsch`, sampled at 10%.
+
 ## [1.109.0] - 2026-08-10
 
 ### Changed

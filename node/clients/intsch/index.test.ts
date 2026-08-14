@@ -15,7 +15,9 @@ function createTestClient(): Intsch {
   const client = new Intsch(ctx)
 
   ;(client as unknown as { http: unknown }).http = {
-    get: jest.fn().mockResolvedValue({ products: [] }),
+    getRaw: jest
+      .fn()
+      .mockResolvedValue({ data: { products: [] }, headers: {} }),
   }
 
   return client
@@ -27,8 +29,8 @@ describe('Intsch#productSearch semantic params', () => {
 
     await client.productSearch({ semanticRatio: 0.5 } as any, 'some/path')
 
-    const httpGet = (client as any).http.get as jest.Mock
-    const [, requestConfig] = httpGet.mock.calls[0]
+    const httpGetRaw = (client as any).http.getRaw as jest.Mock
+    const [, requestConfig] = httpGetRaw.mock.calls[0]
 
     expect(requestConfig.params).toMatchObject({ semanticRatio: 0.5 })
   })
@@ -38,8 +40,8 @@ describe('Intsch#productSearch semantic params', () => {
 
     await client.productSearch({} as any, 'some/path')
 
-    const httpGet = (client as any).http.get as jest.Mock
-    const [, requestConfig] = httpGet.mock.calls[0]
+    const httpGetRaw = (client as any).http.getRaw as jest.Mock
+    const [, requestConfig] = httpGetRaw.mock.calls[0]
 
     expect(requestConfig.params).not.toHaveProperty('semanticRatio')
   })
