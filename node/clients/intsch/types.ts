@@ -15,6 +15,8 @@ export type IntschFacetsParams = Omit<FacetsInput, 'selectedFacets'> & {
   options?: Options
   leap?: boolean
   regionId?: string | null
+  /** Delivery Promises QA preview. Gated by the `enableDeliveryPromisePreview` app setting. */
+  dpPreview?: boolean
 }
 
 /**
@@ -44,6 +46,8 @@ export type IntschProductSearchParams = Omit<
      * sending it is what actually activates semantic ranking.
      */
     semanticRatio?: number
+    /** Delivery Promises QA preview. Gated by the `enableDeliveryPromisePreview` app setting. */
+    dpPreview?: boolean
   }
 
 export type AutocompleteSuggestionsArgs = {

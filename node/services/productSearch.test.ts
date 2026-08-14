@@ -365,4 +365,44 @@ describe('fetchProductSearch service', () => {
 
     expect(callArgs).not.toHaveProperty('semanticRatio')
   })
+
+  it('sends dpPreview=true to intsch when enableDeliveryPromisePreview is on', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: true,
+        enableDeliveryPromisePreview: true,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+    })
+
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+
+    expect(ctx.clients.intsch.productSearch).toHaveBeenCalledWith(
+      expect.objectContaining({ dpPreview: true }),
+      expect.any(String),
+      expect.any(Object)
+    )
+  })
+
+  it('does not send dpPreview when enableDeliveryPromisePreview is off', async () => {
+    const ctx = createContext({
+      accountName: 'testaccount',
+      appSettings: {
+        shouldUseNewPLPEndpoint: true,
+      },
+      intschSettings: {
+        productSearch: mockProductSearchResponse,
+      },
+    })
+
+    await fetchProductSearch(ctx, mockArgs, mockSelectedFacets)
+
+    const [callArgs] = (ctx.clients.intsch.productSearch as jest.Mock).mock
+      .calls[0]
+
+    expect(callArgs.dpPreview).toBe(false)
+  })
 })
