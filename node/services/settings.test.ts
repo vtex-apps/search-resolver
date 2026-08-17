@@ -6,7 +6,6 @@ describe('fetchAppSettings', () => {
     const ctx = createContext({
       appSettings: {
         shouldUseNewPDPEndpoint: false,
-        shouldUseNewPLPEndpoint: true,
         enableHybridSearch: true,
       },
     })
@@ -20,7 +19,6 @@ describe('fetchAppSettings', () => {
     const ctx = createContext({
       appSettings: {
         shouldUseNewPDPEndpoint: false,
-        shouldUseNewPLPEndpoint: false,
       },
     })
 
@@ -42,40 +40,16 @@ describe('fetchAppSettings', () => {
     expect(settings.enableHybridSearch).toBe(false)
   })
 
-  it('defaults shouldUseNewPLPEndpoint to true when not set', async () => {
+  it('does not expose shouldUseNewPLPEndpoint', async () => {
     const ctx = createContext({
       appSettings: {
         shouldUseNewPDPEndpoint: false,
-      },
-    })
-
-    const settings = await fetchAppSettings(ctx)
-
-    expect(settings.shouldUseNewPLPEndpoint).toBe(true)
-  })
-
-  it('respects an explicit shouldUseNewPLPEndpoint: false setting', async () => {
-    const ctx = createContext({
-      appSettings: {
         shouldUseNewPLPEndpoint: false,
-      },
+      } as any,
     })
 
     const settings = await fetchAppSettings(ctx)
 
-    expect(settings.shouldUseNewPLPEndpoint).toBe(false)
-  })
-
-  it('defaults shouldUseNewPLPEndpoint to true when getAppSettings throws', async () => {
-    const ctx = createContext({})
-
-    jest
-      .spyOn((ctx as any).clients.apps, 'getAppSettings')
-      .mockImplementation()
-      .mockRejectedValue(new Error('boom'))
-
-    const settings = await fetchAppSettings(ctx)
-
-    expect(settings.shouldUseNewPLPEndpoint).toBe(true)
+    expect(settings).not.toHaveProperty('shouldUseNewPLPEndpoint')
   })
 })

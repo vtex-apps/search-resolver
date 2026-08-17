@@ -32,11 +32,6 @@
         "type": "boolean",
         "default": false
       },
-      "shouldUseNewPLPEndpoint": {
-        "title": "Feature flag to use the new PLP endpoint",
-        "type": "boolean",
-        "default": true
-      },
       "enableHybridSearch": {
         "title": "Enable Hybrid Search. Sends semanticRatio on product-search requests to activate semantic ranking (requires storeSearchSettings to already be configured on the account).",
         "type": "boolean",

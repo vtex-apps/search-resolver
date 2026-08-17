@@ -59,57 +59,6 @@ function buildProductSearchRequestParams(
 }
 
 /**
- * Fetches product search results using the intelligentSearchApi client (Biggy)
- */
-// eslint-disable-next-line max-params
-async function fetchProductSearchFromBiggy(
-  ctx: Context,
-  args: ProductSearchInput,
-  selectedFacets: SelectedFacet[],
-  shippingOptions?: string[],
-  segmentData?: SegmentData
-) {
-  const { intelligentSearchApi } = ctx.clients
-  const { fullText } = args
-  const advertisementOptionsResolved =
-    args.advertisementOptions ?? defaultAdvertisementOptions
-
-  const biggyArgs = buildProductSearchRequestParams(
-    args,
-    fullText,
-    advertisementOptionsResolved
-  )
-
-  const finalArgs = applyHideUnavailableItemsDefaultForDP(
-    biggyArgs,
-    segmentData?.segmentParams
-  )
-
-  const raw = await intelligentSearchApi.productSearch(
-    { ...finalArgs },
-    buildAttributePath(selectedFacets),
-    { shippingHeader: shippingOptions }
-  )
-
-  const { requestInfo, ...result } = raw
-
-  if (
-    ctx.vtex.tenant &&
-    !args.productOriginVtex &&
-    raw.translated !== undefined &&
-    raw.translated !== null
-  ) {
-    ctx.translated = raw.translated
-  }
-
-  return {
-    searchState: args.searchState,
-    ...result,
-    requestInfo,
-  }
-}
-
-/**
  * Fetches product search results using the intsch client (Intelligent Search)
  */
 // eslint-disable-next-line max-params
@@ -194,8 +143,7 @@ function logSponsoredProducts(ctx: Context, result: any) {
 }
 
 /**
- * ProductSearch service that routes PLP requests to intsch or the legacy
- * client based on the shouldUseNewPLPEndpoint flag.
+ * ProductSearch service that always routes PLP requests through intsch.
  */
 // eslint-disable-next-line max-params
 export async function fetchProductSearch(
@@ -204,11 +152,9 @@ export async function fetchProductSearch(
   selectedFacets: SelectedFacet[],
   shippingOptions?: string[]
 ) {
-  const {
-    shouldUseNewPLPEndpoint,
-    enableHybridSearch,
-    enableDeliveryPromisePreview,
-  } = await fetchAppSettings(ctx)
+  const { enableHybridSearch, enableDeliveryPromisePreview } =
+    await fetchAppSettings(ctx)
+
   const segment = await getOrCreateSegment(ctx)
   const segmentData = extractSegmentData(segment)
 
@@ -218,33 +164,14 @@ export async function fetchProductSearch(
     })
   }
 
-  if (shouldUseNewPLPEndpoint) {
-    const result = await fetchProductSearchFromIntsch(
-      ctx,
-      args,
-      selectedFacets,
-      shippingOptions,
-      segmentData,
-      enableHybridSearch,
-      enableDeliveryPromisePreview
-    )
-
-    logSponsoredProducts(ctx, result)
-
-    return omitRequestInfo(result)
-  }
-
-  ctx.vtex.logger.warn({
-    message: 'ProductSearch migration: intsch not used as final response',
-    account: ctx.vtex.account,
-  })
-
-  const result = await fetchProductSearchFromBiggy(
+  const result = await fetchProductSearchFromIntsch(
     ctx,
     args,
     selectedFacets,
     shippingOptions,
-    segmentData
+    segmentData,
+    enableHybridSearch,
+    enableDeliveryPromisePreview
   )
 
   logSponsoredProducts(ctx, result)

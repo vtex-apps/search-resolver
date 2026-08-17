@@ -1,11 +1,9 @@
 type AppSettings = {
   shouldUseNewPDPEndpoint: boolean
-  shouldUseNewPLPEndpoint: boolean
   enableHybridSearch: boolean
   enableDeliveryPromisePreview: boolean
 }
 
-const FORCE_NEW_PLP_HEADER = 'x-vtex-force-new-plp-endpoint'
 const FORCE_NEW_PDP_HEADER = 'x-vtex-force-new-pdp-endpoint'
 
 export async function fetchAppSettings(ctx: Context): Promise<AppSettings> {
@@ -13,20 +11,17 @@ export async function fetchAppSettings(ctx: Context): Promise<AppSettings> {
     clients: { apps },
   } = ctx
 
-  const forceNewPLP = ctx.get(FORCE_NEW_PLP_HEADER) === 'true'
   const forceNewPDP = ctx.get(FORCE_NEW_PDP_HEADER) === 'true'
 
   try {
     const {
       shouldUseNewPDPEndpoint,
-      shouldUseNewPLPEndpoint,
       enableHybridSearch,
       enableDeliveryPromisePreview,
     }: AppSettings = await apps.getAppSettings('vtex.search-resolver@1.x')
 
     return {
       shouldUseNewPDPEndpoint: forceNewPDP || shouldUseNewPDPEndpoint,
-      shouldUseNewPLPEndpoint: forceNewPLP || (shouldUseNewPLPEndpoint ?? true),
       enableHybridSearch: enableHybridSearch ?? false,
       enableDeliveryPromisePreview: enableDeliveryPromisePreview ?? false,
     }
@@ -38,9 +33,6 @@ export async function fetchAppSettings(ctx: Context): Promise<AppSettings> {
 
     return {
       shouldUseNewPDPEndpoint: forceNewPDP,
-      // Defaults to true (matches the new manifest default) — the legacy
-      // client is no longer the safe fallback when settings can't be read.
-      shouldUseNewPLPEndpoint: true,
       enableHybridSearch: false,
       enableDeliveryPromisePreview: false,
     }

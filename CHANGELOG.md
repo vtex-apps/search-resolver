@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed
+
+- `shouldUseNewPLPEndpoint` app setting and `x-vtex-force-new-plp-endpoint` header. `productSearch`, `products`, `productSuggestions`, and `facets` always use `intsch`; there is no runtime path back to `vtex.intelligent-search-api` for these routes. `sponsoredProducts` is unchanged.
+
 ## [1.110.0] - 2026-08-14
 
 ### Added
