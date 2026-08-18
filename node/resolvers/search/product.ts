@@ -124,7 +124,7 @@ const findMainTree = (categoriesIds: string[], prodCategoryId: string) => {
 const productCategoriesToCategoryTree = async (
   { categories, categoriesIds, categoryId: prodCategoryId }: SearchProduct,
   _: any,
-  { clients: { search }, vtex: { platform, logger } }: Context
+  { clients: { search }, vtex: { platform, logger, locale } }: Context
 ) => {
   if (!categories || !categoriesIds) {
     return []
@@ -133,7 +133,9 @@ const productCategoriesToCategoryTree = async (
   const mainTreeIds = findMainTree(categoriesIds, prodCategoryId)
 
   if (platform === 'vtex') {
-    return mainTreeIds.map((categoryId) => search.category(Number(categoryId)))
+    return mainTreeIds.map((categoryId) =>
+      search.category(Number(categoryId), locale)
+    )
   }
 
   logger.info({

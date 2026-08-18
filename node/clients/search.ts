@@ -303,9 +303,10 @@ export class Search extends AppClient {
     )
   }
 
-  public category = (id: string | number) =>
+  public category = (id: string | number, acceptLanguage?: string) =>
     this.get<CategoryByIdResponse>(`/pub/category/${id}`, {
       metric: 'search-category',
+      headers: acceptLanguage ? { 'Accept-Language': acceptLanguage } : {},
     })
 
   public crossSelling = (id: string, type: SearchCrossSellingTypes, groupByProduct = true, acceptLanguage?: string) =>
