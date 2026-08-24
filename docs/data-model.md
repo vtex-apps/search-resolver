@@ -56,13 +56,16 @@ export const resolvers = {
 
 ## Settings (per-account behavior)
 
-`manifest.json:settingsSchema` exposes three boolean flags:
+Relevant `manifest.json:settingsSchema` flags:
 
 | Flag | Default | Effect |
 |---|---|---|
 | `slugifyLinks` | `false` | When `true`, links are slugified via `slugify`; when `false`, the default catalog slug is used. |
 | `shouldUseNewPDPEndpoint` | `false` | Routes PDP queries through the new IS endpoint instead of the legacy search backend. |
-| `shouldUseNewPLPEndpoint` | `true` | Same as above, for PLP queries. |
+| `enableHybridSearch` | `false` | When `true`, sends `semanticRatio` on `intsch` product-search requests. |
+| `enableDeliveryPromisePreview` | `false` | When `true`, sends `dpPreview` on `intsch` product-search/facets requests. |
+
+PLP (`productSearch` / `products` / `productSuggestions` / `facets`) always uses `intsch`; there is no PLP app-setting toggle.
 
 These are read from VTEX **app settings** at runtime, not from FeatureHub.
 
