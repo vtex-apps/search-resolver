@@ -452,6 +452,7 @@ export function isDeepEqual(
  * Convert an ignore path pattern to a RegExp.
  * Escapes all regex special chars first, then un-escapes our wildcard tokens:
  *   - `[*]` → matches any array index: numeric (e.g. `[0]`, `[1]`) or named (e.g. `[name:foo]`)
+ *   - `**`  → matches the rest of the path, including nested keys and indices
  *   - `*`   → matches any characters except dots and brackets
  *   - `[name:X]` is matched literally (already escaped correctly)
  */
@@ -460,12 +461,12 @@ function ignorePatternToRegex(pathPattern: string): RegExp {
   let regex = pathPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
   // 2. Un-escape and replace [*] → match numeric or named array indices (matches intelligent-search)
-  regex = regex.replace(
-    /\\\[\\\*\\\]/g,
-    '(?:\\[\\d+\\]|\\[name:[^\\]]+\\])'
-  )
+  regex = regex.replace(/\\\[\\\*\\\]/g, '(?:\\[\\d+\\]|\\[name:[^\\]]+\\])')
 
-  // 3. Un-escape and replace remaining * → match any chars except dots/brackets
+  // 3. Un-escape ** → match this field and any nested path under it
+  regex = regex.replace(/\\\*\\\*/g, '.*')
+
+  // 4. Un-escape and replace remaining * → match any chars except dots/brackets
   regex = regex.replace(/\\\*/g, '[^.\\[\\]]*')
 
   return new RegExp(`^${regex}$`)
@@ -500,7 +501,7 @@ export function shouldIgnoreDifference(
 
 /**
  * Filters out differences that should be ignored based on path patterns and type.
- * Supports wildcard patterns in paths (`[*]`, `*`, `[name:X]`).
+ * Supports wildcard patterns in paths (`[*]`, `**`, `*`, `[name:X]`).
  * @param differences Array of differences to filter
  * @param ignoredDifferences Array of ignored difference configurations
  * @returns Filtered array of differences
@@ -561,7 +562,9 @@ export const DEFAULT_MAX_DIFF_VALUE_LENGTH = 2000
 
 function truncateForLog(value: unknown, maxLength: number): string {
   const s = JSON.stringify(value)
+
   if (maxLength <= 0 || s.length <= maxLength) return s
+
   return `${s.slice(0, maxLength)} ... (truncated, total ${s.length} chars)`
 }
 
@@ -677,6 +680,7 @@ export async function compareApiResults<T>(
 
       differences = comparisonResult.differences
       const result = filterIgnoredDifferences(differences, ignoredDifferences)
+
       filteredDifferences = result.filtered
       ignored = result.ignored
       areEqual = filteredDifferences.length === 0
