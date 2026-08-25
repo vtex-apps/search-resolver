@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Ignore `PromotionTeasers` and `completeSpecifications.Values` length/extra-key diffs in the PDP catalog vs intsch comparison. Those fields are unused by GraphQL (or duplicate mapping) and were inflating `Product: Results differ` logs.
+
 ## [1.111.0] - 2026-08-24
 
 ### Removed
