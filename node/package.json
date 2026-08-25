@@ -13,7 +13,7 @@
     "graphql-tools": "^4.0.6",
     "qs": "^6.6.0",
     "ramda": "^0.27.1",
-    "slugify": "^1.6.4",
+    "slugify": "^1.6.9",
     "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.72.0/public"
   },
   "devDependencies": {
