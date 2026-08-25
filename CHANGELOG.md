@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Expand the PDP catalog vs intsch ignore list for `Product: Results differ`. Drop mapping-only extra keys (`offerOrigin`, `attributes`, `allSpecifications`, `allSpecificationsGroups`), intsch’s product-cluster cap of 50, `brandImageUrl`, `imageText` null vs string, GraphQL-unused offer/product payload (`PaymentOptions`, `FullSellingPrice`, `IsAvailable`, `DeliverySlaSamplesPerRegion`, `ItemMetadataAttachment`, `SellerVSS`, `PromotionTeasers`), and duplicate `completeSpecifications.Values`. `Teasers` content and extra specs by `Name` still log.
+- Support `**` in compare ignore paths so a field and its nested keys can be ignored together.
+
 ## [1.111.0] - 2026-08-24
 
 ### Removed
