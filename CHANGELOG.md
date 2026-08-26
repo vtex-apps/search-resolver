@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.112.0] - 2026-08-26
+
 ### Changed
 
 - Bump `@vtex/api` from 7.2.7 to 7.4.0 in `/node` (#565).
