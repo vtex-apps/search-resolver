@@ -1290,10 +1290,10 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@vtex/api@^7.2.7":
-  version "7.2.7"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-7.2.7.tgz#c22dc034a36fc9b586a450345cfd95d764325d14"
-  integrity sha512-MIrTNRr5ijTVRsXQAxLkkp3M6P1afpLIds+LLcMqxq4H8rXqLsHC0G8Wr3G5QVTN6kbTtE+WbriFdHe396h8lQ==
+"@vtex/api@^7.4.0":
+  version "7.4.2"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-7.4.2.tgz#096fb08b856653f6cee916a5569e66a91e7b1522"
+  integrity sha512-SbZajYFWoktFHPAbvbkSiLNCkxc2nV3FlzgW6cMdGgxG9dNuznhDakJ+mlBRZi5x413/7/elQxgfUp/xFnCP0g==
   dependencies:
     "@opentelemetry/api" "^1.9.0"
     "@opentelemetry/host-metrics" "0.35.5"
@@ -1301,7 +1301,7 @@
     "@opentelemetry/instrumentation-koa" "0.47.1"
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"
-    "@vtex/diagnostics-nodejs" "0.1.0-io-beta.20"
+    "@vtex/diagnostics-nodejs" "0.1.8-io"
     "@vtex/diagnostics-semconv" "^1.1.2"
     "@vtex/node-error-report" "^0.0.3"
     "@wry/equality" "^0.1.9"
@@ -1336,16 +1336,16 @@
     ramda "^0.26.0"
     rwlock "^5.0.0"
     semver "^5.5.1"
-    stats-lite vtex/node-stats-lite#dist
+    stats-lite vtex/node-stats-lite#v2.2.1
     tar-fs "^2.0.0"
     tokenbucket "^0.3.2"
     uuid "^3.3.3"
     xss "^1.0.6"
 
-"@vtex/diagnostics-nodejs@0.1.0-io-beta.20":
-  version "0.1.0-io-beta.20"
-  resolved "https://registry.yarnpkg.com/@vtex/diagnostics-nodejs/-/diagnostics-nodejs-0.1.0-io-beta.20.tgz#79ee25a88827a501206d1a8ef0715674fa1521b5"
-  integrity sha512-8DbibPcPEd2yJCRKZOM2JAf4FYr9W90lD+DRV/mOwgMd1ZGdZuXupfoqqOzOdrkOidXhCeLBPhRXne8O2N3QEQ==
+"@vtex/diagnostics-nodejs@0.1.8-io":
+  version "0.1.8-io"
+  resolved "https://registry.yarnpkg.com/@vtex/diagnostics-nodejs/-/diagnostics-nodejs-0.1.8-io.tgz#ca5679779b8bac8e3c91288b35e418836201a2c2"
+  integrity sha512-Nm9fF/tpRP38Pt9wKlPE/RUttKP4mVRnKqUskkul/yBSdlYNKJQ366YIlZXgizAApt8oiJJb5oL0i2GBgSXSag==
   dependencies:
     "@grpc/grpc-js" "^1.13.4"
     "@opentelemetry/api" "^1.9.0"
@@ -3944,9 +3944,9 @@ stack-utils@^2.0.3:
   dependencies:
     escape-string-regexp "^2.0.0"
 
-stats-lite@vtex/node-stats-lite#dist:
-  version "2.2.0"
-  resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/1b0d39cc41ef7aaecfd541191f877887a2044797"
+"stats-lite@github:vtex/node-stats-lite#v2.2.1":
+  version "2.2.1"
+  resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/a0b5ee91861f31b6ec845146b4906faf5172c430"
   dependencies:
     isnumber "~1.0.0"
 
