@@ -893,10 +893,10 @@ describe('nested existence-based comparison with ignore patterns', () => {
       { path: 'products[*].properties[name:sellerId]', type: 'missing_key' },
     ]
 
-    const filtered = filterIgnoredDifferences(
+    const { filtered } = filterIgnoredDifferences(
       result.differences,
       ignoredDifferences
-    ).filtered
+    )
 
     expect(filtered).toEqual([])
   })
@@ -953,7 +953,10 @@ describe('filterIgnoredDifferences', () => {
         { path: 'email', type: 'missing_key' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
+      const result = filterIgnoredDifferences(
+        differences,
+        ignoredDifferences
+      ).filtered
 
       expect(result).toEqual([
         {
@@ -985,7 +988,10 @@ describe('filterIgnoredDifferences', () => {
         { path: 'value', type: 'different_value' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
+      const result = filterIgnoredDifferences(
+        differences,
+        ignoredDifferences
+      ).filtered
 
       expect(result).toEqual([
         {
@@ -1007,7 +1013,10 @@ describe('filterIgnoredDifferences', () => {
         { path: 'name', type: 'extra_key' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
+      const result = filterIgnoredDifferences(
+        differences,
+        ignoredDifferences
+      ).filtered
 
       expect(result).toEqual([{ path: 'age', type: 'extra_key', expected: 25 }])
     })
@@ -1031,7 +1040,10 @@ describe('filterIgnoredDifferences', () => {
         { path: '[0].brandImageUrl', type: 'extra_key' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
+      const result = filterIgnoredDifferences(
+        differences,
+        ignoredDifferences
+      ).filtered
 
       expect(result).toEqual([
         {
@@ -1058,7 +1070,10 @@ describe('filterIgnoredDifferences', () => {
         { path: 'data[0].items[2].specs', type: 'missing_key' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
+      const result = filterIgnoredDifferences(
+        differences,
+        ignoredDifferences
+      ).filtered
 
       expect(result).toEqual([
         {
@@ -1097,7 +1112,10 @@ describe('filterIgnoredDifferences', () => {
         { path: 'user.settings.notifications', type: 'missing_key' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
+      const result = filterIgnoredDifferences(
+        differences,
+        ignoredDifferences
+      ).filtered
 
       expect(result).toEqual([
         {
@@ -1142,7 +1160,10 @@ describe('filterIgnoredDifferences', () => {
         { path: 'array', type: 'array_length_mismatch' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
+      const result = filterIgnoredDifferences(
+        differences,
+        ignoredDifferences
+      ).filtered
 
       expect(result).toEqual([
         {
@@ -1162,7 +1183,10 @@ describe('filterIgnoredDifferences', () => {
         { path: 'any', type: 'extra_key' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
+      const result = filterIgnoredDifferences(
+        differences,
+        ignoredDifferences
+      ).filtered
 
       expect(result).toEqual([])
     })
@@ -1198,7 +1222,10 @@ describe('filterIgnoredDifferences', () => {
         { path: 'age', type: 'extra_key' },
       ]
 
-      const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
+      const result = filterIgnoredDifferences(
+        differences,
+        ignoredDifferences
+      ).filtered
 
       expect(result).toEqual([])
     })
@@ -1301,6 +1328,54 @@ describe('shouldIgnoreDifference', () => {
           path: 'products[*].specificationGroups[name:allSpecifications]',
           type: 'missing_key',
         })
+      ).toBe(false)
+    })
+  })
+
+  describe('wildcard ** matching', () => {
+    it('matches the field itself and nested paths', () => {
+      const pattern: IgnoredDifference = {
+        path: '[*].items[*].sellers[*].commertialOffer.PaymentOptions**',
+      }
+
+      expect(
+        shouldIgnoreDifference(
+          {
+            path: '[0].items[0].sellers[0].commertialOffer.PaymentOptions',
+            type: 'null_mismatch',
+            expected: null,
+            actual: {},
+          },
+          pattern
+        )
+      ).toBe(true)
+
+      expect(
+        shouldIgnoreDifference(
+          {
+            path: '[0].items[0].sellers[0].commertialOffer.PaymentOptions.installmentOptions[0].installments[0].sellerMerchantInstallments[0].id',
+            type: 'different_value',
+            expected: 'A',
+            actual: 'B',
+          },
+          pattern
+        )
+      ).toBe(true)
+    })
+
+    it('does not match a sibling field', () => {
+      expect(
+        shouldIgnoreDifference(
+          {
+            path: '[0].items[0].sellers[0].commertialOffer.Installments[0].Value',
+            type: 'different_value',
+            expected: 1,
+            actual: 2,
+          },
+          {
+            path: '[*].items[*].sellers[*].commertialOffer.PaymentOptions**',
+          }
+        )
       ).toBe(false)
     })
   })
@@ -1428,7 +1503,10 @@ describe('filterIgnoredDifferences with wildcards', () => {
       { path: 'products[*].cacheId', type: 'different_value' },
     ]
 
-    const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
+    const result = filterIgnoredDifferences(
+      differences,
+      ignoredDifferences
+    ).filtered
 
     expect(result).toEqual([
       {
@@ -1487,7 +1565,10 @@ describe('filterIgnoredDifferences with wildcards', () => {
       },
     ]
 
-    const result = filterIgnoredDifferences(differences, ignoredDifferences).filtered
+    const result = filterIgnoredDifferences(
+      differences,
+      ignoredDifferences
+    ).filtered
 
     expect(result).toEqual([
       {

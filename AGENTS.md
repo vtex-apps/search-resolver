@@ -22,7 +22,7 @@ It is the resolver layer of the Intelligent Search stack. The GraphQL schema (th
 
 | File | What it defines |
 |---|---|
-| `manifest.json` | App identity (`vtex.search-resolver@1.102.2`), builders (`node`, `docs`), dependencies (`vtex.messages`, `vtex.catalog-api-proxy`, `vtex.search-graphql`, `vtex.rewriter`, `vtex.sae-analytics`, `vtex.intelligent-search-api`), `settingsSchema` (`slugifyLinks`, `shouldUseNewPDPEndpoint`, `shouldUseNewPLPEndpoint`), policies (`vtex.messages:translate-messages`, `vtex.catalog-api-proxy:catalog-proxy`/`authenticated-catalog-proxy`, …) |
+| `manifest.json` | App identity (`vtex.search-resolver@1.102.2`), builders (`node`, `docs`), dependencies (`vtex.messages`, `vtex.catalog-api-proxy`, `vtex.search-graphql`, `vtex.rewriter`, `vtex.sae-analytics`, `vtex.intelligent-search-api`), `settingsSchema` (`slugifyLinks`, `shouldUseNewPDPEndpoint`, `enableHybridSearch`, `enableDeliveryPromisePreview`), policies (`vtex.messages:translate-messages`, `vtex.catalog-api-proxy:catalog-proxy`/`authenticated-catalog-proxy`, …) |
 | `node/service.json` | Runtime: `nodejs` stack, 2048MB memory, 80 shared CPU @ 95%, ttl 30s, timeout 12s, 30–250 replicas, 2 workers. **No `routes`** — this service is a pure GraphQL plugin mounted by `vtex.search-graphql` via the schema. |
 | `node/index.ts` | Service composition, LRU caches (`segmentCache: 1000`, `searchCache: 3000`, `messagesCache: 3000`, `appsCache: 1500`, `intschCache: 3000`), per-client timeouts (default 3s, `search: 6s`, `intelligentSearchApi: 9s`), `metrics.trackCache` instrumentation. Imports `schema` from `vtex.search-graphql/graphql`. |
 | `node/resolvers/index.ts` | Composes `searchFieldResolvers`, `benefitsFieldResolvers`, `searchQueries`, `statsQueries`. **This is the resolver entry point.** |
@@ -69,13 +69,12 @@ GraphQL request ─► vtex.graphql-server / @vtex/api Service runtime
 
 ### Endpoint switching
 
-Three settings control the new-vs-legacy migration:
-
 | Setting | Default | Effect |
 |---|---|---|
 | `slugifyLinks` | `false` | When `true`, links use `slugify` instead of the default catalog slug |
 | `shouldUseNewPDPEndpoint` | `false` | When `true`, PDP queries hit the new IS endpoint via `intelligentSearchApi` / `intsch`; otherwise the legacy `search` client |
-| `shouldUseNewPLPEndpoint` | `true` | Same for PLP — per-account override still available to roll back to legacy |
+
+PLP (`productSearch` / `products` / `productSuggestions` / `facets`) always uses `intsch`. There is no `shouldUseNewPLPEndpoint` toggle.
 
 These are **per-account app settings**, not FeatureHub flags. Toggling them changes which client takes the hot path.
 
@@ -162,7 +161,7 @@ Part of the **`is-io-specs`** multi-repo workspace. SpecKit artifacts (`.specify
 - **`@gocommerce/utils`** branches behavior for go-commerce stores. Always go through the existing helpers; do not gate by account name.
 
 ### Endpoint switching
-- **`shouldUseNewPDPEndpoint` / `shouldUseNewPLPEndpoint`** are per-account flags. Adding a new flag requires updating `manifest.json:settingsSchema` and the corresponding read sites.
+- **`shouldUseNewPDPEndpoint`** is a per-account flag. Adding a new flag requires updating `manifest.json:settingsSchema` and the corresponding read sites. PLP product search/facets are intsch-only (no PLP flag).
 - **Never** call `intelligentSearchApi` and the legacy `search` client for the same field — pick one based on settings, or you'll double-bill and double-cache.
 
 ### Observability

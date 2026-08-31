@@ -11,6 +11,33 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Send accept-language param to catalog category request
 
+## [1.112.0] - 2026-08-26
+
+### Changed
+
+- Bump `@vtex/api` from 7.2.7 to 7.4.0 in `/node` (#565).
+- Bump `typescript` from 5.5.3 to 5.9.3 in `/node` (#566).
+- Bump `ts-jest` from 29.2.5 to 29.4.11 in `/node` (#562).
+- Bump `slugify` from 1.6.4 to 1.6.9 in `/node` (#564).
+- Bump `lodash` from 4.17.15 to 4.18.1 in `/node` (#581).
+- Bump `follow-redirects` from 1.14.6 to 1.16.0 in `/node` (#580).
+- Bump `js-yaml` from 3.14.1 to 3.15.1 (#585) and from 3.13.1 to 3.15.1 in `/node` (#586).
+- Bump `fast-uri` from 3.0.5 to 3.1.5 (#582).
+- Bump `brace-expansion` from 1.1.11 to 1.1.16 (#577) and from 1.1.11 to 1.1.18 in `/node` (#591).
+
+## [1.111.1] - 2026-08-25
+
+### Changed
+
+- Expand the PDP catalog vs intsch ignore list for `Product: Results differ`. Drop mapping-only extra keys (`offerOrigin`, `attributes`, `allSpecifications`, `allSpecificationsGroups`), intsch’s product-cluster cap of 50, `brandImageUrl`, `imageText` null vs string, GraphQL-unused offer/product payload (`PaymentOptions`, `FullSellingPrice`, `IsAvailable`, `DeliverySlaSamplesPerRegion`, `ItemMetadataAttachment`, `SellerVSS`, `PromotionTeasers`), and duplicate `completeSpecifications.Values`. `Teasers` content and extra specs by `Name` still log.
+- Support `**` in compare ignore paths so a field and its nested keys can be ignored together.
+
+## [1.111.0] - 2026-08-24
+
+### Removed
+
+- `shouldUseNewPLPEndpoint` app setting and `x-vtex-force-new-plp-endpoint` header. `productSearch`, `products`, `productSuggestions`, and `facets` always use `intsch`; there is no runtime path back to `vtex.intelligent-search-api` for these routes. `sponsoredProducts` is unchanged.
+
 ## [1.110.0] - 2026-08-14
 
 ### Added
