@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `productsByIdentifier` on the intsch PDP path (`shouldUseNewPDPEndpoint`) no longer fails the whole batch when one identifier 404s. Missing products are omitted; other errors still propagate.
 
+## [1.113.0] - 2026-08-31
+
+### Changed
+
+- Send accept-language param to catalog category request
+
 ## [1.112.0] - 2026-08-26
 
 ### Changed
