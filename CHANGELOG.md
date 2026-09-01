@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.113.1] - 2026-09-01
+
 ### Fixed
 
 - `productsByIdentifier` on the intsch PDP path (`shouldUseNewPDPEndpoint`) no longer fails the whole batch when one identifier 404s. Missing products are omitted; other errors still propagate.
