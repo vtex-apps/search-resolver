@@ -6,6 +6,34 @@ import {
   CATALOG_EXISTENCE_COMPARE_FIELDS,
 } from './pdpConfig'
 
+function isProductNotFoundError(error: unknown): boolean {
+  const axiosError = error as {
+    response?: { status?: number; data?: { code?: string } }
+  }
+
+  const status = axiosError.response?.status
+  const code = axiosError.response?.data?.code
+
+  return status === 404 || code === 'PRODUCT_NOT_FOUND'
+}
+
+async function fetchIntschProductOrNull(
+  intsch: Context['clients']['intsch'],
+  args: Parameters<Context['clients']['intsch']['fetchProduct']>[0]
+): Promise<SearchProduct | null> {
+  try {
+    const product = await intsch.fetchProduct(args)
+
+    return product ?? null
+  } catch (error) {
+    if (isProductNotFoundError(error)) {
+      return null
+    }
+
+    throw error
+  }
+}
+
 export type ProductIdentifier = {
   field: 'id' | 'slug' | 'ean' | 'reference' | 'sku'
   value: string
@@ -92,7 +120,7 @@ async function fetchProductFromIntsch(
     }
   }
 
-  const product = await intsch.fetchProduct({
+  const product = await fetchIntschProductOrNull(intsch, {
     field,
     value,
     salesChannel: finalSalesChannel?.toString(),
@@ -101,8 +129,6 @@ async function fetchProductFromIntsch(
     productOriginVtex: true,
   })
 
-  // intsch.fetchProduct returns a single SearchProduct, but we need to return an array
-  // to match the search client interface
   return product ? [product] : []
 }
 
@@ -273,21 +299,23 @@ async function fetchProductsByIdentifierFromIntsch(
     }
   }
 
-  // Fetch all products in parallel
-  const productPromises = values.map((value) =>
-    intsch.fetchProduct({
-      field,
-      value,
-      salesChannel: finalSalesChannel?.toString(),
-      regionId: regionId ?? undefined,
-      locale: finalLocale,
-      productOriginVtex: true,
-    })
+  // Fetch all products in parallel, omitting IDs that intsch reports as not found
+  const productResults = await Promise.all(
+    values.map((value) =>
+      fetchIntschProductOrNull(intsch, {
+        field,
+        value,
+        salesChannel: finalSalesChannel?.toString(),
+        regionId: regionId ?? undefined,
+        locale: finalLocale,
+        productOriginVtex: true,
+      })
+    )
   )
 
-  const products = await Promise.all(productPromises)
-
-  return products as SearchProduct[]
+  return productResults.filter(
+    (product): product is SearchProduct => product != null
+  )
 }
 
 export async function resolveProductsByIdentifier(
