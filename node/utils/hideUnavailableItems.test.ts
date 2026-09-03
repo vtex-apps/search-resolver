@@ -28,13 +28,14 @@ describe('applyHideUnavailableItemsDefaultForDP', () => {
     expect(result.hideUnavailableItems).toBeNull()
   })
 
-  it('should default to true when DP is enabled (deliveryZonesHash present) and hideUnavailableItems is undefined', () => {
+  it('should pass through when DP is enabled (deliveryZonesHash present) and hideUnavailableItems is undefined', () => {
     const args: { hideUnavailableItems?: boolean | null } = {}
     const segmentParams = { deliveryZonesHash: 'dzHash' }
 
     const result = applyHideUnavailableItemsDefaultForDP(args, segmentParams)
 
-    expect(result.hideUnavailableItems).toBe(true)
+    expect(result).toBe(args)
+    expect(result.hideUnavailableItems).toBeUndefined()
   })
 
   it('should default to false when DP is disabled (no deliveryZonesHash) and hideUnavailableItems is undefined', () => {
@@ -63,17 +64,17 @@ describe('applyHideUnavailableItemsDefaultForDP', () => {
     expect(result.hideUnavailableItems).toBe(false)
   })
 
-  it('should not mutate the original args object', () => {
+  it('should not mutate the original args object when DP is off', () => {
     const args: { hideUnavailableItems?: boolean | null; foo?: string } = {
       foo: 'bar',
     }
-    const segmentParams = { deliveryZonesHash: 'dzHash' }
+    const segmentParams = {}
 
     const result = applyHideUnavailableItemsDefaultForDP(args, segmentParams)
 
     expect(result).not.toBe(args)
     expect(result.foo).toBe('bar')
-    expect(result.hideUnavailableItems).toBe(true)
+    expect(result.hideUnavailableItems).toBe(false)
     expect(args).not.toHaveProperty('hideUnavailableItems')
   })
 })

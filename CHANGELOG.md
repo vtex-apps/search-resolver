@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Stop defaulting `hideUnavailableItems` to `true` for delivery promise requests; the value is now passed through from upstream when omitted. Non-DP requests still default to `false`.
+
 ## [1.113.1] - 2026-09-01
 
 ### Fixed

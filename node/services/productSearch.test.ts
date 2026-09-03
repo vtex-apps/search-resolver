@@ -29,7 +29,7 @@ describe('fetchProductSearch service', () => {
     jest.clearAllMocks()
   })
 
-  it('should default hideUnavailableItems=true when DP is enabled and hideUnavailableItems is undefined', async () => {
+  it('should pass through hideUnavailableItems when DP is enabled and hideUnavailableItems is undefined', async () => {
     const ctx = createContext({
       accountName: 'testaccount',
       intschSettings: {
@@ -45,11 +45,10 @@ describe('fetchProductSearch service', () => {
 
     await fetchProductSearch(ctx, argsWithoutHide, mockSelectedFacets)
 
-    expect(ctx.clients.intsch.productSearch).toHaveBeenCalledWith(
-      expect.objectContaining({ hideUnavailableItems: true }),
-      expect.any(String),
-      expect.any(Object)
-    )
+    const [callArgs] = (ctx.clients.intsch.productSearch as jest.Mock).mock
+      .calls[0]
+
+    expect(callArgs.hideUnavailableItems).toBeUndefined()
   })
 
   it('should always use intsch and never call intelligentSearchApi', async () => {
