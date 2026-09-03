@@ -90,7 +90,7 @@ describe('product recommendations query tests', () => {
 })
 
 describe('sponsoredProducts query tests', () => {
-  test('defaults hideUnavailableItems=true when DP is enabled and hideUnavailableItems is undefined', async () => {
+  test('passes through hideUnavailableItems when DP is enabled and hideUnavailableItems is undefined', async () => {
     mockContext.vtex.segment = {
       facets: 'deliveryZonesHash=dzHash',
     }
@@ -115,12 +115,9 @@ describe('sponsoredProducts query tests', () => {
 
     await queries.sponsoredProducts({}, argsWithoutHide, mockContext as any)
 
-    expect(
-      mockContext.clients.intelligentSearchApi.sponsoredProducts
-    ).toHaveBeenCalledWith(
-      expect.objectContaining({ hideUnavailableItems: true }),
-      expect.any(String),
-      expect.any(Array)
-    )
+    const [callArgs] =
+      mockContext.clients.intelligentSearchApi.sponsoredProducts.mock.calls[0]
+
+    expect(callArgs.hideUnavailableItems).toBeUndefined()
   })
 })
