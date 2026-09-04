@@ -88,36 +88,3 @@ describe('product recommendations query tests', () => {
     )
   })
 })
-
-describe('sponsoredProducts query tests', () => {
-  test('passes through hideUnavailableItems when DP is enabled and hideUnavailableItems is undefined', async () => {
-    mockContext.vtex.segment = {
-      facets: 'deliveryZonesHash=dzHash',
-    }
-
-    mockContext.clients.intelligentSearchApi.sponsoredProducts = jest
-      .fn()
-      .mockResolvedValue({ translated: false })
-
-    const { hideUnavailableItems: _ignored, ...argsWithoutHide } = {
-      query: 'test',
-      from: 0,
-      to: 4,
-      selectedFacets: [],
-      fullText: 'test',
-      fuzzy: '0',
-      operator: 'and',
-      orderBy: 'OrderByTopSaleDESC',
-      productOriginVtex: false,
-      simulationBehavior: 'default',
-      hideUnavailableItems: false,
-    } as any
-
-    await queries.sponsoredProducts({}, argsWithoutHide, mockContext as any)
-
-    const [callArgs] =
-      mockContext.clients.intelligentSearchApi.sponsoredProducts.mock.calls[0]
-
-    expect(callArgs.hideUnavailableItems).toBeUndefined()
-  })
-})

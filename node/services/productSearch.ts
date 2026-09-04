@@ -5,7 +5,6 @@ import {
   mergeSegmentParamsWithPickupFromPath,
 } from '../commons/compatibility-layer'
 import { extractSegmentData, getOrCreateSegment } from '../utils/segment'
-import { applyHideUnavailableItemsDefaultForDP } from '../utils/hideUnavailableItems'
 import type {
   AdvertisementOptions,
   ProductSearchInput,
@@ -87,17 +86,12 @@ async function fetchProductSearchFromIntsch(
     }
   )
 
-  const finalArgs = applyHideUnavailableItemsDefaultForDP(
-    intschArgs,
-    segmentData?.segmentParams
-  )
-
   const allFacets = segmentData
     ? concatSelectedFacets(selectedFacets, segmentData.extraFacets)
     : selectedFacets
 
   const raw = await intsch.productSearch(
-    { ...finalArgs },
+    { ...intschArgs },
     buildAttributePath(allFacets),
     {
       segmentParams: mergeSegmentParamsWithPickupFromPath(

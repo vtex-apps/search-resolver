@@ -1,69 +1,55 @@
-# hideUnavailableItems passthrough for Delivery Promise requests
+# hideUnavailableItems passthrough (remove DP defaulting)
 
 > **Status**: Done
 > **Created**: 2026-09-03
-> **Related PR**: [#533](https://github.com/vtex-apps/search-resolver/pull/533) (original DP defaulting), revert of DP `true` override
+> **Related PR**: [#533](https://github.com/vtex-apps/search-resolver/pull/533) (original DP defaulting)
 
 ## 1. Business Context
 
 ### Problem Statement
 
-PR [#533](https://github.com/vtex-apps/search-resolver/pull/533) introduced resolver-side defaulting for `hideUnavailableItems`: when the shopper segment includes `deliveryZonesHash` (Delivery Promise / DP enabled) and the GraphQL caller omits the field, `vtex.search-resolver` forced `hideUnavailableItems: true` before calling Intelligent Search.
+PR [#533](https://github.com/vtex-apps/search-resolver/pull/533) added resolver-side defaulting for `hideUnavailableItems`: when the GraphQL caller omitted the field, search-resolver set it to `true` if the segment had `deliveryZonesHash` (Delivery Promise) and `false` otherwise.
 
-That workaround addressed an unavailable-item sorting bug in the IS platform. The sort issue is now fixed upstream, so forcing `true` is no longer needed and prevents storefronts from controlling availability filtering on DP-enabled sessions when they intentionally omit or rely on upstream defaults.
+That workaround existed because Intelligent Search mixed unavailable products into sorted results when `hideUnavailableItems` was false. The sort issue is fixed upstream. Keeping a DP-specific path in the resolver no longer solves anything and overrides storefront intent.
 
 ### Goals
 
-- Stop overriding `hideUnavailableItems` to `true` for DP-enabled requests.
-- Preserve upstream control: pass the value as received from the GraphQL query when DP is on.
-- Keep existing non-DP behavior: when DP is off and the field is omitted, default to `false`.
-- Preserve explicit values (`true`, `false`, `null`) in all cases.
+- Pass `hideUnavailableItems` through from the GraphQL query for every session, including DP.
+- Remove the dedicated helper and segment lookup added only for that defaulting.
+- Leave explicit values (`true`, `false`, `null`, omitted/`undefined`) unchanged.
 
 ### User Stories
 
-#### US-1: Storefront controls availability filtering on DP sessions
+#### US-1: Storefront owns availability filtering
 
-- **Story**: As a storefront developer, I want `hideUnavailableItems` forwarded unchanged on delivery-promise sessions, so that my PLP/facets behavior matches what I send in the GraphQL query.
+- **Story**: As a storefront developer, I want `hideUnavailableItems` forwarded as I sent it, so that PLP, facets, and sponsored products match the GraphQL query.
 - **Acceptance Criteria**:
-  - **Given** a segment with `deliveryZonesHash` and a `productSearch` query that omits `hideUnavailableItems`, **when** the resolver calls `intsch.productSearch`, **then** `hideUnavailableItems` is not set by the resolver (remains `undefined`).
-  - **Given** a segment with `deliveryZonesHash` and `hideUnavailableItems: false` in the query, **when** the resolver calls downstream IS, **then** `hideUnavailableItems` is `false`.
-  - **Given** a segment with `deliveryZonesHash` and `hideUnavailableItems: true` in the query, **when** the resolver calls downstream IS, **then** `hideUnavailableItems` is `true`.
-
-#### US-2: Non-DP sessions keep the existing false default
-
-- **Story**: As a platform maintainer, I want non-DP requests to keep defaulting omitted `hideUnavailableItems` to `false`, so that legacy behavior outside delivery promise is unchanged.
-- **Acceptance Criteria**:
-  - **Given** a segment without `deliveryZonesHash` and a query that omits `hideUnavailableItems`, **when** the resolver calls downstream IS, **then** `hideUnavailableItems` is `false`.
-  - **Given** a segment without `deliveryZonesHash` and `hideUnavailableItems: null` in the query, **when** the resolver calls downstream IS, **then** `hideUnavailableItems` is `null` (explicit value preserved).
+  - **Given** `hideUnavailableItems` is omitted, **when** `productSearch`, `facets`, or `sponsoredProducts` runs, **then** the resolver does not inject a default.
+  - **Given** `hideUnavailableItems` is `true`, `false`, or `null`, **when** those queries run, **then** the same value is forwarded downstream.
 
 ### Key Scenarios
 
 | Scenario | Pre-conditions | Steps | Expected Result |
 |---|---|---|---|
-| DP on, field omitted (happy path) | Segment has `deliveryZonesHash`; GraphQL omits `hideUnavailableItems` | Run `productSearch`, `facets`, or `sponsoredProducts` | Resolver does not inject `hideUnavailableItems`; downstream receives `undefined` |
-| DP on, explicit false | Segment has `deliveryZonesHash`; query sets `hideUnavailableItems: false` | Run product search | Downstream receives `false` |
-| DP off, field omitted (edge case) | Segment has no `deliveryZonesHash`; field omitted | Run product search | Resolver defaults to `false` before calling IS |
-| Explicit null (edge case) | Any segment; query sets `hideUnavailableItems: null` | Run product search | Downstream receives `null`; resolver does not coerce |
+| Field omitted | Any segment (DP or not) | Run `productSearch` / `facets` / `sponsoredProducts` | Downstream args omit the field (`undefined`) |
+| Explicit false | Query sets `hideUnavailableItems: false` | Run product search | Downstream receives `false` |
+| Explicit true | Query sets `hideUnavailableItems: true` | Run product search | Downstream receives `true` |
+| Explicit null | Query sets `hideUnavailableItems: null` | Run product search | Downstream receives `null` |
 
 ### Functional Requirements
 
-- `applyHideUnavailableItemsDefaultForDP` must not set `hideUnavailableItems` when DP is enabled and the upstream value is `undefined`.
-- `applyHideUnavailableItemsDefaultForDP` must set `hideUnavailableItems: false` when DP is disabled and the upstream value is `undefined`.
-- Explicit `true`, `false`, and `null` must never be overridden.
-- Behavior applies consistently across: `fetchProductSearch` (intsch), `fetchFacets`, and `sponsoredProducts`.
+- Product search, facets, and sponsored products must not rewrite `hideUnavailableItems` based on `deliveryZonesHash`.
+- No replacement helper for omitted values.
 
 ### Non-Functional Requirements
 
 - No schema changes in `vtex.search-graphql`.
-- No new app settings or feature flags.
-- Change is backward-compatible for callers that explicitly set `hideUnavailableItems`.
+- No new app settings or flags.
 
 ### Out of Scope
 
-- Removing `applyHideUnavailableItemsDefaultForDP` entirely (non-DP `false` default stays).
-- Changing how `intsch` or `intelligentSearchApi` clients serialize the parameter.
-- Legacy `search` client defaulting (`hideUnavailableItems = false` in `node/clients/search.ts`).
-- Revisiting sort behavior in the IS platform.
+- Legacy `search` client default (`hideUnavailableItems = false` in `node/clients/search.ts`).
+- IS platform sort behavior.
 
 ---
 
@@ -71,71 +57,52 @@ That workaround addressed an unavailable-item sorting bug in the IS platform. Th
 
 ### Proposed Solution
 
-Adjust the existing helper `applyHideUnavailableItemsDefaultForDP` (`node/utils/hideUnavailableItems.ts`) so DP-enabled segments short-circuit and return args unchanged when `hideUnavailableItems` is `undefined`. Non-DP segments continue to spread `{ hideUnavailableItems: false }`.
-
-No call-site changes beyond the helper logic; the three existing integration points keep calling the helper.
+Delete `node/utils/hideUnavailableItems.ts` and stop calling it. Pass the request args built from GraphQL input straight to the IS clients.
 
 ### Architecture Overview
 
 ```mermaid
 flowchart LR
   GQL[GraphQL query] --> R[search-resolver]
-  R --> H[applyHideUnavailableItemsDefaultForDP]
-  H -->|DP on + undefined| P[pass through]
-  H -->|DP off + undefined| F[default false]
-  H -->|explicit value| E[preserve value]
-  P --> IS[intsch / intelligentSearchApi]
-  F --> IS
-  E --> IS
+  R --> IS[intsch / intelligentSearchApi]
 ```
 
-**Call sites (unchanged):**
-
-| Module | Function / query |
+| Module | Change |
 |---|---|
-| `node/services/productSearch.ts` | `fetchProductSearchFromIntsch` |
-| `node/services/facets.ts` | `fetchFacetsFromIntsch` |
-| `node/resolvers/search/index.ts` | `sponsoredProducts` |
+| `node/utils/hideUnavailableItems.ts` | Delete |
+| `node/services/productSearch.ts` | Pass `intschArgs` as built |
+| `node/services/facets.ts` | Pass `intschArgs` as built |
+| `node/resolvers/search/index.ts` `sponsoredProducts` | Pass `biggyArgs`; drop segment fetch added only for this default |
 
 ### Alternatives Considered
 
 | Alternative | Pros | Cons | Verdict |
 |---|---|---|---|
-| Delete helper and pass args raw everywhere | Smallest code | Loses non-DP `false` default introduced in #533 | Rejected — product asked to keep non-DP default only |
-| Default DP to `false` instead of passthrough | Symmetric defaults | Changes DP semantics; storefront cannot defer to IS default | Rejected |
-| Gate change behind a new app setting | Safer rollout | Unnecessary once sort is fixed; adds config surface | Rejected |
-| **DP passthrough + non-DP false default** | Minimal diff; matches intent | Callers omitting the field on DP rely on IS default | **Accepted** |
+| Keep helper, skip default only on DP | Smaller first diff | Two paths for the same field; helper naming no longer matches | Rejected after review |
+| Always default omitted to `false` | Matches post-#533 non-DP behavior | Still a resolver override; not pre-#533 | Rejected |
+| **Delete helper, pass through** | One path; matches pre-#533 | Callers that omitted the field on non-DP no longer get resolver `false` | **Accepted** |
 
 ### Risks & Mitigations
 
 | Risk | Impact | Likelihood | Mitigation |
 |---|---|---|---|
-| Storefronts relied on implicit `true` on DP sessions | Med | Low | Sort fix removes the original reason; explicit `true` still works |
-| IS platform treats omitted vs `false` differently | Low | Low | `intsch` already serializes with `?? undefined`; behavior unchanged from pre-#533 DP path |
-| Regression in non-DP default | Med | Low | Unit + service tests assert `false` default when no `deliveryZonesHash` |
+| Storefronts relied on implicit `true` on DP | Med | Low | Sort is fixed; they can still send `true` |
+| Storefronts relied on implicit `false` when omitted | Low | Low | Schema/client may still omit or serialize `undefined`; same as pre-#533 |
 
 ### Key Decisions
 
-#### Decision 1: Keep helper, change DP branch only
+#### Decision 1: No DP-specific defaulting
 
 - **Status**: Accepted
-- **Context**: #533 centralized defaulting in one function used by three paths.
-- **Decision**: Early-return args unchanged when `deliveryZonesHash` is present and `hideUnavailableItems` is `undefined`.
-- **Consequences**: Single-line behavioral change; tests updated in helper and integration suites.
-
-#### Decision 2: Do not remove non-DP false default
-
-- **Status**: Accepted
-- **Context**: User confirmed only the DP `true` override should be removed.
-- **Decision**: When `deliveryZonesHash` is absent and field is `undefined`, continue defaulting to `false`.
-- **Consequences**: Non-DP PLP/facets/sponsored behavior identical to post-#533 non-DP behavior.
+- **Context**: Reviewer noted the helper only skipped the default for DP, which has no remaining justification.
+- **Decision**: Remove defaulting for all sessions.
+- **Consequences**: One forwarding path; helper and its tests go away.
 
 ### Implementation Plan
 
-1. Update `applyHideUnavailableItemsDefaultForDP` logic.
-2. Update unit tests in `node/utils/hideUnavailableItems.test.ts`.
-3. Update integration tests in `productSearch.test.ts`, `facets.test.ts`, `index.test.ts`.
-4. Add CHANGELOG entry under `[Unreleased]`.
+1. Remove helper, tests, and call sites.
+2. Restore `sponsoredProducts` to pass `biggyArgs` without a segment round-trip.
+3. Update CHANGELOG.
 
 ---
 
@@ -143,59 +110,33 @@ flowchart LR
 
 ### Data Models
 
-```ts
-type HideUnavailableItemsCarrier = {
-  hideUnavailableItems?: boolean | null
-}
-
-// DP enabled when segment carries deliveryZonesHash
-type SegmentParams = {
-  deliveryZonesHash?: string
-  // ...other segment fields
-}
-```
-
-| Input `hideUnavailableItems` | `deliveryZonesHash` present | Resolver output |
-|---|---|---|
-| `undefined` | yes | `undefined` (passthrough) |
-| `undefined` | no | `false` |
-| `true` / `false` / `null` | any | unchanged |
+`hideUnavailableItems?: boolean | null` on product search, facets, and sponsored product args. Unchanged.
 
 ### Interfaces
 
+No public helper. Downstream clients already forward:
+
 ```ts
-function applyHideUnavailableItemsDefaultForDP<T extends HideUnavailableItemsCarrier>(
-  args: T,
-  segmentParams?: Pick<SegmentParams, 'deliveryZonesHash'> | null
-): T
+hideUnavailableItems: params.hideUnavailableItems ?? undefined
 ```
-
-**Contract:**
-
-- Must not mutate `args` when returning early (DP passthrough or explicit value).
-- May return a shallow copy with `hideUnavailableItems: false` only for non-DP + `undefined`.
-- `null` is explicit: `args.hideUnavailableItems !== undefined` guard treats it as set.
 
 ### Integration Points
 
-| Downstream | Parameter forwarding |
+| Downstream | Behavior |
 |---|---|
-| `intsch.productSearch` | `hideUnavailableItems: params.hideUnavailableItems ?? undefined` |
-| `intsch.facets` | same |
-| `intelligentSearchApi.sponsoredProducts` | receives resolver-prepared args object |
-
-Upstream: GraphQL fields on `productSearch`, `facets`, `sponsoredProducts` (and related) in `vtex.search-graphql` — no contract change.
+| `intsch.productSearch` | Forwards GraphQL value |
+| `intsch.facets` | Forwards GraphQL value |
+| `intelligentSearchApi.sponsoredProducts` | Forwards GraphQL value |
 
 ### Invariants & Constraints
 
-- Resolver must never force `hideUnavailableItems: true` based on segment state.
-- `@withSegment` / segment isolation semantics are unchanged.
-- Cache headers remain schema-driven (`@cacheControl`); this change does not alter caching.
-- No coordinated `vtex.search-graphql` release required.
+- Resolver must not force `hideUnavailableItems` from segment state.
+- `@withSegment` / cache headers unchanged.
+- No `vtex.search-graphql` release required.
 
 ### Verification
 
 ```sh
-cd node && yarn test hideUnavailableItems productSearch.test facets.test resolvers/search/index.test
+cd node && yarn test productSearch.test facets.test resolvers/search/index.test
 make lint
 ```

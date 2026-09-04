@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- Stop defaulting `hideUnavailableItems` to `true` for delivery promise requests; the value is now passed through from upstream when omitted. Non-DP requests still default to `false`.
+- Stop applying a resolver-side default for `hideUnavailableItems` on product search, facets, and sponsored products. The value is passed through from upstream for all sessions (including delivery promise).
 
 ## [1.113.1] - 2026-09-01
 
