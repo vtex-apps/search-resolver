@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.113.2] - 2026-09-04
+
 ### Fixed
 
 - PDP intsch product lookups (`shouldUseNewPDPEndpoint`) now forward segment `priceTables`, `regionId`, and other simulation fields with the same helper as PLP `productSearch`. GraphQL `salesChannel` still wins over the segment; `sc` is no longer defaulted to `1`.
