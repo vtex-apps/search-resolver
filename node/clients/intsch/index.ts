@@ -16,6 +16,7 @@ import type {
   FetchBannersArgsV1,
   FetchBannersResponse,
   FetchProductArgs,
+  FetchProductOptions,
   FetchProductResponse,
   IIntelligentSearchClient,
   SearchSuggestionsArgs,
@@ -30,6 +31,7 @@ import { parseState } from '../../utils/searchState'
 import {
   filterUndefinedNonNull,
   filterByAllowedIntelligentSearchQueryKeys,
+  segmentQueryParams,
 } from './utils'
 
 export class Intsch extends JanusClient implements IIntelligentSearchClient {
@@ -45,20 +47,27 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     this.locale = locale ?? tenant?.locale
   }
 
-  public fetchProduct(args: FetchProductArgs): Promise<FetchProductResponse> {
+  public fetchProduct(
+    args: FetchProductArgs,
+    options?: FetchProductOptions
+  ): Promise<FetchProductResponse> {
     // The admin auth token is releavant for CallCenter users when the sales channel is private.
     const authToken =
       this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
 
+    const { segmentParams } = options ?? {}
+
     return this.http.get('/api/intelligent-search/v1/products', {
-      params: {
+      params: filterUndefinedNonNull({
         field: args.field,
         value: args.value,
-        sc: args.salesChannel ?? 1,
-        regionId: args.regionId,
-        locale: args.locale,
+        ...segmentQueryParams(segmentParams, {
+          salesChannel: args.salesChannel,
+          regionId: args.regionId,
+        }),
+        locale: this.locale ?? segmentParams?.locale,
         productOriginVtex: args.productOriginVtex,
-      },
+      }),
       metric: 'search-product-new',
       headers: {
         ...(authToken ? { VtexIdclientAutCookie: authToken } : {}),
@@ -174,19 +183,10 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     const dpPreview = params.dpPreview ? 'true' : undefined
 
     const merged = filterUndefinedNonNull({
-      sc: params.salesChannel ? params.salesChannel : segmentParams?.sc,
-      regionId: params.regionId ?? segmentParams?.regionId,
-      country: segmentParams?.country,
-      'zip-code': segmentParams?.['zip-code'],
-      coordinates: segmentParams?.coordinates,
-      pickupPoint: segmentParams?.pickupPoint,
-      deliveryZonesHash: segmentParams?.deliveryZonesHash,
-      pickupPointHash: segmentParams?.pickupPointHash,
-      utmSource: segmentParams?.utmSource,
-      utmCampaign: segmentParams?.utmCampaign,
-      utmiCampaign: segmentParams?.utmiCampaign,
-      campaigns: segmentParams?.campaigns,
-      priceTables: segmentParams?.priceTables,
+      ...segmentQueryParams(segmentParams, {
+        salesChannel: params.salesChannel,
+        regionId: params.regionId,
+      }),
       query: query ? decodeQuery(query) : undefined,
       sort: params.sort,
       operator: params.operator,
@@ -266,14 +266,9 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     const dpPreview = params.dpPreview ? 'true' : undefined
 
     const merged = filterUndefinedNonNull({
-      sc: segmentParams?.sc,
-      regionId: params.regionId ?? segmentParams?.regionId,
-      country: segmentParams?.country,
-      'zip-code': segmentParams?.['zip-code'],
-      coordinates: segmentParams?.coordinates,
-      pickupPoint: segmentParams?.pickupPoint,
-      deliveryZonesHash: segmentParams?.deliveryZonesHash,
-      pickupPointHash: segmentParams?.pickupPointHash,
+      ...segmentQueryParams(segmentParams, {
+        regionId: params.regionId,
+      }),
       query: query ? decodeQuery(query) : undefined,
       operator: params.operator,
       fuzzy: params.fuzzy,

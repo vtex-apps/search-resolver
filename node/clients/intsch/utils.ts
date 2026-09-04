@@ -1,3 +1,36 @@
+import type { SegmentParams } from '../../utils/segment'
+
+export type SegmentQueryOverrides = {
+  salesChannel?: string | number | null
+  regionId?: string | null
+}
+
+/**
+ * Maps segment + explicit request overrides onto Intelligent Search query params.
+ * PLP (`productSearch`) is the source of truth: `salesChannel` / `regionId` win
+ * when provided; there is no default `sc=1`.
+ */
+export function segmentQueryParams(
+  segmentParams?: SegmentParams,
+  overrides?: SegmentQueryOverrides
+): SegmentParams {
+  return {
+    sc: overrides?.salesChannel ? overrides.salesChannel : segmentParams?.sc,
+    regionId: overrides?.regionId ?? segmentParams?.regionId,
+    country: segmentParams?.country,
+    'zip-code': segmentParams?.['zip-code'],
+    coordinates: segmentParams?.coordinates,
+    pickupPoint: segmentParams?.pickupPoint,
+    deliveryZonesHash: segmentParams?.deliveryZonesHash,
+    pickupPointHash: segmentParams?.pickupPointHash,
+    utmSource: segmentParams?.utmSource,
+    utmCampaign: segmentParams?.utmCampaign,
+    utmiCampaign: segmentParams?.utmiCampaign,
+    campaigns: segmentParams?.campaigns,
+    priceTables: segmentParams?.priceTables,
+  }
+}
+
 /**
  * Drops keys whose value is `undefined` from a plain object.
  * Keeps `false`, '' and `0` (needed for valid API semantics).

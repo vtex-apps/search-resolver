@@ -74,6 +74,43 @@ describe('fetchProduct service', () => {
     expect(result).toEqual([mockProduct])
   })
 
+  it('should forward segment priceTables to intsch and let salesChannel win', async () => {
+    const ctx = createContext({
+      appSettings: { shouldUseNewPDPEndpoint: true },
+      segment: {
+        channel: '2',
+        priceTables: 'pl-001',
+        regionId: 'v2.1BB18CE648B5111D0933734ED83EC783',
+        cultureInfo: 'es-CL',
+      } as any,
+    })
+
+    jest
+      .spyOn(ctx.clients.intsch, 'fetchProduct')
+      .mockResolvedValue(mockProduct)
+
+    await fetchProduct(ctx, {
+      identifier: { field: 'id', value: '1322' },
+      salesChannel: 1,
+    })
+
+    expect(ctx.clients.intsch.fetchProduct).toHaveBeenCalledWith(
+      expect.objectContaining({
+        field: 'id',
+        value: '1322',
+        salesChannel: '1',
+        productOriginVtex: true,
+      }),
+      {
+        segmentParams: expect.objectContaining({
+          sc: '2',
+          priceTables: 'pl-001',
+          regionId: 'v2.1BB18CE648B5111D0933734ED83EC783',
+        }),
+      }
+    )
+  })
+
   it('should return empty array when intsch product is not found', async () => {
     const ctx = createContext({
       appSettings: { shouldUseNewPDPEndpoint: true },
