@@ -9,7 +9,7 @@ const lastSegment = compose<string, string[], string>(last, split('/'))
 
 function cleanUrl(url: string) {
   return url
-    .replace(/https:\/\/[A-z0-9]+\.vtexcommercestable\.com\.br/, '')
+    .replace(/https:\/\/[A-Za-z0-9]+\.vtexcommercestable\.com\.br/, '')
     .toLowerCase()
 }
 
