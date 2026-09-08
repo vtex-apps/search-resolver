@@ -19,10 +19,11 @@ function isProductNotFoundError(error: unknown): boolean {
 
 async function fetchIntschProductOrNull(
   intsch: Context['clients']['intsch'],
-  args: Parameters<Context['clients']['intsch']['fetchProduct']>[0]
+  args: Parameters<Context['clients']['intsch']['fetchProduct']>[0],
+  options?: Parameters<Context['clients']['intsch']['fetchProduct']>[1]
 ): Promise<SearchProduct | null> {
   try {
-    const product = await intsch.fetchProduct(args)
+    const product = await intsch.fetchProduct(args, options)
 
     return product ?? null
   } catch (error) {
@@ -102,32 +103,17 @@ async function fetchProductFromIntsch(
   const { identifier, salesChannel, regionId } = args
   const { field, value } = identifier
 
-  // Get locale from context (fallback)
-  const defaultLocale = ctx.vtex.tenant?.locale ?? ctx.vtex.locale
-
-  // Default salesChannel from args
-  let finalSalesChannel = salesChannel ? `${salesChannel}` : undefined
-  let finalLocale = defaultLocale
-
-  // Extract locale and salesChannel from segment data
-  if (segmentData.segmentParams) {
-    if (segmentData.segmentParams.sc) {
-      finalSalesChannel = String(segmentData.segmentParams.sc)
-    }
-
-    if (segmentData.segmentParams.locale) {
-      finalLocale = segmentData.segmentParams.locale
-    }
-  }
-
-  const product = await fetchIntschProductOrNull(intsch, {
-    field,
-    value,
-    salesChannel: finalSalesChannel?.toString(),
-    regionId,
-    locale: finalLocale,
-    productOriginVtex: true,
-  })
+  const product = await fetchIntschProductOrNull(
+    intsch,
+    {
+      field,
+      value,
+      salesChannel: salesChannel ? `${salesChannel}` : undefined,
+      regionId,
+      productOriginVtex: true,
+    },
+    { segmentParams: segmentData.segmentParams }
+  )
 
   return product ? [product] : []
 }
@@ -281,35 +267,19 @@ async function fetchProductsByIdentifierFromIntsch(
   const { intsch } = ctx.clients
   const { field, values, salesChannel, regionId } = args
 
-  // Get locale from context (fallback)
-  const defaultLocale = ctx.vtex.tenant?.locale ?? ctx.vtex.locale
-
-  // Default salesChannel from args
-  let finalSalesChannel = salesChannel ? `${salesChannel}` : undefined
-  let finalLocale = defaultLocale
-
-  // Extract locale and salesChannel from segment data
-  if (segmentData.segmentParams) {
-    if (segmentData.segmentParams.sc) {
-      finalSalesChannel = String(segmentData.segmentParams.sc)
-    }
-
-    if (segmentData.segmentParams.locale) {
-      finalLocale = segmentData.segmentParams.locale
-    }
-  }
-
-  // Fetch all products in parallel, omitting IDs that intsch reports as not found
   const productResults = await Promise.all(
     values.map((value) =>
-      fetchIntschProductOrNull(intsch, {
-        field,
-        value,
-        salesChannel: finalSalesChannel?.toString(),
-        regionId: regionId ?? undefined,
-        locale: finalLocale,
-        productOriginVtex: true,
-      })
+      fetchIntschProductOrNull(
+        intsch,
+        {
+          field,
+          value,
+          salesChannel: salesChannel ? `${salesChannel}` : undefined,
+          regionId: regionId ?? undefined,
+          productOriginVtex: true,
+        },
+        { segmentParams: segmentData.segmentParams }
+      )
     )
   )
 

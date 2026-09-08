@@ -142,6 +142,10 @@ export type FetchProductArgs = {
   productOriginVtex?: boolean
 }
 
+export type FetchProductOptions = {
+  segmentParams?: SegmentParams
+}
+
 export type FetchProductResponse = SearchProduct
 
 export type ProductSearchResponse = {
@@ -186,7 +190,10 @@ export interface IIntelligentSearchClient {
   ): Promise<SearchSuggestionsResponse>
   fetchCorrection(args: CorrectionArgs): Promise<CorrectionResponse>
   fetchBanners(args: FetchBannersArgs): Promise<FetchBannersResponse>
-  fetchProduct(args: FetchProductArgs): Promise<FetchProductResponse>
+  fetchProduct(
+    args: FetchProductArgs,
+    options?: FetchProductOptions
+  ): Promise<FetchProductResponse>
   fetchAutocompleteSuggestionsV1(
     args: AutocompleteSuggestionsArgsV1
   ): Promise<AutocompleteSuggestionsResponse>

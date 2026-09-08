@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Stop applying a resolver-side default for `hideUnavailableItems` on product search, facets, and sponsored products. The value is passed through from upstream for all sessions (including delivery promise).
 
+## [1.113.2] - 2026-09-04
+
+### Fixed
+
+- PDP intsch product lookups (`shouldUseNewPDPEndpoint`) now forward segment `priceTables`, `regionId`, and other simulation fields with the same helper as PLP `productSearch`. GraphQL `salesChannel` still wins over the segment; `sc` is no longer defaulted to `1`.
+
 ## [1.113.1] - 2026-09-01
 
 ### Fixed
