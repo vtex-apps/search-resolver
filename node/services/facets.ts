@@ -5,7 +5,6 @@ import {
 } from '../commons/compatibility-layer'
 import type { IntschFacetsParams } from '../clients/intsch/types'
 import { extractSegmentData, getOrCreateSegment } from '../utils/segment'
-import { applyHideUnavailableItemsDefaultForDP } from '../utils/hideUnavailableItems'
 import type { FacetsInput } from '../typings/Search'
 import { fetchAppSettings } from './settings'
 
@@ -40,11 +39,6 @@ async function fetchFacetsFromIntsch(
     dpPreview: enableDeliveryPromisePreview,
   }
 
-  const finalArgs = applyHideUnavailableItemsDefaultForDP(
-    intschArgs,
-    segmentData.segmentParams
-  )
-
   const allFacets = concatSelectedFacets(
     selectedFacets,
     segmentData.extraFacets
@@ -53,7 +47,7 @@ async function fetchFacetsFromIntsch(
   const intschPath = buildAttributePath(allFacets)
 
   const result: any = await intsch.facets(
-    { ...finalArgs, query: args.fullText },
+    intschArgs,
     intschPath,
     {
       segmentParams: mergeSegmentParamsWithPickupFromPath(
