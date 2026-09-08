@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.114.0] - 2026-09-08
+
 ### Changed
 
 - Stop applying a resolver-side default for `hideUnavailableItems` on product search, facets, and sponsored products. The value is passed through from upstream for all sessions (including delivery promise).
