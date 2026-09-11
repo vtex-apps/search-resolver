@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.115.0] - 2026-09-11
+
 ### Changed
 
 - Return `Category` `name`, `titleTag`, and `metaTagDescription` from catalog without wrapping them for Messages translation.
