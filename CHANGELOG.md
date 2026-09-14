@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.115.1] - 2026-09-14
+
 ### Changed
 
 - Restore Messages wrapping (`formatTranslatableProp`) on Category `name`, `titleTag`, and `metaTagDescription`.
