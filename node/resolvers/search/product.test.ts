@@ -16,29 +16,49 @@ describe('tests related to product resolver', () => {
     resetContext()
   })
   describe('categoryTree resolver', () => {
-    it('ensure that VTEX account never calls the category tree search API', async () => {
+    it('ensure that VTEX account never calls the category tree search API, only catalogDataplane', async () => {
       const searchProduct = getProduct()
+
+      mockContext.clients.catalogDataplane.productById.mockResolvedValue({
+        categories: [
+          { id: 25, name: 'a', fullPathUriName: 'a' },
+          { id: 10, name: 'b', fullPathUriName: 'a/b' },
+        ],
+      })
 
       await resolvers.Product.categoryTree(
         searchProduct as any,
         {},
         mockContext as any
       )
-      expect(mockContext.clients.search.category).toBeCalledTimes(2)
+      expect(mockContext.clients.search.category).toBeCalledTimes(0)
       expect(mockContext.clients.search.categories).toBeCalledTimes(0)
+      expect(mockContext.clients.catalogDataplane.productById).toBeCalledTimes(
+        1
+      )
+      expect(
+        mockContext.clients.catalogDataplane.productById.mock.calls[0][0]
+      ).toBe(searchProduct.productId)
     })
 
     it('get correct main category tree for product with only one tree', async () => {
       const searchProduct = getProduct()
 
-      await resolvers.Product.categoryTree(
+      mockContext.clients.catalogDataplane.productById.mockResolvedValue({
+        categories: [
+          { id: 25, name: 'a', fullPathUriName: 'a' },
+          { id: 10, name: 'b', fullPathUriName: 'a/b' },
+        ],
+      })
+
+      const result = await resolvers.Product.categoryTree(
         searchProduct as any,
         {},
         mockContext as any
       )
-      expect(mockContext.clients.search.category).toBeCalledTimes(2)
-      expect(mockContext.clients.search.category.mock.calls[0][0]).toBe(25)
-      expect(mockContext.clients.search.category.mock.calls[1][0]).toBe(10)
+      expect(result).toHaveLength(2)
+      expect(result![0].id).toBe(25)
+      expect(result![1].id).toBe(10)
     })
 
     it('get correct main category tree for product with more than one tree', async () => {
@@ -58,17 +78,42 @@ describe('tests related to product resolver', () => {
         categoryId: '101003009',
       })
 
-      await resolvers.Product.categoryTree(
+      mockContext.clients.catalogDataplane.productById.mockResolvedValue({
+        categories: [
+          { id: 101, name: 'a', fullPathUriName: 'a' },
+          { id: 101003, name: 'b', fullPathUriName: 'a/b' },
+          { id: 101003009, name: 'c', fullPathUriName: 'a/b/c' },
+        ],
+      })
+
+      const result = await resolvers.Product.categoryTree(
         searchProduct as any,
         {},
         mockContext as any
       )
-      expect(mockContext.clients.search.category).toBeCalledTimes(3)
-      expect(mockContext.clients.search.category.mock.calls[0][0]).toBe(101)
-      expect(mockContext.clients.search.category.mock.calls[1][0]).toBe(101003)
-      expect(mockContext.clients.search.category.mock.calls[2][0]).toBe(
-        101003009
+      expect(
+        mockContext.clients.catalogDataplane.productById
+      ).toBeCalledTimes(1)
+      expect(result).toHaveLength(3)
+      expect(result![0].id).toBe(101)
+      expect(result![1].id).toBe(101003)
+      expect(result![2].id).toBe(101003009)
+    })
+
+    it('logs a degraded search error and returns [] when catalogDataplane fails', async () => {
+      const searchProduct = getProduct()
+
+      mockContext.clients.catalogDataplane.productById.mockRejectedValue(
+        new Error('boom')
       )
+
+      const result = await resolvers.Product.categoryTree(
+        searchProduct as any,
+        {},
+        mockContext as any
+      )
+      expect(result).toEqual([])
+      expect(mockContext.vtex.logger.warn).toBeCalled()
     })
 
     it('ensure that GC account calls the category tree API', async () => {
@@ -107,18 +152,22 @@ describe('tests related to product resolver', () => {
 
       searchProduct.categoryId = '1'
       searchProduct.categoriesIds = ['/2064927469/', '/2064927469/630877787/']
-      await resolvers.Product.categoryTree(
+
+      mockContext.clients.catalogDataplane.productById.mockResolvedValue({
+        categories: [
+          { id: 2064927469, name: 'a', fullPathUriName: 'a' },
+          { id: 630877787, name: 'b', fullPathUriName: 'a/b' },
+        ],
+      })
+
+      const result = await resolvers.Product.categoryTree(
         searchProduct as any,
         {},
         mockContext as any
       )
-      expect(mockContext.clients.search.category).toBeCalledTimes(2)
-      expect(mockContext.clients.search.category.mock.calls[0][0]).toBe(
-        2064927469
-      )
-      expect(mockContext.clients.search.category.mock.calls[1][0]).toBe(
-        630877787
-      )
+      expect(result).toHaveLength(2)
+      expect(result![0].id).toBe(2064927469)
+      expect(result![1].id).toBe(630877787)
     })
   })
 

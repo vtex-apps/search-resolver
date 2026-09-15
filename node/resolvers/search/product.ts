@@ -1,5 +1,6 @@
 import { compose, flatten, last, omit, pathOr, split } from 'ramda'
 
+import type { DataplaneCategory } from '../../clients/catalog-dataplane'
 import {
   addContextToTranslatableString,
   formatTranslatableProp,
@@ -121,10 +122,47 @@ const findMainTree = (categoriesIds: string[], prodCategoryId: string) => {
   )
 }
 
+type MappedCategory = {
+  id: number
+  name: string
+  url: string
+  Title: string
+  MetaTagDescription: string
+  children: null
+}
+
+const mapDataplaneCategories = (
+  dataplaneCategories: DataplaneCategory[],
+  mainTreeIds: string[]
+): MappedCategory[] => {
+  const categoryMap = dataplaneCategories.reduce((map, category) => {
+    map[category.id] = {
+      id: category.id,
+      name: category.name,
+      url: `/${category.fullPathUriName}`,
+      Title: category.title ?? '', // legacy endpoint returns "" when unset, dataplane returns null
+      MetaTagDescription: category.text ?? '', // same as above
+      children: null,
+    }
+
+    return map
+  }, {} as Record<string, MappedCategory>)
+
+  return mainTreeIds.map((id) => categoryMap[id]).filter(Boolean)
+}
+
 const productCategoriesToCategoryTree = async (
-  { categories, categoriesIds, categoryId: prodCategoryId }: SearchProduct,
+  {
+    categories,
+    categoriesIds,
+    categoryId: prodCategoryId,
+    productId,
+  }: SearchProduct,
   _: any,
-  { clients: { search }, vtex: { platform, logger, locale } }: Context
+  {
+    clients: { search, catalogDataplane },
+    vtex: { platform, logger, locale },
+  }: Context
 ) => {
   if (!categories || !categoriesIds) {
     return []
@@ -133,9 +171,20 @@ const productCategoriesToCategoryTree = async (
   const mainTreeIds = findMainTree(categoriesIds, prodCategoryId)
 
   if (platform === 'vtex') {
-    return mainTreeIds.map((categoryId) =>
-      search.category(Number(categoryId), locale)
-    )
+    try {
+      const response = await catalogDataplane.productById(productId, locale)
+      const dataplaneCategories = response?.categories ?? []
+
+      return mapDataplaneCategories(dataplaneCategories, mainTreeIds)
+    } catch (e) {
+      logDegradedSearchError(logger, {
+        service: 'CatalogDataplane productById',
+        error: `CatalogDataplane productById query returned an error for product ${productId}. categoryTree may be empty.`,
+        errorStack: e,
+      })
+
+      return []
+    }
   }
 
   logger.info({
@@ -242,7 +291,10 @@ export const resolvers = {
     properties: async (product: SearchProduct, _: unknown, ctx: Context) => {
       let valuesUntranslated = []
 
-      if (product.origin === 'intsch' || product.origin === 'intelligent-search') {
+      if (
+        product.origin === 'intsch' ||
+        product.origin === 'intelligent-search'
+      ) {
         valuesUntranslated = product.properties ?? []
       } else {
         valuesUntranslated = (product.allSpecifications ?? []).map(

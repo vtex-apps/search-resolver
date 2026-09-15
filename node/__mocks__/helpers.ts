@@ -21,6 +21,10 @@ const searchClientMock = {
   filtersInCategoryFromId: jest.fn(),
 }
 
+const catalogDataplaneClientMock = {
+  productById: jest.fn(),
+}
+
 const isClientMock = {
   productSearch: jest.fn((params: any) => {
     const { query, map } = params
@@ -81,6 +85,7 @@ export const mockContext: any = {
     messagesGraphQL: messagesGraphQLClientMock,
     rewriter: rewriterClientMock,
     intelligentSearchApi: isClientMock,
+    catalogDataplane: catalogDataplaneClientMock,
     apps: {
       getAppSettings: jest.fn().mockResolvedValue({}),
     },
