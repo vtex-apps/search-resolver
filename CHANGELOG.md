@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Return `Category` `name`, `titleTag`, and `metaTagDescription` from catalog without wrapping them for Messages translation. Catalog-dataplane already returns these strings localized, so Messages wrapping would re-translate them.
+
 ## [1.115.1] - 2026-09-14
 
 ### Changed
