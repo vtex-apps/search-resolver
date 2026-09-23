@@ -5,10 +5,15 @@ import { Checkout } from './checkout'
 import { Rewriter } from './rewriter'
 import { IntelligentSearchApi } from './intelligent-search-api'
 import { Intsch } from './intsch'
+import { CatalogDataplane } from './catalog-dataplane'
 
 export class Clients extends IOClients {
   public get search() {
     return this.getOrSet('search', Search)
+  }
+
+  public get catalogDataplane() {
+    return this.getOrSet('catalogDataplane', CatalogDataplane)
   }
 
   public get checkout() {

@@ -23,12 +23,14 @@ const searchCache = new LRUCache<string, Cached>({ max: 3000 })
 const messagesCache = new LRUCache<string, Cached>({ max: 3000 })
 const appsCache = new LRUCache<string, Cached>({ max: 1500 })
 const intschCache = new LRUCache<string, Cached>({ max: 3000 })
+const catalogDataplaneCache = new LRUCache<string, Cached>({ max: 3000 })
 
 metrics.trackCache('segment', segmentCache)
 metrics.trackCache('search', searchCache)
 metrics.trackCache('messages', messagesCache)
 metrics.trackCache('apps', appsCache)
 metrics.trackCache('intsch', intschCache)
+metrics.trackCache('catalogDataplane', catalogDataplaneCache)
 metrics.trackCache('compatibilityCategoryTreeRoot', categoryTreeRootCache)
 metrics.trackCache(
   'compatibilityCategoryTreeChildren',
@@ -75,6 +77,11 @@ export default new Service<Clients, RecorderState, CustomContext>({
         retries: 0,
         concurrency: 10,
         timeout: NINE_SECONDS_MS,
+      },
+      catalogDataplane: {
+        concurrency: 10,
+        memoryCache: catalogDataplaneCache,
+        timeout: THREE_SECONDS_MS,
       },
       rewriter: {
         timeout: SIX_SECONDS_MS,
