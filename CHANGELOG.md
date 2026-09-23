@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.116.0] - 2026-09-23
+
 ### Changed
 
 - Use the new client `Catalog-dataplane` that already returns these strings localized
