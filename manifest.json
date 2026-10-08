@@ -95,14 +95,14 @@
       "name": "outbound-access",
       "attrs": {
         "host": "portal.vtexcommercestable.com.br",
-        "path": "/api/catalog-dataplane/*"
+        "path": "/api/catalog/query/pvt/product/*"
       }
     },
     {
       "name": "outbound-access",
       "attrs": {
         "host": "portal.vtexcommercebeta.com.br",
-        "path": "/api/catalog-dataplane/*"
+        "path": "/api/catalog/query/pvt/product/*"
       }
     },
     {

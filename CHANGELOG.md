@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Resolve category trees through the private catalog query (`/api/catalog/query/pvt/product/{id}`), authenticated with the IO app token as `VtexIdclientAutCookie`.
+
 ## [1.116.0] - 2026-09-23
 
 ### Changed
