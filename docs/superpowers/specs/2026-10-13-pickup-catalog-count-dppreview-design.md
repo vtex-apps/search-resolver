@@ -107,7 +107,7 @@ catalogCount: async (_, args, ctx) => {
   ])
   return ctx.clients.intsch.catalogCount({
     ...args,
-    salesChannel: args.salesChannel ?? segment?.channel?.toString(),
+    salesChannel: args.salesChannel || segment?.channel?.toString(),
     dpPreview: enableDeliveryPromisePreview,
   })
 }
@@ -141,7 +141,7 @@ type Query {
     country: String!
     """Format: longitude,latitude. Used to sort pickup points by proximity."""
     coordinates: String
-  ): PickupPointAvailability @cacheControl(scope: SEGMENT, maxAge: 120) @withSegment
+  ): PickupPointAvailability @cacheControl(scope: PRIVATE, maxAge: 120) @withSegment
 
   """
   Number of products deliverable to a location. Mirrors IS v1 catalog-count.
@@ -192,8 +192,14 @@ work; they fail today because the browser omits credentials. On the IS side,
 catalog-count v1 sets `Cache-Control: public, max-age=600`, and pickup only
 caches public sales channels. On the GraphQL side, `SEGMENT` scope plus the
 query args form the cache key, so results are kept apart per zip code, country,
-coordinates and sales channel. This is the same trade-off `facets` and
-`productSearch` already make.
+coordinates and sales channel. `catalogCount` uses `SEGMENT` scope, like
+`facets` and `productSearch`: IS does no privacy check there and returns only a
+count. `pickupPointAvailability` uses `PRIVATE` scope instead. Its
+`salesChannel` is a free argument, not tied to the segment, and IS checks
+private sales channels against the forwarded token. A `SEGMENT`-scoped cache
+could therefore serve a private channel's pickup list to an anonymous shopper
+on the same segment. IS still caches public sales channels for 10 minutes, so
+the cost is small.
 
 **`x-vtex-user-agent`.** Not hardcoded and not passed by the caller.
 `@vtex/api` sets the app identity on outbound requests, so IS sees
