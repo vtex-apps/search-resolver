@@ -622,7 +622,7 @@ export const queries = {
 
     return ctx.clients.intsch.catalogCount({
       ...args,
-      salesChannel: args.salesChannel ?? segment?.channel?.toString(),
+      salesChannel: args.salesChannel || segment?.channel?.toString(),
       dpPreview: enableDeliveryPromisePreview,
     })
   },

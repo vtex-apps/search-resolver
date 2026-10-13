@@ -84,6 +84,19 @@ describe('catalogCount query', () => {
     )
   })
 
+  it('falls back to the segment sales channel when salesChannel arg is empty', async () => {
+    const ctx = contextWith({
+      appSettings: {},
+      segment: { channel: 3 } as any,
+    })
+
+    await queries.catalogCount({}, { zipCode: '01310-100', salesChannel: '' }, ctx)
+
+    expect(ctx.clients.intsch.catalogCount).toHaveBeenCalledWith(
+      expect.objectContaining({ salesChannel: '3' })
+    )
+  })
+
   it('sends no sales channel when neither arg nor segment has one', async () => {
     const ctx = contextWith({ appSettings: {} })
 
