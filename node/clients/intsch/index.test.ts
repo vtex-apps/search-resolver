@@ -130,7 +130,7 @@ describe('Intsch#fetchProduct segment params', () => {
 describe('Intsch#pickupPointAvailability', () => {
   const baseArgs = { salesChannel: '1', zipCode: '01310-100', country: 'BRA' }
 
-  it('puts the sales channel in the path and sends zip-code and country', async () => {
+  it('sends sc, zip-code and country as query params', async () => {
     const client = createTestClient()
 
     await client.pickupPointAvailability(baseArgs)
@@ -138,10 +138,9 @@ describe('Intsch#pickupPointAvailability', () => {
     const httpGet = (client as any).http.get as jest.Mock
     const [path, requestConfig] = httpGet.mock.calls[0]
 
-    expect(path).toBe(
-      '/api/intelligent-search/v0/pickup-point-availability/trade-policy/1'
-    )
+    expect(path).toBe('/api/intelligent-search/v0/pickup-point-availability')
     expect(requestConfig.params).toEqual({
+      sc: '1',
       'zip-code': '01310-100',
       country: 'BRA',
     })
@@ -182,55 +181,10 @@ describe('Intsch#pickupPointAvailability', () => {
 
     expect(requestConfig.params).not.toHaveProperty('dpPreview')
   })
-
-  it('url-encodes the sales channel', async () => {
-    const client = createTestClient()
-
-    await client.pickupPointAvailability({ ...baseArgs, salesChannel: '1/x' })
-
-    const httpGet = (client as any).http.get as jest.Mock
-    const [path] = httpGet.mock.calls[0]
-
-    expect(path).toBe(
-      '/api/intelligent-search/v0/pickup-point-availability/trade-policy/1%2Fx'
-    )
-  })
-})
-
-describe('Intsch#pickupPointAvailability path traversal', () => {
-  it('rejects a sales channel containing ".." without calling the API', async () => {
-    const client = createTestClient()
-
-    await expect(
-      client.pickupPointAvailability({
-        salesChannel: '..',
-        zipCode: '01310-100',
-        country: 'BRA',
-      })
-    ).rejects.toThrow('Malformed URL')
-
-    const httpGet = (client as any).http.get as jest.Mock
-
-    expect(httpGet).not.toHaveBeenCalled()
-  })
-})
-
-describe('Intsch#catalogCount path traversal', () => {
-  it('rejects a sales channel containing ".." without calling the API', async () => {
-    const client = createTestClient()
-
-    await expect(
-      client.catalogCount({ zipCode: '01310-100', salesChannel: '..' })
-    ).rejects.toThrow('Malformed URL')
-
-    const httpGet = (client as any).http.get as jest.Mock
-
-    expect(httpGet).not.toHaveBeenCalled()
-  })
 })
 
 describe('Intsch#catalogCount', () => {
-  it('calls catalog-count without trade-policy when no sales channel is given', async () => {
+  it('omits sc when no sales channel is given', async () => {
     const client = createTestClient()
 
     await client.catalogCount({ zipCode: '01310-100', coordinates: '1,2' })
@@ -245,7 +199,7 @@ describe('Intsch#catalogCount', () => {
     })
   })
 
-  it('puts the sales channel in the path when given', async () => {
+  it('sends the sales channel as sc when given', async () => {
     const client = createTestClient()
 
     await client.catalogCount({ zipCode: '01310-100', salesChannel: '2' })
@@ -253,8 +207,8 @@ describe('Intsch#catalogCount', () => {
     const httpGet = (client as any).http.get as jest.Mock
     const [path, requestConfig] = httpGet.mock.calls[0]
 
-    expect(path).toBe('/api/intelligent-search/v1/catalog-count/trade-policy/2')
-    expect(requestConfig.params).not.toHaveProperty('sc')
+    expect(path).toBe('/api/intelligent-search/v1/catalog-count')
+    expect(requestConfig.params).toMatchObject({ sc: '2' })
   })
 
   it('sends dpPreview=true when enabled', async () => {

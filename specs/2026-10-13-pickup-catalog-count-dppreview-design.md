@@ -43,8 +43,8 @@ pickupPointAvailability(args: {
 }): Promise<PickupPointAvailabilityResponse>
 ```
 
-- Path: `/api/intelligent-search/v0/pickup-point-availability/trade-policy/${encodeURIComponent(salesChannel)}`
-- Query: `zip-code`, `country`, `coordinates` (when present), and `dpPreview=true` only when `dpPreview` is true.
+- Path: `/api/intelligent-search/v0/pickup-point-availability`
+- Query: `sc`, `zip-code`, `country`, `coordinates` (when present), and `dpPreview=true` only when `dpPreview` is true.
 - Metric: `pickup-point-availability-new`.
 
 ```ts
@@ -56,8 +56,8 @@ catalogCount(args: {
 }): Promise<CatalogCountResponse>
 ```
 
-- Path: `/api/intelligent-search/v1/catalog-count`, plus `/trade-policy/${encodeURIComponent(salesChannel)}` when `salesChannel` is set. The sales channel travels in the path, never as `sc`.
-- Query: `zip-code`, `coordinates` (when present), and `dpPreview=true` only when `dpPreview` is true.
+- Path: `/api/intelligent-search/v1/catalog-count`
+- Query: `sc` (when `salesChannel` is set), `zip-code`, `coordinates` (when present), and `dpPreview=true` only when `dpPreview` is true.
 - Metric: `catalog-count-new-v1`.
 
 Shared rules for both methods:
@@ -114,7 +114,7 @@ catalogCount: async (_, args, ctx) => {
 ```
 
 - `catalogCount` sales channel: the `salesChannel` arg if given, otherwise the
-  shopper's segment channel (`getOrCreateSegment`, as `facets` uses). With neither, the path has no `trade-policy`,
+  shopper's segment channel (`getOrCreateSegment`, as `facets` uses). With neither, no `sc` is sent,
   which matches today's browser call.
 - The IS body is returned unchanged.
 - Errors (for example IS `400` when the delivery context can't be resolved)
@@ -221,10 +221,10 @@ and `locale`. Add them when a consumer needs them.
 
 - `node/clients/intsch/index.test.ts`
   - `pickupPointAvailability`: sends `dpPreview=true` when the flag is on and
-    omits it when off; puts the sales channel in the path; sends
+    omits it when off; sends the sales channel as `sc`; sends
     `coordinates` only when given.
   - `catalogCount`: sends `dpPreview=true` when on and omits it when off;
-    adds `/trade-policy/{sc}` only when a sales channel is given.
+    sends `sc` only when a sales channel is given.
 - Resolver test: with `enableDeliveryPromisePreview` on and off, the client
   receives `dpPreview: true` / `false`. `catalogCount` falls back to the
   segment channel when no `salesChannel` arg is given.
