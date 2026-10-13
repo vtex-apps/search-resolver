@@ -126,3 +126,124 @@ describe('Intsch#fetchProduct segment params', () => {
     expect(requestConfig.params).not.toHaveProperty('sc')
   })
 })
+
+describe('Intsch#pickupPointAvailability', () => {
+  const baseArgs = { salesChannel: '1', zipCode: '01310-100', country: 'BRA' }
+
+  it('puts the sales channel in the path and sends zip-code and country', async () => {
+    const client = createTestClient()
+
+    await client.pickupPointAvailability(baseArgs)
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [path, requestConfig] = httpGet.mock.calls[0]
+
+    expect(path).toBe(
+      '/api/intelligent-search/v0/pickup-point-availability/trade-policy/1'
+    )
+    expect(requestConfig.params).toEqual({
+      'zip-code': '01310-100',
+      country: 'BRA',
+    })
+  })
+
+  it('sends coordinates when given', async () => {
+    const client = createTestClient()
+
+    await client.pickupPointAvailability({
+      ...baseArgs,
+      coordinates: '-46.65,-23.56',
+    })
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [, requestConfig] = httpGet.mock.calls[0]
+
+    expect(requestConfig.params).toMatchObject({ coordinates: '-46.65,-23.56' })
+  })
+
+  it('sends dpPreview=true when enabled', async () => {
+    const client = createTestClient()
+
+    await client.pickupPointAvailability({ ...baseArgs, dpPreview: true })
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [, requestConfig] = httpGet.mock.calls[0]
+
+    expect(requestConfig.params).toMatchObject({ dpPreview: 'true' })
+  })
+
+  it('omits dpPreview when disabled', async () => {
+    const client = createTestClient()
+
+    await client.pickupPointAvailability({ ...baseArgs, dpPreview: false })
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [, requestConfig] = httpGet.mock.calls[0]
+
+    expect(requestConfig.params).not.toHaveProperty('dpPreview')
+  })
+
+  it('url-encodes the sales channel', async () => {
+    const client = createTestClient()
+
+    await client.pickupPointAvailability({ ...baseArgs, salesChannel: '1/../x' })
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [path] = httpGet.mock.calls[0]
+
+    expect(path).toBe(
+      '/api/intelligent-search/v0/pickup-point-availability/trade-policy/1%2F..%2Fx'
+    )
+  })
+})
+
+describe('Intsch#catalogCount', () => {
+  it('calls catalog-count without trade-policy when no sales channel is given', async () => {
+    const client = createTestClient()
+
+    await client.catalogCount({ zipCode: '01310-100', coordinates: '1,2' })
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [path, requestConfig] = httpGet.mock.calls[0]
+
+    expect(path).toBe('/api/intelligent-search/v1/catalog-count')
+    expect(requestConfig.params).toEqual({
+      'zip-code': '01310-100',
+      coordinates: '1,2',
+    })
+  })
+
+  it('puts the sales channel in the path when given', async () => {
+    const client = createTestClient()
+
+    await client.catalogCount({ zipCode: '01310-100', salesChannel: '2' })
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [path, requestConfig] = httpGet.mock.calls[0]
+
+    expect(path).toBe('/api/intelligent-search/v1/catalog-count/trade-policy/2')
+    expect(requestConfig.params).not.toHaveProperty('sc')
+  })
+
+  it('sends dpPreview=true when enabled', async () => {
+    const client = createTestClient()
+
+    await client.catalogCount({ zipCode: '01310-100', dpPreview: true })
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [, requestConfig] = httpGet.mock.calls[0]
+
+    expect(requestConfig.params).toMatchObject({ dpPreview: 'true' })
+  })
+
+  it('omits dpPreview when disabled', async () => {
+    const client = createTestClient()
+
+    await client.catalogCount({ zipCode: '01310-100', dpPreview: false })
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [, requestConfig] = httpGet.mock.calls[0]
+
+    expect(requestConfig.params).not.toHaveProperty('dpPreview')
+  })
+})
