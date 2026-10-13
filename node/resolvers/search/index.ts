@@ -1,6 +1,10 @@
 import { NotFoundError, UserInputError, createMessagesLoader } from '@vtex/api'
 import { pathOr } from 'ramda'
 
+import type {
+  CatalogCountArgs,
+  PickupPointAvailabilityArgs,
+} from '../../clients/intsch/types'
 import {
   buildAttributePath,
   convertOrderBy,
@@ -31,6 +35,7 @@ import type {
   SuggestionProductsArgs,
 } from '../../typings/Search'
 import { shouldTranslateToTenantLocale } from '../../utils/i18n'
+import { getOrCreateSegment } from '../../utils/segment'
 import { resolvers as assemblyOptionResolvers } from './assemblyOption'
 import { resolvers as autocompleteResolvers } from './autocomplete'
 import { resolvers as brandResolvers } from './brand'
@@ -592,6 +597,34 @@ export const queries = {
   },
   topSearches: (_: any, __: any, ctx: Context) => {
     return fetchTopSearches(ctx)
+  },
+  pickupPointAvailability: async (
+    _: unknown,
+    args: Omit<PickupPointAvailabilityArgs, 'dpPreview'>,
+    ctx: Context
+  ) => {
+    const { enableDeliveryPromisePreview } = await fetchAppSettings(ctx)
+
+    return ctx.clients.intsch.pickupPointAvailability({
+      ...args,
+      dpPreview: enableDeliveryPromisePreview,
+    })
+  },
+  catalogCount: async (
+    _: unknown,
+    args: Omit<CatalogCountArgs, 'dpPreview'>,
+    ctx: Context
+  ) => {
+    const [{ enableDeliveryPromisePreview }, segment] = await Promise.all([
+      fetchAppSettings(ctx),
+      args.salesChannel ? undefined : getOrCreateSegment(ctx),
+    ])
+
+    return ctx.clients.intsch.catalogCount({
+      ...args,
+      salesChannel: args.salesChannel ?? segment?.channel?.toString(),
+      dpPreview: enableDeliveryPromisePreview,
+    })
   },
   autocompleteSearchSuggestions: (
     _: any,
