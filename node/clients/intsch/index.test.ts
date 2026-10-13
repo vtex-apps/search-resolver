@@ -126,3 +126,110 @@ describe('Intsch#fetchProduct segment params', () => {
     expect(requestConfig.params).not.toHaveProperty('sc')
   })
 })
+
+describe('Intsch#pickupPointAvailability', () => {
+  const baseArgs = { salesChannel: '1', zipCode: '01310-100', country: 'BRA' }
+
+  it('sends sc, zip-code and country as query params', async () => {
+    const client = createTestClient()
+
+    await client.pickupPointAvailability(baseArgs)
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [path, requestConfig] = httpGet.mock.calls[0]
+
+    expect(path).toBe('/api/intelligent-search/v0/pickup-point-availability')
+    expect(requestConfig.params).toEqual({
+      sc: '1',
+      'zip-code': '01310-100',
+      country: 'BRA',
+    })
+  })
+
+  it('sends coordinates when given', async () => {
+    const client = createTestClient()
+
+    await client.pickupPointAvailability({
+      ...baseArgs,
+      coordinates: '-46.65,-23.56',
+    })
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [, requestConfig] = httpGet.mock.calls[0]
+
+    expect(requestConfig.params).toMatchObject({ coordinates: '-46.65,-23.56' })
+  })
+
+  it('sends dpPreview=true when enabled', async () => {
+    const client = createTestClient()
+
+    await client.pickupPointAvailability({ ...baseArgs, dpPreview: true })
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [, requestConfig] = httpGet.mock.calls[0]
+
+    expect(requestConfig.params).toMatchObject({ dpPreview: 'true' })
+  })
+
+  it('omits dpPreview when disabled', async () => {
+    const client = createTestClient()
+
+    await client.pickupPointAvailability({ ...baseArgs, dpPreview: false })
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [, requestConfig] = httpGet.mock.calls[0]
+
+    expect(requestConfig.params).not.toHaveProperty('dpPreview')
+  })
+})
+
+describe('Intsch#catalogCount', () => {
+  it('omits sc when no sales channel is given', async () => {
+    const client = createTestClient()
+
+    await client.catalogCount({ zipCode: '01310-100', coordinates: '1,2' })
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [path, requestConfig] = httpGet.mock.calls[0]
+
+    expect(path).toBe('/api/intelligent-search/v1/catalog-count')
+    expect(requestConfig.params).toEqual({
+      'zip-code': '01310-100',
+      coordinates: '1,2',
+    })
+  })
+
+  it('sends the sales channel as sc when given', async () => {
+    const client = createTestClient()
+
+    await client.catalogCount({ zipCode: '01310-100', salesChannel: '2' })
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [path, requestConfig] = httpGet.mock.calls[0]
+
+    expect(path).toBe('/api/intelligent-search/v1/catalog-count')
+    expect(requestConfig.params).toMatchObject({ sc: '2' })
+  })
+
+  it('sends dpPreview=true when enabled', async () => {
+    const client = createTestClient()
+
+    await client.catalogCount({ zipCode: '01310-100', dpPreview: true })
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [, requestConfig] = httpGet.mock.calls[0]
+
+    expect(requestConfig.params).toMatchObject({ dpPreview: 'true' })
+  })
+
+  it('omits dpPreview when disabled', async () => {
+    const client = createTestClient()
+
+    await client.catalogCount({ zipCode: '01310-100', dpPreview: false })
+
+    const httpGet = (client as any).http.get as jest.Mock
+    const [, requestConfig] = httpGet.mock.calls[0]
+
+    expect(requestConfig.params).not.toHaveProperty('dpPreview')
+  })
+})
