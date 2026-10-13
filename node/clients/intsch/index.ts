@@ -307,9 +307,13 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     return response.data
   }
 
-  public pickupPointAvailability(
+  public async pickupPointAvailability(
     args: PickupPointAvailabilityArgs
   ): Promise<PickupPointAvailabilityResponse> {
+    if (isPathTraversal(args.salesChannel)) {
+      throw new Error('Malformed URL')
+    }
+
     const authToken =
       this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
 
@@ -332,7 +336,13 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     )
   }
 
-  public catalogCount(args: CatalogCountArgs): Promise<CatalogCountResponse> {
+  public async catalogCount(
+    args: CatalogCountArgs
+  ): Promise<CatalogCountResponse> {
+    if (args.salesChannel && isPathTraversal(args.salesChannel)) {
+      throw new Error('Malformed URL')
+    }
+
     const authToken =
       this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
 

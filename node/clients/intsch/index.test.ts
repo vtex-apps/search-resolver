@@ -186,14 +186,46 @@ describe('Intsch#pickupPointAvailability', () => {
   it('url-encodes the sales channel', async () => {
     const client = createTestClient()
 
-    await client.pickupPointAvailability({ ...baseArgs, salesChannel: '1/../x' })
+    await client.pickupPointAvailability({ ...baseArgs, salesChannel: '1/x' })
 
     const httpGet = (client as any).http.get as jest.Mock
     const [path] = httpGet.mock.calls[0]
 
     expect(path).toBe(
-      '/api/intelligent-search/v0/pickup-point-availability/trade-policy/1%2F..%2Fx'
+      '/api/intelligent-search/v0/pickup-point-availability/trade-policy/1%2Fx'
     )
+  })
+})
+
+describe('Intsch#pickupPointAvailability path traversal', () => {
+  it('rejects a sales channel containing ".." without calling the API', async () => {
+    const client = createTestClient()
+
+    await expect(
+      client.pickupPointAvailability({
+        salesChannel: '..',
+        zipCode: '01310-100',
+        country: 'BRA',
+      })
+    ).rejects.toThrow('Malformed URL')
+
+    const httpGet = (client as any).http.get as jest.Mock
+
+    expect(httpGet).not.toHaveBeenCalled()
+  })
+})
+
+describe('Intsch#catalogCount path traversal', () => {
+  it('rejects a sales channel containing ".." without calling the API', async () => {
+    const client = createTestClient()
+
+    await expect(
+      client.catalogCount({ zipCode: '01310-100', salesChannel: '..' })
+    ).rejects.toThrow('Malformed URL')
+
+    const httpGet = (client as any).http.get as jest.Mock
+
+    expect(httpGet).not.toHaveBeenCalled()
   })
 })
 
