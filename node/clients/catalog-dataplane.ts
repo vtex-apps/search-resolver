@@ -37,8 +37,11 @@ export class CatalogDataplane extends JanusClient {
   }
 
   public productById = (id: string | number, acceptLanguage?: string) => {
-    const path = `/api/catalog-dataplane/product/${id}`
-    const headers = acceptLanguage ? { 'Accept-Language': acceptLanguage } : {}
+    const path = `/api/catalog/query/pvt/product/${id}`
+    const headers = {
+      VtexIdclientAutCookie: this.context.authToken,
+      ...(acceptLanguage ? { 'Accept-Language': acceptLanguage } : {}),
+    }
 
     return this.http.get<DataplaneProductResponse>(path, {
       metric: 'catalog-dataplane-product',
