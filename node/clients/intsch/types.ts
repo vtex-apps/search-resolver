@@ -214,3 +214,43 @@ export interface IIntelligentSearchClient {
     options?: FacetsOptions
   ): Promise<FacetsResponse>
 }
+
+export type PickupPointAvailabilityArgs = {
+  salesChannel: string
+  zipCode: string
+  /** ISO 3166 alpha-3, e.g. `BRA`. */
+  country: string
+  /** `longitude,latitude`. */
+  coordinates?: string
+  /** Delivery Promises QA preview. Gated by the `enableDeliveryPromisePreview` app setting. */
+  dpPreview?: boolean
+}
+
+export type PickupPointAvailabilityResponse = {
+  pickupPointDistances?: Array<{
+    pickupId: string
+    pickupName: string
+    distance: number
+    isActive: boolean
+    address?: {
+      street?: string | null
+      number?: string | null
+      neighborhood?: string | null
+      city?: string | null
+      state?: string | null
+      postalCode?: string | null
+    }
+  }>
+}
+
+export type CatalogCountArgs = {
+  zipCode: string
+  /** `longitude,latitude`. */
+  coordinates?: string
+  /** Sent in the path as `trade-policy/{salesChannel}` when set. */
+  salesChannel?: string
+  /** Delivery Promises QA preview. Gated by the `enableDeliveryPromisePreview` app setting. */
+  dpPreview?: boolean
+}
+
+export type CatalogCountResponse = { total: number }

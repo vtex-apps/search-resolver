@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- `pickupPointAvailability` and `catalogCount` queries, backed by Intelligent Search `v0/pickup-point-availability` and `v1/catalog-count`. Both forward `dpPreview=true` when the `enableDeliveryPromisePreview` app setting is on. Requires the matching schema fields in `vtex.search-graphql`.
 ## [1.116.1] - 2026-10-14
 
 ### Changed

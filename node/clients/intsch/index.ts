@@ -25,6 +25,10 @@ import type {
   TopSearchesResponse,
   IntschFacetsParams,
   IntschProductSearchParams,
+  CatalogCountArgs,
+  CatalogCountResponse,
+  PickupPointAvailabilityArgs,
+  PickupPointAvailabilityResponse,
 } from './types'
 import { decodeQuery, isPathTraversal } from '../intelligent-search-api'
 import { parseState } from '../../utils/searchState'
@@ -301,6 +305,50 @@ export class Intsch extends JanusClient implements IIntelligentSearchClient {
     )
 
     return response.data
+  }
+
+  public async pickupPointAvailability(
+    args: PickupPointAvailabilityArgs
+  ): Promise<PickupPointAvailabilityResponse> {
+    const authToken =
+      this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
+
+    return this.http.get(
+      '/api/intelligent-search/v0/pickup-point-availability',
+      {
+        params: filterUndefinedNonNull({
+          sc: args.salesChannel,
+          'zip-code': args.zipCode,
+          country: args.country,
+          coordinates: args.coordinates,
+          dpPreview: args.dpPreview ? 'true' : undefined,
+        }),
+        metric: 'pickup-point-availability-new',
+        headers: {
+          ...(authToken ? { VtexIdclientAutCookie: authToken } : {}),
+        },
+      }
+    )
+  }
+
+  public async catalogCount(
+    args: CatalogCountArgs
+  ): Promise<CatalogCountResponse> {
+    const authToken =
+      this.context.storeUserAuthToken ?? this.context.adminUserAuthToken
+
+    return this.http.get('/api/intelligent-search/v1/catalog-count', {
+      params: filterUndefinedNonNull({
+        sc: args.salesChannel,
+        'zip-code': args.zipCode,
+        coordinates: args.coordinates,
+        dpPreview: args.dpPreview ? 'true' : undefined,
+      }),
+      metric: 'catalog-count-new-v1',
+      headers: {
+        ...(authToken ? { VtexIdclientAutCookie: authToken } : {}),
+      },
+    })
   }
 
   private logCacheStatus(
