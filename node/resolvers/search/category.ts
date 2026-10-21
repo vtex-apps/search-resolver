@@ -1,7 +1,7 @@
 import { compose, last, prop, split } from 'ramda'
 
 import { getCategoryInfo, logDegradedSearchError } from './utils'
-import { shouldTranslateToBinding } from '../../utils/i18n'
+import { formatTranslatableProp, shouldTranslateToBinding } from '../../utils/i18n'
 import { Slugify } from '../../utils/slug'
 import { APP_NAME } from './constants'
 
@@ -22,7 +22,7 @@ type SafeCategory = CategoryByIdResponse | CategoryTreeResponse
 
 export const resolvers = {
   Category: {
-    name: prop('name'),
+    name: formatTranslatableProp<SafeCategory, 'name', 'id'>('name', 'id'),
 
     cacheId: prop('id'),
 
@@ -48,9 +48,16 @@ export const resolvers = {
       return settings.slugifyLinks ? Slugify(pathname) : pathname
     },
 
-    metaTagDescription: prop('MetaTagDescription'),
+    metaTagDescription: formatTranslatableProp<
+      SafeCategory,
+      'MetaTagDescription',
+      'id'
+    >('MetaTagDescription', 'id'),
 
-    titleTag: prop('Title'),
+    titleTag: formatTranslatableProp<SafeCategory, 'Title', 'id'>(
+      'Title',
+      'id'
+    ),
 
     slug: async ({ url, id }: SafeCategory, _: unknown, ctx: Context) => {
       if (shouldTranslateToBinding(ctx)) {
