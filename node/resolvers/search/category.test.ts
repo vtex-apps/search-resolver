@@ -14,8 +14,8 @@ describe('Category resolvers', () => {
     mockContext.translated = undefined
   })
 
-  it('wraps name, title and meta as translated when ctx.translated is true', () => {
-    mockContext.translated = true
+  it('always wraps name, title and meta as translated', () => {
+    mockContext.translated = false
 
     expect(resolvers.Category.name(category as any, {}, mockContext)).toBe(
       'Shoes (((10))) <<<pt-BR>>> [[[translated]]]'
@@ -26,24 +26,11 @@ describe('Category resolvers', () => {
     expect(
       resolvers.Category.metaTagDescription(category as any, {}, mockContext)
     ).toBe('Shoes meta (((10))) <<<pt-BR>>> [[[translated]]]')
+    expect(mockContext.translated).toBe(false)
   })
 
-  it('wraps name, title and meta as original when ctx.translated is false', () => {
+  it('keeps catalog context and forces translated on an already marked string', () => {
     mockContext.translated = false
-
-    expect(resolvers.Category.name(category as any, {}, mockContext)).toBe(
-      'Shoes (((10))) <<<pt-BR>>> [[[original]]]'
-    )
-    expect(resolvers.Category.titleTag(category as any, {}, mockContext)).toBe(
-      'Shoes Title (((10))) <<<pt-BR>>> [[[original]]]'
-    )
-    expect(
-      resolvers.Category.metaTagDescription(category as any, {}, mockContext)
-    ).toBe('Shoes meta (((10))) <<<pt-BR>>> [[[original]]]')
-  })
-
-  it('keeps catalog context and applies ctx.translated on an already marked string', () => {
-    mockContext.translated = true
 
     expect(
       resolvers.Category.name(

@@ -20,9 +20,19 @@ function cleanUrl(url: string) {
 
 type SafeCategory = CategoryByIdResponse | CategoryTreeResponse
 
+// Dataplane already returns localized category strings, so these fields must
+// not reuse the product query's ctx.translated flag.
+const formatDataplaneCategoryProp =
+  <P extends 'name' | 'Title' | 'MetaTagDescription'>(field: P) =>
+  (root: SafeCategory, _: unknown, ctx: Context) =>
+    formatTranslatableProp<SafeCategory, P, 'id'>(field, 'id')(root, _, {
+      ...ctx,
+      translated: true,
+    })
+
 export const resolvers = {
   Category: {
-    name: formatTranslatableProp<SafeCategory, 'name', 'id'>('name', 'id'),
+    name: formatDataplaneCategoryProp('name'),
 
     cacheId: prop('id'),
 
@@ -48,16 +58,9 @@ export const resolvers = {
       return settings.slugifyLinks ? Slugify(pathname) : pathname
     },
 
-    metaTagDescription: formatTranslatableProp<
-      SafeCategory,
-      'MetaTagDescription',
-      'id'
-    >('MetaTagDescription', 'id'),
+    metaTagDescription: formatDataplaneCategoryProp('MetaTagDescription'),
 
-    titleTag: formatTranslatableProp<SafeCategory, 'Title', 'id'>(
-      'Title',
-      'id'
-    ),
+    titleTag: formatDataplaneCategoryProp('Title'),
 
     slug: async ({ url, id }: SafeCategory, _: unknown, ctx: Context) => {
       if (shouldTranslateToBinding(ctx)) {
