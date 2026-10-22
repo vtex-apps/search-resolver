@@ -686,14 +686,14 @@ export async function compareApiResults<T>(
       areEqual = filteredDifferences.length === 0
     }
   } catch (error) {
-    logger.error({
+    logger.warn({
       message: `${logPrefix}: Error during deep comparison`,
       error,
     })
   }
 
   if (!areEqual && !hasError1 && !hasError2) {
-    logger.error({
+    logger.info({
       message: `${logPrefix}: Results differ`,
       params: JSON.stringify(options.args),
       differences: filteredDifferences.slice(0, 10), // Limit to first 10 differences to avoid log overflow
