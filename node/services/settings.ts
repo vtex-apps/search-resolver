@@ -26,7 +26,7 @@ export async function fetchAppSettings(ctx: Context): Promise<AppSettings> {
       enableDeliveryPromisePreview: enableDeliveryPromisePreview ?? false,
     }
   } catch (error) {
-    ctx.vtex.logger.error({
+    ctx.vtex.logger.warn({
       message: 'Error fetching app settings',
       error: error.message,
     })

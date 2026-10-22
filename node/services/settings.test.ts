@@ -38,6 +38,11 @@ describe('fetchAppSettings', () => {
     const settings = await fetchAppSettings(ctx)
 
     expect(settings.enableHybridSearch).toBe(false)
+    expect(ctx.vtex.logger.warn).toHaveBeenCalledWith({
+      message: 'Error fetching app settings',
+      error: 'boom',
+    })
+    expect(ctx.vtex.logger.error).not.toHaveBeenCalled()
   })
 
   it('does not expose shouldUseNewPLPEndpoint', async () => {
