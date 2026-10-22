@@ -3946,7 +3946,6 @@ stack-utils@^2.0.3:
 
 stats-lite@vtex/node-stats-lite#v2.2.1:
   version "2.2.1"
-  uid a0b5ee91861f31b6ec845146b4906faf5172c430
   resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/a0b5ee91861f31b6ec845146b4906faf5172c430"
   dependencies:
     isnumber "~1.0.0"
@@ -4355,9 +4354,9 @@ vary@^1.1.2:
   version "1.53.4"
   resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.53.4/public/@types/vtex.rewriter#6348993efde4106196bca60fd40dba00b3a354b6"
 
-"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.72.0/public":
+"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.75.0/public":
   version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.72.0/public#7bc95c94800b8f09ce1e0b0cf4417bef8bca6e7b"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.75.0/public#dd0a97f23650bd6b88c2ec9436f7f8196d5f3e18"
 
 walker@^1.0.8:
   version "1.0.8"
