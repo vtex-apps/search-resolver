@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Wrap `Category` `name`, `titleTag`, and `metaTagDescription` with `formatTranslatableProp` again, always as `[[[translated]]]`. Dataplane already returns those strings localized, so these fields do not reuse the product query's `ctx.translated` flag.
+
 ## [1.117.1] - 2026-10-22
 
 ### Fixed

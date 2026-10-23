@@ -1,7 +1,7 @@
 import { compose, last, prop, split } from 'ramda'
 
 import { getCategoryInfo, logDegradedSearchError } from './utils'
-import { shouldTranslateToBinding } from '../../utils/i18n'
+import { formatTranslatableProp, shouldTranslateToBinding } from '../../utils/i18n'
 import { Slugify } from '../../utils/slug'
 import { APP_NAME } from './constants'
 
@@ -20,9 +20,19 @@ function cleanUrl(url: string) {
 
 type SafeCategory = CategoryByIdResponse | CategoryTreeResponse
 
+// Dataplane already returns localized category strings, so these fields must
+// not reuse the product query's ctx.translated flag.
+const formatDataplaneCategoryProp =
+  <P extends 'name' | 'Title' | 'MetaTagDescription'>(field: P) =>
+  (root: SafeCategory, _: unknown, ctx: Context) =>
+    formatTranslatableProp<SafeCategory, P, 'id'>(field, 'id')(root, _, {
+      ...ctx,
+      translated: true,
+    })
+
 export const resolvers = {
   Category: {
-    name: prop('name'),
+    name: formatDataplaneCategoryProp('name'),
 
     cacheId: prop('id'),
 
@@ -48,9 +58,9 @@ export const resolvers = {
       return settings.slugifyLinks ? Slugify(pathname) : pathname
     },
 
-    metaTagDescription: prop('MetaTagDescription'),
+    metaTagDescription: formatDataplaneCategoryProp('MetaTagDescription'),
 
-    titleTag: prop('Title'),
+    titleTag: formatDataplaneCategoryProp('Title'),
 
     slug: async ({ url, id }: SafeCategory, _: unknown, ctx: Context) => {
       if (shouldTranslateToBinding(ctx)) {
