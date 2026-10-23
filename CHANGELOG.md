@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Wrap `Category` `name`, `titleTag`, and `metaTagDescription` with `formatTranslatableProp` again, always as `[[[translated]]]`. Dataplane already returns those strings localized, so these fields do not reuse the product query's `ctx.translated` flag.
 
+## [1.117.1] - 2026-10-22
+
+### Fixed
+
+- Bump the bundled `vtex.search-graphql` typings from `0.72.0` to `0.75.0`. With `0.72.0`, the schema lacks `pickupPointAvailability` and `catalogCount`, so `makeExecutableSchema` throws at boot and every worker dies (1.117.0).
+
 ## [1.117.0] - 2026-10-20
 
 ### Added
