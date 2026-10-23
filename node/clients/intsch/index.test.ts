@@ -11,6 +11,7 @@ function createTestClient(): Intsch {
     region: 'aws-us-east-1',
     requestId: 'req-1',
     operationId: 'op-1',
+    logger: { info: jest.fn() },
   } as unknown as IOContext
 
   const client = new Intsch(ctx)

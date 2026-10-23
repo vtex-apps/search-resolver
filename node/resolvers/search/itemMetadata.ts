@@ -29,7 +29,7 @@ const getSimulationPayload = async (
     ) as Record<string, string>
   } catch (e) {
     // TODO: Log to Splunk
-    console.error(e)
+    console.warn(e)
   }
 
   return {

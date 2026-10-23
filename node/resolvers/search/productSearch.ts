@@ -120,7 +120,7 @@ export const resolvers = {
         for (const item of product.items) {
           if (item.sellers == null) {
             const config: any = (productsRaw as any).config
-            ctx.vtex.logger.error({
+            ctx.vtex.logger.warn({
               message: 'Item missing sellers!',
               searchUrl: config.url.replace(/\/proxy\/authenticated\/catalog|\/proxy\/catalog/, ''),
               params: JSON.stringify(config.params)

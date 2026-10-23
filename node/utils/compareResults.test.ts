@@ -1697,7 +1697,8 @@ describe('compareApiResults', () => {
       })
 
       expect(result).toEqual({ data: 'test1' })
-      expect(mockLogger.error).toHaveBeenCalledWith({
+      expect(mockLogger.error).not.toHaveBeenCalled()
+      expect(mockLogger.info).toHaveBeenCalledWith({
         message: 'Test API: Results differ',
         params: JSON.stringify({ query: 'test' }),
         differences: [
@@ -1809,7 +1810,7 @@ describe('compareApiResults', () => {
         },
       ])
 
-      expect(mockLogger.error).toHaveBeenCalledWith({
+      expect(mockLogger.info).toHaveBeenCalledWith({
         message: 'Product API: Results differ',
         params: JSON.stringify({ query: 'test product' }),
         differences: [
@@ -1877,7 +1878,7 @@ describe('compareApiResults', () => {
 
       expect(result).toBeDefined()
       // Should still log errors for categories and categoriesIds differences
-      expect(mockLogger.error).toHaveBeenCalledWith(
+      expect(mockLogger.info).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'Complex Product API: Results differ',
           differenceCount: 2, // Only categories and categoriesIds differences remain
@@ -1896,7 +1897,7 @@ describe('compareApiResults', () => {
       })
 
       expect(result).toEqual({ name: 'John' })
-      expect(mockLogger.error).toHaveBeenCalled()
+      expect(mockLogger.info).toHaveBeenCalled()
     })
 
     it('should handle undefined ignored differences', async () => {
@@ -1908,7 +1909,7 @@ describe('compareApiResults', () => {
       })
 
       expect(result).toEqual({ name: 'John' })
-      expect(mockLogger.error).toHaveBeenCalled()
+      expect(mockLogger.info).toHaveBeenCalled()
     })
 
     it('should handle mixed difference types in ignored differences', async () => {
@@ -1943,7 +1944,7 @@ describe('compareApiResults', () => {
 
       expect(result).toBeDefined()
       // Should still have one difference for theme
-      expect(mockLogger.error).toHaveBeenCalledWith(
+      expect(mockLogger.info).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'Mixed Types API: Results differ',
           differenceCount: 1, // Only theme difference remains
@@ -1952,5 +1953,29 @@ describe('compareApiResults', () => {
         })
       )
     })
+  })
+
+  it('warns when deep comparison throws and still returns the primary result', async () => {
+    const boom: Record<string, unknown> = {}
+    Object.defineProperty(boom, 'x', {
+      enumerable: true,
+      get() {
+        throw new Error('compare blew up')
+      },
+    })
+
+    const func1 = jest.fn().mockResolvedValue(boom)
+    const func2 = jest.fn().mockResolvedValue({ x: 1 })
+
+    const result = await compareApiResults(func1, func2, 100, mockLogger, {
+      logPrefix: 'Product',
+    })
+
+    expect(result).toBe(boom)
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Product: Error during deep comparison',
+      })
+    )
   })
 })

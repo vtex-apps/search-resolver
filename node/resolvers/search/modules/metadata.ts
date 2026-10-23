@@ -40,10 +40,18 @@ const categoriesOnlyQuery = compose<
 
 const getAndParsePagetype = async (path: string, ctx: Context) => {
   const pagetype = await ctx.clients.search.pageType(path).catch((e) => {
-    ctx.vtex.logger.error({
+    const status = e?.response?.status
+    const entry = {
       message: 'Failed to call the pageType API.',
-      data: e
-    })
+      data: e,
+    }
+    const clientError = typeof status === 'number' && status >= 400 && status < 500
+
+    if (clientError) {
+      ctx.vtex.logger.warn(entry)
+    } else {
+      ctx.vtex.logger.error(entry)
+    }
 
     return null
   })
