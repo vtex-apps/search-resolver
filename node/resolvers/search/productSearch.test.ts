@@ -6,9 +6,16 @@ import { mockContext, resetContext } from '../../__mocks__/helpers'
 import { getProduct } from '../../__mocks__/product'
 
 describe('tests related to the searchMetadata query', () => {
+  const pageType = mockContext.clients.search.pageType
+  const originalPageType = pageType.getMockImplementation()
+
   beforeEach(() => {
     jest.clearAllMocks()
     resetContext()
+  })
+
+  afterEach(() => {
+    pageType.mockImplementation(originalPageType)
   })
 
   it('get search metadata from pageType for category', async () => {
@@ -194,6 +201,45 @@ describe('tests related to the searchMetadata query', () => {
       'department/category-metaTagDescription (((1))) <<<pt-BR>>> [[[original]]]'
     )
     expect(mockContext.clients.search.pageType).toBeCalledTimes(1)
+  })
+
+  it('warns when pageType returns 400 and still resolves', async () => {
+    mockContext.clients.search.pageType.mockRejectedValue({
+      message: 'Request failed with status code 400',
+      response: { status: 400 },
+    })
+
+    const result = await queries.searchMetadata(
+      {},
+      { query: 'Department/Category', map: 'c,c' },
+      mockContext as any
+    )
+
+    expect(result).toEqual(
+      expect.objectContaining({ titleTag: expect.any(String) })
+    )
+    expect(mockContext.vtex.logger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Failed to call the pageType API.' })
+    )
+    expect(mockContext.vtex.logger.error).not.toHaveBeenCalled()
+  })
+
+  it('keeps pageType 500 at error', async () => {
+    mockContext.clients.search.pageType.mockRejectedValue({
+      message: 'Request failed with status code 500',
+      response: { status: 500 },
+    })
+
+    await queries.searchMetadata(
+      {},
+      { query: 'Department/Category', map: 'c,c' },
+      mockContext as any
+    )
+
+    expect(mockContext.vtex.logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Failed to call the pageType API.' })
+    )
+    expect(mockContext.vtex.logger.warn).not.toHaveBeenCalled()
   })
 })
 
