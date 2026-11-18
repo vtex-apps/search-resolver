@@ -474,10 +474,10 @@
     "@typescript-eslint/types" "5.62.0"
     eslint-visitor-keys "^3.3.0"
 
-"@vtex/danger@^0.2.7":
-  version "0.2.9"
-  resolved "https://registry.yarnpkg.com/@vtex/danger/-/danger-0.2.9.tgz#f308c3de89f997038efe2b3d902fc7225550fe61"
-  integrity sha512-di3PCIhJ/pLgFJU+FIKM0lFWnigroos8Mt/kahDreisK4ZtaQFsne9LhT5rpVPmThL3CETj7i/gHsAtC7XxBwQ==
+"@vtex/danger@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@vtex/danger/-/danger-0.3.0.tgz#942b63dad8053cffe3ae72f3f1368fa05f2d3e92"
+  integrity sha512-oaN0bsGw8R8vc+3+/D1/uoWu72k1BGbZQ2y1dhYy2DCevKudEsKYUQg/8oWJIehJgySOXuN+FugHEVOuXo6Skw==
   dependencies:
     actions-toolkit "^6.0.0"
     danger "^10.4.0"
