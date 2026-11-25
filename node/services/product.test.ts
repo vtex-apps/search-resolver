@@ -1,4 +1,9 @@
-import { fetchProduct, resolveProductsByIdentifier } from './product'
+import {
+  fetchProduct,
+  isValidProductIdentifier,
+  resolveProduct,
+  resolveProductsByIdentifier,
+} from './product'
 import { createContext } from '../mocks/contextFactory'
 
 function createNotFoundError() {
@@ -203,5 +208,93 @@ describe('resolveProductsByIdentifier service', () => {
         salesChannel: '1',
       })
     ).rejects.toThrow('Request failed with status code 500')
+  })
+})
+
+describe('isValidProductIdentifier', () => {
+  it('should accept an identifier with a non-empty value', () => {
+    expect(isValidProductIdentifier({ field: 'id', value: '27' })).toBe(true)
+  })
+
+  it.each([
+    ['empty string', ''],
+    ['null', null],
+    ['undefined', undefined],
+  ])('should reject an identifier with %s value', (_, value) => {
+    expect(
+      isValidProductIdentifier({ field: 'id', value } as never)
+    ).toBe(false)
+  })
+
+  it('should reject an unsupported field', () => {
+    expect(
+      isValidProductIdentifier({ field: 'foo', value: '27' } as never)
+    ).toBe(false)
+  })
+
+  it('should reject an undefined identifier', () => {
+    expect(isValidProductIdentifier(undefined)).toBe(false)
+  })
+})
+
+describe('resolveProduct service', () => {
+  const product = {
+    productId: '27',
+    productName: 'Produto teste',
+  } as SearchProduct
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('should fall back to slug when identifier value is empty', async () => {
+    const ctx = createContext({
+      appSettings: { shouldUseNewPDPEndpoint: true },
+    })
+
+    const fetchSpy = jest
+      .spyOn(ctx.clients.intsch, 'fetchProduct')
+      .mockResolvedValue(product)
+
+    const result = await resolveProduct(ctx, {
+      slug: 'produto-teste',
+      identifier: { field: 'id', value: '' },
+    })
+
+    expect(result).toEqual(product)
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ field: 'slug', value: 'produto-teste' }),
+      expect.anything()
+    )
+  })
+
+  it('should keep using the identifier when value is provided', async () => {
+    const ctx = createContext({
+      appSettings: { shouldUseNewPDPEndpoint: true },
+    })
+
+    const fetchSpy = jest
+      .spyOn(ctx.clients.intsch, 'fetchProduct')
+      .mockResolvedValue(product)
+
+    await resolveProduct(ctx, {
+      slug: 'produto-teste',
+      identifier: { field: 'id', value: '27' },
+    })
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ field: 'id', value: '27' }),
+      expect.anything()
+    )
+  })
+
+  it('should throw when neither identifier nor slug is provided', async () => {
+    const ctx = createContext({
+      appSettings: { shouldUseNewPDPEndpoint: true },
+    })
+
+    await expect(
+      resolveProduct(ctx, { identifier: { field: 'id', value: '' } })
+    ).rejects.toThrow('No product identifier provided')
   })
 })

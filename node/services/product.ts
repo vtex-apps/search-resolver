@@ -174,7 +174,9 @@ export function isValidProductIdentifier(
 ): identifier is ProductIdentifier {
   return (
     identifier?.field !== undefined &&
-    identifier.value !== undefined &&
+    // Empty/nullish values must be invalid so resolveProduct falls back to the
+    // slug (e.g. `/sellers/:slug`, where ProductContext sends `value: ''`).
+    !!identifier.value &&
     ['id', 'slug', 'ean', 'reference', 'sku'].includes(identifier.field)
   )
 }
