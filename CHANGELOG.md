@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- `product` query falling back to the slug again when the identifier value is empty (e.g. `/sellers/:slug` route, which sends `identifier: { field: 'id', value: '' }`). Regression introduced when the product logic moved to `node/services/product.ts` (#497).
+
 ## [1.117.3] - 2026-10-27
 
 ## [1.117.2] - 2026-10-23
